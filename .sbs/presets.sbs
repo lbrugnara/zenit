@@ -1,0 +1,34 @@
+# All this present in this build do not define the environment to be used, so the build
+# command must include the --env (or -e) flag to specify one
+
+# This preset builds the Cenit compiler in release mode
+preset release {
+    toolchain: clang,
+    config: clang-release,
+    target: cenit
+}
+
+# This preset builds the Cenit compiler in debug mode
+preset debug {
+    toolchain: clang,
+    config: clang-debug,
+    target: cenit
+}
+
+# This preset builds the test project for the Cenit compiler
+preset tests {
+    toolchain: clang,
+    config: clang-debug,
+    target: cenit-tests
+}
+
+# This is a dummy preset to hack my own build system. We get a clean action for free by running:
+# sbs build -e=<win-cmd|linux-bash> clean
+preset clean {
+    toolchain: dummy,
+    config: dummy,
+    target: dummy,
+    actions: {
+        before: [ clean, clean-tests ]
+    }
+}

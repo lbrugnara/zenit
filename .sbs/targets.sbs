@@ -1,0 +1,75 @@
+# The cenit-objects target compiles all the Cenit compiler's source files
+compile cenit-objects {
+    includes: [
+        "../fllib/include"
+    ],
+    output_dir: "obj/",
+    sources: [
+        "src/front-end/ast.c",
+        "src/front-end/lexer.c",
+        "src/front-end/parser.c"
+        "src/front-end/resolve.c"
+        "src/front-end/symbol.c"
+        "src/front-end/symtable.c"
+        "src/front-end/token.c",
+        "src/front-end/type.c",
+    ]
+}
+
+# This target compiles just the file containing the main function, that way we can
+# compile the tests project with the cenit-objects dependency without getting main redefined
+compile cenit-main {
+    includes: [
+        "../fllib/include"
+    ],
+    output_dir: "obj/",
+    sources: [
+        "src/main.c"
+    ]
+}
+
+# This target compiles the tests objects
+compile cenit-tests-objects {
+    includes: [ 
+        "../fllib/include"
+    ],
+    output_dir: "obj/",
+    sources: [
+        "tests/Main.c",
+        "tests/Test.c",
+        "tests/front-end/lexer/assignment.c",
+        "tests/front-end/lexer/combinations.c",
+        "tests/front-end/lexer/errors.c",
+        "tests/front-end/lexer/identifiers.c",
+        "tests/front-end/lexer/keywords.c",
+        "tests/front-end/lexer/common.c",
+        "tests/front-end/lexer/punctuation.c",
+        "tests/front-end/lexer/types.c",
+        "tests/front-end/parser/literals.c"
+        "tests/front-end/parser/variables.c"
+        "tests/front-end/resolve/variables.c"
+        "tests/front-end/symtable/symbols.c"
+    ]
+}
+
+# This target creates the cenit compiler executable
+executable cenit {
+    output_name: "cenit",
+    output_dir: "build/",
+    objects: [
+        cenit-objects,
+        cenit-main,
+        "lib/libfl.lib"
+    ]
+}
+
+# This target creates an executable for the test suite
+executable cenit-tests {
+    output_name: "tests",
+    output_dir: "build/",
+    objects: [
+        cenit-objects,
+        cenit-tests-objects,
+        "lib/libfl.lib"
+    ]
+}

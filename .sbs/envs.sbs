@@ -1,0 +1,6 @@
+# Both environments use the default command executor (the system() function), but we need to differentiate them
+# as the configurations and toolchains need to know which environment the build is running in.
+
+env win-cmd { }
+
+env linux-bash { }

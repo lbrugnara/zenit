@@ -1,0 +1,11 @@
+# This is the main build file, just a bunch of includes...
+
+include [
+    "actions.sbs",
+    "configs.sbs",
+    "envs.sbs",
+    "presets.sbs",
+    "targets.sbs",
+    "toolchains.sbs",
+    "dummy.sbs"
+]
