@@ -74,6 +74,7 @@ typedef struct CenitVariableNode {
 typedef struct CenitArrayInitNode {
     CenitNode base;
     CenitNode **values;
+    CenitTypeInfo typeinfo;
 } CenitArrayInitNode;
 
 /*

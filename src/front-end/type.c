@@ -45,3 +45,25 @@ const char* cenit_type_string(CenitType type)
 
     return "<none>";
 }
+
+void cenit_type_copy(CenitTypeInfo *dest_type, CenitTypeInfo *src_type)
+{
+    dest_type->name = src_type->name ? fl_cstring_dup(src_type->name) : NULL;
+    dest_type->elements = src_type->elements;
+    dest_type->is_array = src_type->is_array;
+    dest_type->type = src_type->type;
+}
+
+bool cenit_type_equals(CenitTypeInfo *type_a, CenitTypeInfo *type_b)
+{
+    if (type_a->type != type_b->type)
+        return false;
+
+    if (type_a->name != type_b->name)
+        return false;
+
+    if (type_a->is_array != type_b->is_array)
+        return false;
+
+    return type_a->elements == type_b->elements;
+}

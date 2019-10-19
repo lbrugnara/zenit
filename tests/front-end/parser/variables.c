@@ -1,9 +1,8 @@
 #include <fllib.h>
 
 #include "../../Test.h"
-#include "../../../src/front-end/parser.h"
-#include "../../../src/front-end/lexer.h"
 #include "../../../src/front-end/ast.h"
+#include "../../../src/front-end/parse.h"
 #include "tests.h"
 
 void cenit_test_parser_variable(void)
@@ -14,12 +13,12 @@ void cenit_test_parser_variable(void)
         "var num2 = 2;"
         "var num3 = 3;";
 
-    CenitParser parser = cenit_parser_new(source);
-    CenitAst *ast = cenit_parser_parse(&parser);
+    CenitContext ctx = cenit_context_new("global");
+    bool is_valid = cenit_parse_string(&ctx, source);
 
-    for (size_t i=0; i < fl_array_length(ast->decls); i++)
+    for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
-        CenitNode *node = ast->decls[i];
+        CenitNode *node = ctx.ast->decls[i];
         fl_expect("Node must be a variable declaration", node->type == CENIT_NODE_VARIABLE);
 
         CenitVariableNode *var_decl = (CenitVariableNode*)node;
@@ -35,8 +34,7 @@ void cenit_test_parser_variable(void)
         fl_vexpect((size_t)literal->value.uint8 == i, "Right-hand side expression has value %zu", i);
     }
 
-    cenit_ast_free(ast);
-    cenit_parser_free(&parser);
+    cenit_context_free(&ctx);
 }
 
 void cenit_test_parser_array_variable(void)
@@ -74,12 +72,12 @@ void cenit_test_parser_array_variable(void)
         { 3, 4 } 
     };
 
-    CenitParser parser = cenit_parser_new(source);
-    CenitAst *ast = cenit_parser_parse(&parser);
+    CenitContext ctx = cenit_context_new("global");
+    bool is_valid = cenit_parse_string(&ctx, source);
 
-    for (size_t i=0; i < fl_array_length(ast->decls); i++)
+    for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
-        CenitNode *node = ast->decls[i];
+        CenitNode *node = ctx.ast->decls[i];
         fl_expect("Node must be a variable declaration", node->type == CENIT_NODE_VARIABLE);
 
         CenitVariableNode *var_decl = (CenitVariableNode*)node;
@@ -115,8 +113,7 @@ void cenit_test_parser_array_variable(void)
         }
     }
 
-    cenit_ast_free(ast);
-    cenit_parser_free(&parser);
+    cenit_context_free(&ctx);
 }
 
 void cenit_test_parser_variable_type_info(void)
@@ -128,12 +125,12 @@ void cenit_test_parser_variable_type_info(void)
         "var num3 : uint8 = 3;"
     ;
 
-    CenitParser parser = cenit_parser_new(source);
-    CenitAst *ast = cenit_parser_parse(&parser);
+    CenitContext ctx = cenit_context_new("global");
+    bool is_valid = cenit_parse_string(&ctx, source);
 
-    for (size_t i=0; i < fl_array_length(ast->decls); i++)
+    for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
-        CenitNode *node = ast->decls[i];
+        CenitNode *node = ctx.ast->decls[i];
         fl_expect("Node must be a variable declaration", node->type == CENIT_NODE_VARIABLE);
 
         CenitVariableNode *var_decl = (CenitVariableNode*)node;
@@ -149,8 +146,7 @@ void cenit_test_parser_variable_type_info(void)
         fl_vexpect((size_t)literal->value.uint8 == i, "Right-hand side expression has value %zu", i);
     }
 
-    cenit_ast_free(ast);
-    cenit_parser_free(&parser);
+    cenit_context_free(&ctx);
 }
 
 
@@ -189,12 +185,12 @@ void cenit_test_parser_array_variable_type_info(void)
         { 6, 7, 8, 9 }
     };
 
-    CenitParser parser = cenit_parser_new(source);
-    CenitAst *ast = cenit_parser_parse(&parser);
+    CenitContext ctx = cenit_context_new("global");
+    bool is_valid = cenit_parse_string(&ctx, source);
 
-    for (size_t i=0; i < fl_array_length(ast->decls); i++)
+    for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
-        CenitNode *node = ast->decls[i];
+        CenitNode *node = ctx.ast->decls[i];
         fl_expect("Node must be a variable declaration", node->type == CENIT_NODE_VARIABLE);
 
         CenitVariableNode *var_decl = (CenitVariableNode*)node;
@@ -236,33 +232,34 @@ void cenit_test_parser_array_variable_type_info(void)
         }
     }
 
-    cenit_ast_free(ast);
-    cenit_parser_free(&parser);
+    cenit_context_free(&ctx);
 }
 
 void cenit_test_parser_variable_errors(void)
 {
     const char *source = 
         /* The missing semicolon after the 0 makes the parser ignore everything up to finding the semicolon */
-        "/* Line 1 */ var n : uint8 = 0   ignored by synch ; \n"
-        /* Missing variable name */
-        "/* Line 2 */ var : uint8 = 1;                       \n"
+        "/* Line 1 */ var n : uint8 = 0   ignored by synch ;"                                              "\n"
+        /* Missing variable name                                                                            */
+        "/* Line 2 */ var : uint8 = 1;"                                                                    "\n"
         /* The missing semicolon after the 2 makes the parser ignore everything up to finding the semicolon */
-        "/* Line 3 */ var n2 : uint8 = 2  ignored by synch ; \n"
-        /* Missing type name after the colon */
-        "/* Line 4 */ var n3 : = 3;                          \n"
-        /* Missing assignment operator */
-        "/* Line 5 */ var n4 4;                              \n"
-        /* Missing variable initializer */
-        "/* Line 6 */ var n5 = ;                             \n"
-        /* ULLONG_MAX + 1: Too large integral type */
-        "/* Line 7 */ var n6 = 18446744073709551616;         \n"
-        /* Array without initializer */
-        "/* Line 8 */ var n7 : [2]uint8 = ;                  \n"
+        "/* Line 3 */ var n2 : uint8 = 2  ignored by synch ;"                                              "\n"
+        /* Missing type name after the colon                                                                */
+        "/* Line 4 */ var n3 : = 3;"                                                                       "\n"
+        /* Missing assignment operator                                                                      */
+        "/* Line 5 */ var n4 4;"                                                                           "\n"
+        /* Missing variable initializer                                                                     */
+        "/* Line 6 */ var n5 = ;"                                                                          "\n"
+        /* ULLONG_MAX + 1: Too large integral type                                                          */
+        "/* Line 7 */ var n6 = 18446744073709551616;"                                                      "\n"
+        /* Array without initializer                                                                        */
+        "/* Line 8 */ var n7 : [2]uint8 = ;"                                                               "\n"
+        /* Invalid variable name                                                                            */
+        "/* Line 9 */ var $invalid = 2;"                                                                   "\n"
     ;
 
-    const CenitParserErrorType errors[] = {
-        [0] = (CenitParserErrorType)-1,
+    const CenitErrorType errors[] = {
+        [0] = (CenitErrorType)-1,
         /* Line */ [1] = CENIT_ERROR_SYNTAX,
         /* Line */ [2] = CENIT_ERROR_SYNTAX,
         /* Line */ [3] = CENIT_ERROR_SYNTAX,
@@ -271,23 +268,23 @@ void cenit_test_parser_variable_errors(void)
         /* Line */ [6] = CENIT_ERROR_SYNTAX,
         /* Line */ [7] = CENIT_ERROR_LARGE_INTEGER,
         /* Line */ [8] = CENIT_ERROR_SYNTAX,
+        /* Line */ [9] = CENIT_ERROR_SYNTAX,
     };
 
-    CenitParser parser = cenit_parser_new(source);
+    CenitContext ctx = cenit_context_new("global");
 
-    CenitAst *ast = cenit_parser_parse(&parser);
+    bool is_valid = cenit_parse_string(&ctx, source);
 
     size_t expected_errors = (sizeof(errors) / sizeof(errors[0])) - 1;
-    fl_vexpect(parser.errors != NULL && fl_array_length(parser.errors) == expected_errors, "The parser object must contain %zu errors", expected_errors);
+    fl_vexpect(ctx.errors != NULL && fl_array_length(ctx.errors) == expected_errors, "The context object must contain %zu errors", expected_errors);
 
-    CenitParserError *error = parser.errors;
+    CenitError *error = ctx.errors;
 
-    for (size_t i=1; i < expected_errors; i++, error++)
+    for (size_t i=1; i <= expected_errors; i++, error++)
     {
         fl_vexpect(error->line == i && error->type == errors[i],
             "Expected %s error: %s at line %u:%u", errors[i] == error->type ? "syntax" : "large integer", error->message, error->line, error->col);
     }
 
-    cenit_ast_free(ast);
-    cenit_parser_free(&parser);
+    cenit_context_free(&ctx);
 }

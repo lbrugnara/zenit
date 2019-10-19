@@ -70,4 +70,8 @@ CenitType cenit_type_parse_slice(struct FlSlice *slice);
  */
 const char* cenit_type_string(CenitType type);
 
+void cenit_type_copy(CenitTypeInfo *dest_type, CenitTypeInfo *src_type);
+
+bool cenit_type_equals(CenitTypeInfo *type_a, CenitTypeInfo *type_b);
+
 #endif /* CENIT_TYPE_H */

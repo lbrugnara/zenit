@@ -1,9 +1,10 @@
 #include <fllib.h>
 
 #include "../../Test.h"
-#include "../../../src/front-end/parser.h"
-#include "../../../src/front-end/lexer.h"
 #include "../../../src/front-end/ast.h"
+#include "../../../src/front-end/context.h"
+#include "../../../src/front-end/lexer.h"
+#include "../../../src/front-end/parse.h"
 #include "tests.h"
 
 void cenit_test_parser_literal_integer(void)
@@ -18,15 +19,14 @@ void cenit_test_parser_literal_integer(void)
 
     const size_t results[] = { 1, 2, 3, 255 };
 
-    CenitParser parser = cenit_parser_new(source);
+    CenitContext ctx = cenit_context_new("global");
+    bool is_valid = cenit_parse_string(&ctx, source);
 
-    CenitAst *ast = cenit_parser_parse(&parser);
+    fl_expect("Parser object should not contain errors", is_valid);
 
-    fl_expect("Parser object should not contain errors", parser.errors == NULL);
-
-    for (size_t i=0; i < fl_array_length(ast->decls); i++)
+    for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
-        CenitNode *node = ast->decls[i];
+        CenitNode *node = ctx.ast->decls[i];
         fl_expect("Node must be a literal node", node->type == CENIT_NODE_LITERAL);
 
         CenitLiteralNode *literal = (CenitLiteralNode*)node;
@@ -34,28 +34,28 @@ void cenit_test_parser_literal_integer(void)
         fl_vexpect((size_t)literal->value.uint8 == results[i], "Literal value must be equals to %zu", results[i]);
     }    
 
-    cenit_ast_free(ast);
-    cenit_parser_free(&parser);
+    cenit_context_free(&ctx);
 }
 
 void cenit_test_parser_literal_array_initializer(void)
 {
     const char *source = 
-            "/* [3]uint8 */ [ 1, 2, 3 ];        \n"
+            /* [3]uint8 */
+            "[ 1, 2, 3 ];"      "\n"
+            "[ ];"              "\n"
     ;
 
-    const size_t elements[] = { 3 };
-    const size_t values[99][99] = { { 1, 2, 3 } };
+    const size_t elements[] = { 3, 0 };
+    const size_t values[99][99] = { { 1, 2, 3 }, { 0 } };
 
-    CenitParser parser = cenit_parser_new(source);
+    CenitContext ctx = cenit_context_new("global");
+    bool is_valid = cenit_parse_string(&ctx, source);
 
-    CenitAst *ast = cenit_parser_parse(&parser);
+    fl_expect("Parser object should not contain errors", is_valid);
 
-    fl_expect("Parser object should not contain errors", parser.errors == NULL);
-
-    for (size_t i=0; i < fl_array_length(ast->decls); i++)
+    for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
-        CenitNode *node = ast->decls[i];
+        CenitNode *node = ctx.ast->decls[i];
         fl_expect("Node must be a literal node", node->type == CENIT_NODE_ARRAY_INIT);
 
         CenitArrayInitNode *array = (CenitArrayInitNode*)node;
@@ -70,29 +70,26 @@ void cenit_test_parser_literal_array_initializer(void)
         }
     }    
 
-    cenit_ast_free(ast);
-    cenit_parser_free(&parser);
+    cenit_context_free(&ctx);
 }
 
 void cenit_test_parser_literal_integer_error(void)
 {
     const char *source = 
         /* ULLONG_MAX + 1: Too large integral type*/
-        "/* Line 1 */ 18446744073709551616;          \n"
+        "18446744073709551616;          \n"
     ;
 
-    CenitParser parser = cenit_parser_new(source);
-
-    CenitAst *ast = cenit_parser_parse(&parser);
+    CenitContext ctx = cenit_context_new("global");
+    bool is_valid = cenit_parse_string(&ctx, source);
 
     size_t expected_errors = 1;
-    fl_vexpect(parser.errors != NULL && fl_array_length(parser.errors) == expected_errors, "The parser object must contain %zu error(s)", expected_errors);
+    fl_vexpect(!is_valid && ctx.errors != NULL && fl_array_length(ctx.errors) == expected_errors, "The context object must contain %zu error(s)", expected_errors);
 
-    CenitParserError *error = parser.errors;
+    CenitError *error = ctx.errors;
 
     fl_vexpect(error->line == 1 && error->type == CENIT_ERROR_LARGE_INTEGER, 
         "Expected semantic error: %s at line %u:%u", error->message, error->line, error->col);
 
-    cenit_ast_free(ast);
-    cenit_parser_free(&parser);
+    cenit_context_free(&ctx);
 }

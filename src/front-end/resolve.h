@@ -2,25 +2,28 @@
 #define CENIT_RESOLVE_H
 
 #include "ast.h"
-#include "symtable.h"
+#include "context.h"
 
 /*
  * Function: cenit_resolve_symbols
  *  This function walks over the <CenitAst> tree and populates
- *  the <CenitSymbolTable> with the symbols defined in the AST.
+ *  the <CenitSymbolTable> in the context with the symbols defined 
+ *  in the AST.
  *
  * Parameters:
- *  symtable - Symbol table
+ *  ctx - Context object
  *  ast - Parse program tree
  *
  * Returns:
- *  void - This function does not return a value
+ *  void - *true* on a pass without errors. Otheriwise, this function returns
+ *          *false* and the *errors* property in the <CenitContext> object
+ *          should contain the error(s) description
  * 
  * Notes:
  *  This function just creates the <CenitSymbol> entries with the information
  *  present in the symbol definition, it does not perform any type of type 
  *  inference nor type checking
  */
-void cenit_resolve_symbols(CenitSymbolTable *symtable, CenitAst *ast);
+bool cenit_resolve_symbols(CenitContext *ctx);
 
 #endif /* CENIT_RESOLVE_H */

@@ -1,12 +1,13 @@
 #include <fllib.h>
 
 #include "../../Test.h"
+#include "../../../src/front-end/infer.h"
 #include "../../../src/front-end/parse.h"
 #include "../../../src/front-end/resolve.h"
 #include "../../../src/front-end/symtable.h"
 #include "tests.h"
 
-void cenit_test_resolve_variables(void)
+void cenit_test_infer_variable_type(void)
 {
     const char *source = 
         "var sym_a : uint8 = 2;"                "\n"
@@ -31,10 +32,10 @@ void cenit_test_resolve_variables(void)
 
         /* The type information will be inferred by the assignment, so the symbol       */
         /* definition does not contain that information at this pass.                   */
-        { .elements = 0, .name = NULL, .type = CENIT_TYPE_NONE, .is_array = false       },
+        { .elements = 1, .name = NULL, .type = CENIT_TYPE_UINT8, .is_array = false       },
 
         /* Similar to the previous case, the type is not defined                        */
-        { .elements = 0, .name = NULL, .type = CENIT_TYPE_NONE, .is_array = false       },
+        { .elements = 3, .name = NULL, .type = CENIT_TYPE_UINT8, .is_array = true        },
     };
 
     const size_t count = sizeof(types) / sizeof(types[0]);
@@ -43,6 +44,7 @@ void cenit_test_resolve_variables(void)
     bool is_valid = cenit_parse_string(&ctx, source);
 
     cenit_resolve_symbols(&ctx);
+    cenit_infer_types(&ctx);
     
     fl_vexpect(fl_hashtable_length(ctx.symtable.symbols) == count, "Symbol table must contain %zu symbols", count);
 

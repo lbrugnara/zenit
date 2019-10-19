@@ -6,7 +6,11 @@ compile cenit-objects {
     output_dir: "obj/",
     sources: [
         "src/front-end/ast.c",
+        "src/front-end/check.c",
+        "src/front-end/context.c",
+        "src/front-end/infer.c",
         "src/front-end/lexer.c",
+        "src/front-end/parse.c"
         "src/front-end/parser.c"
         "src/front-end/resolve.c"
         "src/front-end/symbol.c"
@@ -37,6 +41,7 @@ compile cenit-tests-objects {
     sources: [
         "tests/Main.c",
         "tests/Test.c",
+        "tests/front-end/infer/variables.c"
         "tests/front-end/lexer/assignment.c",
         "tests/front-end/lexer/combinations.c",
         "tests/front-end/lexer/errors.c",
@@ -47,6 +52,7 @@ compile cenit-tests-objects {
         "tests/front-end/lexer/types.c",
         "tests/front-end/parser/literals.c"
         "tests/front-end/parser/variables.c"
+        "tests/front-end/resolve/errors.c"
         "tests/front-end/resolve/variables.c"
         "tests/front-end/symtable/symbols.c"
     ]

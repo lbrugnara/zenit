@@ -8,7 +8,7 @@
  *  The function returns a <CenitSymbol> if the node updates the table or NULL
  *  if there is nothing to update
  */
-typedef CenitSymbol*(*CenitResolver)(CenitSymbolTable *symtable, CenitNode *node);
+typedef CenitSymbol*(*CenitResolver)(CenitContext *ctx, CenitNode *node);
 
 /*
  * Function: visit_node
@@ -16,7 +16,7 @@ typedef CenitSymbol*(*CenitResolver)(CenitSymbolTable *symtable, CenitNode *node
  *  and calls the function.
  *
  * Parameters:
- *  symtable - Symbol table
+ *  ctx - Context object
  *  node - Node to visit
  *
  * Returns:
@@ -24,7 +24,7 @@ typedef CenitSymbol*(*CenitResolver)(CenitSymbolTable *symtable, CenitNode *node
  *                  or NULL
  *
  */
-static CenitSymbol* visit_node(CenitSymbolTable *symtable, CenitNode *node);
+static CenitSymbol* visit_node(CenitContext *ctx, CenitNode *node);
 
 
 /*
@@ -33,7 +33,7 @@ static CenitSymbol* visit_node(CenitSymbolTable *symtable, CenitNode *node);
  *  function simply returns NULL
  *
  * Parameters:
- *  symtable - Symbol table
+ *  ctx - Context object
  *  node - Node to visit
  *
  * Returns:
@@ -41,7 +41,7 @@ static CenitSymbol* visit_node(CenitSymbolTable *symtable, CenitNode *node);
  *                  or NULL
  *
  */
-static CenitSymbol* visit_nothing(CenitSymbolTable *symtable, CenitNode *node);
+static CenitSymbol* visit_nothing(CenitContext *ctx, CenitNode *node);
 
 /*
  * Function: visit_variable
@@ -49,7 +49,7 @@ static CenitSymbol* visit_nothing(CenitSymbolTable *symtable, CenitNode *node);
  *  present in the <CenitAst>
  *
  * Parameters:
- *  symtable - Symbol table
+ *  ctx - Context object
  *  node - Node to visit
  *
  * Returns:
@@ -57,7 +57,7 @@ static CenitSymbol* visit_nothing(CenitSymbolTable *symtable, CenitNode *node);
  *                  or NULL
  *
  */
-static CenitSymbol* visit_variable(CenitSymbolTable *symtable, CenitNode *node);
+static CenitSymbol* visit_variable(CenitContext *ctx, CenitNode *node);
 
 /*
  * Variable: resolvers
@@ -66,46 +66,53 @@ static CenitSymbol* visit_variable(CenitSymbolTable *symtable, CenitNode *node);
 static const CenitResolver resolvers[] = {
     [CENIT_NODE_VARIABLE] = &visit_variable,
 
-    // These nodes do not play a role in this phase
+    // These nodes do not play a role in this pass
     [CENIT_NODE_LITERAL] = &visit_nothing,
     [CENIT_NODE_ARRAY_INIT] = &visit_nothing,
     
 };
 
-static CenitSymbol* visit_node(CenitSymbolTable *symtable, CenitNode *node)
+static CenitSymbol* visit_node(CenitContext *ctx, CenitNode *node)
 {
-    return resolvers[node->type](symtable, node);
+    return resolvers[node->type](ctx, node);
 }
 
-static CenitSymbol* visit_nothing(CenitSymbolTable *symtable, CenitNode *node)
+static CenitSymbol* visit_nothing(CenitContext *ctx, CenitNode *node)
 {
     return NULL;
 }
 
-static CenitSymbol* visit_variable(CenitSymbolTable *symtable, CenitNode *node)
+static CenitSymbol* visit_variable(CenitContext *ctx, CenitNode *node)
 {
     CenitVariableNode *var_decl = (CenitVariableNode*)node;
 
-    // We don't care about the returned symbol -if any- at this phase
-    visit_node(symtable, var_decl->value);
+    // We don't care about the returned symbol -if any- at this pass
+    visit_node(ctx, var_decl->value);
+
+    // If the symbol already exists add an error
+    if (cenit_symtable_has(&ctx->symtable, var_decl->name))
+    {
+        cenit_context_error(ctx, CENIT_ERROR_DUPLICATED_SYMBOL, var_decl->base.line, var_decl->base.col, "Cannot redefine symbol '%s'", var_decl->name);
+        return NULL;
+    }
 
     // Create and insert the symbol in the table
-    return cenit_symtable_add(symtable, cenit_symbol_new(var_decl->name, &var_decl->typeinfo));
+    return cenit_symtable_add(&ctx->symtable, cenit_symbol_new(var_decl->name, &var_decl->typeinfo));
 }
 
 /*
  * Function: cenit_resolve_symbols
  *  We just iterate over the declarations visiting each node
  */
-void cenit_resolve_symbols(CenitSymbolTable *symtable, CenitAst *ast)
+bool cenit_resolve_symbols(CenitContext *ctx)
 {
-    if (!ast || !ast->decls)
-        return;
+    if (!ctx || !ctx->ast || !ctx->ast->decls)
+        return false;
 
-    for (size_t i=0; i < fl_array_length(ast->decls); i++)
-    {
-        CenitNode *node = ast->decls[i];
-        
-        visit_node(symtable, node);
-    }
+    size_t errors = cenit_context_error_count(ctx);
+
+    for (size_t i=0; i < fl_array_length(ctx->ast->decls); i++)
+        visit_node(ctx, ctx->ast->decls[i]);
+
+    return errors == cenit_context_error_count(ctx);
 }

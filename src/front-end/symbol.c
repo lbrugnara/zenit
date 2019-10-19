@@ -9,10 +9,7 @@ CenitSymbol* cenit_symbol_new(const char *name, CenitTypeInfo *typeinfo)
     CenitSymbol *symbol = fl_malloc(sizeof(CenitSymbol));
 
     symbol->name = fl_cstring_dup(name);
-    symbol->typeinfo.name = typeinfo->name ? fl_cstring_dup(typeinfo->name) : NULL;
-    symbol->typeinfo.elements = typeinfo->elements;
-    symbol->typeinfo.is_array = typeinfo->is_array;
-    symbol->typeinfo.type = typeinfo->type;
+    cenit_type_copy(&symbol->typeinfo, typeinfo);
 
     return symbol;
 }

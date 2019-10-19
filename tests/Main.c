@@ -6,6 +6,7 @@
 #include "Test.h"
 
 // Tests
+#include "front-end/infer/tests.h"
 #include "front-end/lexer/tests.h"
 #include "front-end/parser/tests.h"
 #include "front-end/resolve/tests.h"
@@ -39,7 +40,11 @@ int main(int argc, char **argv)
             { "Symbol creation",    &cenit_test_symtable_api },
         ),
         fl_test_suite("Resolve",
-            { "Resolve variables",  &cenit_test_resolve_variables },
+            { "Resolve variables",  &cenit_test_resolve_variables   },
+            { "Resolve errors",     &cenit_test_resolve_errors      },
+        ),
+        fl_test_suite("Infer",
+            { "Infer variable type",  &cenit_test_infer_variable_type },
         ),
         NULL
     );
