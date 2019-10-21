@@ -6,14 +6,11 @@
 
 /*
  * Function: cenit_infer_types
- *  This function walks over the <CenitAst> tree and updates
- *  the <CenitSymbolTable> in the context with the type information 
- *  inferred for each symbol that does not declare or contain type 
- *  information
+ *  This function does the type inference pass to update symbols that
+ *  may not contain type information.
  *
  * Parameters:
  *  ctx - Context object
- *  ast - Parse program tree
  *
  * Returns:
  *  void - *true* on a pass without errors. Otheriwise, this function returns
@@ -21,10 +18,11 @@
  *          should contain the error(s) description
  * 
  * Notes:
- *  This function updates the type information but do not perform any type
- *  checking. At the end of this pass, we can say all the symbols contain
- *  the type information, therefore there shouldn't be symbols with the 
- *  <CENIT_TYPE_NONE> value present in the <CenitSymbolTable> entries.
+ *  This function updates the type information but does not perform any type
+ *  checking. At the end of this pass, if there are not errors, we can say 
+ *  all the symbols contain the type information, therefore there shouldn't 
+ *  be symbols with the <CENIT_TYPE_NONE> value present in the 
+ *  <CenitSymbolTable> entries.
  */
 bool cenit_infer_types(CenitContext *ctx);
 

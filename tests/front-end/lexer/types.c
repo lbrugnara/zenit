@@ -8,10 +8,10 @@
 
 static struct CenitLexerTest tests[] = {
     // Types
-    { "1",              false,   (CenitTokenType[]){ T(INTEGER), T(EOF) } },
-    { "1234",           false,   (CenitTokenType[]){ T(INTEGER), T(EOF) } },
-    { "01234",          false,   (CenitTokenType[]){ T(INTEGER), T(EOF) } },
-    { "4294967295",     false,   (CenitTokenType[]){ T(INTEGER), T(EOF) } },
+    { "1",              (CenitTokenType[]){ T(INTEGER), T(EOF) } },
+    { "1234",           (CenitTokenType[]){ T(INTEGER), T(EOF) } },
+    { "01234",          (CenitTokenType[]){ T(INTEGER), T(EOF) } },
+    { "4294967295",     (CenitTokenType[]){ T(INTEGER), T(EOF) } },
 };
 
 void cenit_test_lexer_types(void)

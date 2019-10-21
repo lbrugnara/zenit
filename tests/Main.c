@@ -6,6 +6,7 @@
 #include "Test.h"
 
 // Tests
+#include "front-end/check/tests.h"
 #include "front-end/infer/tests.h"
 #include "front-end/lexer/tests.h"
 #include "front-end/parser/tests.h"
@@ -45,6 +46,9 @@ int main(int argc, char **argv)
         ),
         fl_test_suite("Infer",
             { "Infer variable type",  &cenit_test_infer_variable_type },
+        ),
+        fl_test_suite("Check",
+            { "Type check errors",  &cenit_test_check_types_errors  }
         ),
         NULL
     );

@@ -8,7 +8,6 @@
 /*
  * Enum: CenitNodeType 
  *  Types of AST node
- *
  */
 typedef enum CenitNodeType {
     CENIT_NODE_LITERAL,
@@ -17,18 +16,16 @@ typedef enum CenitNodeType {
 } CenitNodeType;
 
 /*
- * Type: CenitNode
- *  The base node object. All the specific objects
- *  are compound with this one
+ * Struct: CenitNode
+ *  The base node object. All the specific objects are compound with this one
  */
 typedef struct CenitNode {
     CenitNodeType type;
-    int line;
-    int col;
+    CenitSourceLocation location;
 } CenitNode;
 
 /*
- * Type: CenitLiteralNode
+ * Struct: CenitLiteralNode
  *  Represents a literal value in the program's source.
  * 
  * Members:
@@ -46,7 +43,7 @@ typedef struct CenitLiteralNode {
 } CenitLiteralNode;
 
 /*
- * Type: CenitVariableNode
+ * Struct: CenitVariableNode
  *  Represents a variable declaration node
  * 
  * Members:
@@ -63,7 +60,7 @@ typedef struct CenitVariableNode {
 } CenitVariableNode;
 
 /*
- * Type: CenitArrayInitNode
+ * Struct: CenitArrayInitNode
  *  Represents a literal array initializer
  * 
  * Members:
@@ -78,7 +75,7 @@ typedef struct CenitArrayInitNode {
 } CenitArrayInitNode;
 
 /*
- * Type: CenitAst
+ * Struct: CenitAst
  *  Represents the abstract syntax tree of the parsed program
  * 
  * Members:
@@ -103,18 +100,22 @@ typedef struct CenitAst {
 void cenit_node_free(CenitNode *node);
 
 /*
- * Function: cenit_node_pointer_free
- *  Used in conjution with the <fl_array_free_each>
- *  function to release the memory of a node.
- *  *nodeptr* is expected to be a <CenitNode>**
+ * Function: cenit_node_array_free
+ *  Releases the memory of an array of <CenitNode> pointers.
+ *  The array must be an array allocated with the fllib's 
+ *  <fl_array_new> function
  *
  * Parameters:
- *  nodeptr - Pointer to a <CenitNode> pointer
+ *  array - An <FlArray> object
  *
  * Returns:
  *  void - This function does not return a value
+ * 
+ * Notes:
+ *  If *array* is NULL, this function returns immediately
+ *  without performing anything nor erroring out
  */
-void cenit_node_pointer_free(void *nodeptr);
+void cenit_node_array_free(CenitNode **array);
 
 /*
  * Function: cenit_ast_free

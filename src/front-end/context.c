@@ -1,11 +1,12 @@
 #include <fllib.h>
 #include "ast.h"
 #include "context.h"
+#include "source.h"
 #include "type.h"
 
 /*
  * Function: error_free
- *  Frees the memory of an error object allocated with the <parser_error> function
+ *  Frees the memory of an error object allocated with the <cenit_context_error> function
  *
  * Parameters:
  *  errorptr - Pointer to a <CenitError> object
@@ -26,20 +27,36 @@ static void error_free(void *errorptr)
 }
 
 
-CenitContext cenit_context_new(const char *id)
+/*
+ * Function: cenit_context_new
+ *  Allocates memory for a <CenitSymbolTable> object and a <CenitSourceInfo> object
+ */
+CenitContext cenit_context_new(const char *id, CenitSourceType type, const char *input)
 {
-    return (CenitContext) { 
+    CenitContext ctx = { 
         .symtable = cenit_symtable_new(CENIT_SYMTABLE_GLOBAL, id),
+        .srcinfo = cenit_source_new(type, input),
         .errors = NULL
     };
+
+    return ctx;
 }
 
+/*
+ * Function: cenit_context_free
+ *  Releases all the memory allocated by the <cenit_context_new> function
+ *  but also if present, this function releases the memory of the <CenitAst>
+ *  object.
+ */
 void cenit_context_free(CenitContext *ctx)
 {
     if (!ctx)
         return;
 
     cenit_symtable_free(&ctx->symtable);
+
+    if (ctx->srcinfo)
+        cenit_source_free(ctx->srcinfo);
 
     if (ctx->ast)
         cenit_ast_free(ctx->ast);
@@ -48,7 +65,12 @@ void cenit_context_free(CenitContext *ctx)
         fl_array_free_each(ctx->errors, error_free);
 }
 
-void cenit_context_error(CenitContext *ctx, CenitErrorType type, unsigned int line, unsigned int col, const char *message, ...)
+/*
+ * Function: cenit_context_error
+ *  Initializes the *errors* property if needed and allocates memory for the formatted string. Both objects are
+ *  deallocated by the <error_free> function.
+ */
+void cenit_context_error(CenitContext *ctx, CenitSourceLocation location, CenitErrorType type, const char *message, ...)
 {
     if (message == NULL)
         return;
@@ -74,8 +96,7 @@ void cenit_context_error(CenitContext *ctx, CenitErrorType type, unsigned int li
 
     CenitError error = {
         .type = type,
-        .line = line,
-        .col = col,
+        .location = location,
         .message = formatted_msg
     };
 

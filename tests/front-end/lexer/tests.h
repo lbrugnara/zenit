@@ -5,7 +5,6 @@
 
 struct CenitLexerTest {
     const char *source;
-    const bool has_errors;
     CenitTokenType *tokens;
 };
 

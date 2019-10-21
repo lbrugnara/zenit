@@ -8,8 +8,8 @@
 
 static struct CenitLexerTest tests[] = {
     // Errors
-    { "123$invalid_id", true,   (CenitTokenType[]){ T(INTEGER), T(UNKNOWN), T(EOF) } },
-    { "var err = 123$invalid_id;", true,   (CenitTokenType[]){ T(VAR), T(ID), T(ASSIGNMENT), T(INTEGER), T(UNKNOWN), T(SEMICOLON), T(EOF) } },
+    { "123$invalid_id",             (CenitTokenType[]){ T(INTEGER), T(UNKNOWN), T(EOF) } },
+    { "var err = 123$invalid_id;",  (CenitTokenType[]){ T(VAR), T(ID), T(ASSIGN), T(INTEGER), T(UNKNOWN), T(SEMICOLON), T(EOF) } },
 };
 
 void cenit_test_lexer_errors(void)

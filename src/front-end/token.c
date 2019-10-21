@@ -8,7 +8,7 @@ static const char *TokenTypeString[] = {
     [CENIT_TOKEN_ID]            = "IDENTIFIER",
     [CENIT_TOKEN_VAR]            = "VAR (var)",
 
-    [CENIT_TOKEN_ASSIGNMENT]    = "ASSIGNMENT (=)",
+    [CENIT_TOKEN_ASSIGN]    = "ASSIGN (=)",
 
     [CENIT_TOKEN_COMMA]         = "COMMA (,)",
     [CENIT_TOKEN_SEMICOLON]     = "SEMICOLON (;)",

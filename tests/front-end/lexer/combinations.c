@@ -8,10 +8,10 @@
 
 static struct CenitLexerTest tests[] = {
     // Combinations
-    { "[ 1, 2, 3 ]",                false,   (CenitTokenType[]){ T(LBRACKET), T(INTEGER), T(COMMA), T(INTEGER), T(COMMA), T(INTEGER), T(RBRACKET), T(EOF) } },
-    { "var id = 2",                 false,   (CenitTokenType[]){ T(VAR), T(ID), T(ASSIGNMENT), T(INTEGER), T(EOF) } },
-    { "var id : uint8 = 2;",        false,   (CenitTokenType[]){ T(VAR), T(ID), T(COLON), T(ID), T(ASSIGNMENT), T(INTEGER), T(SEMICOLON), T(EOF) } },    
-    { "var id : [10] uint8 = 2;",   false,   (CenitTokenType[]){ T(VAR), T(ID), T(COLON), T(LBRACKET), T(INTEGER), T(RBRACKET), T(ID), T(ASSIGNMENT), T(INTEGER), T(SEMICOLON), T(EOF) } },    
+    { "[ 1, 2, 3 ]",                (CenitTokenType[]){ T(LBRACKET), T(INTEGER), T(COMMA), T(INTEGER), T(COMMA), T(INTEGER), T(RBRACKET), T(EOF) } },
+    { "var id = 2",                 (CenitTokenType[]){ T(VAR), T(ID), T(ASSIGN), T(INTEGER), T(EOF) } },
+    { "var id : uint8 = 2;",        (CenitTokenType[]){ T(VAR), T(ID), T(COLON), T(ID), T(ASSIGN), T(INTEGER), T(SEMICOLON), T(EOF) } },    
+    { "var id : [10] uint8 = 2;",   (CenitTokenType[]){ T(VAR), T(ID), T(COLON), T(LBRACKET), T(INTEGER), T(RBRACKET), T(ID), T(ASSIGN), T(INTEGER), T(SEMICOLON), T(EOF) } },    
 };
 
 void cenit_test_lexer_combinations(void)

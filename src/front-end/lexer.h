@@ -6,29 +6,29 @@
 
 /*
  * Struct: CenitLexer
- *  Object that keeps track of the lexical analysis
+ *  Object that keeps track of the lexical analysis phase
  *
+ * Members:
+ *  CenitSourceInfo *srcinfo - Object that contains the program's source code
+ *  unsigned int index - Used as a pointer to perform the scan's operations
  */
 typedef struct CenitLexer {
-    struct FlSlice source;
+    CenitSourceInfo *srcinfo;
     unsigned int index;
-    unsigned int line;
-    unsigned int col;
-    bool has_errors;
 } CenitLexer;
 
 /*
  * Function: cenit_lexer_new
- *  Creates a new <CenitLexer> feeded with the provided source code.
+ *  Creates a new <CenitLexer> feeded with the provided source object.
  *
  * Parameters:
- *  source - Source code.
+ *  srcinfo - Object that keeps track of source information
  *
  * Returns:
  *  CenitLexer - Object to keep track of the lexical analysis
  *
  */
-CenitLexer cenit_lexer_new(const char *source);
+CenitLexer cenit_lexer_new(CenitSourceInfo *srcinfo);
 
 /*
  * Function: cenit_lexer_consume

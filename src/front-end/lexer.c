@@ -45,6 +45,19 @@
 #define is_string(seq, str) fl_slice_equals_sequence(seq, (FlByte*)(str), strlen(str))
 
 /* Private API */
+/*
+ * Variable: sync_char
+ *  Group of synchronization characters of length 1
+ *
+ */
+static char sync_char[] = { '\0', '\n', ' ', '\t', '\r', '#', ';', '=' };
+
+/*
+ * Variable: sync_chars
+ *  Group of synchronization characters of length greater than 1
+ *
+ */
+static char *sync_chars[] = { "//", "/*" };
 
 /*
  * Function: has_input
@@ -59,7 +72,7 @@
  */
 static inline bool has_input(CenitLexer *lexer)
 {
-    return lexer->index < lexer->source.length;
+    return lexer->index < lexer->srcinfo->source.length;
 }
 
 /*
@@ -76,7 +89,7 @@ static inline bool has_input(CenitLexer *lexer)
  */
 static inline char peek(CenitLexer *lexer)
 {
-    return lexer->source.sequence[lexer->index];
+    return lexer->srcinfo->source.content[lexer->index];
 }
 
 /*
@@ -96,10 +109,10 @@ static inline char peek(CenitLexer *lexer)
  */
 static inline char peek_at(CenitLexer *lexer, size_t index)
 {
-    if (lexer->index + index >= lexer->source.length)
+    if (lexer->index + index >= lexer->srcinfo->source.length)
         return '\0';
 
-    return lexer->source.sequence[lexer->index + index];
+    return lexer->srcinfo->source.content[lexer->index + index];
 }
 
 /*
@@ -119,10 +132,10 @@ static inline char peek_at(CenitLexer *lexer, size_t index)
  */
 static inline struct FlSlice peek_many(CenitLexer *lexer, size_t n)
 {
-    if (lexer->index + n >= lexer->source.length)
+    if (lexer->index + n >= lexer->srcinfo->source.length)
         return (struct FlSlice){ .sequence = NULL };
 
-    return fl_slice_new(lexer->source.sequence, 1, lexer->index, n);
+    return fl_slice_new((const FlByte*)lexer->srcinfo->source.content, 1, lexer->index, n);
 }
 
 /*
@@ -143,10 +156,10 @@ static inline struct FlSlice peek_many(CenitLexer *lexer, size_t n)
  */
 static inline struct FlSlice peek_many_at(CenitLexer *lexer, size_t offset, size_t n)
 {
-    if (lexer->index + offset + n >= lexer->source.length)
+    if (lexer->index + offset + n >= lexer->srcinfo->source.length)
         return (struct FlSlice){ .sequence = NULL };
 
-    return fl_slice_new(lexer->source.sequence, 1, lexer->index + offset, n);
+    return fl_slice_new((const FlByte*)lexer->srcinfo->source.content, 1, lexer->index + offset, n);
 }
 
 /*
@@ -162,33 +175,19 @@ static inline struct FlSlice peek_many_at(CenitLexer *lexer, size_t offset, size
  */
 static inline char consume(CenitLexer *lexer)
 {
-    lexer->col++;
-    return lexer->source.sequence[lexer->index++];
+    lexer->srcinfo->location.col++;
+    return lexer->srcinfo->source.content[lexer->index++];
 }
-
-/*
- * Variable: sync_char
- *  Group of synchronization characters of length 1
- *
- */
-static char sync_char[] = { '\0', '\n', ' ', '\t', '\r', '#', ';', '=' };
-
-/*
- * Variable: sync_chars
- *  Group of synchronization characters of length greater than 1
- *
- */
-static char *sync_chars[] = { "//", "/*" };
 
 /*
  * Function: is_sync_character
  *  Returns *true* if a char or a group of chars placed at *offset* elements of
- *  the current pointer location is *synchronization character* when an error
+ *  the current pointer source is *synchronization character* when an error
  *  occurs
  *
  * Parameters:
  *  lexer - Lexer object
- *  offset - Number of elements to skip from the current pointer location
+ *  offset - Number of elements to skip from the current pointer source
  *
  * Returns:
  *  bool - *true* if the character (or group of chars) is a synchronization character
@@ -237,8 +236,8 @@ static inline void remove_ws_and_comments(CenitLexer *lexer)
         if (c == '\n')
         {
             consume(lexer);
-            lexer->line++;
-            lexer->col = 1;
+            lexer->srcinfo->location.line++;
+            lexer->srcinfo->location.col = 1;
             continue;
         }
         
@@ -274,8 +273,8 @@ static inline void remove_ws_and_comments(CenitLexer *lexer)
                 }
                 if (c == '\n')
                 {
-                    lexer->line++;
-                    lexer->col = 1;
+                    lexer->srcinfo->location.line++;
+                    lexer->srcinfo->location.col = 1;
                 }
             }
 
@@ -305,17 +304,16 @@ static inline void remove_ws_and_comments(CenitLexer *lexer)
  *  CenitToken - Token object
  *
  */
-static inline CenitToken create_token(CenitLexer *lexer, CenitTokenType type, size_t chars, unsigned int line, unsigned int col)
+static inline CenitToken create_token(CenitLexer *lexer, CenitTokenType type, size_t chars)
 {
     // Current pointer position
-    FlByte *starts = (FlByte*)lexer->source.sequence + lexer->index;    
+    FlByte *starts = (FlByte*)lexer->srcinfo->source.content + lexer->index;    
 
     CenitToken token = { 
         .type = type,
         .value = fl_slice_new(starts, sizeof(char), 0, chars),
-        .line = line,
-        .col = col
-    };
+        .location = lexer->srcinfo->location
+    };    
 
     // Advance the pointer as much as needed
     for (size_t i=0; i < chars; i++)
@@ -326,14 +324,11 @@ static inline CenitToken create_token(CenitLexer *lexer, CenitTokenType type, si
 
 /* Public API */
 
-CenitLexer cenit_lexer_new(const char *source)
+CenitLexer cenit_lexer_new(CenitSourceInfo *srcinfo)
 {
     return (CenitLexer) {
-        .source = fl_slice_new((const FlByte*)source, 1, 0, strlen(source)),
         .index = 0,
-        .line = 1,
-        .col = 1,
-        .has_errors = false
+        .srcinfo = srcinfo
     };
 }
 
@@ -351,9 +346,6 @@ CenitToken* cenit_lexer_tokenize(CenitLexer *lexer)
 
         if (token.type == CENIT_TOKEN_EOF)
             break;
-
-        if (token.type == CENIT_TOKEN_UNKNOWN)
-            lexer->has_errors = true;
 
         fl_vector_add(tempvec, &token);
 
@@ -380,35 +372,35 @@ CenitToken cenit_lexer_consume(CenitLexer *lexer)
 
         if (c == ';')
         {
-            return create_token(lexer, CENIT_TOKEN_SEMICOLON, 1, lexer->line, lexer->col);
+            return create_token(lexer, CENIT_TOKEN_SEMICOLON, 1);
         }
         else if (c == ',')
         {
-            return create_token(lexer, CENIT_TOKEN_COMMA, 1, lexer->line, lexer->col);
+            return create_token(lexer, CENIT_TOKEN_COMMA, 1);
         }
         else if (c == ':')
         {
-            return create_token(lexer, CENIT_TOKEN_COLON, 1, lexer->line, lexer->col);
+            return create_token(lexer, CENIT_TOKEN_COLON, 1);
         }
         else if (c == '=')
         {
-            return create_token(lexer, CENIT_TOKEN_ASSIGNMENT, 1, lexer->line, lexer->col);
+            return create_token(lexer, CENIT_TOKEN_ASSIGN, 1);
         }
         else if (c == '{')
         {
-            return create_token(lexer, CENIT_TOKEN_LBRACE, 1, lexer->line, lexer->col);
+            return create_token(lexer, CENIT_TOKEN_LBRACE, 1);
         }
         else if (c == '}')
         {
-            return create_token(lexer, CENIT_TOKEN_RBRACE, 1, lexer->line, lexer->col);
+            return create_token(lexer, CENIT_TOKEN_RBRACE, 1);
         }
         else if (c == '[')
         {
-            return create_token(lexer, CENIT_TOKEN_LBRACKET, 1, lexer->line, lexer->col);
+            return create_token(lexer, CENIT_TOKEN_LBRACKET, 1);
         }
         else if (c == ']')
         {
-            return create_token(lexer, CENIT_TOKEN_RBRACKET, 1, lexer->line, lexer->col);
+            return create_token(lexer, CENIT_TOKEN_RBRACKET, 1);
         }
         else if (is_number(c))
         {
@@ -418,7 +410,7 @@ CenitToken cenit_lexer_consume(CenitLexer *lexer)
             while (is_number(peek_at(lexer, digits)))
                 digits++;
 
-            return create_token(lexer, CENIT_TOKEN_INTEGER, digits, lexer->line, lexer->col);
+            return create_token(lexer, CENIT_TOKEN_INTEGER, digits);
         }
         else if (is_alpha(c))
         {
@@ -426,7 +418,7 @@ CenitToken cenit_lexer_consume(CenitLexer *lexer)
             while (is_number(peek_at(lexer, chars)) || is_alpha(peek_at(lexer, chars)) || peek_at(lexer, chars) == '_' || peek_at(lexer, chars) == '-')
                 chars++;
 
-            CenitToken token = create_token(lexer, CENIT_TOKEN_ID, chars, lexer->line, lexer->col);
+            CenitToken token = create_token(lexer, CENIT_TOKEN_ID, chars);
 
             if (is_reserved_keyword(&token.value, "var"))
                 token.type = CENIT_TOKEN_VAR;
@@ -442,22 +434,19 @@ CenitToken cenit_lexer_consume(CenitLexer *lexer)
     // If we reach this point, the token is unrecognized by the lexer
     // so we look for a synchronizing character and we return a UNKNOWN
     // token with the whole content
-    lexer->has_errors = true;
-
     size_t sync_chars = 0;
     while (!is_sync_character(lexer, sync_chars))
         sync_chars++;
 
-    return create_token(lexer, CENIT_TOKEN_UNKNOWN, sync_chars, lexer->line, lexer->col);
+    return create_token(lexer, CENIT_TOKEN_UNKNOWN, sync_chars);
 }
 
 CenitToken cenit_lexer_peek(CenitLexer *lexer)
 {
     // Save the lexer state
     unsigned int index = lexer->index;
-    unsigned int line = lexer->line;
-    unsigned int col = lexer->col;
-    bool has_errors = lexer->has_errors;
+    unsigned int line = lexer->srcinfo->location.line;
+    unsigned int col = lexer->srcinfo->location.col;
 
     // Get the next token
     // TODO: We should buffer consumed tokens, by now
@@ -466,9 +455,8 @@ CenitToken cenit_lexer_peek(CenitLexer *lexer)
     
     // Restore the lexer state
     lexer->index = index;
-    lexer->line = line;
-    lexer->col = col;
-    lexer->has_errors = has_errors;
+    lexer->srcinfo->location.line = line;
+    lexer->srcinfo->location.col = col;
 
     return token;
 }

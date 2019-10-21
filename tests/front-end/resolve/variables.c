@@ -13,6 +13,8 @@ void cenit_test_resolve_variables(void)
         "var sym_b : [2]uint8 = [ 1, 2 ];"      "\n"
         "var sym_c = 1;"                        "\n"
         "var sym_d = [ 1, 2, 3 ];"              "\n"
+        "var sym_e : customType = 0;"           "\n"
+        "var sym_f : [0]customType = [];"       "\n"
     ;
 
     const char *names[] = { 
@@ -20,27 +22,35 @@ void cenit_test_resolve_variables(void)
         "sym_b",
         "sym_c",
         "sym_d",
+        "sym_e",
+        "sym_f",
     };
     
     const CenitTypeInfo types[] = {
-        /* The type and number of elements is present in the variable declaration       */
-        { .elements = 1, .name = NULL, .type = CENIT_TYPE_UINT8, .is_array = false      },
+        /* The type and number of elements is present in the variable declaration           */
+        { .elements = 1, .name = NULL, .type = CENIT_TYPE_UINT8, .is_array = false          },
 
-        /* The type and number of elements is present in the variable declaration       */
-        { .elements = 2, .name = NULL, .type = CENIT_TYPE_UINT8, .is_array = true       },
+        /* The type and number of elements is present in the variable declaration           */
+        { .elements = 2, .name = NULL, .type = CENIT_TYPE_UINT8, .is_array = true           },
 
-        /* The type information will be inferred by the assignment, so the symbol       */
-        /* definition does not contain that information at this pass.                   */
-        { .elements = 0, .name = NULL, .type = CENIT_TYPE_NONE, .is_array = false       },
+        /* The type information will be inferred by the assignment, so the symbol           */
+        /* definition does not contain that information at this pass.                       */
+        { .elements = 0, .name = NULL, .type = CENIT_TYPE_NONE, .is_array = false           },
 
-        /* Similar to the previous case, the type is not defined                        */
-        { .elements = 0, .name = NULL, .type = CENIT_TYPE_NONE, .is_array = false       },
+        /* Similar to the previous case, the type is not defined                            */
+        { .elements = 0, .name = NULL, .type = CENIT_TYPE_NONE, .is_array = false           },
+
+        /* The type and number of elements is present in the variable declaration           */
+        { .elements = 1, .name = "customType", .type = CENIT_TYPE_CUSTOM, .is_array = false },
+
+        /* The type and number of elements is present in the variable declaration           */
+        { .elements = 0, .name = "customType", .type = CENIT_TYPE_CUSTOM, .is_array = true  },
     };
 
     const size_t count = sizeof(types) / sizeof(types[0]);
 
-    CenitContext ctx = cenit_context_new("global");
-    bool is_valid = cenit_parse_string(&ctx, source);
+    CenitContext ctx = cenit_context_new("global", CENIT_SOURCE_STRING, source);
+    bool is_valid = cenit_parse_source(&ctx);
 
     cenit_resolve_symbols(&ctx);
     
@@ -58,7 +68,7 @@ void cenit_test_resolve_variables(void)
             fl_expect("Symbol must be an array", symbol->typeinfo.is_array);
         else
             fl_expect("Symbol must not be an array", !symbol->typeinfo.is_array);
-        fl_vexpect(symbol->typeinfo.type == types[i].type, "Symbol type must match (%s)", cenit_type_string(types[i].type));
+        fl_vexpect(symbol->typeinfo.type == types[i].type, "Symbol type must match (%s)", cenit_type_to_string(types + i));
         fl_vexpect(((symbol->typeinfo.name == NULL && types[i].name == NULL) 
             || (flm_cstring_equals(symbol->typeinfo.name, types[i].name))), "Symbol type name must match (%s)", types[i].name ? types[i].name : "null");
     }

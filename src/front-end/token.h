@@ -2,6 +2,7 @@
 #define CENIT_TOKEN_H
 
 #include <fllib.h>
+#include "source.h"
 
 /*
  * Enum: CenitTokenType 
@@ -18,7 +19,7 @@ typedef enum CenitTokenType {
     CENIT_TOKEN_VAR,
 
     // Assignment
-    CENIT_TOKEN_ASSIGNMENT,
+    CENIT_TOKEN_ASSIGN,
 
     // Punctuation
     CENIT_TOKEN_COMMA,
@@ -40,8 +41,7 @@ typedef enum CenitTokenType {
 typedef struct CenitToken {
     CenitTokenType type;
     struct FlSlice value;
-    unsigned int line;
-    unsigned int col;
+    CenitSourceLocation location;
 } CenitToken;
 
 /*

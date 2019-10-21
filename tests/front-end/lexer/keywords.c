@@ -8,7 +8,7 @@
 
 static struct CenitLexerTest tests[] = {
     // Keywords
-    { "var",            false,   (CenitTokenType[]){ T(VAR), T(EOF) } },
+    { "var",            (CenitTokenType[]){ T(VAR), T(EOF) } },
 };
 
 void cenit_test_lexer_keywords(void)

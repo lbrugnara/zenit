@@ -6,13 +6,11 @@
 
 /*
  * Function: cenit_resolve_symbols
- *  This function walks over the <CenitAst> tree and populates
- *  the <CenitSymbolTable> in the context with the symbols defined 
- *  in the AST.
+ *  This function registers all the symbols defined in the source code
+ *  in the symbol table
  *
  * Parameters:
  *  ctx - Context object
- *  ast - Parse program tree
  *
  * Returns:
  *  void - *true* on a pass without errors. Otheriwise, this function returns

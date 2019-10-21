@@ -6,13 +6,11 @@
 
 /*
  * Function: cenit_check_types
- *  This function walks over the <CenitAst> tree and type checks
- *  all the symbols that are parte of assignments, initializers,
- *  conditionals, loops, etc. to make sure these operations are valid.
+ *  This pass ensures the statements and expressions are valid based
+ *  on the types involved in them.
  *
  * Parameters:
  *  ctx - Context object
- *  ast - Parse program tree
  *
  * Returns:
  *  void - *true* on a pass without errors. Otheriwise, this function returns
@@ -21,7 +19,7 @@
  * 
  * Notes:
  *  This function only perform checks and does not update the symbol table. 
- *  At the end of this pass, we can say all the operations mentioned before
+ *  At the end of this pass, we can say all the operations in the program
  *  are valid in regard to types
  */
 bool cenit_check_types(CenitContext *ctx);

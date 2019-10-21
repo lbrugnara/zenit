@@ -5,6 +5,15 @@
 #include "parser.h"
 #include "ast.h"
 
+#define token_to_string(tokenptr) fl_cstring_dup_n((const char*)(tokenptr)->value.sequence, (tokenptr)->value.length)
+
+#define token_to_typeinfo(tokenptr, typeinfoptr)                            \
+    do {                                                                    \
+        (typeinfoptr)->type = cenit_type_slice_parse(&(tokenptr)->value);   \
+        if ((typeinfoptr)->type == CENIT_TYPE_CUSTOM)                       \
+            (typeinfoptr)->name = token_to_string((tokenptr));              \
+    } while (0)
+
 /* Private API */
 static CenitNode* parse_integer_literal(CenitParser *parser, CenitContext *ctx);
 static CenitNode* parse_literal_expression(CenitParser *parser, CenitContext *ctx);
@@ -35,15 +44,14 @@ static CenitNode* parse_integer_literal(CenitParser *parser, CenitContext *ctx)
     // By now we just parse integers, particularly uint8
     if (!cenit_parser_expects(parser, CENIT_TOKEN_INTEGER, &temp_token))
     {
-        cenit_context_error(ctx, CENIT_ERROR_SYNTAX, parser->lexer.line, parser->lexer.col, "Expecting an integer literal");
+        cenit_context_error(ctx, ctx->srcinfo->location, CENIT_ERROR_SYNTAX, "Expecting an integer literal");
         return NULL;
     }
 
-    // Create the literal node with the base information
+    // Create the literal node with the basic information
     CenitLiteralNode *literal_node = fl_malloc(sizeof(CenitLiteralNode));
     literal_node->base.type = CENIT_NODE_LITERAL;
-    literal_node->base.col = temp_token.col;
-    literal_node->base.line = temp_token.line;
+    literal_node->base.location = temp_token.location;
 
     // This is the integer parsing logic (unsigned integers in base 10 by now)
     char *endptr;
@@ -56,7 +64,7 @@ static CenitNode* parse_integer_literal(CenitParser *parser, CenitContext *ctx)
     // Check for specific strtoull errors
     if ((temp_int == ULLONG_MAX && errno == ERANGE) || (temp_int == 0ULL && errno == EINVAL))
     {
-        cenit_context_error(ctx, CENIT_ERROR_LARGE_INTEGER, parser->lexer.line, parser->lexer.col, "Integral value is too large");
+        cenit_context_error(ctx, ctx->srcinfo->location, CENIT_ERROR_LARGE_INTEGER, "Integral value is too large");
         goto range_error;
     }
 
@@ -70,7 +78,7 @@ static CenitNode* parse_integer_literal(CenitParser *parser, CenitContext *ctx)
     }
     else
     {
-        cenit_context_error(ctx, CENIT_ERROR_LARGE_INTEGER, parser->lexer.line, parser->lexer.col, "Integral value is too large");
+        cenit_context_error(ctx, ctx->srcinfo->location, CENIT_ERROR_LARGE_INTEGER, "Integral value is too large");
         goto range_error;
     }
 
@@ -78,8 +86,7 @@ static CenitNode* parse_integer_literal(CenitParser *parser, CenitContext *ctx)
     return (CenitNode*)literal_node;
 
     // Cleanup code for error conditions
-    range_error:
-        cenit_node_free((CenitNode*)literal_node);
+    range_error:    cenit_node_free((CenitNode*)literal_node);
 
     return NULL;
 }
@@ -92,7 +99,7 @@ static CenitNode* parse_integer_literal(CenitParser *parser, CenitContext *ctx)
  *  parser - Parser object
  *
  * Returns:
- *  static CenitNode* - Node representing the literal expression
+ *  CenitNode* - Node representing the literal expression
  *
  * Grammar:
  *  literal_expression = integer_literal ;
@@ -102,71 +109,90 @@ static CenitNode* parse_literal_expression(CenitParser *parser, CenitContext *ct
     // By now we just parse integers, particularly uint8
     if (cenit_parser_peek(parser).type != CENIT_TOKEN_INTEGER)
     {
-        cenit_context_error(ctx, CENIT_ERROR_SYNTAX, parser->lexer.line, parser->lexer.col, "Expecting a literal value");
+        cenit_context_error(ctx, ctx->srcinfo->location, CENIT_ERROR_SYNTAX, "Expecting a literal value");
         return NULL;
     }
 
     return parse_integer_literal(parser, ctx);
 }
 
+/*
+ * Function: parse_array_initializer
+ *  Parses an array initializer
+ *
+ * Parameters:
+ *  parser - Parser object
+*  ctx - <CenitContext> object
+ *
+ * Returns:
+ *  CenitNode* - The <CenitArrayInitNode> object
+ *
+ * Grammar:
+ *  array_initializer = '[' ( expression ( ',' expression )* ','? )? ']' ;
+ */
 static CenitNode* parse_array_initializer(CenitParser *parser, CenitContext *ctx)
 {
     CenitToken temp_token;
+
+    // Consume the required left bracket
     if (!cenit_parser_expects(parser, CENIT_TOKEN_LBRACKET, &temp_token))
     {
-        cenit_context_error(ctx, CENIT_ERROR_SYNTAX, parser->lexer.line, parser->lexer.col, "Expecting LEFT BRACKET ([)");
+        cenit_context_error(ctx, ctx->srcinfo->location, CENIT_ERROR_SYNTAX, "Expecting LEFT BRACKET ([)");
         return NULL;
     }
 
+    // Allocate memory for the array node and fill the basic information
     CenitArrayInitNode *node = fl_malloc(sizeof(CenitArrayInitNode));
     node->base.type = CENIT_NODE_ARRAY_INIT;
-    node->base.col = temp_token.col;
-    node->base.line = temp_token.line;
+    node->base.location = temp_token.location;
     node->values = fl_array_new(sizeof(CenitNode*), 0);
 
     // Array type information: The type is NONE by default and is
     // updated accordingly in the inference pass based on its content
+    node->typeinfo.type = CENIT_TYPE_NONE;
     node->typeinfo.name = NULL;
     node->typeinfo.elements = 0;
     node->typeinfo.is_array = true;
-    node->typeinfo.type = CENIT_TYPE_NONE;
 
-
-    while (true)
+    // Keep iterating until get an EOF token or breaking out from inside 
+    while (cenit_parser_has_input(parser))
     {
         CenitToken token = cenit_parser_peek(parser);
 
-        if (token.type == CENIT_TOKEN_RBRACKET || token.type == CENIT_TOKEN_EOF)
+        // If we find the right bracket, we finished parsing the elements
+        if (token.type == CENIT_TOKEN_RBRACKET)
             break;
 
+        // Each element in the array initializer is an expression
         CenitNode *value = parse_expression(parser, ctx);
 
+        // Something happened parsing the element, we need to leave
         if (value == NULL)
             goto bad_expression_value;
 
         node->values = fl_array_append(node->values, &value);
 
-        if (cenit_parser_peek(parser).type == CENIT_TOKEN_COMMA)
-            cenit_parser_consume(parser);
+        // Consume the trailing comma if present
+        cenit_parser_consume_if(parser, CENIT_TOKEN_COMMA);
     }
 
+    // If the following token is not the right bracket, we reached the EOF token
     if (!cenit_parser_expects(parser, CENIT_TOKEN_RBRACKET, &temp_token))
     {
-        cenit_context_error(ctx, CENIT_ERROR_SYNTAX, parser->lexer.line, parser->lexer.col, "Expecting RIGHT BRACKET (])");
+        cenit_context_error(ctx, ctx->srcinfo->location, CENIT_ERROR_SYNTAX, "Expecting RIGHT BRACKET (])");
         goto missing_bracket;
     }
 
     // Update the number of elements
     node->typeinfo.elements = fl_array_length(node->values);
 
+    // Return the parsed array initializer
     return (CenitNode*)node;
 
-    bad_expression_value:
-        if (node->values)
-            fl_array_free_each(node->values, cenit_node_pointer_free);
+    // Cleanup code for error conditions
+    bad_expression_value:   cenit_node_array_free(node->values);
+    missing_bracket:        cenit_node_free((CenitNode*)node);
 
-    missing_bracket:
-        cenit_node_free((CenitNode*)node);
     return NULL;
 }
 
@@ -176,6 +202,7 @@ static CenitNode* parse_array_initializer(CenitParser *parser, CenitContext *ctx
  *
  * Parameters:
  *  parser - Parser object
+ *  ctx - <CenitContext> object
  *
  * Returns:
  *  CenitNode* - Parsed expression node
@@ -198,29 +225,32 @@ static CenitNode* parse_expression(CenitParser *parser, CenitContext *ctx)
  *
  * Parameters:
  *  parser - Parser object
+ *  ctx - <CenitContext> object
  *
  * Returns:
  *  CenitNode* - Variable declaration node
  * 
  * Grammar:
- *  variable_declaration = 'var' ID ( ':' ID )? '=' expression ';' ;
+ *  variable_declaration = 'var' ID ( ':' ( '[' integer_literal ']' )? ID )? '=' expression ';' ;
  *
  */
 static CenitNode* parse_variable_declaration(CenitParser *parser, CenitContext *ctx)
 {
     CenitToken temp_token;
 
+    // The 'var' token is required
     if (!cenit_parser_expects(parser, CENIT_TOKEN_VAR, &temp_token))
     {
-        cenit_context_error(ctx, CENIT_ERROR_SYNTAX, parser->lexer.line, parser->lexer.col, "Expecting token 'var'");
+        cenit_context_error(ctx, ctx->srcinfo->location, CENIT_ERROR_SYNTAX, "Expecting token 'var'");
         return NULL;
     }
     
+    // Allocate the memory and the base information
     CenitVariableNode *var_node = fl_malloc(sizeof(CenitVariableNode));
     var_node->base.type = CENIT_NODE_VARIABLE;
-    var_node->base.col = temp_token.col;
-    var_node->base.line = temp_token.line;
+    var_node->base.location = temp_token.location;
 
+    // The variable name is required to be present and be valid
     if (!cenit_parser_expects(parser, CENIT_TOKEN_ID, &temp_token))
     {
         if (cenit_parser_peek(parser).type == CENIT_TOKEN_UNKNOWN)
@@ -228,32 +258,33 @@ static CenitNode* parse_variable_declaration(CenitParser *parser, CenitContext *
             struct FlSlice slice = cenit_parser_peek(parser).value;
             size_t length = slice.length;
             const char *str = (const char*)slice.sequence;
-            cenit_context_error(ctx, CENIT_ERROR_SYNTAX,  parser->lexer.line, parser->lexer.col, "'%.*s' is not a valid identifier", length, str);
+            cenit_context_error(ctx, ctx->srcinfo->location, CENIT_ERROR_SYNTAX, "'%.*s' is not a valid identifier", length, str);
         }
         else
         {
-            cenit_context_error(ctx, CENIT_ERROR_SYNTAX, parser->lexer.line, parser->lexer.col, "Missing variable name");
+            cenit_context_error(ctx, ctx->srcinfo->location, CENIT_ERROR_SYNTAX, "Missing variable name");
         }
         goto missing_name;
     }
     
-    var_node->name = fl_cstring_dup_n((const char*)temp_token.value.sequence, temp_token.value.length);
+    // Get the variable name from the token
+    var_node->name = token_to_string(&temp_token);
 
-    if (cenit_parser_peek(parser).type == CENIT_TOKEN_COLON)
+    // If the COLON token is present, we need to parse the type information
+    if (cenit_parser_consume_if(parser, CENIT_TOKEN_COLON))
     {
-        cenit_parser_consume(parser);
-
         // Check if it is an array
-        if (cenit_parser_peek(parser).type == CENIT_TOKEN_LBRACKET)
+        if (cenit_parser_consume_if(parser, CENIT_TOKEN_LBRACKET))
         {
-            cenit_parser_consume(parser);
+            var_node->typeinfo.is_array = true;
 
+            // Parse the array size that must be an integer literal
             CenitLiteralNode *literal = (CenitLiteralNode*)parse_integer_literal(parser, ctx);
             
             if (literal == NULL)
                 goto missing_type;
 
-            var_node->typeinfo.is_array = true;
+            // If the literal node is valid, we get the size form its value
             switch (literal->typeinfo.type)
             {
                 case CENIT_TYPE_UINT8:
@@ -263,62 +294,60 @@ static CenitNode* parse_variable_declaration(CenitParser *parser, CenitContext *
                     goto missing_type;
             }
 
+            // We can safely free the size here
             cenit_node_free((CenitNode*)literal);
 
+            // The closing bracket is required
             if (!cenit_parser_expects(parser, CENIT_TOKEN_RBRACKET, NULL))
                 goto missing_type;
         }
         else
         {
+            // The type declaration is a single element
             var_node->typeinfo.is_array = false;
             var_node->typeinfo.elements = 1;
         }
         
+        // The type name is required, so let's get it
         if (!cenit_parser_expects(parser, CENIT_TOKEN_ID, &temp_token))
         {
-            cenit_context_error(ctx, CENIT_ERROR_SYNTAX, parser->lexer.line, parser->lexer.col, "Missing type name");
+            cenit_context_error(ctx, ctx->srcinfo->location, CENIT_ERROR_SYNTAX, "Missing type name");
             goto missing_type;
         }
 
-        var_node->typeinfo.type = cenit_type_parse_slice(&temp_token.value);
-        if (var_node->typeinfo.type == CENIT_TYPE_CUSTOM)
-            var_node->typeinfo.name = fl_cstring_dup_n((const char*)temp_token.value.sequence, temp_token.value.length);
+        // Fill the node's <CenitTypeInfo> object
+        token_to_typeinfo(&temp_token, &var_node->typeinfo);
     }
 
-    if (!cenit_parser_expects(parser, CENIT_TOKEN_ASSIGNMENT, &temp_token))
+    // We don't allow variables without initializers, the ASSIGN token is required
+    if (!cenit_parser_expects(parser, CENIT_TOKEN_ASSIGN, &temp_token))
     {
-        cenit_context_error(ctx, CENIT_ERROR_SYNTAX, parser->lexer.line, parser->lexer.col, "Expecting assignment operator ('=')");
+        cenit_context_error(ctx, ctx->srcinfo->location, CENIT_ERROR_SYNTAX, "Expecting assignment operator ('=')");
         goto missing_assignment;
     }
 
+    // The right-hand side value is an expression
     var_node->value = parse_expression(parser, ctx);
 
+    // As noted before, the initialization expression is required
     if (var_node->value == NULL)
         goto missing_assignment;
 
+    // The variable declaration ends with a semicolon
     if (!cenit_parser_expects(parser, CENIT_TOKEN_SEMICOLON, NULL))
     {
-        cenit_context_error(ctx, CENIT_ERROR_SYNTAX, parser->lexer.line, parser->lexer.col, "Missing semicolon (';')");
+        cenit_context_error(ctx, ctx->srcinfo->location, CENIT_ERROR_SYNTAX, "Missing semicolon (';')");
         goto missing_semicolon;
     }
 
     // Success
     return (CenitNode*)var_node;
 
-
-    // Cleanup code
-    missing_semicolon:
-        cenit_node_free(var_node->value);
-
-    missing_assignment:
-        if (var_node->typeinfo.name)
-            fl_cstring_free(var_node->typeinfo.name);
-
-    missing_type:
-        fl_cstring_free(var_node->name);
-
-    missing_name:
-        fl_free(var_node);
+    // Cleanup code for error conditions
+    missing_semicolon:   cenit_node_free(var_node->value);
+    missing_assignment:  fl_cstring_free(var_node->typeinfo.name);
+    missing_type:        fl_cstring_free(var_node->name);
+    missing_name:        fl_free(var_node);
 
     return NULL;
 }
@@ -329,6 +358,7 @@ static CenitNode* parse_variable_declaration(CenitParser *parser, CenitContext *
  *
  * Parameters:
  *  parser - Parser object
+ *  ctx - <CenitContext> object
  *
  * Returns:
  *  CenitNode* - Parsed expression
@@ -340,13 +370,18 @@ static CenitNode* parse_expression_statement(CenitParser *parser, CenitContext *
 {
     CenitNode *node = parse_expression(parser, ctx);
 
-    if (cenit_parser_expects(parser, CENIT_TOKEN_SEMICOLON, NULL))
-        return node;
+    if (!cenit_parser_expects(parser, CENIT_TOKEN_SEMICOLON, NULL))
+    {
+        cenit_context_error(ctx, ctx->srcinfo->location, CENIT_ERROR_SYNTAX, "Missing semicolon (';')");
+        goto missing_semicolon;
+    }
 
-    cenit_context_error(ctx, CENIT_ERROR_SYNTAX, parser->lexer.line, parser->lexer.col, "Missing semicolon (';')");
+    // Success
+    return node;
 
-    // Missing SEMICOLON
-    cenit_node_free(node);
+    // Cleanup code for error conditions
+    missing_semicolon:  cenit_node_free(node);
+
     return NULL;
 }
 
@@ -357,6 +392,7 @@ static CenitNode* parse_expression_statement(CenitParser *parser, CenitContext *
  *
  * Parameters:
  *  parser - Parser object
+ *  ctx - <CenitContext> object
  *
  * Returns:
  *  CenitNode* - The parsed statement
@@ -378,6 +414,7 @@ static CenitNode* parse_statement(CenitParser *parser, CenitContext *ctx)
  *
  * Parameters:
  *  parser - Parser object
+ *  ctx - <CenitContext> object
  *
  * Returns:
  * CenitNode* - Parsed declaration node
@@ -400,21 +437,11 @@ static CenitNode* parse_declaration(CenitParser *parser, CenitContext *ctx)
 }
 
 /*
- * Function: cenit_parse_string
- *  Parse a whole program
- *
- * Parameters:
- *  parser - Parser object
- *  ctx - Context object
- *
- * Returns:
- *  CenitAst* - The parsed program represented by an AST object
- * 
- * Grammar:
- *  program = declaration *
- *
+ * Function: cenit_parse_source
+ *  While the parser has input, we call the <parse_declaration> function
+ *  that is the top-level function that knows how to "traverse" the code
  */
-bool cenit_parse_string(CenitContext *ctx, const char *source)
+bool cenit_parse_source(CenitContext *ctx)
 {
     // We use a vector with an initial capacity, if there are more
     // nodes the vector will resize automatically
@@ -423,9 +450,10 @@ bool cenit_parse_string(CenitContext *ctx, const char *source)
         .capacity = 1000
     });
 
-    CenitParser parser = cenit_parser_new(source);
+    CenitParser parser = cenit_parser_new(ctx->srcinfo);
 
-    // Parse the program
+    // Each iteration processes a declaration which is a subtree of the
+    // final ast object
     while (cenit_parser_has_input(&parser))
     {
         CenitNode *declaration = parse_declaration(&parser, ctx);
@@ -450,11 +478,10 @@ bool cenit_parse_string(CenitContext *ctx, const char *source)
         fl_vector_add(tempvec, declaration);
     }
 
-    // Create the ast object
+    // Create the CenitAst object
     ctx->ast = fl_malloc(sizeof(CenitAst));
     ctx->ast->decls = fl_vector_to_array(tempvec);
     fl_vector_free(tempvec);
 
     return !ctx->errors;
 }
-

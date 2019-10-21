@@ -1,9 +1,40 @@
 #include "ast.h"
 
+
+/*
+ * Function: free_array_entry
+ *  This function takes a void pointer that is expected to be
+ *  a pointer to a <CenitNode> pointer
+ */
+void free_array_entry(void *nodeptr)
+{
+    if (!nodeptr)
+        return;
+
+    CenitNode *node = *(CenitNode**)nodeptr;
+
+    if (!node)
+        return;
+
+    cenit_node_free(node);
+}
+
+/*
+ * Function: array_initializer_node_free
+ *  Releases the memory of a <CenitArrayInitNode> object
+ *
+ * Parameters:
+ *  array - <CenitArrayInitNode> object
+ *
+ * Returns:
+ *  void - This function does not return a value
+ */
 static inline void array_initializer_node_free(CenitArrayInitNode *array)
 {
-    if (array->values)
-        fl_array_free_each(array->values, cenit_node_pointer_free);
+    cenit_node_array_free(array->values);
+
+    if (array->typeinfo.name)
+        fl_cstring_free(array->typeinfo.name);
 }
 
 /*
@@ -44,6 +75,11 @@ static inline void variable_declaration_node_free(CenitVariableNode *var_node)
         cenit_node_free(var_node->value);
 }
 
+/*
+ * Function: cenit_node_free
+ *  Checks the node's *type* property to call the specific
+ *  function that releases its memory.
+ */
 void cenit_node_free(CenitNode *node)
 {
     if (!node)
@@ -65,25 +101,30 @@ void cenit_node_free(CenitNode *node)
     fl_free(node);
 }
 
-void cenit_node_pointer_free(void *nodeptr)
+/*
+ * Function: cenit_node_array_free
+ *  Frees the memory allocated by both the <CenitNode> objects
+ *  and the <FlArray>.
+ */
+void cenit_node_array_free(CenitNode **array)
 {
-    if (!nodeptr)
+    if (!array)
         return;
 
-    CenitNode *node = *(CenitNode**)nodeptr;
-
-    if (!node)
-        return;
-
-    cenit_node_free(node);
+    fl_array_free_each(array, free_array_entry);
 }
 
+/*
+ * Function: cenit_ast_free
+ *  Frees the memory of all the declarations and the AST
+ *  itself
+ */
 void cenit_ast_free(CenitAst *ast)
 {
-    if (!ast || !ast->decls)
+    if (!ast)
         return;
 
-    fl_array_free_each(ast->decls, cenit_node_pointer_free);
+    cenit_node_array_free(ast->decls);
 
     fl_free(ast);
 }

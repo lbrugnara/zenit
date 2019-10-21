@@ -8,7 +8,7 @@
 
 static struct CenitLexerTest tests[] = {
     // Assignment
-    { "=",              false,   (CenitTokenType[]){ T(ASSIGNMENT), T(EOF) } },
+    { "=",              (CenitTokenType[]){ T(ASSIGN), T(EOF) } },
 };
 
 void cenit_test_lexer_assignment(void)

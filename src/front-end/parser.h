@@ -6,8 +6,8 @@
 #include "ast.h"
 
 /*
- * Type: CenitParser
- *  Object that keeps track of the parsing process
+ * Struct: CenitParser
+ *  Object to keep track of the parsing process
  */
 typedef struct CenitParser {
     CenitLexer lexer;
@@ -18,13 +18,13 @@ typedef struct CenitParser {
  *  Returns a parser object ready to parse the provided source.
  *
  * Parameters:
- *  source - Source code to parse
+ *  srcinfo - Object that keeps track of the source information
  *
  * Returns:
  *  CenitParser - Parser object
  *
  */
-CenitParser cenit_parser_new(const char *source);
+CenitParser cenit_parser_new(CenitSourceInfo *srcinfo);
 
 /*
  * Function: cenit_parser_peek
@@ -70,6 +70,20 @@ CenitToken cenit_parser_consume(CenitParser *parser);
  */
 bool cenit_parser_expects(CenitParser *parser, CenitTokenType type, CenitToken *consumed_token);
 
+/*
+ * Function: cenit_parser_consume_if
+ *  If the type of the following token is equals to the provided *type*
+ *  this function consumes the token and returns true. If the types differ, the parser
+ *  remains in the same position and returns false
+ *
+ * Parameters:
+ *  parser - Parser object
+ *  type - Expected type of the following token
+ *
+ * Returns:
+ *  bool - *true* if the following token matches the *type*, otherwise *false*.
+ */
+bool cenit_parser_consume_if(CenitParser *parser, CenitTokenType type);
 
 /*
  * Function: cenit_parser_has_input

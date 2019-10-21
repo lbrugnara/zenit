@@ -6,13 +6,12 @@
 #include "ast.h"
 
 /*
- * Function: cenit_parse_string
+ * Function: cenit_parse_source
  *  Parses the whole source code and populates the <CenitContext>
- *  with a <CenitAst> object.
+ *  with the resulting <CenitAst> object.
  *
  * Parameters:
  *  ctx - Context object
- *  source - Source code
  *
  * Returns:
 *  void - *true* tif he parsing ends without errors. Otheriwise, this function 
@@ -20,6 +19,6 @@
  *          object should contain the error(s) description
  *
  */
-bool cenit_parse_string(CenitContext *ctx, const char *source);
+bool cenit_parse_source(CenitContext *ctx);
 
 #endif /* CENIT_PARSE_H */

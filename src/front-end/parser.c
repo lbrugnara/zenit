@@ -5,10 +5,10 @@
 #include "ast.h"
 
 /* Public API */
-CenitParser cenit_parser_new(const char *source)
+CenitParser cenit_parser_new(CenitSourceInfo *srcinfo)
 {
     return (CenitParser){
-        .lexer = cenit_lexer_new(source)
+        .lexer = cenit_lexer_new(srcinfo)
     };
 }
 
@@ -40,4 +40,15 @@ bool cenit_parser_expects(CenitParser *parser, CenitTokenType type, CenitToken *
     cenit_parser_consume(parser);
     
     return true;
+}
+
+bool cenit_parser_consume_if(CenitParser *parser, CenitTokenType type)
+{
+    if (cenit_parser_peek(parser).type == type)
+    {
+        cenit_parser_consume(parser);
+        return true;
+    }
+
+    return false;
 }

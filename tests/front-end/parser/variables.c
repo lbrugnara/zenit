@@ -13,8 +13,8 @@ void cenit_test_parser_variable(void)
         "var num2 = 2;"
         "var num3 = 3;";
 
-    CenitContext ctx = cenit_context_new("global");
-    bool is_valid = cenit_parse_string(&ctx, source);
+    CenitContext ctx = cenit_context_new("global", CENIT_SOURCE_STRING, source);
+    bool is_valid = cenit_parse_source(&ctx);
 
     for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
@@ -72,8 +72,8 @@ void cenit_test_parser_array_variable(void)
         { 3, 4 } 
     };
 
-    CenitContext ctx = cenit_context_new("global");
-    bool is_valid = cenit_parse_string(&ctx, source);
+    CenitContext ctx = cenit_context_new("global", CENIT_SOURCE_STRING, source);
+    bool is_valid = cenit_parse_source(&ctx);
 
     for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
@@ -106,7 +106,7 @@ void cenit_test_parser_array_variable(void)
                     "Array %s at position %zu has type %s and value %d", 
                     name, 
                     j, 
-                    cenit_type_string(literal_node->typeinfo.type), 
+                    cenit_type_to_string(&literal_node->typeinfo), 
                     values[i][j]
                 );
             }
@@ -125,8 +125,8 @@ void cenit_test_parser_variable_type_info(void)
         "var num3 : uint8 = 3;"
     ;
 
-    CenitContext ctx = cenit_context_new("global");
-    bool is_valid = cenit_parse_string(&ctx, source);
+    CenitContext ctx = cenit_context_new("global", CENIT_SOURCE_STRING, source);
+    bool is_valid = cenit_parse_source(&ctx);
 
     for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
@@ -138,11 +138,11 @@ void cenit_test_parser_variable_type_info(void)
         char name[5] = { 'n', 'u', 'm', (char)i + 48, '\0' };
         
         fl_vexpect(flm_cstring_equals(name, var_decl->name), "Variable name must be equals to \"%s\"", name);
-        fl_expect("Variable type is uint8 because the type is present in the declaration", var_decl->typeinfo.type == CENIT_TYPE_UINT8);
+        fl_vexpect(var_decl->typeinfo.type == CENIT_TYPE_UINT8, "Variable type is \"%s\" because the type is present in the declaration", cenit_type_to_string(&var_decl->typeinfo));
         fl_expect("Right-hand side must be a literal node", var_decl->value && var_decl->value->type == CENIT_NODE_LITERAL);
 
         CenitLiteralNode *literal = (CenitLiteralNode*)var_decl->value;
-        fl_expect("Right-hand side expression must have uint8", literal->typeinfo.type == CENIT_TYPE_UINT8);
+        fl_vexpect(literal->typeinfo.type == CENIT_TYPE_UINT8, "Right-hand side expression must be of type \"%s\"", cenit_type_to_string(&literal->typeinfo));
         fl_vexpect((size_t)literal->value.uint8 == i, "Right-hand side expression has value %zu", i);
     }
 
@@ -185,8 +185,8 @@ void cenit_test_parser_array_variable_type_info(void)
         { 6, 7, 8, 9 }
     };
 
-    CenitContext ctx = cenit_context_new("global");
-    bool is_valid = cenit_parse_string(&ctx, source);
+    CenitContext ctx = cenit_context_new("global", CENIT_SOURCE_STRING, source);
+    bool is_valid = cenit_parse_source(&ctx);
 
     for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
@@ -203,7 +203,9 @@ void cenit_test_parser_array_variable_type_info(void)
             var_decl->typeinfo.is_array 
             && var_decl->typeinfo.elements == elements[i]
             && var_decl->typeinfo.type == CENIT_TYPE_UINT8,
-            "Variable type is array of %zu uint8 because the type is present in the declaration", var_decl->typeinfo.elements);
+            "Variable type is array of %zu uint8 (\"%s\") because the type is present in the declaration", 
+            var_decl->typeinfo.elements,
+            cenit_type_to_string(&var_decl->typeinfo));
 
         fl_expect("Right-hand side must be an array initializer", var_decl->value && var_decl->value->type == CENIT_NODE_ARRAY_INIT);
 
@@ -222,10 +224,10 @@ void cenit_test_parser_array_variable_type_info(void)
                 CenitLiteralNode *literal_node = (CenitLiteralNode*)value_node;
                 fl_vexpect(
                     literal_node->typeinfo.type == types[i][j], 
-                    "Array %s at position %zu has type %s and value %d", 
+                    "Array %s at position %zu has type \"%s\" and value %d", 
                     name, 
                     j, 
-                    cenit_type_string(literal_node->typeinfo.type), 
+                    cenit_type_to_string(&literal_node->typeinfo), 
                     values[i][j]
                 );
             }
@@ -271,9 +273,9 @@ void cenit_test_parser_variable_errors(void)
         /* Line */ [9] = CENIT_ERROR_SYNTAX,
     };
 
-    CenitContext ctx = cenit_context_new("global");
+    CenitContext ctx = cenit_context_new("global", CENIT_SOURCE_STRING, source);
 
-    bool is_valid = cenit_parse_string(&ctx, source);
+    bool is_valid = cenit_parse_source(&ctx);
 
     size_t expected_errors = (sizeof(errors) / sizeof(errors[0])) - 1;
     fl_vexpect(ctx.errors != NULL && fl_array_length(ctx.errors) == expected_errors, "The context object must contain %zu errors", expected_errors);
@@ -282,8 +284,8 @@ void cenit_test_parser_variable_errors(void)
 
     for (size_t i=1; i <= expected_errors; i++, error++)
     {
-        fl_vexpect(error->line == i && error->type == errors[i],
-            "Expected %s error: %s at line %u:%u", errors[i] == error->type ? "syntax" : "large integer", error->message, error->line, error->col);
+        fl_vexpect(error->location.line == i && error->type == errors[i],
+            "Expected %s error: %s at line %u:%u", errors[i] == error->type ? "syntax" : "large integer", error->message, error->location.line, error->location.col);
     }
 
     cenit_context_free(&ctx);

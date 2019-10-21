@@ -13,6 +13,7 @@ compile cenit-objects {
         "src/front-end/parse.c"
         "src/front-end/parser.c"
         "src/front-end/resolve.c"
+        "src/front-end/source.c"
         "src/front-end/symbol.c"
         "src/front-end/symtable.c"
         "src/front-end/token.c",
@@ -41,6 +42,7 @@ compile cenit-tests-objects {
     sources: [
         "tests/Main.c",
         "tests/Test.c",
+        "tests/front-end/check/errors.c"
         "tests/front-end/infer/variables.c"
         "tests/front-end/lexer/assignment.c",
         "tests/front-end/lexer/combinations.c",
