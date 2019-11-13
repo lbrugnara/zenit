@@ -70,7 +70,7 @@ static char *sync_chars[] = { "//", "/*" };
  *  bool - *true* if there is input pending to process
  *
  */
-static inline bool has_input(CenitLexer *lexer)
+static inline bool has_input(struct ZenitLexer *lexer)
 {
     return lexer->index < lexer->srcinfo->source.length;
 }
@@ -87,7 +87,7 @@ static inline bool has_input(CenitLexer *lexer)
  *  char - Current character pointed by the lexer's internal pointer
  *
  */
-static inline char peek(CenitLexer *lexer)
+static inline char peek(struct ZenitLexer *lexer)
 {
     return lexer->srcinfo->source.content[lexer->index];
 }
@@ -107,7 +107,7 @@ static inline char peek(CenitLexer *lexer)
  *          or NULL if *index* falls outside of the valid range.
  *
  */
-static inline char peek_at(CenitLexer *lexer, size_t index)
+static inline char peek_at(struct ZenitLexer *lexer, size_t index)
 {
     if (lexer->index + index >= lexer->srcinfo->source.length)
         return '\0';
@@ -130,7 +130,7 @@ static inline char peek_at(CenitLexer *lexer, size_t index)
  *  struct FlSlice - Slice of characters
  *
  */
-static inline struct FlSlice peek_many(CenitLexer *lexer, size_t n)
+static inline struct FlSlice peek_many(struct ZenitLexer *lexer, size_t n)
 {
     if (lexer->index + n >= lexer->srcinfo->source.length)
         return (struct FlSlice){ .sequence = NULL };
@@ -154,7 +154,7 @@ static inline struct FlSlice peek_many(CenitLexer *lexer, size_t n)
  *  struct FlSlice - Slice of characters
  *
  */
-static inline struct FlSlice peek_many_at(CenitLexer *lexer, size_t offset, size_t n)
+static inline struct FlSlice peek_many_at(struct ZenitLexer *lexer, size_t offset, size_t n)
 {
     if (lexer->index + offset + n >= lexer->srcinfo->source.length)
         return (struct FlSlice){ .sequence = NULL };
@@ -173,7 +173,7 @@ static inline struct FlSlice peek_many_at(CenitLexer *lexer, size_t offset, size
  *  char - Character that has been consumed
  *
  */
-static inline char consume(CenitLexer *lexer)
+static inline char consume(struct ZenitLexer *lexer)
 {
     lexer->srcinfo->location.col++;
     return lexer->srcinfo->source.content[lexer->index++];
@@ -193,7 +193,7 @@ static inline char consume(CenitLexer *lexer)
  *  bool - *true* if the character (or group of chars) is a synchronization character
  *
  */
-static inline bool is_sync_character(CenitLexer *lexer, size_t offset)
+static inline bool is_sync_character(struct ZenitLexer *lexer, size_t offset)
 {
     char c = peek_at(lexer, offset);
 
@@ -226,7 +226,7 @@ static inline bool is_sync_character(CenitLexer *lexer, size_t offset)
  *  void - This function does not return a value
  *
  */
-static inline void remove_ws_and_comments(CenitLexer *lexer)
+static inline void remove_ws_and_comments(struct ZenitLexer *lexer)
 {
     while(has_input(lexer))
     {
@@ -251,7 +251,7 @@ static inline void remove_ws_and_comments(CenitLexer *lexer)
         // Consume comments
         struct FlSlice cc = peek_many(lexer, 2);
         
-        if (c == '#' || (cc.sequence && is_string(&cc, "//")))
+        if (cc.sequence && is_string(&cc, "//"))
         {
             // Consume comment line
             while (has_input(lexer) && peek(lexer) != '\n')
@@ -301,15 +301,15 @@ static inline void remove_ws_and_comments(CenitLexer *lexer)
  *  col - Token's column number.
  *
  * Returns:
- *  CenitToken - Token object
+ *  struct ZenitToken - Token object
  *
  */
-static inline CenitToken create_token(CenitLexer *lexer, CenitTokenType type, size_t chars)
+static inline struct ZenitToken create_token(struct ZenitLexer *lexer, enum ZenitTokenType type, size_t chars)
 {
     // Current pointer position
     FlByte *starts = (FlByte*)lexer->srcinfo->source.content + lexer->index;    
 
-    CenitToken token = { 
+    struct ZenitToken token = { 
         .type = type,
         .value = fl_slice_new(starts, sizeof(char), 0, chars),
         .location = lexer->srcinfo->location
@@ -324,27 +324,27 @@ static inline CenitToken create_token(CenitLexer *lexer, CenitTokenType type, si
 
 /* Public API */
 
-CenitLexer cenit_lexer_new(CenitSourceInfo *srcinfo)
+struct ZenitLexer zenit_lexer_new(struct ZenitSourceInfo *srcinfo)
 {
-    return (CenitLexer) {
+    return (struct ZenitLexer) {
         .index = 0,
         .srcinfo = srcinfo
     };
 }
 
-CenitToken* cenit_lexer_tokenize(CenitLexer *lexer)
+struct ZenitToken* zenit_lexer_tokenize(struct ZenitLexer *lexer)
 {
     FlVector tempvec = fl_vector_new_args((struct FlVectorArgs) {
         .writer = fl_container_writer,
-        .element_size = sizeof(CenitToken),
+        .element_size = sizeof(struct ZenitToken),
         .capacity = 1000
     });
 
     while (has_input(lexer))
     {
-        CenitToken token = cenit_lexer_consume(lexer);
+        struct ZenitToken token = zenit_lexer_consume(lexer);
 
-        if (token.type == CENIT_TOKEN_EOF)
+        if (token.type == ZENIT_TOKEN_EOF)
             break;
 
         fl_vector_add(tempvec, &token);
@@ -352,19 +352,19 @@ CenitToken* cenit_lexer_tokenize(CenitLexer *lexer)
         remove_ws_and_comments(lexer);
     }
 
-    CenitToken* tokens = fl_vector_to_array(tempvec);
+    struct ZenitToken* tokens = fl_vector_to_array(tempvec);
 
     fl_vector_free(tempvec);
 
     return tokens;
 }
 
-CenitToken cenit_lexer_consume(CenitLexer *lexer)
+struct ZenitToken zenit_lexer_consume(struct ZenitLexer *lexer)
 {
     remove_ws_and_comments(lexer);
 
     if (!has_input(lexer))
-        return (CenitToken){ .type = CENIT_TOKEN_EOF };
+        return (struct ZenitToken){ .type = ZENIT_TOKEN_EOF };
 
     while (has_input(lexer))
     {
@@ -372,35 +372,51 @@ CenitToken cenit_lexer_consume(CenitLexer *lexer)
 
         if (c == ';')
         {
-            return create_token(lexer, CENIT_TOKEN_SEMICOLON, 1);
+            return create_token(lexer, ZENIT_TOKEN_SEMICOLON, 1);
         }
         else if (c == ',')
         {
-            return create_token(lexer, CENIT_TOKEN_COMMA, 1);
+            return create_token(lexer, ZENIT_TOKEN_COMMA, 1);
         }
         else if (c == ':')
         {
-            return create_token(lexer, CENIT_TOKEN_COLON, 1);
+            return create_token(lexer, ZENIT_TOKEN_COLON, 1);
         }
         else if (c == '=')
         {
-            return create_token(lexer, CENIT_TOKEN_ASSIGN, 1);
+            return create_token(lexer, ZENIT_TOKEN_ASSIGN, 1);
         }
         else if (c == '{')
         {
-            return create_token(lexer, CENIT_TOKEN_LBRACE, 1);
+            return create_token(lexer, ZENIT_TOKEN_LBRACE, 1);
         }
         else if (c == '}')
         {
-            return create_token(lexer, CENIT_TOKEN_RBRACE, 1);
+            return create_token(lexer, ZENIT_TOKEN_RBRACE, 1);
         }
         else if (c == '[')
         {
-            return create_token(lexer, CENIT_TOKEN_LBRACKET, 1);
+            return create_token(lexer, ZENIT_TOKEN_LBRACKET, 1);
         }
         else if (c == ']')
         {
-            return create_token(lexer, CENIT_TOKEN_RBRACKET, 1);
+            return create_token(lexer, ZENIT_TOKEN_RBRACKET, 1);
+        }
+        else if (c == '(')
+        {
+            return create_token(lexer, ZENIT_TOKEN_LPAREN, 1);
+        }
+        else if (c == ')')
+        {
+            return create_token(lexer, ZENIT_TOKEN_RPAREN, 1);
+        }
+        else if (c == '&')
+        {
+            return create_token(lexer, ZENIT_TOKEN_AMPERSAND, 1);
+        }
+        else if (c == '#')
+        {
+            return create_token(lexer, ZENIT_TOKEN_HASH, 1);
         }
         else if (is_number(c))
         {
@@ -410,7 +426,7 @@ CenitToken cenit_lexer_consume(CenitLexer *lexer)
             while (is_number(peek_at(lexer, digits)))
                 digits++;
 
-            return create_token(lexer, CENIT_TOKEN_INTEGER, digits);
+            return create_token(lexer, ZENIT_TOKEN_INTEGER, digits);
         }
         else if (is_alpha(c))
         {
@@ -418,10 +434,10 @@ CenitToken cenit_lexer_consume(CenitLexer *lexer)
             while (is_number(peek_at(lexer, chars)) || is_alpha(peek_at(lexer, chars)) || peek_at(lexer, chars) == '_' || peek_at(lexer, chars) == '-')
                 chars++;
 
-            CenitToken token = create_token(lexer, CENIT_TOKEN_ID, chars);
+            struct ZenitToken token = create_token(lexer, ZENIT_TOKEN_ID, chars);
 
             if (is_reserved_keyword(&token.value, "var"))
-                token.type = CENIT_TOKEN_VAR;
+                token.type = ZENIT_TOKEN_VAR;
 
             return token;
         }
@@ -438,10 +454,10 @@ CenitToken cenit_lexer_consume(CenitLexer *lexer)
     while (!is_sync_character(lexer, sync_chars))
         sync_chars++;
 
-    return create_token(lexer, CENIT_TOKEN_UNKNOWN, sync_chars);
+    return create_token(lexer, ZENIT_TOKEN_UNKNOWN, sync_chars);
 }
 
-CenitToken cenit_lexer_peek(CenitLexer *lexer)
+struct ZenitToken zenit_lexer_peek(struct ZenitLexer *lexer)
 {
     // Save the lexer state
     unsigned int index = lexer->index;
@@ -451,7 +467,7 @@ CenitToken cenit_lexer_peek(CenitLexer *lexer)
     // Get the next token
     // TODO: We should buffer consumed tokens, by now
     // for simplicity it is ok to use this
-    CenitToken token = cenit_lexer_consume(lexer);
+    struct ZenitToken token = zenit_lexer_consume(lexer);
     
     // Restore the lexer state
     lexer->index = index;

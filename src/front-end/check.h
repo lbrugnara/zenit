@@ -1,11 +1,11 @@
-#ifndef CENIT_CHECK_H
-#define CENIT_CHECK_H
+#ifndef ZENIT_CHECK_H
+#define ZENIT_CHECK_H
 
 #include "ast.h"
 #include "context.h"
 
 /*
- * Function: cenit_check_types
+ * Function: zenit_check_types
  *  This pass ensures the statements and expressions are valid based
  *  on the types involved in them.
  *
@@ -14,7 +14,7 @@
  *
  * Returns:
  *  void - *true* on a pass without errors. Otheriwise, this function returns
- *          *false* and the *errors* property in the <CenitContext> object
+ *          *false* and the *errors* property in the <struct ZenitContext> object
  *          should contain the error(s) description
  * 
  * Notes:
@@ -22,6 +22,6 @@
  *  At the end of this pass, we can say all the operations in the program
  *  are valid in regard to types
  */
-bool cenit_check_types(CenitContext *ctx);
+bool zenit_check_types(struct ZenitContext *ctx);
 
-#endif /* CENIT_CHECK_H */
+#endif /* ZENIT_CHECK_H */

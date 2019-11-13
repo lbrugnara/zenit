@@ -2,51 +2,64 @@
 #include <stdlib.h>
 #include "type.h"
 
+#define TYPE_KEY_FORMAT "[n:%s][t:%d][a:%d][e:%d][r:%d]", typeinfo->name, typeinfo->type, typeinfo->is_array, typeinfo->elements, typeinfo->is_ref
+
 /*
  * Struct: TypeMapping
  *  Internal structure to keep a lookup list between type's string
- *  representation and its corresponding <CenitType> value
+ *  representation and its corresponding <enum ZenitType> value
  */
 static struct TypeMapping {
     const char *string;
-    CenitType type;
+    enum ZenitType type;
 } type_mappings[] = {
-    { "<none>", CENIT_TYPE_NONE },
-    { "uint8", CENIT_TYPE_UINT8 },
+    { "<none>",     ZENIT_TYPE_NONE },
+    { "uint8",      ZENIT_TYPE_UINT8 },
+    { "uint16",     ZENIT_TYPE_UINT16 },
 };
 
 /*
  * Variable: type_string_mapping_pool
- *  Because many <CenitTypeInfo> objects that are equals
+ *  Because many <struct ZenitTypeInfo> objects that are equals
  *  map to the same string representation, we use a hashtable
  *  to reuse those strings between them.
- *  The hashtable uses <CenitTypeInfo> as key elements and 
+ *  The hashtable uses <struct ZenitTypeInfo> as key elements and 
  *  saves string for each value
  */
 static FlHashtable type_string_mapping_pool = NULL;
 
 /*
  * Function: hash_type
- *  Creates a hash from a <CenitTypeInfo> object
+ *  Creates a hash from a <struct ZenitTypeInfo> object
  */
 static unsigned long hash_type(const FlByte *key)
 {
+    struct ZenitTypeInfo *typeinfo = (struct ZenitTypeInfo*)key;
+
+    size_t length = snprintf(NULL, 0, TYPE_KEY_FORMAT);
+    char *buffer = fl_cstring_new(length);
+    snprintf(buffer, length + 1, TYPE_KEY_FORMAT);
+    buffer[length] = '\0';
+
     unsigned long hash = 5381;
     FlByte c;
 
-    for (size_t i=0; i < sizeof(CenitTypeInfo); i++)
-        hash = ((hash << 5) + hash) + key[i];
+    for (size_t i=0; i < length; i++)
+        hash = ((hash << 5) + hash) + buffer[i];
+
+    fl_cstring_free(buffer);
+
     return hash;
 }
 
 /*
  * Function: alloc_type_key
- *  Allocates a <CenitTypeInfo> object into the *dest* pointer
+ *  Allocates a <struct ZenitTypeInfo> object into the *dest* pointer
  */
 static void alloc_type_key(FlByte **dest, const FlByte *src)
 {
-    *dest = fl_malloc(sizeof(CenitTypeInfo));
-    memcpy(*dest, src, sizeof(CenitTypeInfo));
+    *dest = fl_malloc(sizeof(struct ZenitTypeInfo));
+    memcpy(*dest, src, sizeof(struct ZenitTypeInfo));
 }
 
 /*
@@ -61,7 +74,7 @@ static void free_pool(void)
 
 /*
  * Function: init_pool
- *  Initializes the pool of mappings between <CenitTypeInfo> objects
+ *  Initializes the pool of mappings between <struct ZenitTypeInfo> objects
  *  and strings
  */
 static inline void init_pool(void)
@@ -81,7 +94,7 @@ static inline void init_pool(void)
     atexit(free_pool);
 }
 
-CenitType cenit_type_to_string_parse(const char *typestr)
+enum ZenitType zenit_type_string_parse(const char *typestr)
 {
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
     {
@@ -91,10 +104,10 @@ CenitType cenit_type_to_string_parse(const char *typestr)
     }
 
     // We simply assume the type is a custom type
-    return CENIT_TYPE_CUSTOM;
+    return ZENIT_TYPE_CUSTOM;
 }
 
-CenitType cenit_type_slice_parse(struct FlSlice *slice)
+enum ZenitType zenit_type_slice_parse(struct FlSlice *slice)
 {
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
     {
@@ -104,29 +117,29 @@ CenitType cenit_type_slice_parse(struct FlSlice *slice)
     }
 
     // We simply assume the type is a custom type
-    return CENIT_TYPE_CUSTOM;
+    return ZENIT_TYPE_CUSTOM;
 }
 
 /*
- * Function: cenit_type_to_string
+ * Function: zenit_type_to_string
  *  This function has the added complexity of taking into account if 
  *  the type is an array and its size, therefore we need to use a heap
  *  allocated string, but we benefit from the <type_string_mapping_pool> variable
  *  to reuse strings.
  */
-const char* cenit_type_to_string(const CenitTypeInfo *typeinfo)
+const char* zenit_type_to_string(const struct ZenitTypeInfo *typeinfo)
 {
     // We need to initialize the pool first
     if (!type_string_mapping_pool)
         init_pool();
 
-    // If we already processed the string representation of the <CenitTypeInfo> object
+    // If we already processed the string representation of the <struct ZenitTypeInfo> object
     // we return it
     if (fl_hashtable_has_key(type_string_mapping_pool, typeinfo))
         return fl_hashtable_get(type_string_mapping_pool, typeinfo);
 
     // If the base type is a custom type, we use the custom type's name
-    const char *base_type = CENIT_TYPE_CUSTOM == typeinfo->type ? typeinfo->name : NULL;
+    const char *base_type = ZENIT_TYPE_CUSTOM == typeinfo->type ? typeinfo->name : NULL;
 
     // If it is a native type, we need to lookup its native string representation
     if (base_type == NULL)
@@ -142,7 +155,7 @@ const char* cenit_type_to_string(const CenitTypeInfo *typeinfo)
         }
     }
 
-    // We allocate memory for the string representation of this <CenitTypeInfo> object
+    // We allocate memory for the string representation of this <struct ZenitTypeInfo> object
     char *string_value = fl_cstring_new(0);
     
     // Add the arrray information if needed
@@ -155,6 +168,9 @@ const char* cenit_type_to_string(const CenitTypeInfo *typeinfo)
         fl_cstring_append(&string_value, "]");
     }
 
+    if (typeinfo->is_ref)
+        fl_cstring_append(&string_value, "&");
+
     // Add the base type
     fl_cstring_append(&string_value, base_type);
 
@@ -165,13 +181,13 @@ const char* cenit_type_to_string(const CenitTypeInfo *typeinfo)
 }
 
 /*
- * Function: cenit_type_to_base_string
- *  The base string representation is easier than the <cenit_type_to_string>
+ * Function: zenit_type_to_base_string
+ *  The base string representation is easier than the <zenit_type_to_string>
  *  function because we don't care about array information
  */
-const char* cenit_type_to_base_string(const CenitTypeInfo *typeinfo)
+const char* zenit_type_to_base_string(const struct ZenitTypeInfo *typeinfo)
 {
-    if (CENIT_TYPE_CUSTOM == typeinfo->type)
+    if (ZENIT_TYPE_CUSTOM == typeinfo->type)
         return typeinfo->name;
 
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
@@ -185,12 +201,15 @@ const char* cenit_type_to_base_string(const CenitTypeInfo *typeinfo)
 }
 
 /*
- * Function: cenit_type_copy
+ * Function: zenit_type_copy
  *  We safely assign memory if needed because the owner of the
- *  <CenitTypeInfo> is in charge of releasing it
+ *  <struct ZenitTypeInfo> is in charge of releasing it
  */
-void cenit_type_copy(CenitTypeInfo *dest_type, CenitTypeInfo *src_type)
+void zenit_type_copy(struct ZenitTypeInfo *dest_type, struct ZenitTypeInfo *src_type)
 {
+    if (!src_type)
+        return;
+
     if (src_type->name)
     {
         if (dest_type->name)
@@ -198,16 +217,18 @@ void cenit_type_copy(CenitTypeInfo *dest_type, CenitTypeInfo *src_type)
         else
             dest_type->name = fl_cstring_dup(src_type->name);
     }
+
     dest_type->elements = src_type->elements;
     dest_type->is_array = src_type->is_array;
+    dest_type->is_ref = src_type->is_ref;
     dest_type->type = src_type->type;
 }
 
 /*
- * Function: cenit_type_equals
+ * Function: zenit_type_equals
  *  This basic function compares types, names, and array information
  */
-bool cenit_type_equals(CenitTypeInfo *type_a, CenitTypeInfo *type_b)
+bool zenit_type_equals(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b)
 {
     if (type_a->type != type_b->type)
         return false;
@@ -218,5 +239,46 @@ bool cenit_type_equals(CenitTypeInfo *type_a, CenitTypeInfo *type_b)
     if (type_a->is_array != type_b->is_array)
         return false;
 
+    if (type_a->is_ref != type_b->is_ref)
+        return false;
+
     return type_a->elements == type_b->elements;
+}
+
+bool zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b)
+{
+    if (type_a->type == type_b->type && type_a->type == ZENIT_TYPE_NONE)
+        return false;
+
+    if (type_a->type == ZENIT_TYPE_NONE)
+    {
+        zenit_type_copy(type_a, type_b);
+        return true;
+    }
+
+    if (type_b->type == ZENIT_TYPE_NONE)
+    {
+        zenit_type_copy(type_b, type_a);
+        return true;
+    }
+
+    bool a_uint = type_a->type >= ZENIT_TYPE_UINT8 && type_a->type <= ZENIT_TYPE_UINT16;
+    bool b_uint = type_b->type >= ZENIT_TYPE_UINT8 && type_b->type <= ZENIT_TYPE_UINT16;
+    
+    if (a_uint && b_uint)
+    {
+        if (type_a->type > type_b->type)
+            zenit_type_copy(type_b, type_a);
+        else
+            zenit_type_copy(type_a, type_b);
+        return true;
+    }
+
+    return false;
+}
+
+void zenit_type_free(struct ZenitTypeInfo *typeinfo)
+{
+    if (typeinfo->name)
+        fl_cstring_free(typeinfo->name);
 }

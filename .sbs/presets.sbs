@@ -1,25 +1,25 @@
 # All this present in this build do not define the environment to be used, so the build
 # command must include the --env (or -e) flag to specify one
 
-# This preset builds the Cenit compiler in release mode
+# This preset builds the Zenit compiler in release mode
 preset release {
     toolchain: clang,
     config: clang-release,
-    target: cenit
+    target: zenit
 }
 
-# This preset builds the Cenit compiler in debug mode
+# This preset builds the Zenit compiler in debug mode
 preset debug {
     toolchain: clang,
     config: clang-debug,
-    target: cenit
+    target: zenit
 }
 
-# This preset builds the test project for the Cenit compiler
+# This preset builds the test project for the Zenit compiler
 preset tests {
     toolchain: clang,
     config: clang-debug,
-    target: cenit-tests
+    target: zenit-tests
 }
 
 # This is a dummy preset to hack my own build system. We get a clean action for free by running:

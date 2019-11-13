@@ -1,5 +1,5 @@
-# The cenit-objects target compiles all the Cenit compiler's source files
-compile cenit-objects {
+# The zenit-objects target compiles all the Zenit compiler's source files
+compile zenit-objects {
     includes: [
         "../fllib/include"
     ],
@@ -12,18 +12,30 @@ compile cenit-objects {
         "src/front-end/lexer.c",
         "src/front-end/parse.c"
         "src/front-end/parser.c"
+        "src/front-end/program.c"
         "src/front-end/resolve.c"
+        "src/front-end/scope.c"
         "src/front-end/source.c"
         "src/front-end/symbol.c"
         "src/front-end/symtable.c"
         "src/front-end/token.c",
         "src/front-end/type.c",
+        "src/front-end/zirgen.c",
+
+        "src/middle-end/block.c",
+        "src/middle-end/instruction.c",
+        "src/middle-end/operand.c",
+        "src/middle-end/program.c",
+        "src/middle-end/symbol.c",
+        "src/middle-end/symtable.c",
+        "src/middle-end/type.c",
+        "src/middle-end/value.c",
     ]
 }
 
 # This target compiles just the file containing the main function, that way we can
-# compile the tests project with the cenit-objects dependency without getting main redefined
-compile cenit-main {
+# compile the tests project with the zenit-objects dependency without getting main redefined
+compile zenit-main {
     includes: [
         "../fllib/include"
     ],
@@ -34,7 +46,7 @@ compile cenit-main {
 }
 
 # This target compiles the tests objects
-compile cenit-tests-objects {
+compile zenit-tests-objects {
     includes: [ 
         "../fllib/include"
     ],
@@ -43,15 +55,20 @@ compile cenit-tests-objects {
         "tests/Main.c",
         "tests/Test.c",
         "tests/front-end/check/errors.c"
+        "tests/front-end/generate/variables.c"
+        "tests/front-end/infer/errors.c"
         "tests/front-end/infer/variables.c"
-        "tests/front-end/lexer/assignment.c",
+        "tests/front-end/lexer/operators.c",
         "tests/front-end/lexer/combinations.c",
         "tests/front-end/lexer/errors.c",
         "tests/front-end/lexer/identifiers.c",
         "tests/front-end/lexer/keywords.c",
         "tests/front-end/lexer/common.c",
         "tests/front-end/lexer/punctuation.c",
+        "tests/front-end/lexer/specials.c",
         "tests/front-end/lexer/types.c",
+        "tests/front-end/parser/attributes.c"
+        "tests/front-end/parser/errors.c"
         "tests/front-end/parser/literals.c"
         "tests/front-end/parser/variables.c"
         "tests/front-end/resolve/errors.c"
@@ -60,24 +77,24 @@ compile cenit-tests-objects {
     ]
 }
 
-# This target creates the cenit compiler executable
-executable cenit {
-    output_name: "cenit",
+# This target creates the zenit compiler executable
+executable zenit {
+    output_name: "zenit",
     output_dir: "build/",
     objects: [
-        cenit-objects,
-        cenit-main,
+        zenit-objects,
+        zenit-main,
         "lib/libfl.lib"
     ]
 }
 
 # This target creates an executable for the test suite
-executable cenit-tests {
+executable zenit-tests {
     output_name: "tests",
     output_dir: "build/",
     objects: [
-        cenit-objects,
-        cenit-tests-objects,
+        zenit-objects,
+        zenit-tests-objects,
         "lib/libfl.lib"
     ]
 }

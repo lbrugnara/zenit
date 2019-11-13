@@ -1,20 +1,20 @@
 #include "symbol.h"
 
-CenitSymbol* cenit_symbol_new(const char *name, CenitTypeInfo *typeinfo)
+struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitTypeInfo *typeinfo)
 {
     flm_assert(name != NULL, "Symbol name cannot be NULL");
     flm_assert(typeinfo != NULL, "Type information cannot be NULL");
 
 
-    CenitSymbol *symbol = fl_malloc(sizeof(CenitSymbol));
+    struct ZenitSymbol *symbol = fl_malloc(sizeof(struct ZenitSymbol));
 
     symbol->name = fl_cstring_dup(name);
-    cenit_type_copy(&symbol->typeinfo, typeinfo);
+    zenit_type_copy(&symbol->typeinfo, typeinfo);
 
     return symbol;
 }
 
-void cenit_symbol_free(CenitSymbol *symbol)
+void zenit_symbol_free(struct ZenitSymbol *symbol)
 {
     if (!symbol)
         return;

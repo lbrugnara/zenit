@@ -4,14 +4,14 @@
 #include "../../../src/front-end/lexer.h"
 #include "tests.h"
 
-#define T(token) CENIT_TOKEN_##token
+#define T(token) ZENIT_TOKEN_##token
 
-static struct CenitLexerTest tests[] = {
+static struct ZenitLexerTest tests[] = {
     // Keywords
-    { "var",            (CenitTokenType[]){ T(VAR), T(EOF) } },
+    { "var",            (enum ZenitTokenType[]){ T(VAR), T(EOF) } },
 };
 
-void cenit_test_lexer_keywords(void)
+void zenit_test_lexer_keywords(void)
 {
-    cenit_test_lexer_run(tests, sizeof(tests) / sizeof(tests[0]));
+    zenit_test_lexer_run(tests, sizeof(tests) / sizeof(tests[0]));
 }

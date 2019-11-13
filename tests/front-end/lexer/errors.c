@@ -4,15 +4,15 @@
 #include "../../../src/front-end/lexer.h"
 #include "tests.h"
 
-#define T(token) CENIT_TOKEN_##token
+#define T(token) ZENIT_TOKEN_##token
 
-static struct CenitLexerTest tests[] = {
+static struct ZenitLexerTest tests[] = {
     // Errors
-    { "123$invalid_id",             (CenitTokenType[]){ T(INTEGER), T(UNKNOWN), T(EOF) } },
-    { "var err = 123$invalid_id;",  (CenitTokenType[]){ T(VAR), T(ID), T(ASSIGN), T(INTEGER), T(UNKNOWN), T(SEMICOLON), T(EOF) } },
+    { "123$invalid_id",             (enum ZenitTokenType[]){ T(INTEGER), T(UNKNOWN), T(EOF) } },
+    { "var err = 123$invalid_id;",  (enum ZenitTokenType[]){ T(VAR), T(ID), T(ASSIGN), T(INTEGER), T(UNKNOWN), T(SEMICOLON), T(EOF) } },
 };
 
-void cenit_test_lexer_errors(void)
+void zenit_test_lexer_errors(void)
 {
-    cenit_test_lexer_run(tests, sizeof(tests) / sizeof(tests[0]));
+    zenit_test_lexer_run(tests, sizeof(tests) / sizeof(tests[0]));
 }

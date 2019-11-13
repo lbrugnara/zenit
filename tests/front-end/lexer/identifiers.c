@@ -4,21 +4,21 @@
 #include "../../../src/front-end/lexer.h"
 #include "tests.h"
 
-#define T(token) CENIT_TOKEN_##token
+#define T(token) ZENIT_TOKEN_##token
 
-static struct CenitLexerTest tests[] = {
+static struct ZenitLexerTest tests[] = {
     // Identifiers
-    { "id",             (CenitTokenType[]){ T(ID), T(EOF) } },
-    { "name",           (CenitTokenType[]){ T(ID), T(EOF) } },
-    { "identifier",     (CenitTokenType[]){ T(ID), T(EOF) } },
-    { "something",      (CenitTokenType[]){ T(ID), T(EOF) } },
-    { "id123",          (CenitTokenType[]){ T(ID), T(EOF) } },
-    { "name_id",        (CenitTokenType[]){ T(ID), T(EOF) } },
-    { "int8",           (CenitTokenType[]){ T(ID), T(EOF) } },
-    { "int32",          (CenitTokenType[]){ T(ID), T(EOF) } },
+    { "id",             (enum ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "name",           (enum ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "identifier",     (enum ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "something",      (enum ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "id123",          (enum ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "name_id",        (enum ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "int8",           (enum ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "int32",          (enum ZenitTokenType[]){ T(ID), T(EOF) } },
 };
 
-void cenit_test_lexer_identifiers(void)
+void zenit_test_lexer_identifiers(void)
 {
-    cenit_test_lexer_run(tests, sizeof(tests) / sizeof(tests[0]));
+    zenit_test_lexer_run(tests, sizeof(tests) / sizeof(tests[0]));
 }

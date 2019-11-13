@@ -1,22 +1,23 @@
-#ifndef CENIT_TESTS_LEXER_H
-#define CENIT_TESTS_LEXER_H
+#ifndef ZENIT_TESTS_LEXER_H
+#define ZENIT_TESTS_LEXER_H
 
 #include "../../../src/front-end/token.h"
 
-struct CenitLexerTest {
+struct ZenitLexerTest {
     const char *source;
-    CenitTokenType *tokens;
+    enum ZenitTokenType *tokens;
 };
 
-void cenit_test_lexer_run(struct CenitLexerTest *tests, size_t count);
+void zenit_test_lexer_run(struct ZenitLexerTest *tests, size_t count);
 
 // Tests
-void cenit_test_lexer_types(void);
-void cenit_test_lexer_assignment(void);
-void cenit_test_lexer_identifiers(void);
-void cenit_test_lexer_keywords(void);
-void cenit_test_lexer_punctuation(void);
-void cenit_test_lexer_errors(void);
-void cenit_test_lexer_combinations(void);
+void zenit_test_lexer_types(void);
+void zenit_test_lexer_operators(void);
+void zenit_test_lexer_identifiers(void);
+void zenit_test_lexer_keywords(void);
+void zenit_test_lexer_punctuation(void);
+void zenit_test_lexer_specials(void);
+void zenit_test_lexer_errors(void);
+void zenit_test_lexer_combinations(void);
 
-#endif /* CENIT_TESTS_LEXER_H */
+#endif /* ZENIT_TESTS_LEXER_H */

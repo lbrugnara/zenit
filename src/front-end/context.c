@@ -1,15 +1,16 @@
 #include <fllib.h>
 #include "ast.h"
 #include "context.h"
+#include "program.h"
 #include "source.h"
 #include "type.h"
 
 /*
  * Function: error_free
- *  Frees the memory of an error object allocated with the <cenit_context_error> function
+ *  Frees the memory of an error object allocated with the <zenit_context_error> function
  *
  * Parameters:
- *  errorptr - Pointer to a <CenitError> object
+ *  errorptr - Pointer to a <struct ZenitError> object
  *
  * Returns:
  *  void - This function does not return a value
@@ -20,7 +21,7 @@ static void error_free(void *errorptr)
     if (!errorptr)
         return;
 
-    CenitError *error = (CenitError*)errorptr;
+    struct ZenitError *error = (struct ZenitError*)errorptr;
 
     if (error->message)
         fl_cstring_free(error->message);
@@ -28,14 +29,14 @@ static void error_free(void *errorptr)
 
 
 /*
- * Function: cenit_context_new
- *  Allocates memory for a <CenitSymbolTable> object and a <CenitSourceInfo> object
+ * Function: zenit_context_new
+ *  Allocates memory for a <struct ZenitSymbolTable> object and a <struct ZenitSourceInfo> object
  */
-CenitContext cenit_context_new(const char *id, CenitSourceType type, const char *input)
+struct ZenitContext zenit_context_new(enum ZenitSourceType type, const char *input)
 {
-    CenitContext ctx = { 
-        .symtable = cenit_symtable_new(CENIT_SYMTABLE_GLOBAL, id),
-        .srcinfo = cenit_source_new(type, input),
+    struct ZenitContext ctx = { 
+        .program = zenit_program_new(),
+        .srcinfo = zenit_source_new(type, input),
         .errors = NULL
     };
 
@@ -43,40 +44,40 @@ CenitContext cenit_context_new(const char *id, CenitSourceType type, const char 
 }
 
 /*
- * Function: cenit_context_free
- *  Releases all the memory allocated by the <cenit_context_new> function
- *  but also if present, this function releases the memory of the <CenitAst>
+ * Function: zenit_context_free
+ *  Releases all the memory allocated by the <zenit_context_new> function
+ *  but also if present, this function releases the memory of the <struct ZenitAst>
  *  object.
  */
-void cenit_context_free(CenitContext *ctx)
+void zenit_context_free(struct ZenitContext *ctx)
 {
     if (!ctx)
         return;
 
-    cenit_symtable_free(&ctx->symtable);
+    zenit_program_free(ctx->program);
 
     if (ctx->srcinfo)
-        cenit_source_free(ctx->srcinfo);
+        zenit_source_free(ctx->srcinfo);
 
     if (ctx->ast)
-        cenit_ast_free(ctx->ast);
+        zenit_ast_free(ctx->ast);
 
     if (ctx->errors)
         fl_array_free_each(ctx->errors, error_free);
 }
 
 /*
- * Function: cenit_context_error
+ * Function: zenit_context_error
  *  Initializes the *errors* property if needed and allocates memory for the formatted string. Both objects are
  *  deallocated by the <error_free> function.
  */
-void cenit_context_error(CenitContext *ctx, CenitSourceLocation location, CenitErrorType type, const char *message, ...)
+void zenit_context_error(struct ZenitContext *ctx, struct ZenitSourceLocation location, enum ZenitErrorType type, const char *message, ...)
 {
     if (message == NULL)
         return;
 
     if (ctx->errors == NULL)
-        ctx->errors = fl_array_new(sizeof(CenitError), 0);
+        ctx->errors = fl_array_new(sizeof(struct ZenitError), 0);
 
     va_list args;
     va_start(args, message);
@@ -94,7 +95,7 @@ void cenit_context_error(CenitContext *ctx, CenitSourceLocation location, CenitE
     vsnprintf(formatted_msg, length+1, message, args);
     va_end(args);
 
-    CenitError error = {
+    struct ZenitError error = {
         .type = type,
         .location = location,
         .message = formatted_msg

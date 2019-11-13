@@ -1,93 +1,132 @@
-#ifndef CENIT_NODE_H
-#define CENIT_NODE_H
+#ifndef ZENIT_NODE_H
+#define ZENIT_NODE_H
 
 #include <stdint.h>
 #include "token.h"
 #include "type.h"
 
 /*
- * Enum: CenitNodeType 
+ * Enum: enum ZenitNodeType 
  *  Types of AST node
  */
-typedef enum CenitNodeType {
-    CENIT_NODE_LITERAL,
-    CENIT_NODE_VARIABLE,
-    CENIT_NODE_ARRAY_INIT,
-} CenitNodeType;
+enum ZenitNodeType {
+    ZENIT_NODE_LITERAL,
+    ZENIT_NODE_VARIABLE,
+    ZENIT_NODE_ATTRIBUTE,
+    ZENIT_NODE_ARRAY_INIT,
+    ZENIT_NODE_IDENTIFIER,
+    ZENIT_NODE_UNARY_REF,
+};
 
 /*
- * Struct: CenitNode
+ * Struct: struct ZenitNode
  *  The base node object. All the specific objects are compound with this one
+ * 
+ * Members:
+ *  <enum ZenitNodeType> type: The specific type of the AST node
+ *  <struct ZenitSourceLocation> location: The place in the source code represented by the node
+ *  <struct ZenitTypeInfo> typeinfo: The type of the operand or operator represented by the node
  */
-typedef struct CenitNode {
-    CenitNodeType type;
-    CenitSourceLocation location;
-} CenitNode;
+struct ZenitNode {
+    enum ZenitNodeType type;
+    struct ZenitSourceLocation location;
+    struct ZenitTypeInfo typeinfo;
+};
 
 /*
- * Struct: CenitLiteralNode
+ * Struct: struct ZenitLiteralNode
  *  Represents a literal value in the program's source.
  * 
  * Members:
- *  <CenitNode> base: Basic information of the node object
- *  <CenitTypeInfo> typeinfo: Contains the literal's type information
+ *  <struct ZenitNode> base: Basic information of the node object 
  *  <anonymous union> value: Based on the type information the union is populated with the C value
  * 
  */
-typedef struct CenitLiteralNode {
-    CenitNode base;
-    CenitTypeInfo typeinfo;
+struct ZenitLiteralNode {
+    struct ZenitNode base;    
     union {
         uint8_t uint8;
+        uint16_t uint16;
     } value;
-} CenitLiteralNode;
+};
 
 /*
- * Struct: CenitVariableNode
+ * Struct: struct ZenitVariableNode
  *  Represents a variable declaration node
  * 
  * Members:
- *  <CenitNode> base: Basic information of the node object
- *  <CenitTypeInfo> typeinfo: Contains the variable declaration type information, if present (can be inferred)
+ *  <struct ZenitNode> base: Basic information of the node object
  *  <char> *name: The variable name
- *  <CenitNode> *value: The right-hand side expression that initializes the variable
+ *  <struct ZenitNode> *value: The right-hand side expression that initializes the variable
  */
-typedef struct CenitVariableNode {
-    CenitNode base;
-    CenitTypeInfo typeinfo;
+struct ZenitVariableNode {
+    struct ZenitNode base;
     char *name;
-    CenitNode *value;
-} CenitVariableNode;
+    struct ZenitNode *value;
+    struct ZenitAttributeNode **attributes;
+};
 
 /*
- * Struct: CenitArrayInitNode
+ * Struct: struct ZenitArrayInitNode
  *  Represents a literal array initializer
  * 
  * Members:
- *  <CenitNode> base: Basic information of the node object
- *  <CenitNode> **values: Array of pointers to <CenitNode>s that are the individual values
+ *  <struct ZenitNode> base: Basic information of the node object
+ *  <struct ZenitNode> **values: Array of pointers to <struct ZenitNode>s that are the individual values
  *              of the array
  */
-typedef struct CenitArrayInitNode {
-    CenitNode base;
-    CenitNode **values;
-    CenitTypeInfo typeinfo;
-} CenitArrayInitNode;
+struct ZenitArrayInitNode {
+    struct ZenitNode base;
+    struct ZenitNode **elements;
+};
 
 /*
- * Struct: CenitAst
+ * Struct: struct ZenitUnaryRefNode
+ *  Represents taking an expression address (reference operator)
+ * 
+ * Members:
+ *  <struct ZenitNode> base: Basic information of the node object
+ *  <struct ZenitNode> *expression: The expression to take its address from
+ */
+struct ZenitUnaryRefNode {
+    struct ZenitNode base;
+    struct ZenitNode *expression;
+};
+
+/*
+ * Struct: struct ZenitIdentifierNode
+ *  Represents a reference to an identifier
+ */
+struct ZenitIdentifierNode {
+    struct ZenitNode base;
+    char *name;
+};
+
+struct ZenitAttributePropertyNode {
+    char *name;
+    struct ZenitNode *value;
+};
+
+struct ZenitAttributeNode {
+    struct ZenitNode base;
+    char *name;
+    struct ZenitAttributePropertyNode *properties;
+};
+
+/*
+ * Struct: struct ZenitAst
  *  Represents the abstract syntax tree of the parsed program
  * 
  * Members:
- *  <CenitNode> **decls: -fllib- array of pointers that contains the declarations of the program
+ *  <struct ZenitNode> **decls: -fllib- array of pointers that contains the declarations of the program
  * 
  */
-typedef struct CenitAst {
-    CenitNode **decls;
-} CenitAst;
+struct ZenitAst {
+    struct ZenitNode **decls;
+};
 
 /*
- * Function: cenit_node_free
+ * Function: zenit_node_free
  *  This function releases the memory allocated in the *node* object
  *  independently of the type of node
  *
@@ -97,11 +136,11 @@ typedef struct CenitAst {
  * Returns:
  *  void - This function does not return a value
  */
-void cenit_node_free(CenitNode *node);
+void zenit_node_free(struct ZenitNode *node);
 
 /*
- * Function: cenit_node_array_free
- *  Releases the memory of an array of <CenitNode> pointers.
+ * Function: zenit_node_array_free
+ *  Releases the memory of an array of <struct ZenitNode> pointers.
  *  The array must be an array allocated with the fllib's 
  *  <fl_array_new> function
  *
@@ -115,11 +154,11 @@ void cenit_node_free(CenitNode *node);
  *  If *array* is NULL, this function returns immediately
  *  without performing anything nor erroring out
  */
-void cenit_node_array_free(CenitNode **array);
+void zenit_node_array_free(struct ZenitNode **array);
 
 /*
- * Function: cenit_ast_free
- *  Releases the memory of a whole <CenitAst> object
+ * Function: zenit_ast_free
+ *  Releases the memory of a whole <struct ZenitAst> object
  *
  * Parameters:
  *  ast - AST object to free
@@ -127,6 +166,6 @@ void cenit_node_array_free(CenitNode **array);
  * Returns:
  *  void - This function does not return a value
  */
-void cenit_ast_free(CenitAst *ast);
+void zenit_ast_free(struct ZenitAst *ast);
 
-#endif /* CENIT_NODE_H */
+#endif /* ZENIT_NODE_H */

@@ -1,32 +1,32 @@
-#ifndef CENIT_SOURCE_H
-#define CENIT_SOURCE_H
+#ifndef ZENIT_SOURCE_H
+#define ZENIT_SOURCE_H
 
 #include "source.h"
 
 /*
- * Enum: CenitSourceType 
+ * Enum: enum ZenitSourceType 
  *  The source code of a program can be
  *  consumed from a file or a string, so this
  *  enum represents those options,
  *
  */
-typedef enum CenitSourceType {
-    CENIT_SOURCE_FILE,
-    CENIT_SOURCE_STRING
-} CenitSourceType;
+enum ZenitSourceType {
+    ZENIT_SOURCE_FILE,
+    ZENIT_SOURCE_STRING
+};
 
 /*
- * Struct: CenitSource
+ * Struct: struct ZenitSource
  *  Objects of this type contains the source code of
  *  a program and its length
  */
-typedef struct CenitSource {
+struct ZenitSource {
     const char *content;
     size_t length;
-} CenitSource;
+};
 
 /*
- * Struct: CenitSourceLocation
+ * Struct: struct ZenitSourceLocation
  *  Objects of this type keeps track of the
  *  position in the source code during the compilation
  *  process.
@@ -36,59 +36,59 @@ typedef struct CenitSource {
  *  line: The line number
  *  col: The column number
  */
-typedef struct CenitSourceLocation {
+struct ZenitSourceLocation {
     const char *filename;
     unsigned int line;
     unsigned int col;
-} CenitSourceLocation;
+};
 
 /*
- * Struct: CenitSourceInfo
+ * Struct: struct ZenitSourceInfo
  *  Represents the source code of the program and keeps track
  *  of the location during the compilation process
  * 
  * Members:
- *  source: A <CenitSource> object containing the program's code
- *  location: A <CenitSourceLocation> object that keeps track of the
+ *  source: A <struct ZenitSource> object containing the program's code
+ *  location: A <struct ZenitSourceLocation> object that keeps track of the
  *              line and column numbers
  */
-typedef struct CenitSourceInfo {
-    CenitSource source;
-    CenitSourceLocation location;
-} CenitSourceInfo;
+struct ZenitSourceInfo {
+    struct ZenitSource source;
+    struct ZenitSourceLocation location;
+};
 
 /*
- * Function: cenit_source_new
- *  Creates a <CenitSourceInfo> object that contains the program's source
- *  and is ready to be used by a <CenitContext> object.
+ * Function: zenit_source_new
+ *  Creates a <struct ZenitSourceInfo> object that contains the program's source
+ *  and is ready to be used by a <struct ZenitContext> object.
  *
  * Parameters:
- *  type - The origin of the source code represented by a <CenitSourceType> value
+ *  type - The origin of the source code represented by a <enum ZenitSourceType> value
  *  input - A string that represents a filename or the source code based on the value
  *          of the *type* parameter.
  *
  * Returns:
- *  CenitSourceInfo* - Pointer to an object that is ready to be used by a <CenitContext>
+ *  struct ZenitSourceInfo* - Pointer to an object that is ready to be used by a <struct ZenitContext>
  *                      object to start the compilation process
  * 
  * Notes:
- *  The pointer returned by this function MUST be freed with the <cenit_source_free> function
+ *  The pointer returned by this function MUST be freed with the <zenit_source_free> function
  *
  */
-CenitSourceInfo* cenit_source_new(CenitSourceType type, const char *input);
+struct ZenitSourceInfo* zenit_source_new(enum ZenitSourceType type, const char *input);
 
 
 /*
- * Function: cenit_source_free
- *  Releases the memory used by a <CenitSourceInfo> object allocated
- *  with the <cenit_source_new> function.
+ * Function: zenit_source_free
+ *  Releases the memory used by a <struct ZenitSourceInfo> object allocated
+ *  with the <zenit_source_new> function.
  *
  * Parameters:
- *  srcinfo - Pointer to a <CenitSourceInfo> object
+ *  srcinfo - Pointer to a <struct ZenitSourceInfo> object
  *
  * Returns:
  *  void - This function does not return a value
  */
-void cenit_source_free(CenitSourceInfo *srcinfo);
+void zenit_source_free(struct ZenitSourceInfo *srcinfo);
 
-#endif /* CENIT_SOURCE_H */
+#endif /* ZENIT_SOURCE_H */

@@ -7,38 +7,51 @@
 #include "../../../src/front-end/parse.h"
 #include "tests.h"
 
-void cenit_test_parser_literal_integer(void)
+void zenit_test_parser_literal_integer(void)
 {
     const char *source = 
-            "/* uint8 */ 1;                     \n"
-            "/* uint8 */ 2;                     \n"
-            "/* uint8 */ 3;                     \n"
-            "/* uint8 */ 255;                   \n"
+            "/* uint8 */ 1;"                    "\n"
+            "/* uint8 */ 2;"                    "\n"
+            "/* uint8 */ 3;"                    "\n"
+            "/* uint8 */ 255;"                  "\n"
+            "/* uint16 */ 8192;"                "\n"
             //"/* uint64 */ 1844674407370955161;  \n"
     ;
 
-    const size_t results[] = { 1, 2, 3, 255 };
+    const size_t results[] = { 1, 2, 3, 255, 8192 };
+    const enum ZenitType types[] = { ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT16 };
 
-    CenitContext ctx = cenit_context_new("global", CENIT_SOURCE_STRING, source);
+    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
 
-    bool is_valid = cenit_parse_source(&ctx);
+    bool is_valid = zenit_parse_source(&ctx);
 
     fl_expect("Parser object should not contain errors", is_valid);
 
     for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
-        CenitNode *node = ctx.ast->decls[i];
-        fl_expect("Node must be a literal node", node->type == CENIT_NODE_LITERAL);
+        struct ZenitNode *node = ctx.ast->decls[i];
+        fl_expect("Node must be a literal node", node->type == ZENIT_NODE_LITERAL);
 
-        CenitLiteralNode *literal = (CenitLiteralNode*)node;
-        fl_vexpect(literal->typeinfo.type == CENIT_TYPE_UINT8, "Literal type must be \"%s\"", cenit_type_to_string(&literal->typeinfo));
-        fl_vexpect((size_t)literal->value.uint8 == results[i], "Literal value must be equals to %zu", results[i]);
+        struct ZenitLiteralNode *literal = (struct ZenitLiteralNode*)node;
+        fl_vexpect(literal->base.typeinfo.type == types[i], "Literal type must be \"%s\"", zenit_type_to_string(&literal->base.typeinfo));
+
+        switch (types[i])
+        {
+            case ZENIT_TYPE_UINT8:
+                fl_vexpect((size_t)literal->value.uint8 == results[i], "Literal value must be equals to %zu", results[i]);
+                break;
+            case ZENIT_TYPE_UINT16:
+                fl_vexpect((size_t)literal->value.uint16 == results[i], "Literal value must be equals to %zu", results[i]);
+                break;
+            default:
+                fl_expect("Unmanaged type", false);
+        }        
     }    
 
-    cenit_context_free(&ctx);
+    zenit_context_free(&ctx);
 }
 
-void cenit_test_parser_literal_array_initializer(void)
+void zenit_test_parser_literal_array_initializer(void)
 {
     const char *source = 
             /* [3]uint8 */
@@ -49,48 +62,48 @@ void cenit_test_parser_literal_array_initializer(void)
     const size_t elements[] = { 3, 0 };
     const size_t values[99][99] = { { 1, 2, 3 }, { 0 } };
 
-    CenitContext ctx = cenit_context_new("global", CENIT_SOURCE_STRING, source);
-    bool is_valid = cenit_parse_source(&ctx);
+    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    bool is_valid = zenit_parse_source(&ctx);
 
     fl_expect("Parser object should not contain errors", is_valid);
 
     for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
-        CenitNode *node = ctx.ast->decls[i];
-        fl_expect("Node must be a literal node", node->type == CENIT_NODE_ARRAY_INIT);
+        struct ZenitNode *node = ctx.ast->decls[i];
+        fl_expect("Node must be a literal node", node->type == ZENIT_NODE_ARRAY_INIT);
 
-        CenitArrayInitNode *array = (CenitArrayInitNode*)node;
+        struct ZenitArrayInitNode *array = (struct ZenitArrayInitNode*)node;
 
-        fl_vexpect(array->values && fl_array_length(array->values) == elements[i], "Array must contain %zu elements", elements[i]);
+        fl_vexpect(array->elements && fl_array_length(array->elements) == elements[i], "Array must contain %zu elements", elements[i]);
 
-        for (size_t j=0; j < fl_array_length(array->values); j++)
+        for (size_t j=0; j < fl_array_length(array->elements); j++)
         {
-            CenitLiteralNode *literal = (CenitLiteralNode*)array->values[j];
-            fl_vexpect(literal->typeinfo.type == CENIT_TYPE_UINT8, "Literal type must be \"%s\"", cenit_type_to_string(&literal->typeinfo));
+            struct ZenitLiteralNode *literal = (struct ZenitLiteralNode*)array->elements[j];
+            fl_vexpect(literal->base.typeinfo.type == ZENIT_TYPE_UINT8, "Literal type must be \"%s\"", zenit_type_to_string(&literal->base.typeinfo));
             fl_vexpect((size_t)literal->value.uint8 == values[i][j], "Literal value must be equals to %zu", values[i][j]);
         }
     }    
 
-    cenit_context_free(&ctx);
+    zenit_context_free(&ctx);
 }
 
-void cenit_test_parser_literal_integer_error(void)
+void zenit_test_parser_literal_integer_error(void)
 {
     const char *source = 
         /* ULLONG_MAX + 1: Too large integral type*/
         "18446744073709551616;          \n"
     ;
 
-    CenitContext ctx = cenit_context_new("global", CENIT_SOURCE_STRING, source);
-    bool is_valid = cenit_parse_source(&ctx);
+    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    bool is_valid = zenit_parse_source(&ctx);
 
     size_t expected_errors = 1;
     fl_vexpect(!is_valid && ctx.errors != NULL && fl_array_length(ctx.errors) == expected_errors, "The context object must contain %zu error(s)", expected_errors);
 
-    CenitError *error = ctx.errors;
+    struct ZenitError *error = ctx.errors;
 
-    fl_vexpect(error->location.line == 1 && error->type == CENIT_ERROR_LARGE_INTEGER, 
+    fl_vexpect(error->location.line == 1 && error->type == ZENIT_ERROR_LARGE_INTEGER, 
         "Expected semantic error: %s at line %u:%u", error->message, error->location.line, error->location.col);
 
-    cenit_context_free(&ctx);
+    zenit_context_free(&ctx);
 }

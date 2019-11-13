@@ -1,4 +1,5 @@
 #include "infer.h"
+#include "program.h"
 #include "symbol.h"
 
 /*
@@ -8,46 +9,51 @@
  *  table
  *
  * Parameters:
- *  symtable - Symbol table
+ *  program - Program object
  *  typeinfo - Type information
  *
  * Returns:
  *  bool - *true* if the type is a native type or a custom type defined in the symbol
  *          table, otherwise this function returns *false*.
  */
-static bool is_type_defined(CenitSymbolTable *symtable, CenitTypeInfo *typeinfo)
+static bool is_type_defined(struct ZenitProgram *program, struct ZenitTypeInfo *typeinfo)
 {
-    if (typeinfo->type != CENIT_TYPE_CUSTOM)
+    if (typeinfo->type != ZENIT_TYPE_CUSTOM)
         return true;
 
-    return cenit_symtable_has(symtable, typeinfo->name);
+    return zenit_program_has_symbol(program, typeinfo->name)
+            || zenit_program_has_global_symbol(program, typeinfo->name);
 }
 
 /*
- * Type: CenitTypeChecker
- *  A checker function takes a symbol from the <CenitSymbolTable> and 
+ * Type: ZenitTypeChecker
+ *  A checker function takes a symbol from the <struct ZenitSymbolTable> and 
  *  and makes sure its type is valid in the context that is determined
- *  by the <CenitNode>.
- *  The function returns a <CenitTypeInfo> pointer with the checked type information
+ *  by the <struct ZenitNode>.
+ *  The function returns a <struct ZenitTypeInfo> pointer with the checked type information
  *  or NULL on error where the caller should know how to handle that and should keep
  *  propagating the error.
  */
-typedef CenitTypeInfo*(*CenitTypeChecker)(CenitContext *ctx, CenitNode *node);
+typedef struct ZenitTypeInfo*(*ZenitTypeChecker)(struct ZenitContext *ctx, struct ZenitNode *node);
 
 // Visitor functions
-static CenitTypeInfo* visit_node(CenitContext *ctx, CenitNode *node);
-static CenitTypeInfo* visit_literal(CenitContext *ctx, CenitNode *node);
-static CenitTypeInfo* visit_variable(CenitContext *ctx, CenitNode *node);
-static CenitTypeInfo* visit_array_initializer(CenitContext *ctx, CenitNode *node);
+static struct ZenitTypeInfo* visit_node(struct ZenitContext *ctx, struct ZenitNode *node);
+static struct ZenitTypeInfo* visit_literal(struct ZenitContext *ctx, struct ZenitNode *node);
+static struct ZenitTypeInfo* visit_variable(struct ZenitContext *ctx, struct ZenitNode *node);
+static struct ZenitTypeInfo* visit_array_initializer(struct ZenitContext *ctx, struct ZenitNode *node);
+static struct ZenitTypeInfo* visit_identifier(struct ZenitContext *ctx, struct ZenitNode *node);
+static struct ZenitTypeInfo* visit_unary_ref(struct ZenitContext *ctx, struct ZenitNode *node);
 
 /*
  * Variable: checkers
- *  An array indexed with a <CenitNodeType> to get a <CenitTypeChecker> function
+ *  An array indexed with a <enum ZenitNodeType> to get a <ZenitTypeChecker> function
  */
-static const CenitTypeChecker checkers[] = {
-    [CENIT_NODE_LITERAL]    = &visit_literal,
-    [CENIT_NODE_VARIABLE]   = &visit_variable,
-    [CENIT_NODE_ARRAY_INIT] = &visit_array_initializer,
+static const ZenitTypeChecker checkers[] = {
+    [ZENIT_NODE_LITERAL]    = &visit_literal,
+    [ZENIT_NODE_VARIABLE]   = &visit_variable,
+    [ZENIT_NODE_ARRAY_INIT] = &visit_array_initializer,
+    [ZENIT_NODE_IDENTIFIER] = &visit_identifier,
+    [ZENIT_NODE_UNARY_REF]  = &visit_unary_ref,
 };
 
 /*
@@ -60,12 +66,54 @@ static const CenitTypeChecker checkers[] = {
  *  node - Node to visit
  *
  * Returns:
- *  CenitTypeInfo* - The literal's type information
+ *  struct ZenitTypeInfo* - The literal's type information
  */
-static CenitTypeInfo* visit_literal(CenitContext *ctx, CenitNode *node)
+static struct ZenitTypeInfo* visit_literal(struct ZenitContext *ctx, struct ZenitNode *node)
 {
-    CenitLiteralNode *literal = (CenitLiteralNode*)node;
-    return &literal->typeinfo;
+    struct ZenitLiteralNode *literal = (struct ZenitLiteralNode*)node;
+    return &literal->base.typeinfo;
+}
+
+/*
+ * Function: visit_identifier
+ *  It just returns the type information of the identifier
+ *
+ * Parameters:
+ *  ctx - Context object
+ *  node - Node to visit
+ *
+ * Returns:
+ *  struct ZenitTypeInfo* - The identifier type information
+ */
+static struct ZenitTypeInfo* visit_identifier(struct ZenitContext *ctx, struct ZenitNode *node)
+{
+    struct ZenitIdentifierNode *id_node = (struct ZenitIdentifierNode*)node;
+    return &zenit_program_get_symbol(ctx->program, id_node->name)->typeinfo;
+}
+
+/*
+ * Function: visit_unary_ref
+ *  Check the referenced expression is a valid expression to take its address from
+ *
+ * Parameters:
+ *  ctx - Context object
+ *  node - Node to visit
+ *
+ * Returns:
+ *  struct ZenitTypeInfo* - The reference type information
+ */
+static struct ZenitTypeInfo* visit_unary_ref(struct ZenitContext *ctx, struct ZenitNode *node)
+{
+    struct ZenitUnaryRefNode *ref_node = (struct ZenitUnaryRefNode*)node;
+    struct ZenitTypeInfo *expr_info = visit_node(ctx, ref_node->expression);
+
+    if (expr_info->is_ref)
+    {
+        zenit_context_error(ctx, ref_node->base.location, ZENIT_ERROR_INVALID_REF, 
+                "Cannot take a reference to another reference.");
+    }
+
+    return &ref_node->base.typeinfo;
 }
 
 /*
@@ -78,32 +126,32 @@ static CenitTypeInfo* visit_literal(CenitContext *ctx, CenitNode *node)
  *  node - Node to visit
  *
  * Returns:
- *  CenitTypeInfo* - The arrays's type information
+ *  struct ZenitTypeInfo* - The arrays's type information
  */
-static CenitTypeInfo* visit_array_initializer(CenitContext *ctx, CenitNode *node)
+static struct ZenitTypeInfo* visit_array_initializer(struct ZenitContext *ctx, struct ZenitNode *node)
 {
-    CenitArrayInitNode *array = (CenitArrayInitNode*)node;
+    struct ZenitArrayInitNode *array = (struct ZenitArrayInitNode*)node;
 
     // The array type is inferred in the inference pass, so we have information
     // about it, but it can be a custom type that doesn't exist in the symbol
     // table
-    bool array_type_defined = is_type_defined(&ctx->symtable, &array->typeinfo);
+    bool array_type_defined = is_type_defined(ctx->program, &array->base.typeinfo);
 
-    for (size_t i=0; i < fl_array_length(array->values); i++)
+    for (size_t i=0; i < fl_array_length(array->elements); i++)
     {
-        CenitTypeInfo* elem_typeinfo = visit_node(ctx, array->values[i]);
+        struct ZenitTypeInfo* elem_typeinfo = visit_node(ctx, array->elements[i]);
 
         // If the type check fails, we add an error only if the array type is defined
         // because of not we might be targeting a false positive error
-        if (array_type_defined && elem_typeinfo->type != array->typeinfo.type)
+        if (array_type_defined && elem_typeinfo->type != array->base.typeinfo.type)
         {
-            cenit_context_error(ctx, array->values[i]->location, CENIT_ERROR_TYPE_MISSMATCH, 
-                "Cannot convert from type '%s' to '%s'", cenit_type_to_string(elem_typeinfo), cenit_type_to_string(&array->typeinfo));
+            zenit_context_error(ctx, array->elements[i]->location, ZENIT_ERROR_TYPE_MISSMATCH, 
+                "Cannot convert from type '%s' to '%s'", zenit_type_to_string(elem_typeinfo), zenit_type_to_string(&array->base.typeinfo));
         }
     }
 
     // We return the type of the array initializer
-    return &array->typeinfo;
+    return &array->base.typeinfo;
 }
 
 /*
@@ -116,35 +164,35 @@ static CenitTypeInfo* visit_array_initializer(CenitContext *ctx, CenitNode *node
  *  node - Node to visit
  *
  * Returns:
- *  CenitTypeInfo* - The variable's type information
+ *  struct ZenitTypeInfo* - The variable's type information
  */
-static CenitTypeInfo* visit_variable(CenitContext *ctx, CenitNode *node)
+static struct ZenitTypeInfo* visit_variable(struct ZenitContext *ctx, struct ZenitNode *node)
 {
-    CenitVariableNode *var_decl = (CenitVariableNode*)node;
+    struct ZenitVariableNode *var_decl = (struct ZenitVariableNode*)node;
 
     // We get the variable's symbol
-    CenitSymbol *symbol = cenit_symtable_get(&ctx->symtable, var_decl->name);
+    struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx->program, var_decl->name);
 
     // Check if the variable's type is native or it is registered in the symbol table
-    bool var_type_defined = is_type_defined(&ctx->symtable, &symbol->typeinfo);
+    bool var_type_defined = is_type_defined(ctx->program, &symbol->typeinfo);
 
     // If the variable type is missing, we add an error
     if (!var_type_defined)
     {
-        cenit_context_error(ctx, var_decl->base.location, CENIT_ERROR_MISSING_SYMBOL, 
-            "Type '%s' is not defined", cenit_type_to_base_string(&var_decl->typeinfo));
+        zenit_context_error(ctx, var_decl->base.location, ZENIT_ERROR_MISSING_SYMBOL, 
+            "Type '%s' is not defined", zenit_type_to_base_string(&var_decl->base.typeinfo));
     }
 
     // We visit the right-hand side expression to do type checking in it
-    CenitTypeInfo* rhs_type = visit_node(ctx, var_decl->value);
+    struct ZenitTypeInfo* rhs_type = visit_node(ctx, var_decl->value);
     
     // We check types to make sure the assignment is valid, but we do it only if
     // the variable type is valid, because if not, we might be targeting a false-positive
     // error
-    if (var_type_defined && !cenit_type_equals(&symbol->typeinfo, rhs_type))
+    if (var_type_defined && !zenit_type_equals(&symbol->typeinfo, rhs_type))
     {
-        cenit_context_error(ctx, var_decl->base.location, CENIT_ERROR_TYPE_MISSMATCH, 
-                "Cannot convert from type '%s' to '%s'", cenit_type_to_string(rhs_type), cenit_type_to_string(&symbol->typeinfo));
+        zenit_context_error(ctx, var_decl->base.location, ZENIT_ERROR_TYPE_MISSMATCH, 
+                "Cannot convert from type '%s' to '%s'", zenit_type_to_string(rhs_type), zenit_type_to_string(&symbol->typeinfo));
     }
 
     // The type information returned is always the one from the variable's symbol
@@ -161,26 +209,26 @@ static CenitTypeInfo* visit_variable(CenitContext *ctx, CenitNode *node)
  *  node - Node to visit
  *
  * Returns:
- *  CenitTypeInfo* - A valid type information object or NULL
+ *  struct ZenitTypeInfo* - A valid type information object or NULL
  */
-static CenitTypeInfo* visit_node(CenitContext *ctx, CenitNode *node)
+static struct ZenitTypeInfo* visit_node(struct ZenitContext *ctx, struct ZenitNode *node)
 {
     return checkers[node->type](ctx, node);
 }
 
 /*
- * Function: cenit_infer_symbols
+ * Function: zenit_infer_symbols
  *  We just iterate over the declarations visiting each node
  */
-bool cenit_check_types(CenitContext *ctx)
+bool zenit_check_types(struct ZenitContext *ctx)
 {
     if (!ctx || !ctx->ast || !ctx->ast->decls)
         return false;
 
-    size_t errors = cenit_context_error_count(ctx);
+    size_t errors = zenit_context_error_count(ctx);
 
     for (size_t i=0; i < fl_array_length(ctx->ast->decls); i++)
         visit_node(ctx, ctx->ast->decls[i]);
 
-    return errors == cenit_context_error_count(ctx);
+    return errors == zenit_context_error_count(ctx);
 }

@@ -2,44 +2,114 @@
 
 
 /*
- * Function: free_array_entry
+ * Function: free_node_array_entry
  *  This function takes a void pointer that is expected to be
- *  a pointer to a <CenitNode> pointer
+ *  a pointer to a <struct ZenitNode> pointer
  */
-void free_array_entry(void *nodeptr)
+void free_node_array_entry(void *nodeptr)
 {
     if (!nodeptr)
         return;
 
-    CenitNode *node = *(CenitNode**)nodeptr;
+    struct ZenitNode *node = *(struct ZenitNode**)nodeptr;
 
     if (!node)
         return;
 
-    cenit_node_free(node);
+    zenit_node_free(node);
+}
+
+
+/*
+ * Function: free_attribute_property
+ *  This function takes a void pointer that is expected to be
+ *  a pointer to a <struct ZenitNode> pointer
+ */
+void free_attribute_property(void *nodeptr)
+{
+    if (!nodeptr)
+        return;
+
+    struct ZenitAttributePropertyNode *node = (struct ZenitAttributePropertyNode*)nodeptr;
+
+    if (!node)
+        return;
+
+    if (node->name)
+        fl_cstring_free(node->name);
+
+    zenit_node_free(node->value);
+}
+
+static inline void free_attribute_node(struct ZenitAttributeNode *attribute_node)
+{
+    if (!attribute_node)
+        return;
+
+    if (attribute_node->name)
+        fl_cstring_free(attribute_node->name);
+
+    if (attribute_node->properties)
+        fl_array_free_each(attribute_node->properties, free_attribute_property);
 }
 
 /*
- * Function: array_initializer_node_free
- *  Releases the memory of a <CenitArrayInitNode> object
+ * Function: free_identifier_node
+ *  Releases the memory of the <struct ZenitIdentifierNode> object
  *
  * Parameters:
- *  array - <CenitArrayInitNode> object
+ *  identifier_node - Object to be freed.
  *
  * Returns:
  *  void - This function does not return a value
  */
-static inline void array_initializer_node_free(CenitArrayInitNode *array)
+static inline void free_identifier_node(struct ZenitIdentifierNode *identifier_node)
 {
-    cenit_node_array_free(array->values);
+    if (!identifier_node)
+        return;
 
-    if (array->typeinfo.name)
-        fl_cstring_free(array->typeinfo.name);
+    fl_cstring_free(identifier_node->name);
 }
 
 /*
- * Function: literal_node_free
- *  Frees the memory of a <CenitLiteralNode> object
+ * Function: free_unary_ref_node
+ *  Releases the memory of the <struct ZenitUnaryRefNode> object
+ *
+ * Parameters:
+ *  ref_node - Object to be freed.
+ *
+ * Returns:
+ *  void - This function does not return a value
+ */
+static inline void free_unary_ref_node(struct ZenitUnaryRefNode *ref_node)
+{
+    if (!ref_node)
+        return;
+
+    zenit_node_free(ref_node->expression);
+}
+
+/*
+ f Function: free_array_initializer_node
+ *  Releases the memory of a <struct ZenitArrayInitNode> object
+ *
+ * Parameters:
+ *  array - <struct ZenitArrayInitNode> object
+ *
+ * Returns:
+ *  void - This function does not return a value
+ */
+static inline void free_array_initializer_node(struct ZenitArrayInitNode *array)
+{
+    if (!array)
+        return;
+
+    zenit_node_array_free(array->elements);    
+}
+
+/*
+ * Function: free_literal_node
+ *  Frees the memory of a <struct ZenitLiteralNode> object
  *
  * Parameters:
  *  literal_node - Node object
@@ -47,15 +117,15 @@ static inline void array_initializer_node_free(CenitArrayInitNode *array)
  * Returns:
  *  void - This function does not return a value
  */
-static inline void literal_node_free(CenitLiteralNode *literal_node)
+static inline void free_literal_node(struct ZenitLiteralNode *literal_node)
 {
-    if (literal_node->typeinfo.name)
-        fl_cstring_free(literal_node->typeinfo.name);
+    if (!literal_node)
+        return;
 }
 
 /*
- * Function: variable_declaration_node_free
- *  Frees the memory of a <CenitVariableNode> object
+ * Function: free_variable_declaration_node
+ *  Frees the memory of a <struct ZenitVariableNode> object
  *
  * Parameters:
  *  var_node - Node object
@@ -63,68 +133,85 @@ static inline void literal_node_free(CenitLiteralNode *literal_node)
  * Returns:
  *  void - This function does not return a value
  */
-static inline void variable_declaration_node_free(CenitVariableNode *var_node)
+static inline void free_variable_declaration_node(struct ZenitVariableNode *var_node)
 {
+    if (!var_node)
+        return;
+
     if (var_node->name)
         fl_cstring_free(var_node->name);
 
-    if (var_node->typeinfo.name)
-        fl_cstring_free(var_node->typeinfo.name);
-
     if (var_node->value)
-        cenit_node_free(var_node->value);
+        zenit_node_free(var_node->value);
+
+    if (var_node->attributes)
+        fl_array_free_each(var_node->attributes, free_node_array_entry);
 }
 
 /*
- * Function: cenit_node_free
+ * Function: zenit_node_free
  *  Checks the node's *type* property to call the specific
  *  function that releases its memory.
  */
-void cenit_node_free(CenitNode *node)
+void zenit_node_free(struct ZenitNode *node)
 {
     if (!node)
         return;
 
-    if (node->type == CENIT_NODE_LITERAL)
+    if (node->type == ZENIT_NODE_LITERAL)
     {
-        literal_node_free((CenitLiteralNode*)node);
+        free_literal_node((struct ZenitLiteralNode*)node);
     }
-    else if (node->type == CENIT_NODE_VARIABLE)
+    else if (node->type == ZENIT_NODE_VARIABLE)
     {
-        variable_declaration_node_free((CenitVariableNode*)node);
+        free_variable_declaration_node((struct ZenitVariableNode*)node);
     }
-    else if (node->type == CENIT_NODE_ARRAY_INIT)
+    else if (node->type == ZENIT_NODE_ARRAY_INIT)
     {
-        array_initializer_node_free((CenitArrayInitNode*)node);
+        free_array_initializer_node((struct ZenitArrayInitNode*)node);
     }
+    else if (node->type == ZENIT_NODE_UNARY_REF)
+    {
+        free_unary_ref_node((struct ZenitUnaryRefNode*)node);
+    }
+    else if (node->type == ZENIT_NODE_IDENTIFIER)
+    {
+        free_identifier_node((struct ZenitIdentifierNode*)node);
+    }
+    else if (node->type == ZENIT_NODE_ATTRIBUTE)
+    {
+        free_attribute_node((struct ZenitAttributeNode*)node);
+    }
+
+    zenit_type_free(&node->typeinfo);    
 
     fl_free(node);
 }
 
 /*
- * Function: cenit_node_array_free
- *  Frees the memory allocated by both the <CenitNode> objects
+ * Function: zenit_node_array_free
+ *  Frees the memory allocated by both the <struct ZenitNode> objects
  *  and the <FlArray>.
  */
-void cenit_node_array_free(CenitNode **array)
+void zenit_node_array_free(struct ZenitNode **array)
 {
     if (!array)
         return;
 
-    fl_array_free_each(array, free_array_entry);
+    fl_array_free_each(array, free_node_array_entry);
 }
 
 /*
- * Function: cenit_ast_free
+ * Function: zenit_ast_free
  *  Frees the memory of all the declarations and the AST
  *  itself
  */
-void cenit_ast_free(CenitAst *ast)
+void zenit_ast_free(struct ZenitAst *ast)
 {
     if (!ast)
         return;
 
-    cenit_node_array_free(ast->decls);
+    zenit_node_array_free(ast->decls);
 
     fl_free(ast);
 }

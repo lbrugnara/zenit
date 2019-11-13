@@ -4,25 +4,28 @@
 #include "../../../src/front-end/lexer.h"
 #include "tests.h"
 
-#define T(token) CENIT_TOKEN_##token
+#define T(token) ZENIT_TOKEN_##token
 
-static struct CenitLexerTest tests[] = {
+static struct ZenitLexerTest tests[] = {
     // Punctuation
-    { ";",              (CenitTokenType[]){ T(SEMICOLON), T(EOF) } },
-    { ":",              (CenitTokenType[]){ T(COLON), T(EOF) } },
-    { ",",              (CenitTokenType[]){ T(COMMA), T(EOF) } },
-    { ",,",             (CenitTokenType[]){ T(COMMA), T(COMMA), T(EOF) } },
-    { ";;",             (CenitTokenType[]){ T(SEMICOLON), T(SEMICOLON), T(EOF) } },
-    { ";:;",            (CenitTokenType[]){ T(SEMICOLON), T(COLON), T(SEMICOLON), T(EOF) } },
-    { "{",              (CenitTokenType[]){ T(LBRACE), T(EOF) } },
-    { "}",              (CenitTokenType[]){ T(RBRACE), T(EOF) } },
-    { "{{}}",           (CenitTokenType[]){ T(LBRACE), T(LBRACE), T(RBRACE), T(RBRACE), T(EOF) } },
-    { "[",              (CenitTokenType[]){ T(LBRACKET), T(EOF) } },
-    { "]",              (CenitTokenType[]){ T(RBRACKET), T(EOF) } },
-    { "[[]]",           (CenitTokenType[]){ T(LBRACKET), T(LBRACKET), T(RBRACKET), T(RBRACKET), T(EOF) } },
+    { ";",              (enum ZenitTokenType[]){ T(SEMICOLON), T(EOF) } },
+    { ":",              (enum ZenitTokenType[]){ T(COLON), T(EOF) } },
+    { ",",              (enum ZenitTokenType[]){ T(COMMA), T(EOF) } },
+    { ",,",             (enum ZenitTokenType[]){ T(COMMA), T(COMMA), T(EOF) } },
+    { ";;",             (enum ZenitTokenType[]){ T(SEMICOLON), T(SEMICOLON), T(EOF) } },
+    { ";:;",            (enum ZenitTokenType[]){ T(SEMICOLON), T(COLON), T(SEMICOLON), T(EOF) } },
+    { "{",              (enum ZenitTokenType[]){ T(LBRACE), T(EOF) } },
+    { "}",              (enum ZenitTokenType[]){ T(RBRACE), T(EOF) } },
+    { "{{}}",           (enum ZenitTokenType[]){ T(LBRACE), T(LBRACE), T(RBRACE), T(RBRACE), T(EOF) } },
+    { "[",              (enum ZenitTokenType[]){ T(LBRACKET), T(EOF) } },
+    { "]",              (enum ZenitTokenType[]){ T(RBRACKET), T(EOF) } },
+    { "[[]]",           (enum ZenitTokenType[]){ T(LBRACKET), T(LBRACKET), T(RBRACKET), T(RBRACKET), T(EOF) } },
+    { "(",              (enum ZenitTokenType[]){ T(LPAREN), T(EOF) } },
+    { ")",              (enum ZenitTokenType[]){ T(RPAREN), T(EOF) } },
+    { "(())",           (enum ZenitTokenType[]){ T(LPAREN), T(LPAREN), T(RPAREN), T(RPAREN), T(EOF) } },
 };
 
-void cenit_test_lexer_punctuation(void)
+void zenit_test_lexer_punctuation(void)
 {
-    cenit_test_lexer_run(tests, sizeof(tests) / sizeof(tests[0]));
+    zenit_test_lexer_run(tests, sizeof(tests) / sizeof(tests[0]));
 }

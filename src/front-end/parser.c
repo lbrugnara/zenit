@@ -5,48 +5,48 @@
 #include "ast.h"
 
 /* Public API */
-CenitParser cenit_parser_new(CenitSourceInfo *srcinfo)
+struct ZenitParser zenit_parser_new(struct ZenitSourceInfo *srcinfo)
 {
-    return (CenitParser){
-        .lexer = cenit_lexer_new(srcinfo)
+    return (struct ZenitParser){
+        .lexer = zenit_lexer_new(srcinfo)
     };
 }
 
-bool cenit_parser_has_input(CenitParser *parser)
+bool zenit_parser_has_input(struct ZenitParser *parser)
 {
-    return cenit_lexer_peek(&parser->lexer).type != CENIT_TOKEN_EOF;
+    return zenit_lexer_peek(&parser->lexer).type != ZENIT_TOKEN_EOF;
 }
 
-CenitToken cenit_parser_peek(CenitParser *parser)
+struct ZenitToken zenit_parser_peek(struct ZenitParser *parser)
 {
-    return cenit_lexer_peek(&parser->lexer);
+    return zenit_lexer_peek(&parser->lexer);
 }
 
-CenitToken cenit_parser_consume(CenitParser *parser)
+struct ZenitToken zenit_parser_consume(struct ZenitParser *parser)
 {
-    return cenit_lexer_consume(&parser->lexer);
+    return zenit_lexer_consume(&parser->lexer);
 }
 
-bool cenit_parser_expects(CenitParser *parser, CenitTokenType type, CenitToken *consumed_token)
+bool zenit_parser_expects(struct ZenitParser *parser, enum ZenitTokenType type, struct ZenitToken *consumed_token)
 {
-    CenitToken token = cenit_parser_peek(parser);
+    struct ZenitToken token = zenit_parser_peek(parser);
 
     if (token.type != type)
         return false;
 
     if (consumed_token)
-        memcpy(consumed_token, &token, sizeof(CenitToken));
+        memcpy(consumed_token, &token, sizeof(struct ZenitToken));
 
-    cenit_parser_consume(parser);
+    zenit_parser_consume(parser);
     
     return true;
 }
 
-bool cenit_parser_consume_if(CenitParser *parser, CenitTokenType type)
+bool zenit_parser_consume_if(struct ZenitParser *parser, enum ZenitTokenType type)
 {
-    if (cenit_parser_peek(parser).type == type)
+    if (zenit_parser_peek(parser).type == type)
     {
-        cenit_parser_consume(parser);
+        zenit_parser_consume(parser);
         return true;
     }
 

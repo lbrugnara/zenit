@@ -1,53 +1,57 @@
-#ifndef CENIT_TOKEN_H
-#define CENIT_TOKEN_H
+#ifndef ZENIT_TOKEN_H
+#define ZENIT_TOKEN_H
 
 #include <fllib.h>
 #include "source.h"
 
 /*
- * Enum: CenitTokenType 
- *  The set of Cenit's token types
+ * Enum: enum ZenitTokenType 
+ *  The set of Zenit's token types
  */
-typedef enum CenitTokenType {
-    CENIT_TOKEN_UNKNOWN,    
+enum ZenitTokenType {
+    ZENIT_TOKEN_UNKNOWN,    
 
     // Types
-    CENIT_TOKEN_INTEGER,
+    ZENIT_TOKEN_INTEGER,
 
     // Keywords
-    CENIT_TOKEN_ID,
-    CENIT_TOKEN_VAR,
+    ZENIT_TOKEN_ID,
+    ZENIT_TOKEN_VAR,
 
-    // Assignment
-    CENIT_TOKEN_ASSIGN,
+    // Operators
+    ZENIT_TOKEN_AMPERSAND,
+    ZENIT_TOKEN_ASSIGN,
 
     // Punctuation
-    CENIT_TOKEN_COMMA,
-    CENIT_TOKEN_SEMICOLON,
-    CENIT_TOKEN_COLON,
-    CENIT_TOKEN_LBRACE,
-    CENIT_TOKEN_RBRACE,
-    CENIT_TOKEN_LBRACKET,
-    CENIT_TOKEN_RBRACKET,
+    ZENIT_TOKEN_COMMA,
+    ZENIT_TOKEN_SEMICOLON,
+    ZENIT_TOKEN_COLON,
+    ZENIT_TOKEN_LBRACE,
+    ZENIT_TOKEN_RBRACE,
+    ZENIT_TOKEN_LBRACKET,
+    ZENIT_TOKEN_RBRACKET,
+    ZENIT_TOKEN_LPAREN,
+    ZENIT_TOKEN_RPAREN,
 
     // Special tokens
-    CENIT_TOKEN_EOF,
-} CenitTokenType;
+    ZENIT_TOKEN_HASH,
+    ZENIT_TOKEN_EOF,
+};
 
 /*
- * Struct: CenitToken 
+ * Struct: struct ZenitToken 
  *  Represents a token entity
  */
-typedef struct CenitToken {
-    CenitTokenType type;
+struct ZenitToken {
+    enum ZenitTokenType type;
     struct FlSlice value;
-    CenitSourceLocation location;
-} CenitToken;
+    struct ZenitSourceLocation location;
+};
 
 /*
- * Function: cenit_token_print
+ * Function: zenit_token_print
  *  Returns a pointer to string that prints the friendly version
- *  of the enum <CenitTokenType> value
+ *  of the enum <enum ZenitTokenType> value
  *
  * Parameters:
  *  type - enumeration value
@@ -56,6 +60,6 @@ typedef struct CenitToken {
  *  const char* - String pointer
  *
  */
-const char* cenit_token_print(CenitTokenType type);
+const char* zenit_token_print(enum ZenitTokenType type);
 
-#endif /* CENIT_TOKEN_H */
+#endif /* ZENIT_TOKEN_H */

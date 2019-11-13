@@ -1,35 +1,45 @@
-#ifndef CENIT_TYPE_H
-#define CENIT_TYPE_H
+#ifndef ZENIT_TYPE_H
+#define ZENIT_TYPE_H
 
 /*
- * Enum: CenitType
+ * Enum: enum ZenitType
  *  Enumerates all the native type supported by Zenit
  *  including some special values that the compiler
  *  uses internally
  *
  */
-typedef enum CenitType {
-    CENIT_TYPE_NONE,
-    CENIT_TYPE_CUSTOM,
-    CENIT_TYPE_UINT8,
-} CenitType;
+enum ZenitType {
+    ZENIT_TYPE_NONE,
+    ZENIT_TYPE_CUSTOM,
+
+    ZENIT_TYPE_UINT8,
+    ZENIT_TYPE_UINT16,
+
+    ZENIT_TYPE_END
+};
 
 /*
- * Struct: CenitTypeInfo
- *  Represents the information of a system type. The property
- *  *name* is present when the <CenitType> is <CENIT_TYPE_CUSTOM>,
- *  otherwise it is NULL.
+ * Struct: struct ZenitTypeInfo
+ *  Represents the information of a type. 
+ * 
+ * Members:
+ *  <const char> *name: If the <enum ZenitType> is <ZENIT_TYPE_CUSTOM> this property should be present, otherwise NULL.
+ *  <enum ZenitType> type: The raw type.
+ *  <size_t> elements: Number of elements (1 for simple variables. 0, 1 or greater for arrays)
+ *  <bool> is_array: True if the variable is an array
+ *  <bool> is_ref: True if the variable is a reference to a variable
  *  
  */
-typedef struct CenitTypeInfo {
-    size_t elements;
+struct ZenitTypeInfo {
     const char *name;
-    CenitType type;
+    enum ZenitType type;
+    size_t elements;
     bool is_array;
-} CenitTypeInfo;
+    bool is_ref;
+};
 
 /*
- * Function: cenit_type_to_string_parse
+ * Function: zenit_type_string_parse
  *  Takes a string and returns the system type for that
  *  representation.
  *
@@ -37,59 +47,62 @@ typedef struct CenitTypeInfo {
  *  typestr - String to match against the different system types
  *
  * Returns:
- *  CenitType - The type that matches the string
+ *  enum ZenitType - The type that matches the string
  *
  */
-CenitType cenit_type_to_string_parse(const char *typestr);
+enum ZenitType zenit_type_string_parse(const char *typestr);
 
 
 /*
- * Function: cenit_type_slice_parse
- *  This function is similar to <cenit_type_to_string_parse>, the only
+ * Function: zenit_type_slice_parse
+ *  This function is similar to <zenit_type_string_parse>, the only
  *  difference is it takes a <struct FlSlice> object
  *
  * Parameters:
  *  slice - Sequence of bytes to match against the different system types
  *
  * Returns:
- *  CenitType - The type that matches the sequence of bytes
+ *  enum ZenitType - The type that matches the sequence of bytes
  *
  */
-CenitType cenit_type_slice_parse(struct FlSlice *slice);
+enum ZenitType zenit_type_slice_parse(struct FlSlice *slice);
 
 /*
- * Function: cenit_type_to_string
- *  Returns an string representation of the <CenitType> *typeinfo*.
+ * Function: zenit_type_to_string
+ *  Returns a string representation of the <struct ZenitTypeInfo> object.
  *  If the type is an array type, the string representation contains
- *  the size information. To get the base type without any other
- *  information refer to the <cenit_type_to_base_string> function
+ *  the size information. If the the type is a reference it also contains that
+ *  information.
  *
  * Parameters:
- *  typeinfo - <CenitTypeInfo> object to get its <CenitType>.
+ *  typeinfo - <struct ZenitTypeInfo> object to get its string representation.
  *
  * Returns:
- *  const char* - String representation of the *typeinfo*
+ *  const char* - String representation of the *typeinfo* object
+ * 
+ * Notes:
+ *  To get the base type without any other
+ *  information refer to the <zenit_type_to_base_string> function
  *
  */
-const char* cenit_type_to_string(const CenitTypeInfo *typeinfo);
+const char* zenit_type_to_string(const struct ZenitTypeInfo *typeinfo);
 
 /*
- * Function: cenit_type_to_base_string
- *  Returns the string representation of the <CenitType> *typeinfo*
- *  without any information regarding if it is an array or not
- *  or its size
+ * Function: zenit_type_to_base_string
+ *  Returns the string representation of the <enum ZenitType> within the *typeinfo*
+ *  object without any information regarding if it is an array or a reference.
  *
  * Parameters:
- *  typeinfo - <CenitTypeInfo> object to get its <CenitType>.
+ *  typeinfo - <struct ZenitTypeInfo> object to get its <enum ZenitType> string representation.
  *
  * Returns:
- *  const char* - String representation of the base *typeinfo*
+ *  const char* - String representation of the <enum ZenitType> within the *typeinfo* object
  *
  */
-const char* cenit_type_to_base_string(const CenitTypeInfo *typeinfo);
+const char* zenit_type_to_base_string(const struct ZenitTypeInfo *typeinfo);
 
 /*
- * Function: cenit_type_copy
+ * Function: zenit_type_copy
  *  Copies the information from the *src_type* into the *dest_type*
  *
  * Parameters:
@@ -99,10 +112,10 @@ const char* cenit_type_to_base_string(const CenitTypeInfo *typeinfo);
  * Returns:
  *  void - This function does not return a value
  */
-void cenit_type_copy(CenitTypeInfo *dest_type, CenitTypeInfo *src_type);
+void zenit_type_copy(struct ZenitTypeInfo *dest_type, struct ZenitTypeInfo *src_type);
 
 /*
- * Function: cenit_type_equals
+ * Function: zenit_type_equals
  *  Compares *type_a* and *type_b* to know if they are equals, including
  *  if they are arrays and their elements count
  *
@@ -114,6 +127,10 @@ void cenit_type_copy(CenitTypeInfo *dest_type, CenitTypeInfo *src_type);
  *  bool - *true* if the objects are equals, otherwise *false*.
  *
  */
-bool cenit_type_equals(CenitTypeInfo *type_a, CenitTypeInfo *type_b);
+bool zenit_type_equals(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
 
-#endif /* CENIT_TYPE_H */
+bool zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
+
+void zenit_type_free(struct ZenitTypeInfo *typeinfo);
+
+#endif /* ZENIT_TYPE_H */

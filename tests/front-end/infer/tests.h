@@ -1,6 +1,7 @@
-#ifndef CENIT_TESTS_INFER_H
-#define CENIT_TESTS_INFER_H
+#ifndef ZENIT_TESTS_INFER_H
+#define ZENIT_TESTS_INFER_H
 
-void cenit_test_infer_variable_type(void);
+void zenit_test_infer_variable_type(void);
+void zenit_test_infer_errors(void);
 
-#endif /* CENIT_TESTS_INFER_H */
+#endif /* ZENIT_TESTS_INFER_H */
