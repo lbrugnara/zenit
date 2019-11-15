@@ -20,18 +20,19 @@ void zenit_test_generate_zir_variables(void)
         "var e = a;"                        "\n"
         "var f = &a;"                       "\n"
         "var g : &uint8 = f;"               "\n"
+        "#[Attr(k:1, k2:2)]"                "\n"
         "var h = [ &a, f ];"                "\n"
     ;
 
     const char *zir_src = 
-        "@a : uint8 = 1"                      "\n"
-        "@b : uint8 = 2"                      "\n"
-        "@c : [2]uint8 = [ 0, 1 ]"            "\n"
-        "@d : [3]uint8 = [ 0, 1, 2 ]"         "\n"
-        "@e : uint8 = @a"                     "\n"
-        "@f : &uint8 = ref @a"                "\n"
-        "@g : &uint8 = @f"                    "\n"
-        "@h : [2]&uint8 = [ ref @a, @f ]"     "\n"
+        "@a : uint8 = 1"                                         "\n"
+        "@b : uint8 = 2"                                         "\n"
+        "@c : [2]uint8 = [ 0, 1 ]"                               "\n"
+        "@d : [3]uint8 = [ 0, 1, 2 ]"                            "\n"
+        "@e : uint8 = @a"                                        "\n"
+        "@f : &uint8 = ref @a"                                   "\n"
+        "@g : &uint8 = @f"                                       "\n"
+        "@h : [2]&uint8 = [ ref @a, @f ] ; #Attr(k:1, k2:2)"     "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);

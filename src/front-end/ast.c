@@ -6,7 +6,7 @@
  *  This function takes a void pointer that is expected to be
  *  a pointer to a <struct ZenitNode> pointer
  */
-void free_node_array_entry(void *nodeptr)
+static void free_node_array_entry(void *nodeptr)
 {
     if (!nodeptr)
         return;
@@ -19,13 +19,7 @@ void free_node_array_entry(void *nodeptr)
     zenit_node_free(node);
 }
 
-
-/*
- * Function: free_attribute_property
- *  This function takes a void pointer that is expected to be
- *  a pointer to a <struct ZenitNode> pointer
- */
-void free_attribute_property(void *nodeptr)
+static void free_attribute_property(void *nodeptr)
 {
     if (!nodeptr)
         return;

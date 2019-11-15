@@ -7,12 +7,12 @@
 
 // Tests
 #include "front-end/check/tests.h"
-#include "front-end/generate/tests.h"
 #include "front-end/infer/tests.h"
 #include "front-end/lexer/tests.h"
 #include "front-end/parser/tests.h"
 #include "front-end/resolve/tests.h"
 #include "front-end/symtable/tests.h"
+#include "front-end/zirgen/tests.h"
 
 int main(int argc, char **argv) 
 {
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
         fl_test_suite("Check",
             { "Type check errors",  &zenit_test_check_types_errors  }
         ),
-        fl_test_suite("Generate",
+        fl_test_suite("Zirgen",
             { "Generate ZIR variables",  &zenit_test_generate_zir_variables  }
         ),
         NULL

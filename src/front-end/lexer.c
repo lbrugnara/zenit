@@ -421,7 +421,7 @@ struct ZenitToken zenit_lexer_consume(struct ZenitLexer *lexer)
         else if (is_number(c))
         {
             // Take as much numbers as possible
-            // TODO: Hex and binary support (prefix "0x" and suffix "b")
+            // FIXME: Hex and binary support (prefix "0x" and suffix "b")
             size_t digits = 1;   
             while (is_number(peek_at(lexer, digits)))
                 digits++;
@@ -465,7 +465,7 @@ struct ZenitToken zenit_lexer_peek(struct ZenitLexer *lexer)
     unsigned int col = lexer->srcinfo->location.col;
 
     // Get the next token
-    // TODO: We should buffer consumed tokens, by now
+    // FIXME: We should buffer consumed tokens, by now
     // for simplicity it is ok to use this
     struct ZenitToken token = zenit_lexer_consume(lexer);
     

@@ -14,6 +14,8 @@ void zenit_test_resolve_errors(void)
         "var sym_b = sym_not_defined;"          "\n"
         "var sym_c = [ sym_not_defined2 ];"     "\n"
         "var sym_d = &unknown;"                 "\n"
+        "#[Attr(key:missing_symbol)]"           "\n"
+        "var sym_e = 1;"                        "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
@@ -21,7 +23,7 @@ void zenit_test_resolve_errors(void)
     bool valid_parse = zenit_parse_source(&ctx);
     bool valid_resolve = valid_parse ? zenit_resolve_symbols(&ctx) : false;
 
-    fl_expect("Resolve pass must fail with 4 errors", !valid_resolve && zenit_context_error_count(&ctx) == 4);
+    fl_expect("Resolve pass must fail with 5 errors", !valid_resolve && zenit_context_error_count(&ctx) == 5);
     
     fl_vexpect(ctx.errors[0].type == ZENIT_ERROR_DUPLICATED_SYMBOL, 
         "Error must be a duplicated symbol (<source>:%u:%u): %s", ctx.errors[0].location.line, ctx.errors[0].location.col, ctx.errors[0].message);
@@ -34,6 +36,9 @@ void zenit_test_resolve_errors(void)
 
     fl_vexpect(ctx.errors[3].type == ZENIT_ERROR_MISSING_SYMBOL, 
         "Error must be a missing symbol (<source>:%u:%u): %s", ctx.errors[3].location.line, ctx.errors[3].location.col, ctx.errors[3].message);
+
+    fl_vexpect(ctx.errors[4].type == ZENIT_ERROR_MISSING_SYMBOL, 
+        "Error must be a missing symbol in an attribute (<source>:%u:%u): %s", ctx.errors[4].location.line, ctx.errors[4].location.col, ctx.errors[4].message);
 
     zenit_context_free(&ctx);
 }

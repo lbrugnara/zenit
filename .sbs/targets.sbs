@@ -5,11 +5,11 @@ compile zenit-objects {
     ],
     output_dir: "obj/",
     sources: [
-        "src/front-end/ast.c",
-        "src/front-end/check.c",
-        "src/front-end/context.c",
-        "src/front-end/infer.c",
-        "src/front-end/lexer.c",
+        "src/front-end/ast.c"
+        "src/front-end/check.c"
+        "src/front-end/context.c"
+        "src/front-end/infer.c"
+        "src/front-end/lexer.c"
         "src/front-end/parse.c"
         "src/front-end/parser.c"
         "src/front-end/program.c"
@@ -18,18 +18,21 @@ compile zenit-objects {
         "src/front-end/source.c"
         "src/front-end/symbol.c"
         "src/front-end/symtable.c"
-        "src/front-end/token.c",
-        "src/front-end/type.c",
-        "src/front-end/zirgen.c",
+        "src/front-end/token.c"
+        "src/front-end/type.c"
+        "src/front-end/zirgen.c"
 
-        "src/middle-end/block.c",
-        "src/middle-end/instruction.c",
-        "src/middle-end/operand.c",
-        "src/middle-end/program.c",
-        "src/middle-end/symbol.c",
-        "src/middle-end/symtable.c",
-        "src/middle-end/type.c",
-        "src/middle-end/value.c",
+        "src/middle-end/block.c"
+        "src/middle-end/instruction.c"
+        "src/middle-end/operand.c"
+        "src/middle-end/program.c"
+        "src/middle-end/symbol.c"
+        "src/middle-end/symtable.c"
+        "src/middle-end/type.c"
+        "src/middle-end/value.c"
+
+        "src/back-end/nes/opcode.c"
+        "src/back-end/nes/rom.c"
     ]
 }
 
@@ -52,21 +55,20 @@ compile zenit-tests-objects {
     ],
     output_dir: "obj/",
     sources: [
-        "tests/Main.c",
-        "tests/Test.c",
+        "tests/Main.c"
+        "tests/Test.c"
         "tests/front-end/check/errors.c"
-        "tests/front-end/generate/variables.c"
         "tests/front-end/infer/errors.c"
         "tests/front-end/infer/variables.c"
-        "tests/front-end/lexer/operators.c",
-        "tests/front-end/lexer/combinations.c",
-        "tests/front-end/lexer/errors.c",
-        "tests/front-end/lexer/identifiers.c",
-        "tests/front-end/lexer/keywords.c",
-        "tests/front-end/lexer/common.c",
-        "tests/front-end/lexer/punctuation.c",
-        "tests/front-end/lexer/specials.c",
-        "tests/front-end/lexer/types.c",
+        "tests/front-end/lexer/operators.c"
+        "tests/front-end/lexer/combinations.c"
+        "tests/front-end/lexer/errors.c"
+        "tests/front-end/lexer/identifiers.c"
+        "tests/front-end/lexer/keywords.c"
+        "tests/front-end/lexer/common.c"
+        "tests/front-end/lexer/punctuation.c"
+        "tests/front-end/lexer/specials.c"
+        "tests/front-end/lexer/types.c"
         "tests/front-end/parser/attributes.c"
         "tests/front-end/parser/errors.c"
         "tests/front-end/parser/literals.c"
@@ -74,6 +76,7 @@ compile zenit-tests-objects {
         "tests/front-end/resolve/errors.c"
         "tests/front-end/resolve/variables.c"
         "tests/front-end/symtable/symbols.c"
+        "tests/front-end/zirgen/variables.c"
     ]
 }
 

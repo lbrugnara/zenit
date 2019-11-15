@@ -26,7 +26,7 @@ struct ZirInstruction {
 };
 
 /*
- * Struct: struct ZirVarDeclInstruction
+ * Struct: struct ZirVariableInstruction
  *  Represents a variable declaration instruction
  * 
  * Members:
@@ -35,10 +35,21 @@ struct ZirInstruction {
  *  <struct ZirOperand> rvalue: Right-hand side of the variable declaration
  * 
  */
-struct ZirVarDeclInstruction {
+struct ZirVariableInstruction {
     struct ZirInstruction base;
+    struct ZirAttribute **attributes;
     struct ZirOperand lvalue;
     struct ZirOperand rvalue;
+};
+
+struct ZirAttributeProperty {
+    char *name;
+    struct ZirOperand value;
+};
+
+struct ZirAttribute {
+    char *name;
+    struct ZirAttributeProperty *properties;
 };
 
 /*

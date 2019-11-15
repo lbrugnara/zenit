@@ -111,6 +111,22 @@ static struct ZenitSymbol* visit_variable(struct ZenitContext *ctx, struct Zenit
         return NULL;
     }
 
+    if (var_decl->attributes)
+    {
+        for (size_t i=0; i < fl_array_length(var_decl->attributes); i++)
+        {
+            struct ZenitAttributeNode *attr = var_decl->attributes[i];
+            if (!attr->properties)
+                continue;
+
+            for (size_t j=0; j < fl_array_length(attr->properties); j++)
+            {
+                struct ZenitAttributePropertyNode *prop = attr->properties;
+                visit_node(ctx, prop->value);
+            }
+        }
+    }
+
     // Create and insert the symbol in the table
     return zenit_program_add_symbol(ctx->program, zenit_symbol_new(var_decl->name, &var_decl->base.typeinfo));
 }
