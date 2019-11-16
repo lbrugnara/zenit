@@ -1,9 +1,8 @@
 #ifndef ZENIT_NES_GENERATE
 #define ZENIT_NES_GENERATE
 
-#include "../../middle-end/program.h"
+#include "../../zir/program.h"
 
-
-struct NesRom zenit_nes_generate(struct ZirProgram *program);
+void zenit_nes_generate(struct ZenitIrProgram *program);
 
 #endif /* ZENIT_NES_GENERATE */

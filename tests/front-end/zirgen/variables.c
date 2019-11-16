@@ -10,7 +10,7 @@
 #include "../../../src/front-end/zirgen.h"
 #include "tests.h"
 
-void zenit_test_generate_zir_variables(void)
+void zenit_test_generate_zenit_ir_variables(void)
 {
     const char *zenit_source = 
         "var a : uint8 = 1;"                "\n"
@@ -24,7 +24,7 @@ void zenit_test_generate_zir_variables(void)
         "var h = [ &a, f ];"                "\n"
     ;
 
-    const char *zir_src = 
+    const char *zenit_ir_src = 
         "@a : uint8 = 1"                                         "\n"
         "@b : uint8 = 2"                                         "\n"
         "@c : [2]uint8 = [ 0, 1 ]"                               "\n"
@@ -32,7 +32,8 @@ void zenit_test_generate_zir_variables(void)
         "@e : uint8 = @a"                                        "\n"
         "@f : &uint8 = ref @a"                                   "\n"
         "@g : &uint8 = @f"                                       "\n"
-        "@h : [2]&uint8 = [ ref @a, @f ] ; #Attr(k:1, k2:2)"     "\n"
+        // FIXME: The order of the properties is unspecified because of the hashtable
+        "@h : [2]&uint8 = [ ref @a, @f ] ; #Attr(k2:2, k:1)"     "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
@@ -42,14 +43,14 @@ void zenit_test_generate_zir_variables(void)
     fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
     fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
     
-    struct ZirProgram *program = zenit_generate_zir(&ctx);
+    struct ZenitIrProgram *program = zenit_generate_zir(&ctx);
     
-    char *codegen = zir_program_dump(program, fl_cstring_new(0));
+    char *codegen = zenit_ir_program_dump(program, fl_cstring_new(0));
 
-    fl_expect("Generated IR must be equals to the hand-written version", flm_cstring_equals(codegen, zir_src));
+    fl_expect("Generated IR must be equals to the hand-written version", flm_cstring_equals(codegen, zenit_ir_src));
     
     fl_cstring_free(codegen);
 
-    zir_program_free(program);
+    zenit_ir_program_free(program);
     zenit_context_free(&ctx);
 }

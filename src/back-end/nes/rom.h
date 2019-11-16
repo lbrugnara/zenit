@@ -1,5 +1,5 @@
-#ifndef ZENIT_NES_ROM_H
-#define ZENIT_NES_ROM_H
+#ifndef NES_ROM_H
+#define NES_ROM_H
 
 #include <stdint.h>
 #include "header.h"
@@ -37,4 +37,4 @@ void nes_rom_emit_zpg(struct NesRom *rom, enum NesOpcode opcode, uint8_t byte);
 void nes_rom_emit_zpx(struct NesRom *rom, enum NesOpcode opcode, uint8_t byte);
 void nes_rom_emit_zpy(struct NesRom *rom, enum NesOpcode opcode, uint8_t byte);
 
-#endif /* ZENIT_NES_ROM_H */
+#endif /* NES_ROM_H */

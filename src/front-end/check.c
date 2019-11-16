@@ -195,6 +195,8 @@ static struct ZenitTypeInfo* visit_variable(struct ZenitContext *ctx, struct Zen
                 "Cannot convert from type '%s' to '%s'", zenit_type_to_string(rhs_type), zenit_type_to_string(&symbol->typeinfo));
     }
 
+    // FIXME: Visit the attributes
+
     // The type information returned is always the one from the variable's symbol
     return &symbol->typeinfo;
 }

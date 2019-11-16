@@ -1,20 +1,20 @@
 #include "value.h"
 
 
-static inline char* dump_literal(struct ZirLiteralValue *literal, char *output)
+static inline char* dump_literal(struct ZenitIrLiteralValue *literal, char *output)
 {
     switch (literal->base.typeinfo.type)
     {
-        case ZIR_TYPE_UINT8:
+        case ZENIT_IR_TYPE_UINT8:
             fl_cstring_vappend(&output, "%u", literal->value.uint8);
             break;
-        case ZIR_TYPE_UINT16:
+        case ZENIT_IR_TYPE_UINT16:
             fl_cstring_vappend(&output, "%u", literal->value.uint16);
             break;
-        case ZIR_TYPE_NONE:
+        case ZENIT_IR_TYPE_NONE:
             output = *fl_cstring_append(&output, "<none>");
             break;
-        case ZIR_TYPE_CUSTOM:
+        case ZENIT_IR_TYPE_CUSTOM:
             output = *fl_cstring_append(&output, "<error>");
             break;
     }
@@ -22,7 +22,7 @@ static inline char* dump_literal(struct ZirLiteralValue *literal, char *output)
     return output;
 }
 
-static inline char* dump_array(struct ZirArrayValue *array, char *output)
+static inline char* dump_array(struct ZenitIrArrayValue *array, char *output)
 {
     fl_cstring_append(&output, "[ ");
     if (array->elements)
@@ -32,8 +32,8 @@ static inline char* dump_array(struct ZirArrayValue *array, char *output)
             if (i > 0)
                 fl_cstring_append(&output, ", ");
 
-            struct ZirOperand *operand = &array->elements[i];
-            output = zir_operand_dump(operand, output);
+            struct ZenitIrOperand *operand = &array->elements[i];
+            output = zenit_ir_operand_dump(operand, output);
         }
     }
     fl_cstring_append(&output, " ]");
@@ -43,17 +43,17 @@ static inline char* dump_array(struct ZirArrayValue *array, char *output)
 
 /* Public API */
 
-struct ZirValue* zir_value_new(enum ZirValueType type)
+struct ZenitIrValue* zenit_ir_value_new(enum ZenitIrValueType type)
 {
-    struct ZirValue *value = NULL;
+    struct ZenitIrValue *value = NULL;
     
     switch (type)
     {
-        case ZIR_VALUE_LITERAL:
-            value = fl_malloc(sizeof(struct ZirLiteralValue));
+        case ZENIT_IR_VALUE_LITERAL:
+            value = fl_malloc(sizeof(struct ZenitIrLiteralValue));
             break;
-        case ZIR_VALUE_ARRAY:
-            value = fl_malloc(sizeof(struct ZirArrayValue));
+        case ZENIT_IR_VALUE_ARRAY:
+            value = fl_malloc(sizeof(struct ZenitIrArrayValue));
             break;
         default:
             return NULL;
@@ -64,20 +64,20 @@ struct ZirValue* zir_value_new(enum ZirValueType type)
     return value;
 }
 
-void zir_value_free(struct ZirValue *value)
+void zenit_ir_value_free(struct ZenitIrValue *value)
 {
     switch (value->type)
     {
-        case ZIR_VALUE_LITERAL:
-            // struct ZirLiteralValue *literal = (struct ZirLiteralValue*)value;
+        case ZENIT_IR_VALUE_LITERAL:
+            // struct ZenitIrLiteralValue *literal = (struct ZenitIrLiteralValue*)value;
             // Nothing particular to free here
             break;
-        case ZIR_VALUE_ARRAY:
-            struct ZirArrayValue *array = (struct ZirArrayValue*)value;
+        case ZENIT_IR_VALUE_ARRAY:
+            struct ZenitIrArrayValue *array = (struct ZenitIrArrayValue*)value;
             if (array->elements)
             {
                 for (size_t i=0; i < fl_array_length(array->elements); i++)
-                    zir_operand_free(&array->elements[i]);
+                    zenit_ir_operand_free(&array->elements[i]);
 
                 fl_array_free(array->elements);
             }
@@ -90,15 +90,15 @@ void zir_value_free(struct ZirValue *value)
     fl_free(value);
 }
 
-char* zir_value_dump(struct ZirValue *value, char *output)
+char* zenit_ir_value_dump(struct ZenitIrValue *value, char *output)
 {
     switch (value->type)
     {
-        case ZIR_VALUE_LITERAL:
-            output = dump_literal((struct ZirLiteralValue*)value, output);
+        case ZENIT_IR_VALUE_LITERAL:
+            output = dump_literal((struct ZenitIrLiteralValue*)value, output);
             break;
-        case ZIR_VALUE_ARRAY:
-            output = dump_array((struct ZirArrayValue*)value, output);
+        case ZENIT_IR_VALUE_ARRAY:
+            output = dump_array((struct ZenitIrArrayValue*)value, output);
             break;
     }
 

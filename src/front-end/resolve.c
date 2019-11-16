@@ -111,21 +111,20 @@ static struct ZenitSymbol* visit_variable(struct ZenitContext *ctx, struct Zenit
         return NULL;
     }
 
-    if (var_decl->attributes)
+    const char **names = zenit_attribute_node_map_keys(&var_decl->attributes);
+    for (size_t i=0; i < fl_array_length(names); i++)
     {
-        for (size_t i=0; i < fl_array_length(var_decl->attributes); i++)
-        {
-            struct ZenitAttributeNode *attr = var_decl->attributes[i];
-            if (!attr->properties)
-                continue;
+        struct ZenitAttributeNode *attr = zenit_attribute_node_map_get(&var_decl->attributes, names[i]);
 
-            for (size_t j=0; j < fl_array_length(attr->properties); j++)
-            {
-                struct ZenitAttributePropertyNode *prop = attr->properties;
-                visit_node(ctx, prop->value);
-            }
+        struct ZenitPropertyNode **properties = zenit_property_node_map_values(&attr->properties);
+        for (size_t j=0; j < fl_array_length(properties); j++)
+        {
+            struct ZenitPropertyNode *prop = properties[i];
+            visit_node(ctx, prop->value);
         }
+        fl_array_free(properties);
     }
+    fl_array_free(names);
 
     // Create and insert the symbol in the table
     return zenit_program_add_symbol(ctx->program, zenit_symbol_new(var_decl->name, &var_decl->base.typeinfo));

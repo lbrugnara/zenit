@@ -537,6 +537,7 @@ static struct ZenitNode* parse_attribute_declaration(struct ZenitParser *parser,
     attribute->base.type = ZENIT_NODE_ATTRIBUTE;
     attribute->base.location = hash_token.location;
     attribute->name = token_to_string(&name_token);
+    attribute->properties = zenit_property_node_map_new();
 
     if (zenit_parser_peek(parser).type == ZENIT_TOKEN_LPAREN)
     {
@@ -553,15 +554,13 @@ static struct ZenitNode* parse_attribute_declaration(struct ZenitParser *parser,
             if (value == NULL)
                 goto parsing_error;
 
-            struct ZenitAttributePropertyNode property = {
-                .name = token_to_string(&prop_name),
-                .value = value
-            };
+            struct ZenitPropertyNode *property = fl_malloc(sizeof(struct ZenitPropertyNode));
+            property->base.location = prop_name.location;
+            property->base.type = ZENIT_NODE_ATTRIBUTE_PROPERTY;
+            property->name = token_to_string(&prop_name);
+            property->value = value;
 
-            if (!attribute->properties)
-                attribute->properties = fl_array_new(sizeof(struct ZenitAttributePropertyNode), 0);
-            
-            attribute->properties = fl_array_append(attribute->properties, &property);
+            zenit_property_node_map_add(&attribute->properties, property);
 
             if (zenit_parser_peek(parser).type != ZENIT_TOKEN_RPAREN && !zenit_parser_expects(parser, ZENIT_TOKEN_COMMA, NULL))
                 goto parsing_error;
@@ -598,15 +597,13 @@ static struct ZenitNode* parse_attribute_declaration(struct ZenitParser *parser,
  */
 static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
 {
-    struct ZenitAttributeNode **attributes = NULL;
+    struct ZenitAttributeNodeMap attributes = zenit_attribute_node_map_new();
+    struct ZenitToken temp_token = zenit_parser_peek(parser);
 
     while (zenit_parser_peek(parser).type == ZENIT_TOKEN_HASH)
     {
-        if (attributes == NULL)
-            attributes = fl_array_new(sizeof(struct ZenitAttributeNode*), 0);
-
         struct ZenitAttributeNode *attribute = (struct ZenitAttributeNode*)parse_attribute_declaration(parser, ctx);
-        attributes = fl_array_append(attributes, &attribute);
+        zenit_attribute_node_map_add(&attributes, attribute);
     }
 
     // Check for variables, functions, etc
@@ -614,14 +611,22 @@ static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct Ze
     {
         struct ZenitNode *vardecl = parse_variable_declaration(parser, ctx);
 
-        if (vardecl != NULL)
-            ((struct ZenitVariableNode*)vardecl)->attributes = attributes;
+        // Something happened if vardecl is NULL, we need to free the memory for the attribute map
+        if (vardecl == NULL)
+        {
+            zenit_attribute_node_map_free(&attributes);
+            return NULL;
+        }
+
+        ((struct ZenitVariableNode*)vardecl)->attributes = attributes;
 
         return vardecl;
     }
 
-    if (attributes != NULL)
-        zenit_context_error(ctx, attributes[0]->base.location, ZENIT_ERROR_SYNTAX, "Invalid use of attributes");
+    if (zenit_attribute_node_map_length(&attributes) > 0)
+        zenit_context_error(ctx, temp_token.location, ZENIT_ERROR_SYNTAX, "Invalid use of attributes");
+    else
+        zenit_attribute_node_map_free(&attributes);
 
     // If there are no variables or functions declarations,
     // it is a statement

@@ -5,6 +5,7 @@ compile zenit-objects {
     ],
     output_dir: "obj/",
     sources: [
+        "src/front-end/nodes/node.c"
         "src/front-end/ast.c"
         "src/front-end/check.c"
         "src/front-end/context.c"
@@ -22,14 +23,16 @@ compile zenit-objects {
         "src/front-end/type.c"
         "src/front-end/zirgen.c"
 
-        "src/middle-end/block.c"
-        "src/middle-end/instruction.c"
-        "src/middle-end/operand.c"
-        "src/middle-end/program.c"
-        "src/middle-end/symbol.c"
-        "src/middle-end/symtable.c"
-        "src/middle-end/type.c"
-        "src/middle-end/value.c"
+        "src/zir/attribute.c"
+        "src/zir/block.c"
+        "src/zir/instruction.c"
+        "src/zir/operand.c"
+        "src/zir/program.c"
+        "src/zir/property.c"
+        "src/zir/symbol.c"
+        "src/zir/symtable.c"
+        "src/zir/type.c"
+        "src/zir/value.c"
 
         "src/back-end/nes/opcode.c"
         "src/back-end/nes/rom.c"

@@ -55,8 +55,8 @@ int main(int argc, char **argv)
         fl_test_suite("Check",
             { "Type check errors",  &zenit_test_check_types_errors  }
         ),
-        fl_test_suite("Zirgen",
-            { "Generate ZIR variables",  &zenit_test_generate_zir_variables  }
+        fl_test_suite("zirgen",
+            { "Generate ZIR variables",  &zenit_test_generate_zenit_ir_variables  }
         ),
         NULL
     );

@@ -1,20 +1,20 @@
 #include "symbol.h"
 
-struct ZirSymbol* zir_symbol_new(const char *name, struct ZirTypeInfo *typeinfo)
+struct ZenitIrSymbol* zenit_ir_symbol_new(const char *name, struct ZenitIrTypeInfo *typeinfo)
 {
     flm_assert(name != NULL, "Symbol name cannot be NULL");
     flm_assert(typeinfo != NULL, "Type information cannot be NULL");
 
 
-    struct ZirSymbol *symbol = fl_malloc(sizeof(struct ZirSymbol));
+    struct ZenitIrSymbol *symbol = fl_malloc(sizeof(struct ZenitIrSymbol));
 
     symbol->name = fl_cstring_dup(name);
-    zir_type_copy(&symbol->typeinfo, typeinfo);
+    zenit_ir_type_copy(&symbol->typeinfo, typeinfo);
 
     return symbol;
 }
 
-void zir_symbol_free(struct ZirSymbol *symbol)
+void zenit_ir_symbol_free(struct ZenitIrSymbol *symbol)
 {
     if (!symbol)
         return;

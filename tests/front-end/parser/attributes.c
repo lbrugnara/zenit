@@ -104,23 +104,33 @@ void zenit_test_parser_attributes_variables(void)
 
         fl_vexpect(flm_cstring_equals(test->name, vardecl->name), "Variable name is expected to be '%s'", test->name);
         
-        fl_vexpect((test->attr_count == 0 && vardecl->attributes == NULL) || (test->attr_count == fl_array_length(vardecl->attributes)), 
+        fl_vexpect(test->attr_count == zenit_attribute_node_map_length(&vardecl->attributes), 
             "Expected number of attributes in variable '%s' is %zu", test->name, test->attr_count);
 
         for (size_t j=0; j < test->attr_count; j++)
         {
             struct AttributeTest *attrtest = test->attributes + j;
-            struct ZenitAttributeNode *attrnode = vardecl->attributes[j];
+
+            fl_vexpect(zenit_attribute_node_map_has_key(&vardecl->attributes, attrtest->name), "Attribute %s is expected to be present in the attributes list", attrtest->name);
+
+            struct ZenitAttributeNode *attrnode = zenit_attribute_node_map_get(&vardecl->attributes, attrtest->name);
 
             fl_vexpect(flm_cstring_equals(attrtest->name, attrnode->name), "Attribute name is expected to be '%s'", attrtest->name);
         
-            fl_vexpect((attrtest->prop_count == 0 && attrnode->properties == NULL) || (attrtest->prop_count == fl_array_length(attrnode->properties)), 
+            fl_vexpect(attrtest->prop_count == zenit_property_node_map_length(&attrnode->properties),
                 "Expected number of properties in attribute '%s' is %zu", attrtest->name, attrtest->prop_count);
+
+            if (attrtest->prop_count == 0)
+                continue;
 
             for (size_t k=0; k < attrtest->prop_count; k++)
             {
                 struct PropertyTest *proptest = attrtest->properties + k;
-                struct ZenitAttributePropertyNode *propnode = attrnode->properties + k;
+
+                fl_vexpect(zenit_property_node_map_has_key(&attrnode->properties, proptest->name), 
+                    "Property %s is expected to be present", proptest->name);
+                
+                struct ZenitPropertyNode *propnode = zenit_property_node_map_get(&attrnode->properties, proptest->name);
 
                 fl_vexpect(flm_cstring_equals(proptest->name, propnode->name), "Property name in attribute '%s' is expected to be '%s'", attrnode->name, proptest->name);
                 fl_vexpect(proptest->node_type == propnode->value->type, "'%s' property's type in attribute '%s' is expected to be '%s'", proptest->name, attrnode->name, node_str[proptest->node_type]);

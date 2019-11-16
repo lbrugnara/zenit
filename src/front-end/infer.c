@@ -188,6 +188,8 @@ static struct ZenitTypeInfo* visit_variable(struct ZenitContext *ctx, struct Zen
                 "Cannot infer type of variable '%s' from the right-hand expression. Try making it explicit in the variable.", var_decl->name);
     }
 
+    // FIXME: Visit the attributes
+
     // Always the declared or inferred type. In case of error, we honor the variable type
     return &symbol->typeinfo;
 }
