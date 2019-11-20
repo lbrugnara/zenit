@@ -1,4 +1,4 @@
-#include "infer.h"
+#include "check.h"
 #include "program.h"
 #include "symbol.h"
 

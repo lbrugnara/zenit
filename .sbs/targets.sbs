@@ -5,37 +5,10 @@ compile zenit-objects {
     ],
     output_dir: "obj/",
     sources: [
-        "src/front-end/nodes/node.c"
-        "src/front-end/ast.c"
-        "src/front-end/check.c"
-        "src/front-end/context.c"
-        "src/front-end/infer.c"
-        "src/front-end/lexer.c"
-        "src/front-end/parse.c"
-        "src/front-end/parser.c"
-        "src/front-end/program.c"
-        "src/front-end/resolve.c"
-        "src/front-end/scope.c"
-        "src/front-end/source.c"
-        "src/front-end/symbol.c"
-        "src/front-end/symtable.c"
-        "src/front-end/token.c"
-        "src/front-end/type.c"
-        "src/front-end/zirgen.c"
+        "src/front-end/.*[.]c$",
+        "src/zir/.*[.]c$",
 
-        "src/zir/attribute.c"
-        "src/zir/block.c"
-        "src/zir/instruction.c"
-        "src/zir/operand.c"
-        "src/zir/program.c"
-        "src/zir/property.c"
-        "src/zir/symbol.c"
-        "src/zir/symtable.c"
-        "src/zir/type.c"
-        "src/zir/value.c"
-
-        "src/back-end/nes/opcode.c"
-        "src/back-end/nes/rom.c"
+        "src/back-end/nes/(opcode|rom)[.]c$"
     ]
 }
 
@@ -58,28 +31,7 @@ compile zenit-tests-objects {
     ],
     output_dir: "obj/",
     sources: [
-        "tests/Main.c"
-        "tests/Test.c"
-        "tests/front-end/check/errors.c"
-        "tests/front-end/infer/errors.c"
-        "tests/front-end/infer/variables.c"
-        "tests/front-end/lexer/operators.c"
-        "tests/front-end/lexer/combinations.c"
-        "tests/front-end/lexer/errors.c"
-        "tests/front-end/lexer/identifiers.c"
-        "tests/front-end/lexer/keywords.c"
-        "tests/front-end/lexer/common.c"
-        "tests/front-end/lexer/punctuation.c"
-        "tests/front-end/lexer/specials.c"
-        "tests/front-end/lexer/types.c"
-        "tests/front-end/parser/attributes.c"
-        "tests/front-end/parser/errors.c"
-        "tests/front-end/parser/literals.c"
-        "tests/front-end/parser/variables.c"
-        "tests/front-end/resolve/errors.c"
-        "tests/front-end/resolve/variables.c"
-        "tests/front-end/symtable/symbols.c"
-        "tests/front-end/zirgen/variables.c"
+        "tests/.*[.]c$"
     ]
 }
 
@@ -89,9 +41,20 @@ executable zenit {
     output_dir: "build/",
     objects: [
         zenit-objects,
-        zenit-main,
-        "lib/libfl.lib"
+        zenit-main
     ]
+
+    for win-cmd {
+        objects: [ "../fllib/build/${SBS_CONFIG_NAME}/libfl.lib" ]
+    }
+
+    for linux-bash {
+        objects: [ "../fllib/build/${SBS_CONFIG_NAME}/libfl.a" ],
+        libraries: [
+            { name: "m" },
+            { name: "pthread" }
+        ]
+    }
 }
 
 # This target creates an executable for the test suite
@@ -100,7 +63,18 @@ executable zenit-tests {
     output_dir: "build/",
     objects: [
         zenit-objects,
-        zenit-tests-objects,
-        "lib/libfl.lib"
+        zenit-tests-objects
     ]
+
+    for win-cmd {
+        objects: [ "../fllib/build/${SBS_CONFIG_NAME}/libfl.lib" ]
+    }
+
+    for linux-bash {
+        objects: [ "../fllib/build/${SBS_CONFIG_NAME}/libfl.a" ],
+        libraries: [
+            { name: "m" },
+            { name: "pthread" }
+        ]
+    }
 }

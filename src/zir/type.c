@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "type.h"
 
+#define TYPE_KEY_FORMAT "[n:%s][t:%d][a:%d][e:%zu][r:%d]", typeinfo->name, typeinfo->type, typeinfo->is_array, typeinfo->elements, typeinfo->is_ref
+
 /*
  * Struct: TypeMapping
  *  Internal structure to keep a lookup list between type's string
@@ -32,11 +34,21 @@ static FlHashtable type_string_mapping_pool = NULL;
  */
 static unsigned long hash_type(const FlByte *key)
 {
+    struct ZenitIrTypeInfo *typeinfo = (struct ZenitIrTypeInfo*)key;
+
+    size_t length = snprintf(NULL, 0, TYPE_KEY_FORMAT);
+    char *buffer = fl_cstring_new(length);
+    snprintf(buffer, length + 1, TYPE_KEY_FORMAT);
+    buffer[length] = '\0';
+
     unsigned long hash = 5381;
     FlByte c;
 
-    for (size_t i=0; i < sizeof(struct ZenitIrTypeInfo); i++)
-        hash = ((hash << 5) + hash) + key[i];
+    for (size_t i=0; i < length; i++)
+        hash = ((hash << 5) + hash) + buffer[i];
+
+    fl_cstring_free(buffer);
+
     return hash;
 }
 
@@ -73,7 +85,7 @@ static inline void init_pool(void)
     type_string_mapping_pool = fl_hashtable_new_args((struct FlHashtableArgs) {
         .hash_function = hash_type,
         .key_allocator = alloc_type_key,
-        .key_comparer = fl_container_equals_string,
+        .key_comparer = (FlContainerEqualsFunction)zenit_ir_type_equals,
         .key_cleaner = fl_container_cleaner_pointer,
         .value_cleaner = (FlContainerCleanupFunction)fl_cstring_free,
         .value_allocator = NULL
@@ -188,6 +200,9 @@ void zenit_ir_type_copy(struct ZenitIrTypeInfo *dest_type, struct ZenitIrTypeInf
  */
 bool zenit_ir_type_equals(struct ZenitIrTypeInfo *type_a, struct ZenitIrTypeInfo *type_b)
 {
+    if (type_a == NULL || type_b == NULL)
+        return type_a == type_b;
+
     if (type_a->type != type_b->type)
         return false;
 

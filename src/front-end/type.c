@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "type.h"
 
-#define TYPE_KEY_FORMAT "[n:%s][t:%d][a:%d][e:%d][r:%d]", typeinfo->name, typeinfo->type, typeinfo->is_array, typeinfo->elements, typeinfo->is_ref
+#define TYPE_KEY_FORMAT "[n:%s][t:%d][a:%d][e:%zu][r:%d]", typeinfo->name, typeinfo->type, typeinfo->is_array, typeinfo->elements, typeinfo->is_ref
 
 /*
  * Struct: TypeMapping
@@ -85,7 +85,7 @@ static inline void init_pool(void)
     type_string_mapping_pool = fl_hashtable_new_args((struct FlHashtableArgs) {
         .hash_function = hash_type,
         .key_allocator = alloc_type_key,
-        .key_comparer = fl_container_equals_string,
+        .key_comparer = (FlContainerEqualsFunction)zenit_type_equals,
         .key_cleaner = fl_container_cleaner_pointer,
         .value_cleaner = (FlContainerCleanupFunction)fl_cstring_free,
         .value_allocator = NULL
@@ -230,6 +230,9 @@ void zenit_type_copy(struct ZenitTypeInfo *dest_type, struct ZenitTypeInfo *src_
  */
 bool zenit_type_equals(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b)
 {
+    if (type_a == NULL || type_b == NULL)
+        return type_a == type_b;
+
     if (type_a->type != type_b->type)
         return false;
 

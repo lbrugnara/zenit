@@ -1,4 +1,4 @@
-#include "infer.h"
+#include "zirgen.h"
 #include "program.h"
 #include "symbol.h"
 #include "../zir/program.h"

@@ -21,11 +21,13 @@ void zenit_ir_instruction_free(struct ZenitIrInstruction *instruction)
     switch (instruction->type)
     {
         case ZENIT_IR_INSTR_VARIABLE:
+        {
             struct ZenitIrVariableInstruction *vardecl = (struct ZenitIrVariableInstruction*)instruction;
             zenit_ir_operand_free(&vardecl->lvalue);
             zenit_ir_operand_free(&vardecl->rvalue);
             zenit_ir_attribute_map_free(&vardecl->attributes);
             break;
+        }
     }
 
     fl_free(instruction);
@@ -36,6 +38,7 @@ char* zenit_ir_instruction_dump(struct ZenitIrInstruction *instruction, char *ou
     switch (instruction->type)
     {
         case ZENIT_IR_INSTR_VARIABLE:
+        {
             struct ZenitIrVariableInstruction *vardecl = (struct ZenitIrVariableInstruction*)instruction;
 
             fl_cstring_vappend(&output, "@%s : %s = ", vardecl->lvalue.operand.symbol->name, zenit_ir_type_to_string(&vardecl->lvalue.operand.symbol->typeinfo));
@@ -82,6 +85,7 @@ char* zenit_ir_instruction_dump(struct ZenitIrInstruction *instruction, char *ou
             fl_array_free(attr_names);
 
             break;
+        }
     }
 
     fl_cstring_append(&output, "\n");

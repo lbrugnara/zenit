@@ -1,5 +1,6 @@
 #include <fllib.h>
 #include <errno.h>
+#include <limits.h>
 #include "lexer.h"
 #include "parse.h"
 #include "parser.h"

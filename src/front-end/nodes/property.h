@@ -15,7 +15,7 @@ struct ZenitPropertyNodeMap {
     FlHashtable map;
 };
 
-inline struct ZenitPropertyNodeMap zenit_property_node_map_new()
+static inline struct ZenitPropertyNodeMap zenit_property_node_map_new()
 {
     return (struct ZenitPropertyNodeMap) {
         .map = fl_hashtable_new_args((struct FlHashtableArgs) {
@@ -29,37 +29,37 @@ inline struct ZenitPropertyNodeMap zenit_property_node_map_new()
     };
 }
 
-inline void zenit_property_node_map_free(struct ZenitPropertyNodeMap *property_map)
+static inline void zenit_property_node_map_free(struct ZenitPropertyNodeMap *property_map)
 {
     fl_hashtable_free(property_map->map);
 }
 
-inline struct ZenitPropertyNode* zenit_property_node_map_add(struct ZenitPropertyNodeMap *property_map, struct ZenitPropertyNode *property)
+static inline struct ZenitPropertyNode* zenit_property_node_map_add(struct ZenitPropertyNodeMap *property_map, struct ZenitPropertyNode *property)
 {
     return (struct ZenitPropertyNode*)fl_hashtable_add(property_map->map, property->name, property);
 }
 
-inline const char** zenit_property_node_map_keys(struct ZenitPropertyNodeMap *property_map)
+static inline const char** zenit_property_node_map_keys(struct ZenitPropertyNodeMap *property_map)
 {
     return fl_hashtable_keys(property_map->map);
 }
 
-inline struct ZenitPropertyNode** zenit_property_node_map_values(struct ZenitPropertyNodeMap *property_map)
+static inline struct ZenitPropertyNode** zenit_property_node_map_values(struct ZenitPropertyNodeMap *property_map)
 {
     return fl_hashtable_values(property_map->map);
 }
 
-inline struct ZenitPropertyNode* zenit_property_node_map_get(struct ZenitPropertyNodeMap *property_map, const char *property_name)
+static inline struct ZenitPropertyNode* zenit_property_node_map_get(struct ZenitPropertyNodeMap *property_map, const char *property_name)
 {
     return (struct ZenitPropertyNode*)fl_hashtable_get(property_map->map, property_name);
 }
 
-inline size_t zenit_property_node_map_length(struct ZenitPropertyNodeMap *property_map)
+static inline size_t zenit_property_node_map_length(struct ZenitPropertyNodeMap *property_map)
 {
     return fl_hashtable_length(property_map->map);
 }
 
-inline bool zenit_property_node_map_has_key(struct ZenitPropertyNodeMap *property_map, const char *property_name)
+static inline bool zenit_property_node_map_has_key(struct ZenitPropertyNodeMap *property_map, const char *property_name)
 {
     return fl_hashtable_has_key(property_map->map, property_name);
 }

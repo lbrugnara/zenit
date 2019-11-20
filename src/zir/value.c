@@ -69,10 +69,13 @@ void zenit_ir_value_free(struct ZenitIrValue *value)
     switch (value->type)
     {
         case ZENIT_IR_VALUE_LITERAL:
+        {
             // struct ZenitIrLiteralValue *literal = (struct ZenitIrLiteralValue*)value;
             // Nothing particular to free here
             break;
+        }
         case ZENIT_IR_VALUE_ARRAY:
+        {
             struct ZenitIrArrayValue *array = (struct ZenitIrArrayValue*)value;
             if (array->elements)
             {
@@ -82,6 +85,7 @@ void zenit_ir_value_free(struct ZenitIrValue *value)
                 fl_array_free(array->elements);
             }
             break;
+        }
     }
 
     if (value->typeinfo.name)

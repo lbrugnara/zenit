@@ -20,10 +20,10 @@ config clang-config {
             "-finput-charset=UTF-8",
             "-fexec-charset=UTF-8",
             "-D_FORTIFY_SOURCE=2",
-            # ${source} is a special variable that contains the source filename
-            "-c ${source}",
-            # The ${output} variable contains the output name for the compiled object
-            "-o ${output}"
+            # ${INPUT_FILE} is a special variable that contains the source filename
+            "-c ${INPUT_FILE}",
+            # The ${OUTPUT_FILE} variable contains the output name for the compiled object
+            "-o ${OUTPUT_FILE}"
         ]
     },    
 
@@ -40,12 +40,12 @@ config clang-config {
             extension: ".so",
             flags: [ 
                 "-shared",
-                "-o ${output}"
+                "-o ${OUTPUT_FILE}"
             ]
         },
         executable: {
             extension: "",
-            flags: [ "-o ${output}" ]
+            flags: [ "-o ${OUTPUT_FILE}" ]
         }
     },
 
@@ -55,7 +55,7 @@ config clang-config {
             extension: ".lib",
             flags: [
                 "/NOLOGO",
-                "/OUT:${output}"
+                "/OUT:${OUTPUT_FILE}"
             ]
         },
         shared: {
@@ -63,13 +63,13 @@ config clang-config {
             flags: [
                 "/NOLOGO",
                 "/DLL",
-                "/OUT:${output}"
+                "/OUT:${OUTPUT_FILE}"
             ]
         },
         executable: {
             extension: ".exe",
             flags: [
-                "/OUT:${output}",
+                "/OUT:${OUTPUT_FILE}",
                 "/DEFAULTLIB:libcmt.lib",
                 "/NOLOGO",
                 "/SUBSYSTEM:CONSOLE"
@@ -109,6 +109,7 @@ config clang-release extends clang-config {
 config clang-sanitize extends clang-release {
     compile: {
         flags: [
+            "-O0",
             "-fsanitize=address,undefined"
         ]
     },
