@@ -16,5 +16,7 @@ struct ZenitUnaryRefNode {
     struct ZenitNode *expression;
 };
 
+struct ZenitUnaryRefNode* zenit_node_unary_ref_new(struct ZenitSourceLocation location, struct ZenitNode *expression);
+void zenit_node_unary_ref_free(struct ZenitUnaryRefNode *ref_node);
 
 #endif /* ZENIT_AST_REFERENCE_H */

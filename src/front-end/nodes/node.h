@@ -47,22 +47,4 @@ struct ZenitNode {
  */
 void zenit_node_free(struct ZenitNode *node);
 
-/*
- * Function: zenit_node_array_free
- *  Releases the memory of an array of <struct ZenitNode> pointers.
- *  The array must be an array allocated with the fllib's 
- *  <fl_array_new> function
- *
- * Parameters:
- *  array - An <FlArray> object
- *
- * Returns:
- *  void - This function does not return a value
- * 
- * Notes:
- *  If *array* is NULL, this function returns immediately
- *  without performing anything nor erroring out
- */
-void zenit_node_array_free(struct ZenitNode **array);
-
 #endif /* ZENIT_AST_NODE_H */

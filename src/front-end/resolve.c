@@ -76,7 +76,7 @@ static struct ZenitSymbol* visit_unary_ref(struct ZenitContext *ctx, struct Zeni
 
 static struct ZenitSymbol* visit_array_initializer(struct ZenitContext *ctx, struct ZenitNode *node)
 {
-    struct ZenitArrayInitNode *array = (struct ZenitArrayInitNode*)node;
+    struct ZenitArrayNode *array = (struct ZenitArrayNode*)node;
 
     for (size_t i=0; i < fl_array_length(array->elements); i++)
         visit_node(ctx, array->elements[i]);

@@ -130,7 +130,7 @@ static struct ZenitTypeInfo* visit_unary_ref(struct ZenitContext *ctx, struct Ze
  */
 static struct ZenitTypeInfo* visit_array_initializer(struct ZenitContext *ctx, struct ZenitNode *node)
 {
-    struct ZenitArrayInitNode *array = (struct ZenitArrayInitNode*)node;
+    struct ZenitArrayNode *array = (struct ZenitArrayNode*)node;
 
     // The array type is inferred in the inference pass, so we have information
     // about it, but it can be a custom type that doesn't exist in the symbol

@@ -50,7 +50,7 @@ enum ZenitErrorType {
     // Cannot infer the type of an expression
     ZENIT_ERROR_INFERENCE,
 
-    // An operation involves types that aren't compatible
+    // An operation involves types that are incompatible
     ZENIT_ERROR_TYPE_MISSMATCH,
 
     // Error taking a reference from an expression

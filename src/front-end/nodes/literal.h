@@ -3,6 +3,11 @@
 
 #include "node.h"
 
+union ZenitLiteralValue {
+    uint8_t uint8;
+    uint16_t uint16;
+};
+
 /*
  * Struct: struct ZenitLiteralNode
  *  Represents a literal value in the program's source.
@@ -14,10 +19,10 @@
  */
 struct ZenitLiteralNode {
     struct ZenitNode base;    
-    union {
-        uint8_t uint8;
-        uint16_t uint16;
-    } value;
+    union ZenitLiteralValue value;
 };
+
+struct ZenitLiteralNode* zenit_node_literal_new(struct ZenitSourceLocation location, enum ZenitType type, union ZenitLiteralValue value);
+void zenit_node_literal_free(struct ZenitLiteralNode *literal_node);
 
 #endif /* ZENIT_AST_LITERAL_H */

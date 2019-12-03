@@ -10,7 +10,7 @@ void zenit_ast_free(struct ZenitAst *ast)
     if (!ast)
         return;
 
-    zenit_node_array_free(ast->decls);
+    fl_array_free_each_pointer(ast->decls, (FlArrayFreeElementFunc)zenit_node_free);
 
     fl_free(ast);
 }

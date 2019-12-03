@@ -4,7 +4,7 @@
 #include "node.h"
 
 /*
- * Struct: struct ZenitArrayInitNode
+ * Struct: struct ZenitArrayNode
  *  Represents a literal array initializer
  * 
  * Members:
@@ -12,9 +12,12 @@
  *  <struct ZenitNode> **values: Array of pointers to <struct ZenitNode>s that are the individual values
  *              of the array
  */
-struct ZenitArrayInitNode {
+struct ZenitArrayNode {
     struct ZenitNode base;
     struct ZenitNode **elements;
 };
+
+struct ZenitArrayNode* zenit_node_array_new(struct ZenitSourceLocation location);
+void zenit_node_array_free(struct ZenitArrayNode *array);
 
 #endif /* ZENIT_AST_ARRAY_H */

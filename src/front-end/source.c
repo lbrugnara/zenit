@@ -27,6 +27,7 @@ static struct ZenitSourceInfo* new_from_file(const char *filename)
         return NULL;
 
     struct ZenitSourceInfo *srcinfo = new_from_string(content);
+    fl_cstring_free(content);
     srcinfo->location.filename = fl_cstring_dup(filename);
 
     return srcinfo;

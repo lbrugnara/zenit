@@ -20,4 +20,7 @@ struct ZenitVariableNode {
     struct ZenitAttributeNodeMap attributes;
 };
 
+struct ZenitVariableNode* zenit_node_variable_new(struct ZenitSourceLocation location, char *name);
+void zenit_node_variable_free(struct ZenitVariableNode *var_node);
+
 #endif /* ZENIT_AST_VARIABLE_H */

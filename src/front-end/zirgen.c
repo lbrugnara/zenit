@@ -216,7 +216,7 @@ static struct ZenitIrOperand visit_identifier(struct ZenitContext *ctx, struct Z
  */
 static struct ZenitIrOperand visit_array_initializer(struct ZenitContext *ctx, struct ZenitNode *node, struct ZenitIrProgram *program)
 {
-    struct ZenitArrayInitNode *array = (struct ZenitArrayInitNode*)node;
+    struct ZenitArrayNode *array = (struct ZenitArrayNode*)node;
 
     struct ZenitIrArrayValue *arrayval = (struct ZenitIrArrayValue*)zenit_ir_value_new(ZENIT_IR_VALUE_ARRAY);
     zenit_type_to_zenit_ir_type(&array->base.typeinfo, &arrayval->base.typeinfo);

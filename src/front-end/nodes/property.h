@@ -15,6 +15,30 @@ struct ZenitPropertyNodeMap {
     FlHashtable map;
 };
 
+static inline struct ZenitPropertyNode* zenit_node_property_new(struct ZenitSourceLocation location, char *name, struct ZenitNode *value)
+{
+    struct ZenitPropertyNode *property = fl_malloc(sizeof(struct ZenitPropertyNode));
+    property->base.type = ZENIT_NODE_ATTRIBUTE_PROPERTY;
+    property->base.location = location;
+    property->name = name;
+    property->value = value;
+
+    return property;
+}
+
+static inline void zenit_node_property_free(struct ZenitPropertyNode *node)
+{
+    if (!node)
+        return;
+
+    if (node->name)
+        fl_cstring_free(node->name);
+
+    zenit_node_free(node->value);
+
+    fl_free(node);
+}
+
 static inline struct ZenitPropertyNodeMap zenit_property_node_map_new()
 {
     return (struct ZenitPropertyNodeMap) {
