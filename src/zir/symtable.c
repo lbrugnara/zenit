@@ -46,3 +46,8 @@ struct ZenitIrSymbol* zenit_ir_symtable_get(struct ZenitIrSymbolTable *symtable,
 {
     return (struct ZenitIrSymbol*)fl_hashtable_get(symtable->symbols, symbol_name);
 }
+
+struct ZenitIrSymbol** zenit_ir_symtable_get_all(struct ZenitIrSymbolTable *symtable)
+{
+    return (struct ZenitIrSymbol**)fl_hashtable_values(symtable->symbols);
+}

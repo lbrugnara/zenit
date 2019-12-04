@@ -13,6 +13,7 @@
 #include "front-end/resolve/tests.h"
 #include "front-end/symtable/tests.h"
 #include "front-end/zirgen/tests.h"
+#include "back-end/nes/tests.h"
 
 int main(int argc, char **argv) 
 {
@@ -57,6 +58,9 @@ int main(int argc, char **argv)
         ),
         fl_test_suite("zirgen",
             { "Generate ZIR variables",  &zenit_test_generate_zenit_ir_variables  }
+        ),
+        fl_test_suite("nes",
+            { "NES global variables",  &zenit_test_nes_global_variables  }
         ),
         NULL
     );

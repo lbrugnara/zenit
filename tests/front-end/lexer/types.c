@@ -12,6 +12,9 @@ static struct ZenitLexerTest tests[] = {
     { "1234",           (enum ZenitTokenType[]){ T(INTEGER), T(EOF) } },
     { "01234",          (enum ZenitTokenType[]){ T(INTEGER), T(EOF) } },
     { "4294967295",     (enum ZenitTokenType[]){ T(INTEGER), T(EOF) } },
+    { "0xA",            (enum ZenitTokenType[]){ T(INTEGER), T(EOF) } },
+    { "0xa",            (enum ZenitTokenType[]){ T(INTEGER), T(EOF) } },
+    { "0xFF",           (enum ZenitTokenType[]){ T(INTEGER), T(EOF) } },
 };
 
 void zenit_test_lexer_types(void)

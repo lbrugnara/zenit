@@ -187,6 +187,11 @@ static struct ZenitTypeInfo* visit_variable(struct ZenitContext *ctx, struct Zen
         zenit_context_error(ctx, var_decl->base.location, ZENIT_ERROR_INFERENCE, 
                 "Cannot infer type of variable '%s' from the right-hand expression. Try making it explicit in the variable.", var_decl->name);
     }
+    else
+    {   
+        // Try to unify, but ignore errors, the type check phase will take care of it
+        zenit_type_unify(&symbol->typeinfo, rhs_type);     
+    }
 
     // FIXME: Visit the attributes
 

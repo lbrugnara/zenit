@@ -84,7 +84,7 @@ void zenit_test_parser_attributes_variables(void)
         "#[a4(k: v, k2: v2)]"                   "\n"
         "var variable = 0;"                     "\n"
 
-        "#[NES(address: 8192)]"                 "\n"
+        "#[NES(address: 0x2000)]"               "\n"
         "var PPUCTRL : uint8 = 1;"              "\n"
         "#[NES(segment: zp, address: 0)]"       "\n"
         "var spaceship : uint8 = 1;"            "\n"

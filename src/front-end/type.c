@@ -265,6 +265,15 @@ bool zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b
         return true;
     }
 
+    if (type_a->is_array != type_b->is_array || type_a->elements != type_b->elements)
+        return false;
+
+    if (type_a->is_ref != type_b->is_ref)
+        return false;
+
+    if (type_a->name != type_b->name)
+        return false;
+
     bool a_uint = type_a->type >= ZENIT_TYPE_UINT8 && type_a->type <= ZENIT_TYPE_UINT16;
     bool b_uint = type_b->type >= ZENIT_TYPE_UINT8 && type_b->type <= ZENIT_TYPE_UINT16;
     

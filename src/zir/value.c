@@ -17,6 +17,10 @@ static inline char* dump_literal(struct ZenitIrLiteralValue *literal, char *outp
         case ZENIT_IR_TYPE_CUSTOM:
             output = *fl_cstring_append(&output, "<error>");
             break;
+
+        default:
+            output = *fl_cstring_append(&output, "<error>");
+            break;
     }
 
     return output;

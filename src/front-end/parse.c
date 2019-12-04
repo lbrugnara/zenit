@@ -114,7 +114,7 @@ static bool parse_typeinfo(struct ZenitParser *parser, struct ZenitContext *ctx,
  *  struct ZenitNode* - The parsed integer literal
  *
  * Grammar:
- *  integer_literal = ( '+' | '-' )? INTEGER
+ *  integer_literal = INTEGER
  */
 static struct ZenitNode* parse_integer_literal(struct ZenitParser *parser, struct ZenitContext *ctx)
 {
@@ -132,7 +132,13 @@ static struct ZenitNode* parse_integer_literal(struct ZenitParser *parser, struc
 
     // This is the integer parsing logic (unsigned integers in base 10 by now)
     char *endptr;
-    unsigned long long temp_int = strtoull((const char*)temp_token.value.sequence, &endptr, 10);
+    unsigned long long temp_int = 0;
+    
+    // If it starts with 0x it is a hex value
+    if (temp_token.value.sequence[0] == '0' && temp_token.value.sequence[1] == 'x')
+        temp_int = strtoull((const char*)temp_token.value.sequence, &endptr, 16);
+    else
+        temp_int = strtoull((const char*)temp_token.value.sequence, &endptr, 10);
     
     // The token length must be equals to the parsed number
     if ((void*)(temp_token.value.sequence + temp_token.value.length) != (void*)endptr)
@@ -612,27 +618,19 @@ static struct ZenitNode* parse_attribute_declaration(struct ZenitParser *parser,
 }
 
 /*
- * Function: parse_declaration
- *  This is the top-level non-terminal of the language
+ * Function: parse_attribute_declaration_list
+ *  Helper function that if possible, parses a sequence of attribute declarations
  *
  * Parameters:
  *  parser - Parser object
  *  ctx - <struct ZenitContext> object
  *
  * Returns:
- * struct ZenitNode* - Parsed declaration node
- * 
- * Grammar:
- *  declaration = attribute_declaration | variable_declaration | statement ;
+ * struct ZenitAttributeNodeMap - Map with the parsed attributes or an empty map
  *
  */
-static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
+static struct ZenitAttributeNodeMap parse_attribute_declaration_list(struct ZenitParser *parser, struct ZenitContext *ctx)
 {
-    // We save the next token to keep track of the location
-    struct ZenitToken temp_token = zenit_parser_peek(parser);
-
-    // Attributes may be present in multiple type of declarations (only variable by now)
-    // therefore we need to parse them if present, and then handle if their usage is valid
     struct ZenitAttributeNodeMap attributes = zenit_attribute_node_map_new();
 
     while (zenit_parser_peek(parser).type == ZENIT_TOKEN_HASH)
@@ -644,6 +642,32 @@ static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct Ze
 
         zenit_attribute_node_map_add(&attributes, attribute);
     }
+
+    return attributes;
+}
+
+/*
+ * Function: parse_declaration
+ *  This is the top-level non-terminal of the language
+ *
+ * Parameters:
+ *  parser - Parser object
+ *  ctx - <struct ZenitContext> object
+ *
+ * Returns:
+ * struct ZenitNode* - Parsed declaration node
+ * 
+ * Grammar:
+ *  declaration = attribute_declaration* variable_declaration | statement ;
+ *
+ */
+static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
+{
+    // We save the next token to keep track of the location
+    struct ZenitToken temp_token = zenit_parser_peek(parser);
+
+    // We first check for attributes
+    struct ZenitAttributeNodeMap attributes = parse_attribute_declaration_list(parser, ctx);
 
     // Check for variables, functions, etc
     if (zenit_parser_peek(parser).type == ZENIT_TOKEN_VAR)

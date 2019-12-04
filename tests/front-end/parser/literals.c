@@ -72,7 +72,7 @@ void zenit_test_parser_literal_array_initializer(void)
         struct ZenitNode *node = ctx.ast->decls[i];
         fl_expect("Node must be a literal node", node->type == ZENIT_NODE_ARRAY_INIT);
 
-        struct ZenitArrayInitNode *array = (struct ZenitArrayInitNode*)node;
+        struct ZenitArrayNode *array = (struct ZenitArrayNode*)node;
 
         fl_vexpect(array->elements && fl_array_length(array->elements) == elements[i], "Array must contain %zu elements", elements[i]);
 

@@ -2,7 +2,8 @@
 #define ZENIT_NES_GENERATE
 
 #include "../../zir/program.h"
+#include "program.h"
 
-void zenit_nes_generate(struct ZenitIrProgram *program);
+struct ZenitNesProgram* zenit_nes_generate(struct ZenitIrProgram *program);
 
 #endif /* ZENIT_NES_GENERATE */

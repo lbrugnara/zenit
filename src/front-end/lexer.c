@@ -418,6 +418,24 @@ struct ZenitToken zenit_lexer_consume(struct ZenitLexer *lexer)
         {
             return create_token(lexer, ZENIT_TOKEN_HASH, 1);
         }
+        else if (c == '0' && peek_at(lexer, 1) == 'x')
+        {
+            // Take as much numbers as possible
+            size_t digits = 2;
+            do {
+                char dc[] = { peek_at(lexer, digits), '\0' };
+
+                if (dc[0] && (is_number(dc[0]) || fl_cstring_find("abcdefABCDEF", dc)))
+                    digits++;
+                else break;
+
+            } while (true);
+
+            if (digits > 0)
+                return create_token(lexer, ZENIT_TOKEN_INTEGER, digits);
+
+            // Fall to unknown!
+        }
         else if (is_number(c))
         {
             // Take as much numbers as possible

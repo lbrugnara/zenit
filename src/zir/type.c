@@ -217,3 +217,30 @@ bool zenit_ir_type_equals(struct ZenitIrTypeInfo *type_a, struct ZenitIrTypeInfo
 
     return type_a->elements == type_b->elements;
 }
+
+size_t zenit_ir_type_size(struct ZenitIrTypeInfo *type)
+{
+    if (!type)
+        return 0;
+
+    size_t element_size = 0;
+
+    switch (type->type)
+    {
+        case ZENIT_IR_TYPE_UINT8:
+            element_size = 1; // 1 Byte
+            break;
+
+        case ZENIT_IR_TYPE_UINT16:
+            element_size = 2; // 2 bytes
+            break;
+
+        default:
+            break;
+    }
+
+    if (fl_std_umult_wrap(element_size, type->elements, SIZE_MAX))
+        return 0;
+
+    return element_size * type->elements;
+}

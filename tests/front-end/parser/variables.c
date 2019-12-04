@@ -88,7 +88,7 @@ void zenit_test_parser_array_variable_literal(void)
         fl_expect("Variable type is NONE because the type is inferred from the assignment", var_decl->base.typeinfo.type == ZENIT_TYPE_NONE);
         fl_expect("Right-hand side must be an array initializer", var_decl->value && var_decl->value->type == ZENIT_NODE_ARRAY_INIT);
 
-        struct ZenitArrayInitNode *array_init = (struct ZenitArrayInitNode*)var_decl->value;        
+        struct ZenitArrayNode *array_init = (struct ZenitArrayNode*)var_decl->value;        
 
         fl_vexpect(array_init->elements && fl_array_length(array_init->elements) == elements[i], "Number of elements in %s is %zu", name, elements[i]);
 
@@ -209,7 +209,7 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
 
         fl_expect("Right-hand side must be an array initializer", var_decl->value && var_decl->value->type == ZENIT_NODE_ARRAY_INIT);
 
-        struct ZenitArrayInitNode *array_init = (struct ZenitArrayInitNode*)var_decl->value;        
+        struct ZenitArrayNode *array_init = (struct ZenitArrayNode*)var_decl->value;        
 
         fl_vexpect(array_init->elements && fl_array_length(array_init->elements) == elements[i], "Number of elements in %s is %zu", name, elements[i]);
 

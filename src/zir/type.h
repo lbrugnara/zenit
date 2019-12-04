@@ -14,8 +14,11 @@
 enum ZenitIrType {
     ZENIT_IR_TYPE_NONE,
     ZENIT_IR_TYPE_CUSTOM,
+
     ZENIT_IR_TYPE_UINT8,
     ZENIT_IR_TYPE_UINT16,
+
+    ZENIT_IR_TYPE_END,
 };
 
 
@@ -100,5 +103,7 @@ void zenit_ir_type_copy(struct ZenitIrTypeInfo *dest_type, struct ZenitIrTypeInf
  *
  */
 bool zenit_ir_type_equals(struct ZenitIrTypeInfo *type_a, struct ZenitIrTypeInfo *type_b);
+
+size_t zenit_ir_type_size(struct ZenitIrTypeInfo *type);
 
 #endif /* ZENIT_IR_TYPE_H */

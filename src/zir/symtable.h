@@ -103,4 +103,6 @@ bool zenit_ir_symtable_has(struct ZenitIrSymbolTable *symtable, const char *symb
  */
 struct ZenitIrSymbol* zenit_ir_symtable_get(struct ZenitIrSymbolTable *symtable, const char *symbol_name);
 
+struct ZenitIrSymbol** zenit_ir_symtable_get_all(struct ZenitIrSymbolTable *symtable);
+
 #endif /* ZENIT_IR_SYMTABLE_H */
