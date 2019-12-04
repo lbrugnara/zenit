@@ -1,18 +1,18 @@
 #include "block.h"
 
-struct ZenitIrBlock* zenit_ir_block_new(const char *id, enum ZenitIrSymbolTableType type, struct ZenitIrBlock *parent)
+struct ZirBlock* zir_block_new(const char *id, enum ZirSymbolTableType type, struct ZirBlock *parent)
 {
-    struct ZenitIrBlock *block = fl_malloc(sizeof(struct ZenitIrBlock));
+    struct ZirBlock *block = fl_malloc(sizeof(struct ZirBlock));
     block->parent = parent;
-    block->instructions = fl_array_new(sizeof(struct ZenitIrInstruction*), 0);
-    block->children = fl_array_new(sizeof(struct ZenitIrBlock*), 0);
-    block->symtable = zenit_ir_symtable_new(type, id);
+    block->instructions = fl_array_new(sizeof(struct ZirInstruction*), 0);
+    block->children = fl_array_new(sizeof(struct ZirBlock*), 0);
+    block->symtable = zir_symtable_new(type, id);
     block->temp_counter = 0;
 
     return block;
 }
 
-void zenit_ir_block_free(struct ZenitIrBlock *block)
+void zir_block_free(struct ZirBlock *block)
 {
     if (!block)
         return;
@@ -20,7 +20,7 @@ void zenit_ir_block_free(struct ZenitIrBlock *block)
     if (block->children)
     {
         for (size_t i=0; i < fl_array_length(block->children); i++)
-            zenit_ir_block_free(block->children[i]);
+            zir_block_free(block->children[i]);
 
         fl_array_free(block->children);
     }
@@ -28,25 +28,25 @@ void zenit_ir_block_free(struct ZenitIrBlock *block)
     if (block->instructions)
     {
         for (size_t i=0; i < fl_array_length(block->instructions); i++)
-            zenit_ir_instruction_free(block->instructions[i]);
+            zir_instruction_free(block->instructions[i]);
 
         fl_array_free(block->instructions);
     }
 
-    zenit_ir_symtable_free(&block->symtable);
+    zir_symtable_free(&block->symtable);
 
     fl_free(block);
 }
 
-char* zenit_ir_block_dump(struct ZenitIrBlock *block, char *output)
+char* zir_block_dump(struct ZirBlock *block, char *output)
 {
     if (block->instructions)
         for (size_t i=0; i < fl_array_length(block->instructions); i++)
-            output = zenit_ir_instruction_dump(block->instructions[i], output);
+            output = zir_instruction_dump(block->instructions[i], output);
 
     if (block->children)
         for (size_t i=0; i < fl_array_length(block->children); i++)
-            output = zenit_ir_block_dump(block->children[i], output);
+            output = zir_block_dump(block->children[i], output);
 
     return output;
 }

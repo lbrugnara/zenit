@@ -1,53 +1,53 @@
-#ifndef ZENIT_IR_INSTRUCTION_H
-#define ZENIT_IR_INSTRUCTION_H
+#ifndef ZIR_INSTRUCTION_H
+#define ZIR_INSTRUCTION_H
 
 #include "../operand.h"
 #include "../attribute.h"
 
 /*
- * Enum: enum ZenitIrInstructionType
+ * Enum: enum ZirInstructionType
  *  Represents the different type of instructions available in ZIR
  * 
  */
-enum ZenitIrInstructionType {
-    ZENIT_IR_INSTR_VARIABLE,
-    ZENIT_IR_INSTR_CAST,
+enum ZirInstructionType {
+    ZIR_INSTR_VARIABLE,
+    ZIR_INSTR_CAST,
 };
 
 /*
- * Struct: struct ZenitIrInstruction
+ * Struct: struct ZirInstruction
  *  Base object that tracks common information between the
  *  different types of instructions
  * 
  * Members:
- *  <enum ZenitIrInstructionType> type: Instruction's internal type
+ *  <enum ZirInstructionType> type: Instruction's internal type
  * 
  */
-struct ZenitIrInstruction {
-    enum ZenitIrInstructionType type;
+struct ZirInstruction {
+    enum ZirInstructionType type;
 };
 
 /*
- * Function: zenit_ir_instruction_free
+ * Function: zir_instruction_free
  *  Releases the memory used by an instruction object
  *
  * Parameters:
- *  <struct ZenitIrInstruction> *instruction - The instruction object to be freed
+ *  <struct ZirInstruction> *instruction - The instruction object to be freed
  *
  * Returns:
  *  void - This function does not return a value
  *
  */
-void zenit_ir_instruction_free(struct ZenitIrInstruction *instruction);
+void zir_instruction_free(struct ZirInstruction *instruction);
 
 /*
- * Function: zenit_ir_instruction_dump
+ * Function: zir_instruction_dump
  *  Dumps the string representation of the instruction to the *output* pointer. Because
  *  the *output* pointer can be modified this function returns the same pointer, so
  *  it is safe to use it as:
  * 
  * ==== C ====
- *  output = zenit_ir_instruction_dump(instruction, output);
+ *  output = zir_instruction_dump(instruction, output);
  * ===========
  *
  * Parameters:
@@ -58,6 +58,6 @@ void zenit_ir_instruction_free(struct ZenitIrInstruction *instruction);
  *  char* - *output* pointer
  *
  */
-char* zenit_ir_instruction_dump(struct ZenitIrInstruction *instruction, char *output);
+char* zir_instruction_dump(struct ZirInstruction *instruction, char *output);
 
-#endif /* ZENIT_IR_INSTRUCTION_H */
+#endif /* ZIR_INSTRUCTION_H */

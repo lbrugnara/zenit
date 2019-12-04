@@ -3,27 +3,27 @@
 #include "cast.h"
 #include "variable.h"
 
-void zenit_ir_instruction_free(struct ZenitIrInstruction *instruction)
+void zir_instruction_free(struct ZirInstruction *instruction)
 {
-    if (instruction->type == ZENIT_IR_INSTR_VARIABLE)
+    if (instruction->type == ZIR_INSTR_VARIABLE)
     {
-        zenit_ir_instruction_variable_free((struct ZenitIrVariableInstruction*)instruction);
+        zir_instruction_variable_free((struct ZirVariableInstruction*)instruction);
     }
-    else if (instruction->type == ZENIT_IR_INSTR_CAST)
+    else if (instruction->type == ZIR_INSTR_CAST)
     {
-        zenit_ir_instruction_cast_free((struct ZenitIrCastInstruction*)instruction);
+        zir_instruction_cast_free((struct ZirCastInstruction*)instruction);
     }
 }
 
-char* zenit_ir_instruction_dump(struct ZenitIrInstruction *instruction, char *output)
+char* zir_instruction_dump(struct ZirInstruction *instruction, char *output)
 {
-    if (instruction->type == ZENIT_IR_INSTR_VARIABLE)
+    if (instruction->type == ZIR_INSTR_VARIABLE)
     {
-        output = zenit_ir_instruction_variable_dump((struct ZenitIrVariableInstruction*)instruction, output);
+        output = zir_instruction_variable_dump((struct ZirVariableInstruction*)instruction, output);
     }
-    else if (instruction->type == ZENIT_IR_INSTR_CAST)
+    else if (instruction->type == ZIR_INSTR_CAST)
     {
-        output = zenit_ir_instruction_cast_dump((struct ZenitIrCastInstruction*)instruction, output);
+        output = zir_instruction_cast_dump((struct ZirCastInstruction*)instruction, output);
     }
 
     return output;

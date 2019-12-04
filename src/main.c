@@ -24,7 +24,7 @@ int main(int argc, char **argv)
         return -1;
     }
     
-    struct ZenitIrProgram *zir_program = zenit_generate_zir(&ctx);
+    struct ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
     if (!zir_program)
     {
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     
     zenit_nes_rom_free(rom);
     zenit_nes_program_free(nes_program);
-    zenit_ir_program_free(zir_program);
+    zir_program_free(zir_program);
     zenit_context_free(&ctx);
     return 0;
 }

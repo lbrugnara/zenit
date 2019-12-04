@@ -1,54 +1,54 @@
-#ifndef ZENIT_IR_CAST_H
-#define ZENIT_IR_CAST_H
+#ifndef ZIR_CAST_H
+#define ZIR_CAST_H
 
 #include "instruction.h"
 #include "../operand.h"
 #include "../attribute.h"
 #include "../type.h"
 
-struct ZenitIrCastInstruction {
-    struct ZenitIrInstruction base;
-    struct ZenitIrOperand lvalue;
-    struct ZenitIrOperand rvalue;
+struct ZirCastInstruction {
+    struct ZirInstruction base;
+    struct ZirOperand lvalue;
+    struct ZirOperand rvalue;
 };
 
 /*
- * Function: zenit_ir_instruction_cast_new
+ * Function: zir_instruction_cast_new
  *  Creates and returns a new instruction based on the provided *type*
  *
  * Parameters:
- *  <enum ZenitIrInstructionType> type - Type of the instruction to be created
+ *  <enum ZirInstructionType> type - Type of the instruction to be created
  *
  * Returns:
- *  <struct ZenitIrInstruction>* - Instruction object
+ *  <struct ZirInstruction>* - Instruction object
  *
  * Notes:
  *  The object returned by this function must be freed with the
- *  <zenit_ir_instruction_cast_free> function
+ *  <zir_instruction_cast_free> function
  */
-struct ZenitIrCastInstruction* zenit_ir_instruction_cast_new(void);
+struct ZirCastInstruction* zir_instruction_cast_new(void);
 
 /*
- * Function: zenit_ir_instruction_cast_free
+ * Function: zir_instruction_cast_free
  *  Releases the memory used by an instruction object
  *
  * Parameters:
- *  <struct ZenitIrInstruction> *instruction - The instruction object to be freed
+ *  <struct ZirInstruction> *instruction - The instruction object to be freed
  *
  * Returns:
  *  void - This function does not return a value
  *
  */
-void zenit_ir_instruction_cast_free(struct ZenitIrCastInstruction *instruction);
+void zir_instruction_cast_free(struct ZirCastInstruction *instruction);
 
 /*
- * Function: zenit_ir_instruction_cast_dump
+ * Function: zir_instruction_cast_dump
  *  Dumps the string representation of the instruction to the *output* pointer. Because
  *  the *output* pointer can be modified this function returns the same pointer, so
  *  it is safe to use it as:
  * 
  * ==== C ====
- *  output = zenit_ir_instruction_cast_dump(instruction, output);
+ *  output = zir_instruction_cast_dump(instruction, output);
  * ===========
  *
  * Parameters:
@@ -59,6 +59,6 @@ void zenit_ir_instruction_cast_free(struct ZenitIrCastInstruction *instruction);
  *  char* - *output* pointer
  *
  */
-char* zenit_ir_instruction_cast_dump(struct ZenitIrCastInstruction *instruction, char *output);
+char* zir_instruction_cast_dump(struct ZirCastInstruction *instruction, char *output);
 
-#endif /* ZENIT_IR_CAST_H */
+#endif /* ZIR_CAST_H */

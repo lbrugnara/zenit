@@ -1,6 +1,6 @@
 #include "property.h"
 
-void zenit_ir_property_free(struct ZenitIrProperty *property)
+void zir_property_free(struct ZirProperty *property)
 {
     if (!property)
         return;
@@ -8,7 +8,7 @@ void zenit_ir_property_free(struct ZenitIrProperty *property)
     if (property->name)
         fl_cstring_free(property->name);
 
-    zenit_ir_operand_free(&property->value);
+    zir_operand_free(&property->value);
 
     fl_free(property);
 }

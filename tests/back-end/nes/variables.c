@@ -37,7 +37,7 @@ void zenit_test_nes_literal_variables(void)
     fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
     fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
     
-    struct ZenitIrProgram *zir_program = zenit_generate_zir(&ctx);
+    struct ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
     struct ZenitNesProgram *nes_program = zenit_nes_generate_program(zir_program);
     
@@ -60,6 +60,6 @@ void zenit_test_nes_literal_variables(void)
     fl_expect("Data segment at 0x10 should be 0x08 (arrarr[2][1])", nes_program->data.bytes[0x10] == 0x08);
 
     zenit_nes_program_free(nes_program);
-    zenit_ir_program_free(zir_program);
+    zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }

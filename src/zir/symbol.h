@@ -1,22 +1,22 @@
-#ifndef ZENIT_IR_SYMBOL_H
-#define ZENIT_IR_SYMBOL_H
+#ifndef ZIR_SYMBOL_H
+#define ZIR_SYMBOL_H
 
 #include <stdbool.h>
 #include "type.h"
 
 /*
- * Struct: struct ZenitIrSymbol
+ * Struct: struct ZirSymbol
  *  Represents a symbol of a ZIR program containing the identifier name and
  *  the type information.
  */
-struct ZenitIrSymbol {
+struct ZirSymbol {
     const char *name;
-    struct ZenitIrTypeInfo typeinfo;
+    struct ZirTypeInfo typeinfo;
     bool temporal;
 };
 
 /*
- * Function: zenit_ir_symbol_new
+ * Function: zir_symbol_new
  *  Allocates memory for a new symbol object and initializes it with the provided
  *  identifier name and type information
  *
@@ -26,16 +26,16 @@ struct ZenitIrSymbol {
  *  temporal - True if the symbol is a temporal object
  *
  * Returns:
- *  struct ZenitIrSymbol* - The new symbol
+ *  struct ZirSymbol* - The new symbol
  * 
  * Notes:
- *  The object returned by this function must be freed with the <zenit_ir_symbol_free> function
+ *  The object returned by this function must be freed with the <zir_symbol_free> function
  *
  */
-struct ZenitIrSymbol* zenit_ir_symbol_new(const char *name, struct ZenitIrTypeInfo *typeinfo, bool temporal);
+struct ZirSymbol* zir_symbol_new(const char *name, struct ZirTypeInfo *typeinfo, bool temporal);
 
 /*
- * Function: zenit_ir_symbol_free
+ * Function: zir_symbol_free
  *  Releases the memory of the *symbol* object
  *
  * Parameters:
@@ -44,6 +44,6 @@ struct ZenitIrSymbol* zenit_ir_symbol_new(const char *name, struct ZenitIrTypeIn
  * Returns:
  *  void - This function does not return a value
  */
-void zenit_ir_symbol_free(struct ZenitIrSymbol *symbol);
+void zir_symbol_free(struct ZirSymbol *symbol);
 
-#endif /* ZENIT_IR_SYMBOL_H */
+#endif /* ZIR_SYMBOL_H */

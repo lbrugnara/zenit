@@ -1,42 +1,42 @@
 #include "program.h"
 #include "symbol.h"
 
-struct ZenitIrProgram* zenit_ir_program_new()
+struct ZirProgram* zir_program_new()
 {
-    struct ZenitIrProgram *program = fl_malloc(sizeof(struct ZenitIrProgram));
-    program->global = zenit_ir_block_new("global", ZENIT_IR_SYMTABLE_GLOBAL, NULL);
+    struct ZirProgram *program = fl_malloc(sizeof(struct ZirProgram));
+    program->global = zir_block_new("global", ZIR_SYMTABLE_GLOBAL, NULL);
     program->current = program->global;
 
     return program;
 }
 
-void zenit_ir_program_free(struct ZenitIrProgram *program)
+void zir_program_free(struct ZirProgram *program)
 {
     if (!program)
         return;
         
-    zenit_ir_block_free(program->global);
+    zir_block_free(program->global);
 
     fl_free(program);
 }
 
-struct ZenitIrSymbol* zenit_ir_program_add_global_symbol(struct ZenitIrProgram *program, struct ZenitIrSymbol *symbol)
+struct ZirSymbol* zir_program_add_global_symbol(struct ZirProgram *program, struct ZirSymbol *symbol)
 {
-    return zenit_ir_symtable_add(&program->global->symtable, symbol);
+    return zir_symtable_add(&program->global->symtable, symbol);
 }
 
-struct ZenitIrSymbol* zenit_ir_program_add_symbol(struct ZenitIrProgram *program, struct ZenitIrSymbol *symbol)
+struct ZirSymbol* zir_program_add_symbol(struct ZirProgram *program, struct ZirSymbol *symbol)
 {
-    return zenit_ir_symtable_add(&program->current->symtable, symbol);
+    return zir_symtable_add(&program->current->symtable, symbol);
 }
 
-struct ZenitIrInstruction* zenit_ir_program_add_instruction(struct ZenitIrProgram *program, struct ZenitIrInstruction *instruction)
+struct ZirInstruction* zir_program_add_instruction(struct ZirProgram *program, struct ZirInstruction *instruction)
 {
     program->current->instructions = fl_array_append(program->current->instructions, &instruction);
     return instruction;
 }
 
-char* zenit_ir_program_dump(struct ZenitIrProgram *program, char *output)
+char* zir_program_dump(struct ZirProgram *program, char *output)
 {
-    return zenit_ir_block_dump(program->global, output);
+    return zir_block_dump(program->global, output);
 }

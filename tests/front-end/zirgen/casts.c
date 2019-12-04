@@ -29,7 +29,7 @@ void zenit_test_generate_ir_casts(void)
         "var e : uint16 = cast(&d);"                "\n"
     ;
 
-    const char *zenit_ir_src = 
+    const char *zir_src = 
         "@a : uint16 = 1"                           "\n"
 
         "%tmp0 : uint8 = cast(511, uint8)"          "\n"
@@ -52,14 +52,14 @@ void zenit_test_generate_ir_casts(void)
     fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
     fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
     
-    struct ZenitIrProgram *program = zenit_generate_zir(&ctx);
+    struct ZirProgram *program = zenit_generate_zir(&ctx);
     
-    char *codegen = zenit_ir_program_dump(program, fl_cstring_new(0));
+    char *codegen = zir_program_dump(program, fl_cstring_new(0));
 
-    fl_expect("Generated IR must be equals to the hand-written version", flm_cstring_equals(codegen, zenit_ir_src));
+    fl_expect("Generated IR must be equals to the hand-written version", flm_cstring_equals(codegen, zir_src));
     
     fl_cstring_free(codegen);
 
-    zenit_ir_program_free(program);
+    zir_program_free(program);
     zenit_context_free(&ctx);
 }

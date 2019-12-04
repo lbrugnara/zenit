@@ -7,34 +7,34 @@
 /*
  * Struct: TypeMapping
  *  Internal structure to keep a lookup list between type's string
- *  representation and its corresponding <enum ZenitIrType> value
+ *  representation and its corresponding <enum ZirType> value
  */
 static struct TypeMapping {
     const char *string;
-    enum ZenitIrType type;
+    enum ZirType type;
 } type_mappings[] = {
-    { "<none>", ZENIT_IR_TYPE_NONE },
-    { "uint8",  ZENIT_IR_TYPE_UINT8 },
-    { "uint16", ZENIT_IR_TYPE_UINT16 },
+    { "<none>", ZIR_TYPE_NONE },
+    { "uint8",  ZIR_TYPE_UINT8 },
+    { "uint16", ZIR_TYPE_UINT16 },
 };
 
 /*
  * Variable: type_string_mapping_pool
- *  Because many <struct ZenitIrTypeInfo> objects that are equals
+ *  Because many <struct ZirTypeInfo> objects that are equals
  *  map to the same string representation, we use a hashtable
  *  to reuse those strings between them.
- *  The hashtable uses <struct ZenitIrTypeInfo> as key elements and 
+ *  The hashtable uses <struct ZirTypeInfo> as key elements and 
  *  saves string for each value
  */
 static FlHashtable type_string_mapping_pool = NULL;
 
 /*
  * Function: hash_type
- *  Creates a hash from a <struct ZenitIrTypeInfo> object
+ *  Creates a hash from a <struct ZirTypeInfo> object
  */
 static unsigned long hash_type(const FlByte *key)
 {
-    struct ZenitIrTypeInfo *typeinfo = (struct ZenitIrTypeInfo*)key;
+    struct ZirTypeInfo *typeinfo = (struct ZirTypeInfo*)key;
 
     size_t length = snprintf(NULL, 0, TYPE_KEY_FORMAT);
     char *buffer = fl_cstring_new(length);
@@ -54,12 +54,12 @@ static unsigned long hash_type(const FlByte *key)
 
 /*
  * Function: alloc_type_key
- *  Allocates a <struct ZenitIrTypeInfo> object into the *dest* pointer
+ *  Allocates a <struct ZirTypeInfo> object into the *dest* pointer
  */
 static void alloc_type_key(FlByte **dest, const FlByte *src)
 {
-    *dest = fl_malloc(sizeof(struct ZenitIrTypeInfo));
-    memcpy(*dest, src, sizeof(struct ZenitIrTypeInfo));
+    *dest = fl_malloc(sizeof(struct ZirTypeInfo));
+    memcpy(*dest, src, sizeof(struct ZirTypeInfo));
 }
 
 /*
@@ -74,7 +74,7 @@ static void free_pool(void)
 
 /*
  * Function: init_pool
- *  Initializes the pool of mappings between <struct ZenitIrTypeInfo> objects
+ *  Initializes the pool of mappings between <struct ZirTypeInfo> objects
  *  and strings
  */
 static inline void init_pool(void)
@@ -85,7 +85,7 @@ static inline void init_pool(void)
     type_string_mapping_pool = fl_hashtable_new_args((struct FlHashtableArgs) {
         .hash_function = hash_type,
         .key_allocator = alloc_type_key,
-        .key_comparer = (FlContainerEqualsFunction)zenit_ir_type_equals,
+        .key_comparer = (FlContainerEqualsFunction)zir_type_equals,
         .key_cleaner = fl_container_cleaner_pointer,
         .value_cleaner = (FlContainerCleanupFunction)fl_cstring_free,
         .value_allocator = NULL
@@ -95,25 +95,25 @@ static inline void init_pool(void)
 }
 
 /*
- * Function: zenit_ir_type_to_string
+ * Function: zir_type_to_string
  *  This function has the added complexity of taking into account if 
  *  the type is an array and its size, therefore we need to use a heap
  *  allocated string, but we benefit from the <type_string_mapping_pool> variable
  *  to reuse strings.
  */
-const char* zenit_ir_type_to_string(const struct ZenitIrTypeInfo *typeinfo)
+const char* zir_type_to_string(const struct ZirTypeInfo *typeinfo)
 {
     // We need to initialize the pool first
     if (!type_string_mapping_pool)
         init_pool();
 
-    // If we already processed the string representation of the <struct ZenitIrTypeInfo> object
+    // If we already processed the string representation of the <struct ZirTypeInfo> object
     // we return it
     if (fl_hashtable_has_key(type_string_mapping_pool, typeinfo))
         return fl_hashtable_get(type_string_mapping_pool, typeinfo);
 
     // If the base type is a custom type, we use the custom type's name
-    const char *base_type = ZENIT_IR_TYPE_CUSTOM == typeinfo->type ? typeinfo->name : NULL;
+    const char *base_type = ZIR_TYPE_CUSTOM == typeinfo->type ? typeinfo->name : NULL;
 
     // If it is a native type, we need to lookup its native string representation
     if (base_type == NULL)
@@ -129,7 +129,7 @@ const char* zenit_ir_type_to_string(const struct ZenitIrTypeInfo *typeinfo)
         }
     }
 
-    // We allocate memory for the string representation of this <struct ZenitIrTypeInfo> object
+    // We allocate memory for the string representation of this <struct ZirTypeInfo> object
     char *string_value = fl_cstring_new(0);
     
     // Add the arrray information if needed
@@ -155,13 +155,13 @@ const char* zenit_ir_type_to_string(const struct ZenitIrTypeInfo *typeinfo)
 }
 
 /*
- * Function: zenit_ir_type_to_base_string
- *  The base string representation is easier than the <zenit_ir_type_to_string>
+ * Function: zir_type_to_base_string
+ *  The base string representation is easier than the <zir_type_to_string>
  *  function because we don't care about array information
  */
-const char* zenit_ir_type_to_base_string(const struct ZenitIrTypeInfo *typeinfo)
+const char* zir_type_to_base_string(const struct ZirTypeInfo *typeinfo)
 {
-    if (ZENIT_IR_TYPE_CUSTOM == typeinfo->type)
+    if (ZIR_TYPE_CUSTOM == typeinfo->type)
         return typeinfo->name;
 
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
@@ -175,11 +175,11 @@ const char* zenit_ir_type_to_base_string(const struct ZenitIrTypeInfo *typeinfo)
 }
 
 /*
- * Function: zenit_ir_type_copy
+ * Function: zir_type_copy
  *  We safely assign memory if needed because the owner of the
- *  <struct ZenitIrTypeInfo> is in charge of releasing it
+ *  <struct ZirTypeInfo> is in charge of releasing it
  */
-void zenit_ir_type_copy(struct ZenitIrTypeInfo *dest_type, struct ZenitIrTypeInfo *src_type)
+void zir_type_copy(struct ZirTypeInfo *dest_type, struct ZirTypeInfo *src_type)
 {
     if (src_type->name)
     {
@@ -195,10 +195,10 @@ void zenit_ir_type_copy(struct ZenitIrTypeInfo *dest_type, struct ZenitIrTypeInf
 }
 
 /*
- * Function: zenit_ir_type_equals
+ * Function: zir_type_equals
  *  This basic function compares types, names, reference and array information
  */
-bool zenit_ir_type_equals(struct ZenitIrTypeInfo *type_a, struct ZenitIrTypeInfo *type_b)
+bool zir_type_equals(struct ZirTypeInfo *type_a, struct ZirTypeInfo *type_b)
 {
     if (type_a == NULL || type_b == NULL)
         return type_a == type_b;
@@ -218,7 +218,7 @@ bool zenit_ir_type_equals(struct ZenitIrTypeInfo *type_a, struct ZenitIrTypeInfo
     return type_a->elements == type_b->elements;
 }
 
-size_t zenit_ir_type_size(struct ZenitIrTypeInfo *type)
+size_t zir_type_size(struct ZirTypeInfo *type)
 {
     if (!type)
         return 0;
@@ -227,11 +227,11 @@ size_t zenit_ir_type_size(struct ZenitIrTypeInfo *type)
 
     switch (type->type)
     {
-        case ZENIT_IR_TYPE_UINT8:
+        case ZIR_TYPE_UINT8:
             element_size = 1; // 1 Byte
             break;
 
-        case ZENIT_IR_TYPE_UINT16:
+        case ZIR_TYPE_UINT16:
             element_size = 2; // 2 bytes
             break;
 
