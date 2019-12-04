@@ -190,7 +190,7 @@ static struct ZenitTypeInfo* visit_variable(struct ZenitContext *ctx, struct Zen
     else
     {   
         // Try to unify, but ignore errors, the type check phase will take care of it
-        zenit_type_unify(&symbol->typeinfo, rhs_type);     
+        //zenit_type_unify(&symbol->typeinfo, rhs_type);     
     }
 
     // FIXME: Visit the attributes

@@ -189,7 +189,7 @@ static struct ZenitTypeInfo* visit_variable(struct ZenitContext *ctx, struct Zen
     // We check types to make sure the assignment is valid, but we do it only if
     // the variable type is valid, because if not, we might be targeting a false-positive
     // error
-    if (var_type_defined && !zenit_type_equals(&symbol->typeinfo, rhs_type))
+    if (var_type_defined && !zenit_type_can_assign(&symbol->typeinfo, rhs_type))
     {
         zenit_context_error(ctx, var_decl->base.location, ZENIT_ERROR_TYPE_MISSMATCH, 
                 "Cannot convert from type '%s' to '%s'", zenit_type_to_string(rhs_type), zenit_type_to_string(&symbol->typeinfo));

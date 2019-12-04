@@ -13,7 +13,9 @@ enum ZenitNesSegment {
 
 struct ZenitNesSymbol {
     char *name;
+    size_t elements;
     size_t size;
+    size_t element_size;
     uint16_t address;
     enum ZenitNesSegment segment;
 };
