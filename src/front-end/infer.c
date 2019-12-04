@@ -18,6 +18,7 @@ static struct ZenitTypeInfo* visit_variable(struct ZenitContext *ctx, struct Zen
 static struct ZenitTypeInfo* visit_array_initializer(struct ZenitContext *ctx, struct ZenitNode *node);
 static struct ZenitTypeInfo* visit_identifier(struct ZenitContext *ctx, struct ZenitNode *node);
 static struct ZenitTypeInfo* visit_unary_ref(struct ZenitContext *ctx, struct ZenitNode *node);
+static struct ZenitTypeInfo* visit_cast(struct ZenitContext *ctx, struct ZenitNode *node);
 
 /*
  * Variable: inferrers
@@ -29,7 +30,21 @@ static const ZenitTypeInferrer inferrers[] = {
     [ZENIT_NODE_ARRAY_INIT] = &visit_array_initializer,
     [ZENIT_NODE_IDENTIFIER] = &visit_identifier,
     [ZENIT_NODE_UNARY_REF]  = &visit_unary_ref,
+    [ZENIT_NODE_CAST]       = &visit_cast,
 };
+
+static struct ZenitTypeInfo* visit_cast(struct ZenitContext *ctx, struct ZenitNode *node)
+{
+    struct ZenitCastNode *cast_node = (struct ZenitCastNode*)node;
+
+    // We visit the casted expression, but we don't need to check anything here
+    visit_node(ctx, cast_node->expression);
+
+    // We always return the cast's type, if it is NONE, we will need information
+    // from the context, and if that information is not present, we will error out
+    // in the type check pass
+    return &cast_node->base.typeinfo;
+}
 
 /*
  * Function: visit_literal
@@ -187,10 +202,10 @@ static struct ZenitTypeInfo* visit_variable(struct ZenitContext *ctx, struct Zen
         zenit_context_error(ctx, var_decl->base.location, ZENIT_ERROR_INFERENCE, 
                 "Cannot infer type of variable '%s' from the right-hand expression. Try making it explicit in the variable.", var_decl->name);
     }
-    else
+    else if (!zenit_type_equals(&symbol->typeinfo, rhs_type))
     {   
-        // Try to unify, but ignore errors, the type check phase will take care of it
-        //zenit_type_unify(&symbol->typeinfo, rhs_type);     
+        // Last resort: Both types are defined, so we assume an implicit cast, the type check pass will take care of it
+        var_decl->value = (struct ZenitNode*)zenit_node_cast_new(var_decl->value->location, var_decl->value, &var_decl->base.typeinfo, true);
     }
 
     // FIXME: Visit the attributes

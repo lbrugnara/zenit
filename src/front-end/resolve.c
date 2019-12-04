@@ -18,6 +18,7 @@ static struct ZenitSymbol* visit_variable(struct ZenitContext *ctx, struct Zenit
 static struct ZenitSymbol* visit_array_initializer(struct ZenitContext *ctx, struct ZenitNode *node);
 static struct ZenitSymbol* visit_identifier(struct ZenitContext *ctx, struct ZenitNode *node);
 static struct ZenitSymbol* visit_unary_ref(struct ZenitContext *ctx, struct ZenitNode *node);
+static struct ZenitSymbol* visit_cast(struct ZenitContext *ctx, struct ZenitNode *node);
 
 /*
  * Variable: resolvers
@@ -29,7 +30,7 @@ static const ZenitSymbolResolver resolvers[] = {
     [ZENIT_NODE_IDENTIFIER] = &visit_identifier,
     [ZENIT_NODE_ARRAY_INIT] = &visit_array_initializer,
     [ZENIT_NODE_UNARY_REF]  = &visit_unary_ref,
-
+    [ZENIT_NODE_CAST]       = &visit_cast,
     [ZENIT_NODE_LITERAL]    = &visit_nothing,
     
 };
@@ -49,6 +50,15 @@ static const ZenitSymbolResolver resolvers[] = {
  */
 static struct ZenitSymbol* visit_nothing(struct ZenitContext *ctx, struct ZenitNode *node)
 {
+    return NULL;
+}
+
+static struct ZenitSymbol* visit_cast(struct ZenitContext *ctx, struct ZenitNode *node)
+{
+    struct ZenitCastNode *cast_node = (struct ZenitCastNode*)node;
+
+    visit_node(ctx, cast_node->expression);
+
     return NULL;
 }
 

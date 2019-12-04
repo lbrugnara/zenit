@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-struct NesFileHeader {
+struct ZenitNesFileHeader {
     uint8_t magic[4]; // $4E $45 $53 $1A ("NES" followed by MS-DOS end-of-file)
     uint8_t prg_rom; // Size of PRG-ROM in 16KB units
     uint8_t chr_rom; // Size of CHR-ROM in 8KB units (0 means the board uses CHR-RAM)

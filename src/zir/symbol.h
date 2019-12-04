@@ -1,6 +1,7 @@
 #ifndef ZENIT_IR_SYMBOL_H
 #define ZENIT_IR_SYMBOL_H
 
+#include <stdbool.h>
 #include "type.h"
 
 /*
@@ -11,6 +12,7 @@
 struct ZenitIrSymbol {
     const char *name;
     struct ZenitIrTypeInfo typeinfo;
+    bool temporal;
 };
 
 /*
@@ -21,6 +23,7 @@ struct ZenitIrSymbol {
  * Parameters:
  *  name - Symbol name
  *  typeinfo - Type information
+ *  temporal - True if the symbol is a temporal object
  *
  * Returns:
  *  struct ZenitIrSymbol* - The new symbol
@@ -29,7 +32,7 @@ struct ZenitIrSymbol {
  *  The object returned by this function must be freed with the <zenit_ir_symbol_free> function
  *
  */
-struct ZenitIrSymbol* zenit_ir_symbol_new(const char *name, struct ZenitIrTypeInfo *typeinfo);
+struct ZenitIrSymbol* zenit_ir_symbol_new(const char *name, struct ZenitIrTypeInfo *typeinfo, bool temporal);
 
 /*
  * Function: zenit_ir_symbol_free

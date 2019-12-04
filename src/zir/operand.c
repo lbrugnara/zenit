@@ -17,13 +17,13 @@ char* zenit_ir_operand_dump(struct ZenitIrOperand *operand, char *output)
 
     if (operand->type == ZENIT_IR_OPERAND_SYMBOL)
     {
-        fl_cstring_vappend(&output, "@%s", operand->operand.symbol->name);
+        fl_cstring_vappend(&output, "%s%s", operand->operand.symbol->temporal ? "%" : "@", operand->operand.symbol->name);
         return output;
     }
 
     if (operand->type == ZENIT_IR_OPERAND_REF)
     {
-        fl_cstring_vappend(&output, "ref @%s", operand->operand.symbol->name);
+        fl_cstring_vappend(&output, "ref %s%s", operand->operand.symbol->temporal ? "%" : "@", operand->operand.symbol->name);
         return output;
     }
 

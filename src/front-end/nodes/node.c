@@ -1,5 +1,6 @@
 #include "array.h"
 #include "attribute.h"
+#include "cast.h"
 #include "identifier.h"
 #include "literal.h"
 #include "property.h"
@@ -63,5 +64,9 @@ void zenit_node_free(struct ZenitNode *node)
     else if (node->type == ZENIT_NODE_ATTRIBUTE_PROPERTY)
     {
         zenit_node_property_free((struct ZenitPropertyNode*)node);
+    }
+    else if (node->type == ZENIT_NODE_CAST)
+    {
+        zenit_node_cast_free((struct ZenitCastNode*)node);
     }
 }

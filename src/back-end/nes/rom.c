@@ -1,15 +1,21 @@
 #include <fllib.h>
 #include "rom.h"
 
-typedef uint8_t(*Nes1ByteInstruction)(enum NesOpcode opcode, enum NesAddressMode mode, uint16_t bytes);
-typedef uint8_t(*Nes2BytesInstruction)(enum NesOpcode opcode, enum NesAddressMode mode, uint16_t bytes);
-typedef uint8_t(*Nes3BytesInstruction)(enum NesOpcode opcode, enum NesAddressMode mode, uint16_t bytes);
-
-struct NesRom nes_rom_new(uint16_t base_address)
+struct ZenitNesRom* zenit_nes_rom_new(struct ZenitNesProgram *program)
 {
-    return (struct NesRom) {
-        .pc = 0,
-        .base_address = base_address,
+    //size_t data_size = fl_array_length(program->data.bytes);
+    //size_t startup_size = fl_array_length(program->startup.bytes);
+    //size_t code_size = fl_array_length(program->code.bytes);
+    //size_t total_size = data_size + startup_size + code_size;
+//
+    //// wrap
+    //if (total_size < data_size || total_size < startup_size || total_size < code_size)
+    //    return NULL;
+//
+    //if (total_size > sizeof(struct ZenitNesNrom256))
+    //    return NULL;    
+
+    struct ZenitNesRom default_rom = {
         .header = {
             .magic = { 0x4E, 0x45, 0x53, 0x1A },
             .prg_rom = 2,
@@ -21,203 +27,69 @@ struct NesRom nes_rom_new(uint16_t base_address)
             .flag10 = 0,
             .unused = { 0 }
         },
-        .prg_rom = (struct NesProgramRom) {
-            .data = { 0 },
+        .prg_rom = (struct ZenitNesNrom256) {
+            .bank = { 0 },
             .nmi_addr = 0,
             .res_addr = 0,
             .irq_addr = 0,
         }
     };
-}
 
-uint16_t nes_rom_emit_label(struct NesRom *rom)
-{
-    return rom->pc + rom->base_address;
-}
+    // First we copy the data segment that actually uses the whole PRG-ROM (on purpose)
+    memcpy(&default_rom.prg_rom, program->data.bytes, sizeof(struct ZenitNesNrom256));
 
-uint8_t nes_rom_calc_rel_addr(struct NesRom *rom, uint16_t address)
-{
-    if (address <= rom->pc + rom->base_address)
-        return 256 - (rom->pc + rom->base_address + 2 - address); // 2 is for the 2-byte instruction
-
-    return address - rom->pc + rom->base_address;
-}
-
-void nes_rom_emit_abs(struct NesRom *rom, enum NesOpcode opcode, uint16_t bytes)
-{
-    if (rom->pc == UINT16_MAX)
+    // We need to copy the startup routine, we need to find the space for it
+    if (program->startup.pc > 0)
     {
-        // FIXME: Handle overflow
-        return;
+        // The startup routine will replace the original RESET vector, so we need to add a JMP at the end
+        zenit_nes_program_emit_abs(&program->startup, NES_OP_JMP, default_rom.prg_rom.res_addr);
+
+        size_t i=0;
+        size_t bank_length = sizeof(default_rom.prg_rom.bank) / sizeof(default_rom.prg_rom.bank[0]);
+        for (; i + program->startup.pc < bank_length; i++)
+        {
+            if (default_rom.prg_rom.bank[i] != 0 || default_rom.prg_rom.bank[i + program->startup.pc] != 0)
+                continue;
+
+            size_t j=i;
+            for (; j < program->startup.pc + i; j++)
+            {
+                if (default_rom.prg_rom.bank[j] != 0)
+                    break;
+            }
+
+            if (j == program->startup.pc + i)
+            {
+                memcpy(default_rom.prg_rom.bank + i, program->startup.bytes, program->startup.pc);
+                default_rom.prg_rom.res_addr = program->data.base_address + i;
+                break;
+            }
+        }
+
+        if (i == bank_length - 1)
+            return NULL;
     }
 
-    // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_ABS);
-    rom->prg_rom.data[rom->pc++] = opcode_hex;
-    rom->prg_rom.data[rom->pc++] = (uint8_t)(bytes);
-    rom->prg_rom.data[rom->pc++] = (uint8_t)(bytes >> 8);
+    // FIXME: Copy the code segment
+
+    struct ZenitNesRom *rom = fl_malloc(sizeof(struct ZenitNesRom));
+    memcpy(rom, &default_rom, sizeof(struct ZenitNesRom));
+
+    return rom;
 }
 
-void nes_rom_emit_abx(struct NesRom *rom, enum NesOpcode opcode, uint16_t bytes)
+void zenit_nes_rom_free(struct ZenitNesRom *rom)
 {
-    if (rom->pc == UINT16_MAX)
-    {
-        // FIXME: Handle overflow
+    if (!rom)
         return;
-    }
 
-    // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_ABX);
-    rom->prg_rom.data[rom->pc++] = opcode_hex;
-    rom->prg_rom.data[rom->pc++] = (uint8_t)(bytes);
-    rom->prg_rom.data[rom->pc++] = (uint8_t)(bytes >> 8);
+    fl_free(rom);
 }
 
-void nes_rom_emit_aby(struct NesRom *rom, enum NesOpcode opcode, uint16_t bytes)
-{
-    if (rom->pc == UINT16_MAX)
-    {
-        // FIXME: Handle overflow
-        return;
-    }
-
-    // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_ABY);
-    rom->prg_rom.data[rom->pc++] = opcode_hex;
-    rom->prg_rom.data[rom->pc++] = (uint8_t)(bytes);
-    rom->prg_rom.data[rom->pc++] = (uint8_t)(bytes >> 8);
-}
-
-void nes_rom_emit_imm(struct NesRom *rom, enum NesOpcode opcode, uint8_t byte)
-{
-    if (rom->pc == UINT16_MAX)
-    {
-        // FIXME: Handle overflow
-        return;
-    }
-
-    // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_IMM);
-    rom->prg_rom.data[rom->pc++] = opcode_hex;
-    rom->prg_rom.data[rom->pc++] = byte;
-}
-
-void nes_rom_emit_imp(struct NesRom *rom, enum NesOpcode opcode)
-{
-    if (rom->pc == UINT16_MAX)
-    {
-        // FIXME: Handle overflow
-        return;
-    }
-
-    // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_IMP);
-    rom->prg_rom.data[rom->pc++] = opcode_hex;
-}
-
-void nes_rom_emit_ind(struct NesRom *rom, enum NesOpcode opcode, uint16_t bytes)
-{
-    if (rom->pc == UINT16_MAX)
-    {
-        // FIXME: Handle overflow
-        return;
-    }
-
-    // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_IND);
-    rom->prg_rom.data[rom->pc++] = opcode_hex;
-    rom->prg_rom.data[rom->pc++] = (uint8_t)(bytes);
-    rom->prg_rom.data[rom->pc++] = (uint8_t)(bytes >> 8);
-}
-
-void nes_rom_emit_inx(struct NesRom *rom, enum NesOpcode opcode, uint8_t byte)
-{
-    if (rom->pc == UINT16_MAX)
-    {
-        // FIXME: Handle overflow
-        return;
-    }
-
-    // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_INX);
-    rom->prg_rom.data[rom->pc++] = opcode_hex;
-    rom->prg_rom.data[rom->pc++] = byte;
-}
-
-void nes_rom_emit_iny(struct NesRom *rom, enum NesOpcode opcode, uint8_t byte)
-{
-    if (rom->pc == UINT16_MAX)
-    {
-        // FIXME: Handle overflow
-        return;
-    }
-
-    // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_INY);
-    rom->prg_rom.data[rom->pc++] = opcode_hex;
-    rom->prg_rom.data[rom->pc++] = byte;
-}
-
-void nes_rom_emit_rel(struct NesRom *rom, enum NesOpcode opcode, uint8_t byte)
-{
-    if (rom->pc == UINT16_MAX)
-    {
-        // FIXME: Handle overflow
-        return;
-    }
-
-    // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_REL);
-    rom->prg_rom.data[rom->pc++] = opcode_hex;
-    rom->prg_rom.data[rom->pc++] = byte;
-}
-
-void nes_rom_emit_zpg(struct NesRom *rom, enum NesOpcode opcode, uint8_t byte)
-{
-    if (rom->pc == UINT16_MAX)
-    {
-        // FIXME: Handle overflow
-        return;
-    }
-
-    // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_ZPG);
-    rom->prg_rom.data[rom->pc++] = opcode_hex;
-    rom->prg_rom.data[rom->pc++] = byte;
-}
-
-void nes_rom_emit_zpx(struct NesRom *rom, enum NesOpcode opcode, uint8_t byte)
-{
-    if (rom->pc == UINT16_MAX)
-    {
-        // FIXME: Handle overflow
-        return;
-    }
-
-    // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_ZPX);
-    rom->prg_rom.data[rom->pc++] = opcode_hex;
-    rom->prg_rom.data[rom->pc++] = byte;
-}
-
-void nes_rom_emit_zpy(struct NesRom *rom, enum NesOpcode opcode, uint8_t byte)
-{
-    if (rom->pc == UINT16_MAX)
-    {
-        // FIXME: Handle overflow
-        return;
-    }
-
-    // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_ZPY);
-    rom->prg_rom.data[rom->pc++] = opcode_hex;
-    rom->prg_rom.data[rom->pc++] = byte;
-}
-
-void nes_rom_dump(struct NesRom *rom, const char *filename)
+void zenit_nes_rom_dump(struct ZenitNesRom *rom, const char *filename)
 {
     FILE *file = fl_io_file_open(filename, "w+b");
-    fl_io_file_write_bytes(file, sizeof(struct NesFileHeader), (const FlByte*)&rom->header);
-    fl_io_file_write_bytes(file, sizeof(struct NesProgramRom), (const FlByte*)&rom->prg_rom);
+    fl_io_file_write_bytes(file, sizeof(struct ZenitNesFileHeader), (const FlByte*)&rom->header);
+    fl_io_file_write_bytes(file, sizeof(struct ZenitNesNrom256), (const FlByte*)&rom->prg_rom);
     fl_io_file_close(file);
 }

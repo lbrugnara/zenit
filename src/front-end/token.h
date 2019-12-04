@@ -17,6 +17,7 @@ enum ZenitTokenType {
     // Keywords
     ZENIT_TOKEN_ID,
     ZENIT_TOKEN_VAR,
+    ZENIT_TOKEN_CAST,
 
     // Operators
     ZENIT_TOKEN_AMPERSAND,

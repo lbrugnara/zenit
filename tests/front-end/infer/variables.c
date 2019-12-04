@@ -11,19 +11,21 @@
 void zenit_test_infer_variable_type(void)
 {
     const char *source = 
-        "var sym_a : uint8 = 2;"                "\n"
-        "var sym_b : [2]uint8 = [ 1, 2 ];"      "\n"
-        "var sym_c = 1;"                        "\n"
-        "var sym_d = [ 1, 2, 3 ];"              "\n"
-        "var sym_e : customType = 0;"           "\n"
-        "var sym_f : [0]customType = [];"       "\n"
-        "var sym_g = sym_c;"                    "\n"
-        "var sym_h : [1]uint8 = [ sym_g ];"     "\n"
-        "var sym_i : &uint8 = &sym_g;"          "\n"
-        "var sym_j = &sym_g;"                   "\n"
-        "var sym_k = [ 8192 ];"                 "\n"
-        "var sym_l = [ 1, 8192 ];"              "\n"
-        "var sym_m = [ 1, 8192, 3];"            "\n"
+        "var sym_a : uint8 = 2;"                                        "\n"
+        "var sym_b : [2]uint8 = [ 1, 2 ];"                              "\n"
+        "var sym_c = 1;"                                                "\n"
+        "var sym_d = [ 1, 2, 3 ];"                                      "\n"
+        "var sym_e : customType = 0;"                                   "\n"
+        "var sym_f : [0]customType = [];"                               "\n"
+        "var sym_g = sym_c;"                                            "\n"
+        "var sym_h : [1]uint8 = [ sym_g ];"                             "\n"
+        "var sym_i : &uint8 = &sym_g;"                                  "\n"
+        "var sym_j = &sym_g;"                                           "\n"
+        "var sym_k = [ 8192 ];"                                         "\n"
+        "var sym_l = [ 1, 8192 ];"                                      "\n"
+        "var sym_m = [ 1, 8192, 3];"                                    "\n"
+        "var sym_n = [ cast(&sym_a : uint16) ];"                        "\n"
+        "var sym_o : [2]uint8 = [ cast(&sym_a), cast(&sym_c) ];"        "\n"
     ;
 
     const char *names[] = { 
@@ -40,6 +42,8 @@ void zenit_test_infer_variable_type(void)
         "sym_k",
         "sym_l",
         "sym_m",
+        "sym_n",
+        "sym_o",
     };
     
     const struct ZenitTypeInfo types[] = {
@@ -81,6 +85,12 @@ void zenit_test_infer_variable_type(void)
 
         /* The type information is inferred from the assignment                                                 */
         { .elements = 3, .name = NULL, .type = ZENIT_TYPE_UINT16, .is_array = true, .is_ref = false             },
+
+        /* The type information is inferred from the assignment                                                 */
+        { .elements = 1, .name = NULL, .type = ZENIT_TYPE_UINT16, .is_array = true, .is_ref = false             },
+
+        /* The type information is inferred from the assignment                                                 */
+        { .elements = 2, .name = NULL, .type = ZENIT_TYPE_UINT8, .is_array = true, .is_ref = false             },
     };
 
     const size_t count = sizeof(types) / sizeof(types[0]);

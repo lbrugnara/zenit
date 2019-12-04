@@ -2,7 +2,9 @@
 #define ZENIT_IR_BLOCK_H
 
 #include "symtable.h"
-#include "instruction.h"
+#include "instructions/instruction.h"
+#include "instructions/cast.h"
+#include "instructions/variable.h"
 
 /*
  * Struct: zenit_ir_block_new
@@ -21,6 +23,7 @@ struct ZenitIrBlock {
     struct ZenitIrBlock **children;
     struct ZenitIrInstruction **instructions;
     struct ZenitIrSymbolTable symtable;
+    unsigned long long temp_counter;
 };
 
 /*

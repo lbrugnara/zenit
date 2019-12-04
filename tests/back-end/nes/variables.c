@@ -12,7 +12,7 @@
 #include "../../../src/back-end/nes/generate.h"
 #include "tests.h"
 
-void zenit_test_nes_global_variables(void)
+void zenit_test_nes_literal_variables(void)
 {
     const char *zenit_source = 
         "var a : uint8 = 1;"                                    "\n"
@@ -39,7 +39,7 @@ void zenit_test_nes_global_variables(void)
     
     struct ZenitIrProgram *zir_program = zenit_generate_zir(&ctx);
 
-    struct ZenitNesProgram *nes_program = zenit_nes_generate(zir_program);
+    struct ZenitNesProgram *nes_program = zenit_nes_generate_program(zir_program);
     
     fl_expect("Data segment at 0x00 should be 0x1 (a)",             nes_program->data.bytes[0x00] == 0x1);
     fl_expect("Data segment at 0x01 should be 0x2 (b)",             nes_program->data.bytes[0x01] == 0x2);

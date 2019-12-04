@@ -39,7 +39,7 @@ struct ZenitNesProgram {
     FlHashtable symbols;
     struct ZenitNesZeroPageSegment zp;
     struct ZenitNesDataSegment data;
-    struct ZenitNesCodeSegment init;
+    struct ZenitNesCodeSegment startup;
     struct ZenitNesCodeSegment code;
 };
 

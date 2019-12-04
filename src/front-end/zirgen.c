@@ -5,13 +5,13 @@
 #include "../zir/value.h"
 
 /*
- * Type: ZenitZenitIrGenerator
+ * Type: ZenitIrGenerator
  *  An inferrer function takes a symbol from the <struct ZenitSymbolTable> and updates
  *  it -if needed- with type information the symbol could be missing.
  *  The function returns a <struct ZenitTypeInfo> with the type retrieved from the symbol
  *  or inferred from the context.
  */
-typedef struct ZenitIrOperand(*ZenitZenitIrGenerator)(struct ZenitContext *ctx, struct ZenitNode *node, struct ZenitIrProgram *program);
+typedef struct ZenitIrOperand(*ZenitIrGenerator)(struct ZenitContext *ctx, struct ZenitNode *node, struct ZenitIrProgram *program);
 
 // Visitor functions
 static struct ZenitIrOperand visit_node(struct ZenitContext *ctx, struct ZenitNode *node, struct ZenitIrProgram *program);
@@ -20,6 +20,20 @@ static struct ZenitIrOperand visit_variable(struct ZenitContext *ctx, struct Zen
 static struct ZenitIrOperand visit_array_initializer(struct ZenitContext *ctx, struct ZenitNode *node, struct ZenitIrProgram *program);
 static struct ZenitIrOperand visit_identifier(struct ZenitContext *ctx, struct ZenitNode *node, struct ZenitIrProgram *program);
 static struct ZenitIrOperand visit_unary_ref(struct ZenitContext *ctx, struct ZenitNode *node, struct ZenitIrProgram *program);
+static struct ZenitIrOperand visit_cast(struct ZenitContext *ctx, struct ZenitNode *node, struct ZenitIrProgram *program);
+
+/*
+ * Variable: generators
+ *  An array indexed with a <enum ZenitNodeType> to get a <ZenitIrGenerator> function
+ */
+static const ZenitIrGenerator generators[] = {
+    [ZENIT_NODE_LITERAL]    = &visit_literal,
+    [ZENIT_NODE_VARIABLE]   = &visit_variable,
+    [ZENIT_NODE_ARRAY_INIT] = &visit_array_initializer,
+    [ZENIT_NODE_IDENTIFIER] = &visit_identifier,
+    [ZENIT_NODE_UNARY_REF]  = &visit_unary_ref,
+    [ZENIT_NODE_CAST]       = &visit_cast,
+};
 
 
 static void zenit_type_to_zenit_ir_type(struct ZenitTypeInfo *zenit_type, struct ZenitIrTypeInfo *zenit_ir_type)
@@ -105,7 +119,7 @@ static struct ZenitIrOperand new_operand_symbol(struct ZenitContext *ctx, struct
     struct ZenitIrTypeInfo zenit_ir_symbol_type = { 0 };
     zenit_type_to_zenit_ir_type(&symbol->typeinfo, &zenit_ir_symbol_type);
     
-    struct ZenitIrSymbol *zenit_ir_symbol = zenit_ir_symbol_new(symbol->name, &zenit_ir_symbol_type);
+    struct ZenitIrSymbol *zenit_ir_symbol = zenit_ir_symbol_new(symbol->name, &zenit_ir_symbol_type, false);
 
     if (global_symbol)
         zenit_ir_program_add_global_symbol(program, zenit_ir_symbol);
@@ -118,17 +132,48 @@ static struct ZenitIrOperand new_operand_symbol(struct ZenitContext *ctx, struct
     };
 }
 
-/*
- * Variable: generators
- *  An array indexed with a <enum ZenitNodeType> to get a <ZenitZenitIrGenerator> function
- */
-static const ZenitZenitIrGenerator generators[] = {
-    [ZENIT_NODE_LITERAL]    = &visit_literal,
-    [ZENIT_NODE_VARIABLE]   = &visit_variable,
-    [ZENIT_NODE_ARRAY_INIT] = &visit_array_initializer,
-    [ZENIT_NODE_IDENTIFIER] = &visit_identifier,
-    [ZENIT_NODE_UNARY_REF] =  &visit_unary_ref,
-};
+static struct ZenitIrOperand new_operand_temp_symbol(struct ZenitContext *ctx,struct ZenitIrProgram *program, bool global_symbol)
+{
+    char name[1024] = { 0 };
+    snprintf(name, 1024, "tmp%llu", program->current->temp_counter++);
+
+    struct ZenitIrSymbol *zenit_ir_symbol = zenit_ir_symbol_new(name, NULL, true);
+
+    if (global_symbol)
+        zenit_ir_program_add_global_symbol(program, zenit_ir_symbol);
+    else
+        zenit_ir_program_add_symbol(program, zenit_ir_symbol);
+
+    return (struct ZenitIrOperand) {
+        .type =  ZENIT_IR_OPERAND_SYMBOL,
+        .operand.symbol = zenit_ir_symbol
+    };
+}
+
+static struct ZenitIrOperand visit_cast(struct ZenitContext *ctx, struct ZenitNode *node, struct ZenitIrProgram *program)
+{
+    struct ZenitCastNode *cast_node = (struct ZenitCastNode*)node;
+
+    // If it is an implicit cast (up cast), we let the back end manage it
+    if (cast_node->implicit)
+        return visit_node(ctx, cast_node->expression, program);
+    
+    // To down cast we need to issue an instruction
+    struct ZenitIrCastInstruction *cast_instr = zenit_ir_instruction_cast_new();
+
+    // We use a temporal value to store the cast result
+    cast_instr->lvalue = new_operand_temp_symbol(ctx, program, false);
+    zenit_type_to_zenit_ir_type(&cast_node->base.typeinfo, &cast_instr->lvalue.operand.symbol->typeinfo);
+
+    // We take the right operand from the casted expression
+    cast_instr->rvalue = visit_node(ctx, cast_node->expression, program);
+
+    // We add the instruction to the program
+    zenit_ir_program_add_instruction(program, (struct ZenitIrInstruction*)cast_instr);
+
+    // The operand is the temporal value we created to store the cast's result
+    return cast_instr->lvalue;
+}
 
 /*
  * Function: visit_literal
@@ -254,7 +299,7 @@ static struct ZenitIrOperand visit_variable(struct ZenitContext *ctx, struct Zen
     struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx->program, vardecl->name);
     
     // Create the variable declaration instruction and fill its operands
-    struct ZenitIrVariableInstruction *varinstr = (struct ZenitIrVariableInstruction*)zenit_ir_instruction_new(ZENIT_IR_INSTR_VARIABLE);
+    struct ZenitIrVariableInstruction *varinstr = zenit_ir_instruction_variable_new();
     varinstr->attributes = zenit_attr_to_zenit_ir_attr(ctx, program, vardecl->attributes);
 
     // The lvalue is a symbol operand we create from the <struct ZenitSymbol>

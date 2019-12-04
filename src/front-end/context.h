@@ -137,5 +137,6 @@ void zenit_context_free(struct ZenitContext* ctx);
  */
 void zenit_context_error(struct ZenitContext *ctx, struct ZenitSourceLocation location, enum ZenitErrorType type, const char *message, ...);
 
+void zenit_context_print_errors(struct ZenitContext *ctx);
 
 #endif /* ZENIT_CONTEXT_H */

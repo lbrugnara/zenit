@@ -57,10 +57,12 @@ int main(int argc, char **argv)
             { "Type check errors",  &zenit_test_check_types_errors  }
         ),
         fl_test_suite("zirgen",
-            { "Generate ZIR variables",  &zenit_test_generate_zenit_ir_variables  }
+            { "Generate ZIR variables", &zenit_test_generate_ir_variables   },
+            { "Generate ZIR casts",     &zenit_test_generate_ir_casts       }
         ),
         fl_test_suite("nes",
-            { "NES global variables",  &zenit_test_nes_global_variables  }
+            { "NES global variables",   &zenit_test_nes_literal_variables    },
+            { "Sample program",         &zenit_test_nes_program             },
         ),
         NULL
     );

@@ -1,15 +1,16 @@
 #include "symbol.h"
 
-struct ZenitIrSymbol* zenit_ir_symbol_new(const char *name, struct ZenitIrTypeInfo *typeinfo)
+struct ZenitIrSymbol* zenit_ir_symbol_new(const char *name, struct ZenitIrTypeInfo *typeinfo, bool temporal)
 {
     flm_assert(name != NULL, "Symbol name cannot be NULL");
-    flm_assert(typeinfo != NULL, "Type information cannot be NULL");
-
 
     struct ZenitIrSymbol *symbol = fl_malloc(sizeof(struct ZenitIrSymbol));
 
     symbol->name = fl_cstring_dup(name);
-    zenit_ir_type_copy(&symbol->typeinfo, typeinfo);
+    symbol->temporal = temporal;
+
+    if (typeinfo)
+        zenit_ir_type_copy(&symbol->typeinfo, typeinfo);
 
     return symbol;
 }

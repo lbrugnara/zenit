@@ -342,6 +342,51 @@ static struct ZenitNode* parse_unary_expression(struct ZenitParser *parser, stru
     return parse_literal_expression(parser, ctx);
 }
 
+static struct ZenitNode* parse_cast_expression(struct ZenitParser *parser, struct ZenitContext *ctx)
+{
+    struct ZenitToken temp_token;
+
+    if (!zenit_parser_expects(parser, ZENIT_TOKEN_CAST, &temp_token))
+    {
+        zenit_context_error(ctx, ctx->srcinfo->location, ZENIT_ERROR_SYNTAX, "Expecting token 'cast'");
+        return NULL;
+    }
+
+    if (!zenit_parser_expects(parser, ZENIT_TOKEN_LPAREN, NULL))
+    {
+        zenit_context_error(ctx, ctx->srcinfo->location, ZENIT_ERROR_SYNTAX, "Expecting token %s, received %s", 
+            zenit_token_print(ZENIT_TOKEN_LPAREN),
+            zenit_token_print(zenit_parser_peek(parser).type)
+        );
+        return NULL;
+    }
+
+    struct ZenitNode *expression = parse_expression(parser, ctx);
+
+    if (expression == NULL)
+        return NULL;
+
+    struct ZenitCastNode *cast_node = zenit_node_cast_new(temp_token.location, expression, NULL, false);
+
+    if (zenit_parser_consume_if(parser, ZENIT_TOKEN_COLON) && !parse_typeinfo(parser, ctx, &cast_node->base.typeinfo))
+        goto error;
+
+    if (!zenit_parser_expects(parser, ZENIT_TOKEN_RPAREN, NULL))
+    {
+        zenit_context_error(ctx, ctx->srcinfo->location, ZENIT_ERROR_SYNTAX, "Expecting token %s, received %s", 
+            zenit_token_print(ZENIT_TOKEN_RPAREN),
+            zenit_token_print(zenit_parser_peek(parser).type)
+        );
+        return NULL;
+    }
+
+    return (struct ZenitNode*)cast_node;
+
+    error: zenit_node_cast_free(cast_node);
+
+    return NULL;
+}
+
 /*
  * Function: parse_expression
  *  Parses a single expression
@@ -354,11 +399,14 @@ static struct ZenitNode* parse_unary_expression(struct ZenitParser *parser, stru
  *  struct ZenitNode* - Parsed expression node
  * 
  * Grammar:
- *  expression = array_initializer | unary_expression ;
+ *  expression = cast_expression | array_initializer | unary_expression ;
  *
  */
 static struct ZenitNode* parse_expression(struct ZenitParser *parser, struct ZenitContext *ctx)
 {
+    if (zenit_parser_peek(parser).type == ZENIT_TOKEN_CAST)
+        return parse_cast_expression(parser, ctx);
+
     if (zenit_parser_peek(parser).type == ZENIT_TOKEN_LBRACKET)
         return parse_array_initializer(parser, ctx);
 

@@ -16,6 +16,7 @@ enum ZenitNodeType {
     ZENIT_NODE_ARRAY_INIT,
     ZENIT_NODE_IDENTIFIER,
     ZENIT_NODE_UNARY_REF,
+    ZENIT_NODE_CAST,
 };
 
 /*

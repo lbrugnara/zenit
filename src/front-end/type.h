@@ -131,7 +131,9 @@ bool zenit_type_equals(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_
 
 bool zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
 
-bool zenit_type_can_assign(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
+bool zenit_type_can_assign(struct ZenitTypeInfo *target_type, struct ZenitTypeInfo *value_type);
+
+bool zenit_type_can_cast(struct ZenitTypeInfo *target_type, struct ZenitTypeInfo *cast_type);
 
 void zenit_type_free(struct ZenitTypeInfo *typeinfo);
 

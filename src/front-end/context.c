@@ -103,3 +103,19 @@ void zenit_context_error(struct ZenitContext *ctx, struct ZenitSourceLocation lo
 
     ctx->errors = fl_array_append(ctx->errors, &error);
 }
+
+void zenit_context_print_errors(struct ZenitContext *ctx)
+{
+    if (!zenit_context_has_errors(ctx))
+        return;
+
+    for (size_t i=0; i < fl_array_length(ctx->errors); i++)
+    {
+        fprintf(stderr, "%s:%d:%d: %s\n", 
+            ctx->srcinfo->location.filename, 
+            ctx->errors[i].location.line, 
+            ctx->errors[i].location.col, 
+            ctx->errors[i].message
+        );
+    }
+}

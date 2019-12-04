@@ -1,0 +1,41 @@
+/**
+ *  Each array variable contains assembled instructions for the NES CPU. By means of the special "NES" attribute
+ *  and particularly with the "address" property we ask Zenit's NES backend to store each array in certain addresses:
+ *
+ *  - The "bg_color" initialized to 0x20 is a red background, changing it to 0x40 should make it green.
+ *  - The "reset" array is the routine called when the reset interrupt occurs. It prepares the PPU and then loops forever.
+ *  - The "nmi" array is the routine called when a non-maskable interrupt occurs. This routine changes the background color on each call.
+ *  - The "vectors" array tells the CPU to use addresses 0x8000 and 0x8017 for the reset and NMI interrupts handler, respectively.
+ */
+
+#[NES(address: 0x00)]           // bg_color is stored in the zero page
+var bg_color = 0x20;
+
+#[NES(address: 0x8000)]         // Reset handler
+var reset = [
+    0x78,                       // SEI           Disable IRQs
+    0xD8,                       // CLD           Disable decimal mode
+    0xA2, 0x00,                 // LDX #$00
+    0x2C, 0x02, 0x20,           // BIT $2002     vwait1
+    0x10, 0xFB,                 // BPL $0014
+    0x2C, 0x02, 0x20,           // BIT $2002     vwait2
+    0x10, 0xFB,                 // BPL $0014
+    0xA9, 0x88,                 // LDA #$88      Enable NMI
+    0x8D, 0x00, 0x20,           // STA $2000
+    0x4C, 0x13, 0x80,           // JMP $8013     Jump forever
+];
+
+#[NES(address: 0x8017)]         // NMI handler
+var nmi = [
+    0xA6, 0x00,                 // LDX $00       Load bg_color to X
+    0xE8,                       // INX           Increment X
+    0x86, 0x00,                 // STX $00       Store X to bg_color
+    0x8E, 0x01, 0x20,           // STX $2001     Write PPUMASK
+    0x40,                       // RTI
+];
+
+#[NES(address: 0xFFFA)]
+var vectors : [2]uint16 = [
+    0x8017,                     // NMI
+    0x8000,                     // Reset
+];

@@ -43,6 +43,7 @@ static struct ZenitTypeInfo* visit_variable(struct ZenitContext *ctx, struct Zen
 static struct ZenitTypeInfo* visit_array_initializer(struct ZenitContext *ctx, struct ZenitNode *node);
 static struct ZenitTypeInfo* visit_identifier(struct ZenitContext *ctx, struct ZenitNode *node);
 static struct ZenitTypeInfo* visit_unary_ref(struct ZenitContext *ctx, struct ZenitNode *node);
+static struct ZenitTypeInfo* visit_cast(struct ZenitContext *ctx, struct ZenitNode *node);
 
 /*
  * Variable: checkers
@@ -54,7 +55,29 @@ static const ZenitTypeChecker checkers[] = {
     [ZENIT_NODE_ARRAY_INIT] = &visit_array_initializer,
     [ZENIT_NODE_IDENTIFIER] = &visit_identifier,
     [ZENIT_NODE_UNARY_REF]  = &visit_unary_ref,
+    [ZENIT_NODE_CAST]       = &visit_cast,
 };
+
+static struct ZenitTypeInfo* visit_cast(struct ZenitContext *ctx, struct ZenitNode *node)
+{
+    struct ZenitCastNode *cast = (struct ZenitCastNode*)node;
+
+    // If the cast is implicit, we need to make sure we can up-cast the expression to the requested type
+    if ((cast->implicit && !zenit_type_can_assign(&cast->base.typeinfo, &cast->expression->typeinfo))
+        // HACK: If the cast is explicit, we can check if the other way around works for these types, in that
+        // case we know it is safe to "truncate" the type :grimming:
+        || (!cast->implicit && !zenit_type_can_cast(&cast->base.typeinfo, &cast->expression->typeinfo))
+    )
+    {
+        zenit_context_error(ctx, cast->base.location, ZENIT_ERROR_TYPE_MISSMATCH, "Cannot % from type '%s' to '%s'", 
+                cast->implicit ? "implicitly cast" : "cast", 
+                zenit_type_to_string(&cast->expression->typeinfo),
+                zenit_type_to_string(&cast->base.typeinfo)
+        );
+    }
+
+    return &cast->base.typeinfo;
+}
 
 /*
  * Function: visit_literal

@@ -7,6 +7,7 @@ struct ZenitIrBlock* zenit_ir_block_new(const char *id, enum ZenitIrSymbolTableT
     block->instructions = fl_array_new(sizeof(struct ZenitIrInstruction*), 0);
     block->children = fl_array_new(sizeof(struct ZenitIrBlock*), 0);
     block->symtable = zenit_ir_symtable_new(type, id);
+    block->temp_counter = 0;
 
     return block;
 }

@@ -7,6 +7,7 @@
 
 #include "nodes/array.h"
 #include "nodes/attribute.h"
+#include "nodes/cast.h"
 #include "nodes/identifier.h"
 #include "nodes/literal.h"
 #include "nodes/node.h"

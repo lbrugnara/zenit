@@ -265,6 +265,7 @@ bool zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b
         return true;
     }
 
+    // FIXME: We should check the array's elements
     if (type_a->is_array != type_b->is_array || type_a->elements != type_b->elements)
         return false;
 
@@ -289,35 +290,78 @@ bool zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b
     return false;
 }
 
-bool zenit_type_can_assign(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b)
+bool zenit_type_can_assign(struct ZenitTypeInfo *target_type, struct ZenitTypeInfo *value_type)
 {
-    if (zenit_type_equals(type_a, type_b))
+    if (zenit_type_equals(target_type, value_type))
         return true;
 
-    if (type_a->type == type_b->type && type_a->type == ZENIT_TYPE_NONE)
+    if (target_type->type == value_type->type && target_type->type == ZENIT_TYPE_NONE)
         return false;
 
-    if (type_a->type == ZENIT_TYPE_NONE)
+    if (target_type->type == ZENIT_TYPE_NONE)
         return true;
 
-    if (type_b->type == ZENIT_TYPE_NONE)
+    if (value_type->type == ZENIT_TYPE_NONE)
         return false;
 
-    if (type_a->is_array != type_b->is_array || type_a->elements != type_b->elements)
+    // FIXME: We should check the array's elements
+    if (target_type->is_array != value_type->is_array || target_type->elements != value_type->elements)
         return false;
 
-    if (type_a->is_ref != type_b->is_ref)
+    // We can't assign non-references to references nor the other way around
+    if (target_type->is_ref != value_type->is_ref)
         return false;
 
-    if (type_a->name != type_b->name)
+    // FIXME: Custom types
+    if (target_type->name != value_type->name)
         return false;
 
-    bool a_uint = type_a->type >= ZENIT_TYPE_UINT8 && type_a->type <= ZENIT_TYPE_UINT16;
-    bool b_uint = type_b->type >= ZENIT_TYPE_UINT8 && type_b->type <= ZENIT_TYPE_UINT16;
+    bool a_uint = target_type->type >= ZENIT_TYPE_UINT8 && target_type->type <= ZENIT_TYPE_UINT16;
+    bool b_uint = value_type->type >= ZENIT_TYPE_UINT8 && value_type->type <= ZENIT_TYPE_UINT16;
     
     if (a_uint && b_uint)
     {
-        if (type_a->type >= type_b->type)
+        if (target_type->type >= value_type->type)
+            return true;
+    }
+
+    return false;
+}
+
+
+bool zenit_type_can_cast(struct ZenitTypeInfo *target_type, struct ZenitTypeInfo *cast_type)
+{
+    // If we can assign from the target type to the cast type, it means
+    // the types are compatible, and we could proceed with the dow casting
+    // by truncating the cast_type to a target_type
+    if (zenit_type_can_assign(cast_type, target_type))
+        return true;
+
+    // We can't cast things we don't know
+    if (target_type->type == cast_type->type || target_type->type == ZENIT_TYPE_NONE)
+        return false;
+
+    // FIXME: We should check the array's elements
+    if (target_type->is_array != cast_type->is_array || target_type->elements != cast_type->elements)
+        return false;
+
+    // FIXME: Custom types
+    if (target_type->name != cast_type->name)
+        return false;
+
+    bool target_uint = target_type->type >= ZENIT_TYPE_UINT8 && target_type->type <= ZENIT_TYPE_UINT16;
+    bool cast_uint = cast_type->type >= ZENIT_TYPE_UINT8 && cast_type->type <= ZENIT_TYPE_UINT16;
+
+    // We can cast a reference to an unsigned integer
+    if (cast_type->is_ref && target_uint)
+        return true;
+
+    if (target_type->is_ref != cast_type->is_ref)
+        return false;
+    
+    if (target_uint && cast_uint)
+    {
+        if (target_type->type >= cast_type->type)
             return true;
     }
 

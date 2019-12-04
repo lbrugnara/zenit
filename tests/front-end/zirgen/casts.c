@@ -10,30 +10,39 @@
 #include "../../../src/front-end/zirgen.h"
 #include "tests.h"
 
-void zenit_test_generate_ir_variables(void)
+void zenit_test_generate_ir_casts(void)
 {
     const char *zenit_source = 
-        "var a : uint8 = 1;"                "\n"
-        "var b : uint8 = 2;"                "\n"
-        "var c : [2]uint8 = [ 0, 1 ];"      "\n"
-        "var d = [ 0, 1, 2 ];"              "\n"
-        "var e = a;"                        "\n"
-        "var f = &a;"                       "\n"
-        "var g : &uint8 = f;"               "\n"
-        "#[Attr(k:1, k2:2)]"                "\n"
-        "var h = [ &a, f ];"                "\n"
+        // Implicit (up) cast
+        "var a : uint16 = 1;"                       "\n"
+
+        // Explicit (down) cast (with truncation)
+        "var b : uint8 = cast(0x1FF : uint8);"      "\n"
+
+        // Explicit (down) cast (the cast's type is inferred)
+        "var c : uint8 = cast(0x200);"              "\n"
+
+        // Explicit (down) cast (d's type is inferred)
+        "var d = cast(0x201 : uint8);"              "\n"
+
+        // Explicit (down) cast (the cast's type is inferred)
+        "var e : uint16 = cast(&d);"                "\n"
     ;
 
     const char *zenit_ir_src = 
-        "@a : uint8 = 1"                                         "\n"
-        "@b : uint8 = 2"                                         "\n"
-        "@c : [2]uint8 = [ 0, 1 ]"                               "\n"
-        "@d : [3]uint8 = [ 0, 1, 2 ]"                            "\n"
-        "@e : uint8 = @a"                                        "\n"
-        "@f : &uint8 = ref @a"                                   "\n"
-        "@g : &uint8 = @f"                                       "\n"
-        // FIXME: The order of the properties is unspecified because of the hashtable
-        "@h : [2]&uint8 = [ ref @a, @f ] ; #Attr(k2:2, k:1)"     "\n"
+        "@a : uint16 = 1"                           "\n"
+
+        "%tmp0 : uint8 = cast(511, uint8)"          "\n"
+        "@b : uint8 = %tmp0"                        "\n"
+        
+        "%tmp1 : uint8 = cast(512, uint8)"          "\n"
+        "@c : uint8 = %tmp1"                        "\n"
+
+        "%tmp2 : uint8 = cast(513, uint8)"          "\n"
+        "@d : uint8 = %tmp2"                        "\n"
+
+        "%tmp3 : uint16 = cast(ref @d, uint16)"     "\n"
+        "@e : uint16 = %tmp3"                       "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);

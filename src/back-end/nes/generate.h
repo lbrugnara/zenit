@@ -4,6 +4,6 @@
 #include "../../zir/program.h"
 #include "program.h"
 
-struct ZenitNesProgram* zenit_nes_generate(struct ZenitIrProgram *program);
+struct ZenitNesProgram* zenit_nes_generate_program(struct ZenitIrProgram *program);
 
 #endif /* ZENIT_NES_GENERATE */

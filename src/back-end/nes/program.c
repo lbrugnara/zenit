@@ -31,15 +31,15 @@ struct ZenitNesProgram* zenit_nes_program_new()
         .slots = { 0 },
     };
 
-    program->init = (struct ZenitNesCodeSegment) {
+    program->startup = (struct ZenitNesCodeSegment) {
         .pc = 0,
         .bytes = fl_array_new(sizeof(uint8_t), UINT16_MAX),
     };
 
     program->data = (struct ZenitNesDataSegment){
         .base_address = 0x8000,
-        .slots = fl_array_new(sizeof(uint8_t), 0x7FFF),
-        .bytes = fl_array_new(sizeof(uint8_t), 0x7FFF),
+        .slots = fl_array_new(sizeof(uint8_t), 0x8000),
+        .bytes = fl_array_new(sizeof(uint8_t), 0x8000),
     };
 
     return program;
@@ -54,7 +54,7 @@ void zenit_nes_program_free(struct ZenitNesProgram *program)
 
     fl_hashtable_free(program->symbols);
 
-    fl_array_free(program->init.bytes);
+    fl_array_free(program->startup.bytes);
 
     fl_array_free(program->data.slots);
     fl_array_free(program->data.bytes);
