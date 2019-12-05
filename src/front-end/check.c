@@ -69,7 +69,7 @@ static struct ZenitTypeInfo* visit_cast(struct ZenitContext *ctx, struct ZenitNo
         || (!cast->implicit && !zenit_type_can_cast(&cast->base.typeinfo, &cast->expression->typeinfo))
     )
     {
-        zenit_context_error(ctx, cast->base.location, ZENIT_ERROR_TYPE_MISSMATCH, "Cannot % from type '%s' to '%s'", 
+        zenit_context_error(ctx, cast->base.location, ZENIT_ERROR_TYPE_MISSMATCH, "Cannot %s from type '%s' to '%s'", 
                 cast->implicit ? "implicitly cast" : "cast", 
                 zenit_type_to_string(&cast->expression->typeinfo),
                 zenit_type_to_string(&cast->base.typeinfo)

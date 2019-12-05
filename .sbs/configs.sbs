@@ -112,7 +112,20 @@ config clang-debug-sanitize extends clang-debug {
             "-O0",
             "-fsanitize=address,undefined"
         ]
-    },
+    }
+
+    for linux-bash {
+        compile: {
+            flags: [
+                "-fsanitize=address,undefined,function",
+            ]
+        },
+        executable: {
+            flags: [
+                "-fsanitize=address,undefined,function"
+            ]
+        }
+    }
 }
 
 config clang-release-sanitize extends clang-release {
@@ -120,5 +133,18 @@ config clang-release-sanitize extends clang-release {
         flags: [
             "-fsanitize=address,undefined"
         ]
-    },
+    }
+
+    for linux-bash {
+        compile: {
+            flags: [
+                "-fsanitize=address,undefined,function",
+            ]
+        },
+        executable: {
+            flags: [
+                "-fsanitize=address,undefined,function"
+            ]
+        }
+    }
 }
