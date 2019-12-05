@@ -52,9 +52,9 @@ static struct ZenitTypeInfo* visit_cast(struct ZenitContext *ctx, struct ZenitNo
 static const ZenitTypeChecker checkers[] = {
     [ZENIT_NODE_LITERAL]    = &visit_literal,
     [ZENIT_NODE_VARIABLE]   = &visit_variable,
-    [ZENIT_NODE_ARRAY_INIT] = &visit_array_initializer,
+    [ZENIT_NODE_ARRAY] = &visit_array_initializer,
     [ZENIT_NODE_IDENTIFIER] = &visit_identifier,
-    [ZENIT_NODE_UNARY_REF]  = &visit_unary_ref,
+    [ZENIT_NODE_REFERENCE]  = &visit_unary_ref,
     [ZENIT_NODE_CAST]       = &visit_cast,
 };
 
@@ -93,7 +93,7 @@ static struct ZenitTypeInfo* visit_cast(struct ZenitContext *ctx, struct ZenitNo
  */
 static struct ZenitTypeInfo* visit_literal(struct ZenitContext *ctx, struct ZenitNode *node)
 {
-    struct ZenitLiteralNode *literal = (struct ZenitLiteralNode*)node;
+    struct ZenitPrimitiveNode *literal = (struct ZenitPrimitiveNode*)node;
     return &literal->base.typeinfo;
 }
 
@@ -127,7 +127,7 @@ static struct ZenitTypeInfo* visit_identifier(struct ZenitContext *ctx, struct Z
  */
 static struct ZenitTypeInfo* visit_unary_ref(struct ZenitContext *ctx, struct ZenitNode *node)
 {
-    struct ZenitUnaryRefNode *ref_node = (struct ZenitUnaryRefNode*)node;
+    struct ZenitReferenceNode *ref_node = (struct ZenitReferenceNode*)node;
     struct ZenitTypeInfo *expr_info = visit_node(ctx, ref_node->expression);
 
     if (expr_info->is_ref)

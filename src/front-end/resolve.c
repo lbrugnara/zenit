@@ -28,8 +28,8 @@ static const ZenitSymbolResolver resolvers[] = {
     // These nodes introduce new symbols into the symbol table or retrieve symbols from it
     [ZENIT_NODE_VARIABLE]   = &visit_variable,
     [ZENIT_NODE_IDENTIFIER] = &visit_identifier,
-    [ZENIT_NODE_ARRAY_INIT] = &visit_array_initializer,
-    [ZENIT_NODE_UNARY_REF]  = &visit_unary_ref,
+    [ZENIT_NODE_ARRAY] = &visit_array_initializer,
+    [ZENIT_NODE_REFERENCE]  = &visit_unary_ref,
     [ZENIT_NODE_CAST]       = &visit_cast,
     [ZENIT_NODE_LITERAL]    = &visit_nothing,
     
@@ -79,7 +79,7 @@ static struct ZenitSymbol* visit_identifier(struct ZenitContext *ctx, struct Zen
 
 static struct ZenitSymbol* visit_unary_ref(struct ZenitContext *ctx, struct ZenitNode *node)
 {
-    struct ZenitUnaryRefNode *ref_node = (struct ZenitUnaryRefNode*)node;
+    struct ZenitReferenceNode *ref_node = (struct ZenitReferenceNode*)node;
     visit_node(ctx, ref_node->expression);
     return NULL;
 }

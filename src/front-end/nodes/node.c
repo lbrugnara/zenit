@@ -2,7 +2,7 @@
 #include "attribute.h"
 #include "cast.h"
 #include "identifier.h"
-#include "literal.h"
+#include "primitive.h"
 #include "property.h"
 #include "reference.h"
 #include "variable.h"
@@ -39,19 +39,19 @@ void zenit_node_free(struct ZenitNode *node)
 
     if (node->type == ZENIT_NODE_LITERAL)
     {
-        zenit_node_literal_free((struct ZenitLiteralNode*)node);
+        zenit_node_primitive_free((struct ZenitPrimitiveNode*)node);
     }
     else if (node->type == ZENIT_NODE_VARIABLE)
     {
         zenit_node_variable_free((struct ZenitVariableNode*)node);
     }
-    else if (node->type == ZENIT_NODE_ARRAY_INIT)
+    else if (node->type == ZENIT_NODE_ARRAY)
     {
         zenit_node_array_free((struct ZenitArrayNode*)node);
     }
-    else if (node->type == ZENIT_NODE_UNARY_REF)
+    else if (node->type == ZENIT_NODE_REFERENCE)
     {
-        zenit_node_unary_ref_free((struct ZenitUnaryRefNode*)node);
+        zenit_node_reference_free((struct ZenitReferenceNode*)node);
     }
     else if (node->type == ZENIT_NODE_IDENTIFIER)
     {
@@ -61,7 +61,7 @@ void zenit_node_free(struct ZenitNode *node)
     {
         zenit_node_attribute_free((struct ZenitAttributeNode*)node);
     }
-    else if (node->type == ZENIT_NODE_ATTRIBUTE_PROPERTY)
+    else if (node->type == ZENIT_NODE_PROPERTY)
     {
         zenit_node_property_free((struct ZenitPropertyNode*)node);
     }

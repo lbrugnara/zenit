@@ -17,9 +17,17 @@ bool zenit_parser_has_input(struct ZenitParser *parser)
     return zenit_lexer_peek(&parser->lexer).type != ZENIT_TOKEN_EOF;
 }
 
-struct ZenitToken zenit_parser_peek(struct ZenitParser *parser)
+void zenit_parser_peek(struct ZenitParser *parser, struct ZenitToken *token)
 {
-    return zenit_lexer_peek(&parser->lexer);
+    struct ZenitToken next_token = zenit_lexer_peek(&parser->lexer);
+    
+    if (token)
+        memcpy(token, &next_token, sizeof(struct ZenitToken));
+}
+
+bool zenit_parser_next_is(struct ZenitParser *parser, enum ZenitTokenType token_type)
+{
+    return zenit_lexer_peek(&parser->lexer).type == token_type;
 }
 
 struct ZenitToken zenit_parser_consume(struct ZenitParser *parser)
@@ -29,7 +37,8 @@ struct ZenitToken zenit_parser_consume(struct ZenitParser *parser)
 
 bool zenit_parser_expects(struct ZenitParser *parser, enum ZenitTokenType type, struct ZenitToken *consumed_token)
 {
-    struct ZenitToken token = zenit_parser_peek(parser);
+    struct ZenitToken token;
+    zenit_parser_peek(parser, &token);
 
     if (token.type != type)
         return false;
@@ -44,7 +53,7 @@ bool zenit_parser_expects(struct ZenitParser *parser, enum ZenitTokenType type, 
 
 bool zenit_parser_consume_if(struct ZenitParser *parser, enum ZenitTokenType type)
 {
-    if (zenit_parser_peek(parser).type == type)
+    if (zenit_lexer_peek(&parser->lexer).type == type)
     {
         zenit_parser_consume(parser);
         return true;

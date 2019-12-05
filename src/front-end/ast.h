@@ -9,7 +9,7 @@
 #include "nodes/attribute.h"
 #include "nodes/cast.h"
 #include "nodes/identifier.h"
-#include "nodes/literal.h"
+#include "nodes/primitive.h"
 #include "nodes/node.h"
 #include "nodes/property.h"
 #include "nodes/reference.h"

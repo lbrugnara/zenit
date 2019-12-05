@@ -1,7 +1,7 @@
 #include "symtable.h"
 #include "symbol.h"
 
-struct ZenitSymbolTable zenit_symtable_new(enum ZenitSymbolTableType type, const char *id)
+struct ZenitSymbolTable zenit_symtable_new(enum ZenitSymtableType type, const char *id)
 {
     flm_assert(id != NULL, "Symbol table ID cannot be NULL");
 

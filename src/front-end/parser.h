@@ -32,12 +32,27 @@ struct ZenitParser zenit_parser_new(struct ZenitSourceInfo *srcinfo);
  *
  * Parameters:
  *  parser - Parser object
+ *  token - If not NULL the peeked token is copied to it
  *
  * Returns:
- *  struct ZenitToken - The next available token
+ *  void - This function does not return a value
  *
  */
-struct ZenitToken zenit_parser_peek(struct ZenitParser *parser);
+void zenit_parser_peek(struct ZenitParser *parser, struct ZenitToken *token);
+
+/*
+ * Function: zenit_parser_next_is
+ *  Returns if the next available token matches with the provided token type
+ *
+ * Parameters:
+ *  <struct ZenitParser> *parser - Parser object
+ *  <enum ZenitTokenType> token_type: Expected token type
+ * 
+ * Returns:
+ *  bool - *true* if the token type matches, otherwise this function returns *false*.
+ * 
+ */
+bool zenit_parser_next_is(struct ZenitParser *parser, enum ZenitTokenType token_type);
 
 /*
  * Function: zenit_parser_consume

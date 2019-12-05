@@ -33,7 +33,7 @@ struct ZenitScope {
  *  The object returned by this function must be freed using the
  *  <zenit_scope_free> function
  */
-struct ZenitScope* zenit_scope_new(const char *id, enum ZenitSymbolTableType type, struct ZenitScope *parent);
+struct ZenitScope* zenit_scope_new(const char *id, enum ZenitSymtableType type, struct ZenitScope *parent);
 
 /*
  * Function: zenit_scope_free

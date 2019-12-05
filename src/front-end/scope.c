@@ -1,6 +1,6 @@
 #include "scope.h"
 
-struct ZenitScope* zenit_scope_new(const char *id, enum ZenitSymbolTableType type, struct ZenitScope *parent)
+struct ZenitScope* zenit_scope_new(const char *id, enum ZenitSymtableType type, struct ZenitScope *parent)
 {
     struct ZenitScope *scope = fl_malloc(sizeof(struct ZenitScope));
     scope->parent = parent;

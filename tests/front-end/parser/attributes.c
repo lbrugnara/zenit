@@ -152,12 +152,12 @@ void zenit_test_parser_attributes_variables(void)
                         {
                             case ZENIT_TYPE_UINT8:
                                 test_value = proptest->value.uint8;
-                                prop_value = ((struct ZenitLiteralNode*)propnode->value)->value.uint8;
+                                prop_value = ((struct ZenitPrimitiveNode*)propnode->value)->value.uint8;
                                 is_valid = true;
                                 break;
                             case ZENIT_TYPE_UINT16:
                                 test_value = proptest->value.uint16;
-                                prop_value = ((struct ZenitLiteralNode*)propnode->value)->value.uint16;
+                                prop_value = ((struct ZenitPrimitiveNode*)propnode->value)->value.uint16;
                                 is_valid = true;
                                 break;
                             default:

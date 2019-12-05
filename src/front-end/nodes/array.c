@@ -4,7 +4,7 @@
 struct ZenitArrayNode* zenit_node_array_new(struct ZenitSourceLocation location)
 {
     struct ZenitArrayNode *node = fl_malloc(sizeof(struct ZenitArrayNode));
-    node->base.type = ZENIT_NODE_ARRAY_INIT;
+    node->base.type = ZENIT_NODE_ARRAY;
     node->base.location = location;
     node->elements = fl_array_new(sizeof(struct ZenitNode*), 0);
 

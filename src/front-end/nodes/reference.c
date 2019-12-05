@@ -1,10 +1,10 @@
 #include <fllib.h>
 #include "reference.h"
 
-struct ZenitUnaryRefNode* zenit_node_unary_ref_new(struct ZenitSourceLocation location, struct ZenitNode *expression)
+struct ZenitReferenceNode* zenit_node_reference_new(struct ZenitSourceLocation location, struct ZenitNode *expression)
 {
-    struct ZenitUnaryRefNode *ref_node = fl_malloc(sizeof(struct ZenitUnaryRefNode));
-    ref_node->base.type = ZENIT_NODE_UNARY_REF;
+    struct ZenitReferenceNode *ref_node = fl_malloc(sizeof(struct ZenitReferenceNode));
+    ref_node->base.type = ZENIT_NODE_REFERENCE;
     ref_node->base.location = location;
     ref_node->expression = expression;
 
@@ -12,8 +12,8 @@ struct ZenitUnaryRefNode* zenit_node_unary_ref_new(struct ZenitSourceLocation lo
 }
 
 /*
- * Function: zenit_node_unary_ref_free
- *  Releases the memory of the <struct ZenitUnaryRefNode> object
+ * Function: zenit_node_reference_free
+ *  Releases the memory of the <struct ZenitReferenceNode> object
  *
  * Parameters:
  *  ref_node - Object to be freed.
@@ -21,7 +21,7 @@ struct ZenitUnaryRefNode* zenit_node_unary_ref_new(struct ZenitSourceLocation lo
  * Returns:
  *  void - This function does not return a value
  */
-void zenit_node_unary_ref_free(struct ZenitUnaryRefNode *ref_node)
+void zenit_node_reference_free(struct ZenitReferenceNode *ref_node)
 {
     if (!ref_node)
         return;

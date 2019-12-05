@@ -27,9 +27,9 @@ static struct ZenitTypeInfo* visit_cast(struct ZenitContext *ctx, struct ZenitNo
 static const ZenitTypeInferrer inferrers[] = {
     [ZENIT_NODE_LITERAL]    = &visit_literal,
     [ZENIT_NODE_VARIABLE]   = &visit_variable,
-    [ZENIT_NODE_ARRAY_INIT] = &visit_array_initializer,
+    [ZENIT_NODE_ARRAY] = &visit_array_initializer,
     [ZENIT_NODE_IDENTIFIER] = &visit_identifier,
-    [ZENIT_NODE_UNARY_REF]  = &visit_unary_ref,
+    [ZENIT_NODE_REFERENCE]  = &visit_unary_ref,
     [ZENIT_NODE_CAST]       = &visit_cast,
 };
 
@@ -60,7 +60,7 @@ static struct ZenitTypeInfo* visit_cast(struct ZenitContext *ctx, struct ZenitNo
  */
 static struct ZenitTypeInfo* visit_literal(struct ZenitContext *ctx, struct ZenitNode *node)
 {
-    return &((struct ZenitLiteralNode*)node)->base.typeinfo;
+    return &((struct ZenitPrimitiveNode*)node)->base.typeinfo;
 }
 
 /*
@@ -83,7 +83,7 @@ static struct ZenitTypeInfo* visit_identifier(struct ZenitContext *ctx, struct Z
 
 /*
  * Function: visit_unary_ref
- *  In this function we need to fill the type information of the <struct ZenitUnaryRefNode> object using
+ *  In this function we need to fill the type information of the <struct ZenitReferenceNode> object using
  *  the expression typeinfo object.
  *
  * Parameters:
@@ -96,7 +96,7 @@ static struct ZenitTypeInfo* visit_identifier(struct ZenitContext *ctx, struct Z
  */
 static struct ZenitTypeInfo* visit_unary_ref(struct ZenitContext *ctx, struct ZenitNode *node)
 {
-    struct ZenitUnaryRefNode *ref_node = (struct ZenitUnaryRefNode*)node;
+    struct ZenitReferenceNode *ref_node = (struct ZenitReferenceNode*)node;
     struct ZenitTypeInfo *expr_info = visit_node(ctx, ref_node->expression);
 
     // Update the type of the unary ref node

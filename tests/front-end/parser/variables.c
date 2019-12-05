@@ -29,7 +29,7 @@ void zenit_test_parser_variable_literal(void)
         fl_expect("Variable type is NONE because the type is inferred from the assignment", var_decl->base.typeinfo.type == ZENIT_TYPE_NONE);
         fl_expect("Right-hand side must be a literal node", var_decl->value && var_decl->value->type == ZENIT_NODE_LITERAL);
 
-        struct ZenitLiteralNode *literal = (struct ZenitLiteralNode*)var_decl->value;
+        struct ZenitPrimitiveNode *literal = (struct ZenitPrimitiveNode*)var_decl->value;
         fl_expect("Right-hand side expression must have uint8", literal->base.typeinfo.type == ZENIT_TYPE_UINT8);
         fl_vexpect((size_t)literal->value.uint8 == i, "Right-hand side expression has value %zu", i);
     }
@@ -86,7 +86,7 @@ void zenit_test_parser_array_variable_literal(void)
         
         fl_vexpect(flm_cstring_equals(name, var_decl->name), "Variable name must be equals to \"%s\"", name);
         fl_expect("Variable type is NONE because the type is inferred from the assignment", var_decl->base.typeinfo.type == ZENIT_TYPE_NONE);
-        fl_expect("Right-hand side must be an array initializer", var_decl->value && var_decl->value->type == ZENIT_NODE_ARRAY_INIT);
+        fl_expect("Right-hand side must be an array initializer", var_decl->value && var_decl->value->type == ZENIT_NODE_ARRAY);
 
         struct ZenitArrayNode *array_init = (struct ZenitArrayNode*)var_decl->value;        
 
@@ -100,13 +100,13 @@ void zenit_test_parser_array_variable_literal(void)
 
             if (value_node->type == ZENIT_NODE_LITERAL)
             {
-                struct ZenitLiteralNode *literal_node = (struct ZenitLiteralNode*)value_node;
+                struct ZenitPrimitiveNode *primitive_node = (struct ZenitPrimitiveNode*)value_node;
                 fl_vexpect(
-                    literal_node->base.typeinfo.type == types[i][j], 
+                    primitive_node->base.typeinfo.type == types[i][j], 
                     "Array %s at position %zu has type %s and value %d", 
                     name, 
                     j, 
-                    zenit_type_to_string(&literal_node->base.typeinfo), 
+                    zenit_type_to_string(&primitive_node->base.typeinfo), 
                     values[i][j]
                 );
             }
@@ -141,7 +141,7 @@ void zenit_test_parser_variable_literal_typeinfo(void)
         fl_vexpect(var_decl->base.typeinfo.type == ZENIT_TYPE_UINT8, "Variable type is \"%s\" because the type is present in the declaration", zenit_type_to_string(&var_decl->base.typeinfo));
         fl_expect("Right-hand side must be a literal node", var_decl->value && var_decl->value->type == ZENIT_NODE_LITERAL);
 
-        struct ZenitLiteralNode *literal = (struct ZenitLiteralNode*)var_decl->value;
+        struct ZenitPrimitiveNode *literal = (struct ZenitPrimitiveNode*)var_decl->value;
         fl_vexpect(literal->base.typeinfo.type == ZENIT_TYPE_UINT8, "Right-hand side expression must be of type \"%s\"", zenit_type_to_string(&literal->base.typeinfo));
         fl_vexpect((size_t)literal->value.uint8 == i, "Right-hand side expression has value %zu", i);
     }
@@ -207,7 +207,7 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
             var_decl->base.typeinfo.elements,
             zenit_type_to_string(&var_decl->base.typeinfo));
 
-        fl_expect("Right-hand side must be an array initializer", var_decl->value && var_decl->value->type == ZENIT_NODE_ARRAY_INIT);
+        fl_expect("Right-hand side must be an array initializer", var_decl->value && var_decl->value->type == ZENIT_NODE_ARRAY);
 
         struct ZenitArrayNode *array_init = (struct ZenitArrayNode*)var_decl->value;        
 
@@ -221,13 +221,13 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
 
             if (value_node->type == ZENIT_NODE_LITERAL)
             {
-                struct ZenitLiteralNode *literal_node = (struct ZenitLiteralNode*)value_node;
+                struct ZenitPrimitiveNode *primitive_node = (struct ZenitPrimitiveNode*)value_node;
                 fl_vexpect(
-                    literal_node->base.typeinfo.type == types[i][j], 
+                    primitive_node->base.typeinfo.type == types[i][j], 
                     "Array %s at position %zu has type \"%s\" and value %d", 
                     name, 
                     j, 
-                    zenit_type_to_string(&literal_node->base.typeinfo), 
+                    zenit_type_to_string(&primitive_node->base.typeinfo), 
                     values[i][j]
                 );
             }
@@ -276,9 +276,9 @@ void zenit_test_parser_variable_complex(void)
         }
         else if (i == 2)
         {
-            fl_expect("Right-hand side must be a reference operator node", var_decl->value && var_decl->value->type == ZENIT_NODE_UNARY_REF);
+            fl_expect("Right-hand side must be a reference operator node", var_decl->value && var_decl->value->type == ZENIT_NODE_REFERENCE);
 
-            struct ZenitUnaryRefNode *ref_node = (struct ZenitUnaryRefNode*)var_decl->value;
+            struct ZenitReferenceNode *ref_node = (struct ZenitReferenceNode*)var_decl->value;
             fl_expect("Right-hand side expression must be a reference node to an identifier", ref_node->expression->type == ZENIT_NODE_IDENTIFIER);
 
             struct ZenitIdentifierNode *identifier = (struct ZenitIdentifierNode*)ref_node->expression;
@@ -331,9 +331,9 @@ void zenit_test_parser_variable_complex_typeinfo(void)
         {
             fl_vexpect(var_decl->base.typeinfo.type == ZENIT_TYPE_UINT8 && var_decl->base.typeinfo.is_ref, 
                 "Variable type is \"%s\" because the type is present in the declaration", zenit_type_to_string(&var_decl->base.typeinfo));
-            fl_expect("Right-hand side must be a reference operator node", var_decl->value && var_decl->value->type == ZENIT_NODE_UNARY_REF);
+            fl_expect("Right-hand side must be a reference operator node", var_decl->value && var_decl->value->type == ZENIT_NODE_REFERENCE);
 
-            struct ZenitUnaryRefNode *ref_node = (struct ZenitUnaryRefNode*)var_decl->value;
+            struct ZenitReferenceNode *ref_node = (struct ZenitReferenceNode*)var_decl->value;
             fl_expect("Right-hand side expression must be a reference node to an identifier", ref_node->expression->type == ZENIT_NODE_IDENTIFIER);
 
             struct ZenitIdentifierNode *identifier = (struct ZenitIdentifierNode*)ref_node->expression;

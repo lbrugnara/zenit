@@ -29,9 +29,9 @@ static struct ZirOperand visit_cast(struct ZenitContext *ctx, struct ZenitNode *
 static const ZirGenerator generators[] = {
     [ZENIT_NODE_LITERAL]    = &visit_literal,
     [ZENIT_NODE_VARIABLE]   = &visit_variable,
-    [ZENIT_NODE_ARRAY_INIT] = &visit_array_initializer,
+    [ZENIT_NODE_ARRAY] = &visit_array_initializer,
     [ZENIT_NODE_IDENTIFIER] = &visit_identifier,
-    [ZENIT_NODE_UNARY_REF]  = &visit_unary_ref,
+    [ZENIT_NODE_REFERENCE]  = &visit_unary_ref,
     [ZENIT_NODE_CAST]       = &visit_cast,
 };
 
@@ -190,7 +190,7 @@ static struct ZirOperand visit_cast(struct ZenitContext *ctx, struct ZenitNode *
  */
 static struct ZirOperand visit_literal(struct ZenitContext *ctx, struct ZenitNode *node, struct ZirProgram *program)
 {
-    struct ZenitLiteralNode *literal = (struct ZenitLiteralNode*)node;
+    struct ZenitPrimitiveNode *literal = (struct ZenitPrimitiveNode*)node;
 
     struct ZirLiteralValue *literalval = (struct ZirLiteralValue*)zir_value_new(ZIR_VALUE_LITERAL);
     zenit_type_to_zir_type(&literal->base.typeinfo, &literalval->base.typeinfo);
@@ -215,7 +215,7 @@ static struct ZirOperand visit_literal(struct ZenitContext *ctx, struct ZenitNod
 
 static struct ZirOperand visit_unary_ref(struct ZenitContext *ctx, struct ZenitNode *node, struct ZirProgram *program)
 {
-    struct ZenitUnaryRefNode *ref_node = (struct ZenitUnaryRefNode*)node;
+    struct ZenitReferenceNode *ref_node = (struct ZenitReferenceNode*)node;
     struct ZirOperand operand = visit_node(ctx, ref_node->expression, program);
     operand.type = ZIR_OPERAND_REFERENCE;
     return operand;
