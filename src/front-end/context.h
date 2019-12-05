@@ -54,7 +54,7 @@ enum ZenitErrorType {
     ZENIT_ERROR_TYPE_MISSMATCH,
 
     // Error taking a reference from an expression
-    ZENIT_ERROR_INVALID_REF,
+    ZENIT_ERROR_INVALID_REFERENCE,
 };
 
 /*
