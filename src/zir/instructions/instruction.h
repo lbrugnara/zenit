@@ -1,8 +1,7 @@
 #ifndef ZIR_INSTRUCTION_H
 #define ZIR_INSTRUCTION_H
 
-#include "../operand.h"
-#include "../attribute.h"
+#include "operands/operand.h"
 
 /*
  * Enum: enum ZirInstructionType
@@ -12,6 +11,7 @@
 enum ZirInstructionType {
     ZIR_INSTR_VARIABLE,
     ZIR_INSTR_CAST,
+    ZIR_INSTR_LOAD,
 };
 
 /*
@@ -25,6 +25,7 @@ enum ZirInstructionType {
  */
 struct ZirInstruction {
     enum ZirInstructionType type;
+    struct ZirOperand *destination;
 };
 
 /*

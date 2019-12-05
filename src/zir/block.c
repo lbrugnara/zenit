@@ -19,16 +19,18 @@ void zir_block_free(struct ZirBlock *block)
 
     if (block->children)
     {
-        for (size_t i=0; i < fl_array_length(block->children); i++)
-            zir_block_free(block->children[i]);
+        //for (size_t i=0; i < fl_array_length(block->children); i++)
+        for (size_t i=fl_array_length(block->children); i > 0; i--)
+            zir_block_free(block->children[i - 1]);
 
         fl_array_free(block->children);
     }
 
     if (block->instructions)
     {
-        for (size_t i=0; i < fl_array_length(block->instructions); i++)
-            zir_instruction_free(block->instructions[i]);
+        //for (size_t i=0; i < fl_array_length(block->instructions); i++)
+        for (size_t i=fl_array_length(block->instructions); i > 0; i--)
+            zir_instruction_free(block->instructions[i - 1]);
 
         fl_array_free(block->instructions);
     }

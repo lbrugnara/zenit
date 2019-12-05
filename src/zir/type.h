@@ -106,4 +106,6 @@ bool zir_type_equals(struct ZirTypeInfo *type_a, struct ZirTypeInfo *type_b);
 
 size_t zir_type_size(struct ZirTypeInfo *type);
 
+void zir_type_free(struct ZirTypeInfo *typeinfo);
+
 #endif /* ZIR_TYPE_H */

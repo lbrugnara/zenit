@@ -1,15 +1,14 @@
-#ifndef ZIR_CAST_H
-#define ZIR_CAST_H
+#ifndef ZIR_INSTRUCTION_CAST_H
+#define ZIR_INSTRUCTION_CAST_H
 
 #include "instruction.h"
-#include "../operand.h"
-#include "../attribute.h"
+#include "operands/operand.h"
+#include "operands/symbol.h"
 #include "../type.h"
 
 struct ZirCastInstruction {
     struct ZirInstruction base;
-    struct ZirOperand lvalue;
-    struct ZirOperand rvalue;
+    struct ZirOperand *source;
 };
 
 /*
@@ -26,7 +25,7 @@ struct ZirCastInstruction {
  *  The object returned by this function must be freed with the
  *  <zir_instruction_cast_free> function
  */
-struct ZirCastInstruction* zir_instruction_cast_new(void);
+struct ZirCastInstruction* zir_instruction_cast_new(struct ZirOperand *destination);
 
 /*
  * Function: zir_instruction_cast_free
@@ -61,4 +60,4 @@ void zir_instruction_cast_free(struct ZirCastInstruction *instruction);
  */
 char* zir_instruction_cast_dump(struct ZirCastInstruction *instruction, char *output);
 
-#endif /* ZIR_CAST_H */
+#endif /* ZIR_INSTRUCTION_CAST_H */

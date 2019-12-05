@@ -244,3 +244,9 @@ size_t zir_type_size(struct ZirTypeInfo *type)
 
     return element_size * type->elements;
 }
+
+void zir_type_free(struct ZirTypeInfo *typeinfo)
+{
+    if (typeinfo->name)
+        fl_cstring_free(typeinfo->name);
+}

@@ -1,32 +1,26 @@
 #include <stdio.h>
 #include "variable.h"
 
-struct ZirVariableInstruction* zir_instruction_variable_new(void)
+struct ZirVariableInstruction* zir_instruction_variable_new(struct ZirOperand *destination)
 {
     struct ZirVariableInstruction *instruction = fl_malloc(sizeof(struct ZirVariableInstruction));
     instruction->base.type = ZIR_INSTR_VARIABLE;
+    instruction->base.destination = destination;
     
     return instruction;
 }
 
 void zir_instruction_variable_free(struct ZirVariableInstruction *instruction)
 {
-    struct ZirVariableInstruction *vardecl = (struct ZirVariableInstruction*)instruction;
-    zir_operand_free(&vardecl->lvalue);
-    zir_operand_free(&vardecl->rvalue);
-    zir_attribute_map_free(&vardecl->attributes);
-
+    zir_attribute_map_free(&instruction->attributes);
     fl_free(instruction);
 }
 
 char* zir_instruction_variable_dump(struct ZirVariableInstruction *vardecl, char *output)
 {
-    fl_cstring_vappend(&output, "%s%s : %s = ", 
-        vardecl->lvalue.operand.symbol->temporal ? "%" : "@", 
-        vardecl->lvalue.operand.symbol->name, 
-        zir_type_to_string(&vardecl->lvalue.operand.symbol->typeinfo)
-    );
-    output = zir_operand_dump(&vardecl->rvalue, output);
+    output = zir_operand_dump(vardecl->base.destination, output);
+    fl_cstring_vappend(&output, " : %s = ", zir_type_to_string(&vardecl->base.destination->typeinfo));
+    output = zir_operand_dump(vardecl->source, output);
 
     if (zir_attribute_map_length(&vardecl->attributes) != 0)
     {
@@ -51,7 +45,7 @@ char* zir_instruction_variable_dump(struct ZirVariableInstruction *vardecl, char
                 struct ZirProperty *prop = zir_property_map_get(&attr->properties, prop_names[j]);
                 fl_cstring_vappend(&output, "%s:", prop->name);
 
-                output = zir_operand_dump(&prop->value, output);
+                output = zir_operand_dump(prop->value, output);
 
                 if (j != prop_count - 1)
                     fl_cstring_append(&output, ", ");

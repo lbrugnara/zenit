@@ -53,6 +53,11 @@ void zenit_test_generate_ir_casts(void)
     fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
     
     struct ZirProgram *program = zenit_generate_zir(&ctx);
+
+    fl_expect("ZIR program must compile", program != NULL);
+
+    // At this point we can free the Zenit context, from now on, everything should work only with ZIR objects
+    zenit_context_free(&ctx);
     
     char *codegen = zir_program_dump(program, fl_cstring_new(0));
 
@@ -61,5 +66,4 @@ void zenit_test_generate_ir_casts(void)
     fl_cstring_free(codegen);
 
     zir_program_free(program);
-    zenit_context_free(&ctx);
 }

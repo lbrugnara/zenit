@@ -4,22 +4,29 @@
 #include "program.h"
 
 #include "../../zir/symtable.h"
+#include "../../zir/instructions/operands/operand.h"
+#include "../../zir/instructions/operands/array.h"
+#include "../../zir/instructions/operands/primitive.h"
+#include "../../zir/instructions/operands/reference.h"
+#include "../../zir/instructions/operands/symbol.h"
 
 typedef void(*ZirBlockVisitor)(struct ZirBlock *block, struct ZenitNesProgram *program);
 typedef void(*ZirInstructionVisitor)(struct ZirInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
 
 static void visit_block(struct ZirBlock *block, struct ZenitNesProgram *program);
 static void visit_instruction(struct ZirInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
+static void visit_load_instruction(struct ZirLoadInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
 static void visit_variable_instruction(struct ZirVariableInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
 static void visit_cast_instruction(struct ZirCastInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
 
 static const ZirInstructionVisitor instruction_visitors[] = {
-    [ZIR_INSTR_VARIABLE]   = (ZirInstructionVisitor)&visit_variable_instruction,
-    [ZIR_INSTR_CAST]       = (ZirInstructionVisitor)&visit_cast_instruction,
+    [ZIR_INSTR_VARIABLE]   = (ZirInstructionVisitor) &visit_variable_instruction,
+    [ZIR_INSTR_CAST]       = (ZirInstructionVisitor) &visit_cast_instruction,
+    [ZIR_INSTR_LOAD]       = (ZirInstructionVisitor) &visit_load_instruction,
 };
 
-static void emit_array_store(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, struct ZirArrayValue *array, size_t offset);
-static void emit_literal_store(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, struct ZirLiteralValue *literal, size_t offset);
+static void emit_array_store(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, struct ZirArrayOperand *array, size_t offset);
+static void emit_literal_store(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, struct ZirPrimitiveOperand *literal, size_t offset);
 
 static inline bool reserve_zp_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol **nes_symbol, struct ZirSymbol *zir_symbol, uint8_t *address)
 {
@@ -206,22 +213,20 @@ static struct ZenitNesSymbol* reserve_symbol(struct ZenitNesProgram *program, st
         {
             struct ZirProperty *segment_property = zir_property_map_get(&nes_attribute->properties, "segment");
 
-            if (segment_property->value.type == ZIR_OPERAND_SYMBOL)
+            if (segment_property->value->type == ZIR_OPERAND_SYMBOL)
             {
-                if (flm_cstring_equals(segment_property->value.operand.symbol->name, "zp"))
-                {
+                struct ZirSymbolOperand *symbol_operand = (struct ZirSymbolOperand*)segment_property->value;
+
+                if (flm_cstring_equals(symbol_operand->symbol->name, "zp"))
                     reserve_zp_symbol(program, &nes_symbol, zir_symbol, NULL);
-                }
-                else if (flm_cstring_equals(segment_property->value.operand.symbol->name, "data"))
-                {
+                else if (flm_cstring_equals(symbol_operand->symbol->name, "data"))
                     reserve_data_symbol(program, &nes_symbol, zir_symbol, NULL);
-                }
             }
         }
         else if (zir_property_map_has_key(&nes_attribute->properties, "address"))
         {
             struct ZirProperty *address_property = zir_property_map_get(&nes_attribute->properties, "address");
-            struct ZirLiteralValue *literal_value = (struct ZirLiteralValue*)address_property->value.operand.value;
+            struct ZirPrimitiveOperand *literal_value = (struct ZirPrimitiveOperand*)address_property->value;
 
             if (literal_value->base.typeinfo.type == ZIR_TYPE_UINT8)
             {
@@ -257,7 +262,7 @@ static struct ZenitNesSymbol* reserve_symbol(struct ZenitNesProgram *program, st
     return nes_symbol;
 }
 
-static void emit_array_store(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, struct ZirArrayValue *array, size_t offset)
+static void emit_array_store(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, struct ZirArrayOperand *array, size_t offset)
 {
     uint16_t symbol_address = nes_symbol->address + offset;
 
@@ -266,39 +271,40 @@ static void emit_array_store(struct ZenitNesProgram *program, struct ZenitNesSym
         // If the symbol is in the data segment, we just assign the value
         for (size_t i=0; i < fl_array_length(array->elements); i++)
         {
-            struct ZirOperand element = array->elements[i];
+            struct ZirOperand *operand = array->elements[i];
             uint8_t *slot = program->data.bytes + (nes_symbol->address - program->data.base_address) + i * nes_symbol->size;
             
-            if (element.type == ZIR_OPERAND_VALUE)
+            if (operand->type == ZIR_OPERAND_PRIMITIVE)
             {
-                if (element.operand.value->type == ZIR_VALUE_LITERAL)
-                {
-                    struct ZirLiteralValue *literal_elem = (struct ZirLiteralValue*)element.operand.value;
-                    emit_literal_store(program, nes_symbol, literal_elem, offset + (i * zir_type_size(&literal_elem->base.typeinfo)));
-                }
-                else
-                {
-                    struct ZirArrayValue *array_elem = (struct ZirArrayValue*)element.operand.value;
-                    emit_array_store(program, nes_symbol, array_elem, offset + (i * zir_type_size(&array_elem->base.typeinfo)));
-                }
+                struct ZirPrimitiveOperand *literal_elem = (struct ZirPrimitiveOperand*)operand;
+                emit_literal_store(program, nes_symbol, literal_elem, offset + (i * zir_type_size(&literal_elem->base.typeinfo)));
             }
-            else
+            else if (operand->type == ZIR_OPERAND_ARRAY)
             {
-                // FIXME: Handle refs and symbols
+                struct ZirArrayOperand *array_elem = (struct ZirArrayOperand*)operand;
+                emit_array_store(program, nes_symbol, array_elem, offset + (i * zir_type_size(&array_elem->base.typeinfo)));
+            }
+            else if (operand->type == ZIR_OPERAND_REFERENCE)
+            {
+                // FIXME: Handle symbols and refs
+            }
+            else if (operand->type == ZIR_OPERAND_SYMBOL)
+            {
+                // FIXME: Handle symbols
             }
         }
     }
 }
 
-static void emit_literal_store(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, struct ZirLiteralValue *literal, size_t offset)
+static void emit_literal_store(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, struct ZirPrimitiveOperand *primitive_value, size_t offset)
 {
     uint16_t symbol_address = nes_symbol->address + offset;
 
-    if (literal->base.typeinfo.type == ZIR_TYPE_UINT8)
+    if (primitive_value->base.typeinfo.type == ZIR_TYPE_UINT8)
     {
         if (nes_symbol->segment == ZENIT_NES_SEGMENT_ZP || nes_symbol->segment == ZENIT_NES_SEGMENT_CODE)
         {
-            zenit_nes_program_emit_imm(&program->startup, NES_OP_LDA, literal->value.uint8);
+            zenit_nes_program_emit_imm(&program->startup, NES_OP_LDA, primitive_value->value.uint8);
             zenit_nes_program_emit_zpg(&program->startup, NES_OP_STA, (uint8_t)(symbol_address));
 
             // upcast from uint8 to uint16
@@ -311,7 +317,7 @@ static void emit_literal_store(struct ZenitNesProgram *program, struct ZenitNesS
         else if (nes_symbol->segment == ZENIT_NES_SEGMENT_DATA)
         {
             uint8_t *slot = program->data.bytes + (symbol_address - program->data.base_address);
-            *slot = literal->value.uint8;
+            *slot = primitive_value->value.uint8;
             
             // upcast from uint8 to uint16
             if (nes_symbol->element_size > sizeof(uint8_t))
@@ -323,22 +329,27 @@ static void emit_literal_store(struct ZenitNesProgram *program, struct ZenitNesS
             }
         }
     }
-    else if (literal->base.typeinfo.type == ZIR_TYPE_UINT16)
+    else if (primitive_value->base.typeinfo.type == ZIR_TYPE_UINT16)
     {
         if (nes_symbol->segment == ZENIT_NES_SEGMENT_ZP || nes_symbol->segment == ZENIT_NES_SEGMENT_CODE)
         {
-            zenit_nes_program_emit_imm(&program->startup, NES_OP_LDA, (uint8_t)(literal->value.uint16 & 0xFF));
-            zenit_nes_program_emit_imm(&program->startup, NES_OP_LDX, (uint8_t)((literal->value.uint16 >> 8) & 0xFF));
+            zenit_nes_program_emit_imm(&program->startup, NES_OP_LDA, (uint8_t)(primitive_value->value.uint16 & 0xFF));
+            zenit_nes_program_emit_imm(&program->startup, NES_OP_LDX, (uint8_t)((primitive_value->value.uint16 >> 8) & 0xFF));
             zenit_nes_program_emit_zpg(&program->startup, NES_OP_STA, (uint8_t)(symbol_address));
             zenit_nes_program_emit_zpg(&program->startup, NES_OP_STX, (uint8_t)(symbol_address + 1));
         }
         else if (nes_symbol->segment == ZENIT_NES_SEGMENT_DATA)
         {
             uint8_t *slot = program->data.bytes + (symbol_address - program->data.base_address);
-            *slot       = literal->value.uint16 & 0xFF;
-            *(slot+1)   = (literal->value.uint16 >> 8) & 0xFF;
+            *slot       = primitive_value->value.uint16 & 0xFF;
+            *(slot+1)   = (primitive_value->value.uint16 >> 8) & 0xFF;
         }
     }
+}
+
+static void visit_load_instruction(struct ZirLoadInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program)
+{
+    // nothing...
 }
 
 static void visit_cast_instruction(struct ZirCastInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program)
@@ -349,25 +360,22 @@ static void visit_cast_instruction(struct ZirCastInstruction *instruction, struc
 
 static void visit_variable_instruction(struct ZirVariableInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program)
 {
-    struct ZirSymbol *zir_symbol = instruction->lvalue.operand.symbol;
+    struct ZirSymbol *zir_symbol = ((struct ZirSymbolOperand*)instruction->base.destination)->symbol;
     struct ZenitNesSymbol *nes_symbol = reserve_symbol(program, block, instruction, zir_symbol);
 
-    if (instruction->rvalue.type == ZIR_OPERAND_VALUE)
+    if (instruction->source->type == ZIR_OPERAND_PRIMITIVE)
     {
-        if (instruction->rvalue.operand.value->type == ZIR_VALUE_LITERAL)
-        {
-            emit_literal_store(program, nes_symbol, (struct ZirLiteralValue*)instruction->rvalue.operand.value, 0);
-        }
-        else
-        {
-            emit_array_store(program, nes_symbol, (struct ZirArrayValue*)instruction->rvalue.operand.value, 0);
-        }
+        emit_literal_store(program, nes_symbol, (struct ZirPrimitiveOperand*)instruction->source, 0);
     }
-    else if (instruction->rvalue.type == ZIR_OPERAND_REFERENCE)
+    else if (instruction->source->type == ZIR_OPERAND_ARRAY)
+    {
+        emit_array_store(program, nes_symbol, (struct ZirArrayOperand*)instruction->source, 0);
+    }
+    else if (instruction->source->type == ZIR_OPERAND_REFERENCE)
     {
         // FIXME: Handle symbols and refs
     }
-    else if (instruction->rvalue.type == ZIR_OPERAND_SYMBOL)
+    else if (instruction->source->type == ZIR_OPERAND_SYMBOL)
     {
         // FIXME: Handle symbols
     }

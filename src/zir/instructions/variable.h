@@ -1,9 +1,9 @@
-#ifndef ZIR_VARIABLE_H
-#define ZIR_VARIABLE_H
+#ifndef ZIR_INSTRUCTION_VARIABLE_H
+#define ZIR_INSTRUCTION_VARIABLE_H
 
 #include "instruction.h"
-#include "../operand.h"
-#include "../attribute.h"
+#include "operands/symbol.h"
+#include "attributes/attribute.h"
 
 /*
  * Struct: struct ZirVariableInstruction
@@ -18,8 +18,7 @@
 struct ZirVariableInstruction {
     struct ZirInstruction base;
     struct ZirAttributeMap attributes;
-    struct ZirOperand lvalue;
-    struct ZirOperand rvalue;
+    struct ZirOperand *source;
 };
 
 /*
@@ -36,7 +35,7 @@ struct ZirVariableInstruction {
  *  The object returned by this function must be freed with the
  *  <zir_instruction_variable_free> function
  */
-struct ZirVariableInstruction* zir_instruction_variable_new(void);
+struct ZirVariableInstruction* zir_instruction_variable_new(struct ZirOperand *destination);
 
 /*
  * Function: zir_instruction_variable_free
@@ -71,4 +70,4 @@ void zir_instruction_variable_free(struct ZirVariableInstruction *instruction);
  */
 char* zir_instruction_variable_dump(struct ZirVariableInstruction *instruction, char *output);
 
-#endif /* ZIR_VARIABLE_H */
+#endif /* ZIR_INSTRUCTION_VARIABLE_H */

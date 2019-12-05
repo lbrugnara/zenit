@@ -2,21 +2,18 @@
 #define ZIR_PROPERTY_H
 
 #include <fllib.h>
-#include "operand.h"
+#include "../operands/operand.h"
 
 struct ZirProperty {
     char *name;
-    struct ZirOperand value;
+    struct ZirOperand *value;
 };
 
-static inline struct ZirProperty* zir_property_new(char *name, struct ZirOperand *operand)
+static inline struct ZirProperty* zir_property_new(char *name, struct ZirOperand *value)
 {
     struct ZirProperty *property = fl_malloc(sizeof(struct ZirProperty));
     property->name = fl_cstring_dup(name);
-
-    // We need to generate the operand
-    if (operand != NULL)
-        memcpy(&property->value, operand, sizeof(struct ZirOperand));
+    property->value = value;
 
     return property;
 }
@@ -28,8 +25,6 @@ static inline void zir_property_free(struct ZirProperty *property)
 
     if (property->name)
         fl_cstring_free(property->name);
-
-    zir_operand_free(&property->value);
 
     fl_free(property);
 }
