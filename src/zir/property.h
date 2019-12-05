@@ -9,7 +9,30 @@ struct ZirProperty {
     struct ZirOperand value;
 };
 
-void zir_property_free(struct ZirProperty *property);
+static inline struct ZirProperty* zir_property_new(char *name, struct ZirOperand *operand)
+{
+    struct ZirProperty *property = fl_malloc(sizeof(struct ZirProperty));
+    property->name = fl_cstring_dup(name);
+
+    // We need to generate the operand
+    if (operand != NULL)
+        memcpy(&property->value, operand, sizeof(struct ZirOperand));
+
+    return property;
+}
+
+static inline void zir_property_free(struct ZirProperty *property)
+{
+    if (!property)
+        return;
+
+    if (property->name)
+        fl_cstring_free(property->name);
+
+    zir_operand_free(&property->value);
+
+    fl_free(property);
+}
 
 struct ZirPropertyMap {
     FlHashtable map;
