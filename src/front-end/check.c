@@ -207,7 +207,7 @@ static struct ZenitTypeInfo* visit_variable(struct ZenitContext *ctx, struct Zen
     }
 
     // We visit the right-hand side expression to do type checking in it
-    struct ZenitTypeInfo* rhs_type = visit_node(ctx, var_decl->value);
+    struct ZenitTypeInfo* rhs_type = visit_node(ctx, var_decl->rvalue);
     
     // We check types to make sure the assignment is valid, but we do it only if
     // the variable type is valid, because if not, we might be targeting a false-positive

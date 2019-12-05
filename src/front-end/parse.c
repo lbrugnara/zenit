@@ -568,10 +568,10 @@ static struct ZenitNode* parse_variable_declaration(struct ZenitParser *parser, 
     consume_or_goto(ctx, parser, ZENIT_TOKEN_ASSIGN, NULL, on_missing_assignment);
 
     // The right-hand side value is an expression
-    var_node->value = parse_expression(parser, ctx);
+    var_node->rvalue = parse_expression(parser, ctx);
 
     // As noted before, the initialization expression is required
-    assert_or_goto(ctx, var_node->value != NULL, ZENIT_ERROR_INTERNAL, NULL, on_missing_assignment);
+    assert_or_goto(ctx, var_node->rvalue != NULL, ZENIT_ERROR_INTERNAL, NULL, on_missing_assignment);
 
     // The variable declaration ends with a semicolon
     consume_or_goto(ctx, parser, ZENIT_TOKEN_SEMICOLON, NULL, on_missing_semicolon);
@@ -580,7 +580,7 @@ static struct ZenitNode* parse_variable_declaration(struct ZenitParser *parser, 
     return (struct ZenitNode*)var_node;
 
     // Cleanup code for error conditions
-    on_missing_semicolon:   zenit_node_free(var_node->value);
+    on_missing_semicolon:   zenit_node_free(var_node->rvalue);
     on_missing_assignment:  fl_cstring_free(var_node->base.typeinfo.name);
     on_missing_type:        fl_cstring_free(var_node->name);
     

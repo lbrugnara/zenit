@@ -78,3 +78,34 @@ executable zenit-tests {
         ]
     }
 }
+
+executable zenit-tests-sanitize {
+    output_name: "tests",
+    output_dir: "build/",
+    objects: [
+        zenit-objects,
+        zenit-tests-objects
+    ]
+
+    for win-cmd {
+        objects: [ 
+            "../fllib/build/${SBS_CONFIG_NAME}/libfl.lib",
+            "clang_rt.ubsan_standalone-i386.lib",
+            "clang_rt.asan-i386.lib",
+            "clang_rt.builtins-i386.lib",
+        ]
+        libraries: [
+            {
+                path: "D:\dev\LLVM\x86\lib\clang\8.0.0\lib\windows"
+            }
+        ]
+    }
+
+    for linux-bash {
+        objects: [ "../fllib/build/${SBS_CONFIG_NAME}/libfl.a" ],
+        libraries: [
+            { name: "m" },
+            { name: "pthread" }
+        ]
+    }
+}

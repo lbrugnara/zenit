@@ -16,7 +16,7 @@
 struct ZenitVariableNode {
     struct ZenitNode base;
     char *name;
-    struct ZenitNode *value;
+    struct ZenitNode *rvalue;
     struct ZenitAttributeNodeMap attributes;
 };
 

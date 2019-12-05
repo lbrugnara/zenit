@@ -106,10 +106,18 @@ config clang-release extends clang-config {
 }
 
 # The sanitize config adds the -fsanitize flag to compile with Clang's sanitizers
-config clang-sanitize extends clang-release {
+config clang-debug-sanitize extends clang-debug {
     compile: {
         flags: [
             "-O0",
+            "-fsanitize=address,undefined"
+        ]
+    },
+}
+
+config clang-release-sanitize extends clang-release {
+    compile: {
+        flags: [
             "-fsanitize=address,undefined"
         ]
     },

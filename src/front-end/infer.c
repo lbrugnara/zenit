@@ -184,7 +184,7 @@ static struct ZenitTypeInfo* visit_variable(struct ZenitContext *ctx, struct Zen
     struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx->program, var_decl->name);
 
     // We need to get the type of the right-hand side expression
-    struct ZenitTypeInfo *rhs_type = visit_node(ctx, var_decl->value);
+    struct ZenitTypeInfo *rhs_type = visit_node(ctx, var_decl->rvalue);
 
     if (symbol->typeinfo.type == ZENIT_TYPE_NONE && rhs_type->type != ZENIT_TYPE_NONE)
     {
@@ -205,7 +205,7 @@ static struct ZenitTypeInfo* visit_variable(struct ZenitContext *ctx, struct Zen
     else if (!zenit_type_equals(&symbol->typeinfo, rhs_type))
     {   
         // Last resort: Both types are defined, so we assume an implicit cast, the type check pass will take care of it
-        var_decl->value = (struct ZenitNode*)zenit_node_cast_new(var_decl->value->location, var_decl->value, &var_decl->base.typeinfo, true);
+        var_decl->rvalue = (struct ZenitNode*)zenit_node_cast_new(var_decl->rvalue->location, var_decl->rvalue, &var_decl->base.typeinfo, true);
     }
 
     // FIXME: Visit the attributes

@@ -310,7 +310,7 @@ static struct ZirOperand visit_variable(struct ZenitContext *ctx, struct ZenitNo
 
     // The rvalue is the operand we get from the visit to the <struct ZenitVariableNode>'s 
     // value
-    varinstr->rvalue = visit_node(ctx, vardecl->value, program);
+    varinstr->rvalue = visit_node(ctx, vardecl->rvalue, program);
 
     // We add the instruction to the program
     zir_program_add_instruction(program, (struct ZirInstruction*)varinstr);
