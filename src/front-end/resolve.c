@@ -139,6 +139,18 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
     return NULL;
 }
 
+/*
+ * Function: visit_attribute_node_map
+ *  We iterate over all the attributes to make sure the properties' values are valid symbols
+ *
+ * Parameters:
+ *  <struct ZenitContext> *ctx - Context object
+ *  <struct ZenitAttributeNodeMap> *attributes: Attributes map
+ * 
+ * Returns:
+ *  void - This function does not return a value
+ *
+ */
 static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttributeNodeMap *attributes)
 {
     const char **names = zenit_attribute_node_map_keys(attributes);

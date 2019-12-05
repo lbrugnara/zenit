@@ -189,6 +189,7 @@ static struct ZenitNode* parse_integer_literal(struct ZenitParser *parser, struc
     if (number_token.value.sequence[0] == '0' && number_token.value.sequence[1] == 'x')
         base = 16;
 
+    errno = 0;
     temp_int = strtoull((const char*)number_token.value.sequence, &endptr, base);
     
     // The token length must be equals to the parsed number
