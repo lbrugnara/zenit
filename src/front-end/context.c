@@ -30,7 +30,7 @@ static void error_free(void *errorptr)
 
 /*
  * Function: zenit_context_new
- *  Allocates memory for a <struct ZenitSymbolTable> object and a <struct ZenitSourceInfo> object
+ *  Allocates memory for a <struct ZenitSymtable> object and a <struct ZenitSourceInfo> object
  */
 struct ZenitContext zenit_context_new(enum ZenitSourceType type, const char *input)
 {

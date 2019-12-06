@@ -4,7 +4,7 @@
 
 /*
  * Type: ZenitTypeInferrer
- *  An inferrer function takes a symbol from the <struct ZenitSymbolTable> and updates
+ *  An inferrer function takes a symbol from the <struct ZenitSymtable> and updates
  *  it -if needed- with type information the symbol could be missing.
  *  The function returns a <struct ZenitTypeInfo> with the type retrieved from the symbol
  *  or inferred from the context.

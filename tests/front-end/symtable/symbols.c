@@ -6,7 +6,7 @@
 
 void zenit_test_symtable_api(void)
 {
-    struct ZenitSymbolTable table = zenit_symtable_new(ZENIT_SYMTABLE_GLOBAL, "global");
+    struct ZenitSymtable table = zenit_symtable_new(ZENIT_SYMTABLE_GLOBAL, "global");
 
     const char *names[] = { 
         "sym_a", 

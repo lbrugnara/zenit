@@ -20,17 +20,12 @@ void zir_program_free(struct ZirProgram *program)
     fl_free(program);
 }
 
-struct ZirSymbol* zir_program_add_global_symbol(struct ZirProgram *program, struct ZirSymbol *symbol)
-{
-    return zir_symtable_add(&program->global->symtable, symbol);
-}
-
 struct ZirSymbol* zir_program_add_symbol(struct ZirProgram *program, struct ZirSymbol *symbol)
 {
     return zir_symtable_add(&program->current->symtable, symbol);
 }
 
-struct ZirInstruction* zir_program_add_instruction(struct ZirProgram *program, struct ZirInstruction *instruction)
+struct ZirInstruction* zir_program_emit(struct ZirProgram *program, struct ZirInstruction *instruction)
 {
     program->current->instructions = fl_array_append(program->current->instructions, &instruction);
     return instruction;

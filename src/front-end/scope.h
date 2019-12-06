@@ -10,13 +10,13 @@
  * Members:
  *  <struct ZenitScope> *parent: Pointer to the parent scope
  *  <struct ZenitScope> **children: Set of children scopes
- *  <struct ZenitSymbolTable> symtable: Symbol table of the current scope
+ *  <struct ZenitSymtable> symtable: Symbol table of the current scope
  * 
  */
 struct ZenitScope {
     struct ZenitScope *parent;
     struct ZenitScope **children;
-    struct ZenitSymbolTable symtable;
+    struct ZenitSymtable symtable;
 };
 
 /*

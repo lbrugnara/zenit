@@ -22,7 +22,7 @@
  *  checking. At the end of this pass, if there are not errors, we can say 
  *  all the symbols contain the type information, therefore there shouldn't 
  *  be symbols with the <ZENIT_TYPE_NONE> value present in the 
- *  <struct ZenitSymbolTable> entries.
+ *  <struct ZenitSymtable> entries.
  */
 bool zenit_infer_types(struct ZenitContext *ctx);
 

@@ -1,7 +1,7 @@
 #include <fllib.h>
 #include "reference.h"
 
-struct ZirReferenceOperand* zir_operand_reference_new(struct ZirOperand *operand)
+struct ZirReferenceOperand* zir_operand_reference_new(struct ZirSymbolOperand *operand)
 {
     flm_assert(operand != NULL, "Operand of a reference must not be NULL");
 
@@ -9,7 +9,7 @@ struct ZirReferenceOperand* zir_operand_reference_new(struct ZirOperand *operand
     reference->base.type = ZIR_OPERAND_REFERENCE;
     reference->operand = operand;
 
-    zir_type_copy(&reference->base.typeinfo, &operand->typeinfo);
+    zir_type_copy(&reference->base.typeinfo, &operand->base.typeinfo);
     reference->base.typeinfo.is_ref = true;
 
     return reference;
@@ -28,6 +28,6 @@ void zir_operand_reference_free(struct ZirReferenceOperand *reference)
 char* zir_operand_reference_dump(struct ZirReferenceOperand *reference, char *output)
 {
     fl_cstring_append(&output, "ref ");
-    output = zir_operand_dump(reference->operand, output);
+    output = zir_operand_symbol_dump(reference->operand, output);
     return output;
 }

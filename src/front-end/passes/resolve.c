@@ -4,7 +4,7 @@
 
 /*
  * Type: ZenitSymbolResolver
- *  A resolver function takes the <struct ZenitSymbolTable> and a <struct ZenitNode> and
+ *  A resolver function takes the <struct ZenitSymtable> and a <struct ZenitNode> and
  *  populates the table (if needed) with symbol information.
  *  The function returns a <struct ZenitSymbol> if the node updates the table or NULL
  *  if there is nothing to update

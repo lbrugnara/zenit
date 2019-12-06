@@ -21,13 +21,12 @@ static bool is_type_defined(struct ZenitProgram *program, struct ZenitTypeInfo *
     if (typeinfo->type != ZENIT_TYPE_CUSTOM)
         return true;
 
-    return zenit_program_has_symbol(program, typeinfo->name)
-            || zenit_program_has_global_symbol(program, typeinfo->name);
+    return zenit_program_has_symbol(program, typeinfo->name);
 }
 
 /*
  * Type: ZenitTypeChecker
- *  A checker function takes a symbol from the <struct ZenitSymbolTable> and 
+ *  A checker function takes a symbol from the <struct ZenitSymtable> and 
  *  and makes sure its type is valid in the context that is determined
  *  by the <struct ZenitNode>.
  *  The function returns a <struct ZenitTypeInfo> pointer with the checked type information

@@ -43,20 +43,6 @@ struct ZirProgram* zir_program_new(void);
 void zir_program_free(struct ZirProgram *program);
 
 /*
- * Function: zir_program_add_global_symbol
- *  Adds a new symbol to the global block
- *
- * Parameters:
- *  <struct ZirProgram> *program - Program object
- *  <struct ZirSymbol> *symbol - Symbol to be added
- * 
- * Returns:
- *  <struct ZirSymbol>* - Added symbol
- * 
- */
-struct ZirSymbol* zir_program_add_global_symbol(struct ZirProgram *program, struct ZirSymbol *symbol);
-
-/*
  * Function: zir_program_add_symbol
  *  Adds a new symbol to the current block
  *
@@ -71,7 +57,7 @@ struct ZirSymbol* zir_program_add_global_symbol(struct ZirProgram *program, stru
 struct ZirSymbol* zir_program_add_symbol(struct ZirProgram *program, struct ZirSymbol *symbol);
 
 /*
- * Function: zir_program_add_instruction
+ * Function: zir_program_emit
  *  Adds a new instruction to the current program's block
  *
  * Parameters:
@@ -82,7 +68,7 @@ struct ZirSymbol* zir_program_add_symbol(struct ZirProgram *program, struct ZirS
  *  <struct ZirInstruction>* - Added instruction
  * 
  */
-struct ZirInstruction* zir_program_add_instruction(struct ZirProgram *program, struct ZirInstruction *instruction);
+struct ZirInstruction* zir_program_emit(struct ZirProgram *program, struct ZirInstruction *instruction);
 
 /*
  * Function: zir_program_dump

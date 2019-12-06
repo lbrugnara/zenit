@@ -1,11 +1,11 @@
 #include "symtable.h"
 #include "symbol.h"
 
-struct ZenitSymbolTable zenit_symtable_new(enum ZenitSymtableType type, const char *id)
+struct ZenitSymtable zenit_symtable_new(enum ZenitSymtableType type, const char *id)
 {
     flm_assert(id != NULL, "Symbol table ID cannot be NULL");
 
-    return (struct ZenitSymbolTable) {
+    return (struct ZenitSymtable) {
         .id = fl_cstring_dup(id),
         .type = type,
         .symbols = fl_hashtable_new_args((struct FlHashtableArgs) {
@@ -19,7 +19,7 @@ struct ZenitSymbolTable zenit_symtable_new(enum ZenitSymtableType type, const ch
     };
 }
 
-void zenit_symtable_free(struct ZenitSymbolTable *symtable)
+void zenit_symtable_free(struct ZenitSymtable *symtable)
 {
     if (!symtable)
         return;
@@ -31,18 +31,18 @@ void zenit_symtable_free(struct ZenitSymbolTable *symtable)
         fl_hashtable_free(symtable->symbols);
 }
 
-struct ZenitSymbol* zenit_symtable_add(struct ZenitSymbolTable *symtable, struct ZenitSymbol *symbol)
+struct ZenitSymbol* zenit_symtable_add(struct ZenitSymtable *symtable, struct ZenitSymbol *symbol)
 {
     fl_hashtable_add(symtable->symbols, symbol->name, symbol);
     return symbol;
 }
 
-bool zenit_symtable_has(struct ZenitSymbolTable *symtable, const char *symbol_name)
+bool zenit_symtable_has(struct ZenitSymtable *symtable, const char *symbol_name)
 {
     return fl_hashtable_has_key(symtable->symbols, symbol_name);
 }
 
-struct ZenitSymbol* zenit_symtable_get(struct ZenitSymbolTable *symtable, const char *symbol_name)
+struct ZenitSymbol* zenit_symtable_get(struct ZenitSymtable *symtable, const char *symbol_name)
 {
     return (struct ZenitSymbol*)fl_hashtable_get(symtable->symbols, symbol_name);
 }

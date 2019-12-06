@@ -81,9 +81,9 @@ void zenit_test_resolve_variables(void)
 
     for (size_t i=0; i < count; i++)
     {
-        fl_vexpect(zenit_program_has_global_symbol(ctx.program, names[i]), "Symbol table must contain symbol \"%s\"", names[i]);
+        fl_vexpect(zenit_program_has_symbol(ctx.program, names[i]), "Symbol table must contain symbol \"%s\"", names[i]);
 
-        struct ZenitSymbol *symbol = zenit_program_get_global_symbol(ctx.program, names[i]);
+        struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, names[i]);
 
         fl_vexpect(flm_cstring_equals(symbol->name, names[i]), "Symbol name must match (%s)", names[i]);
         fl_vexpect(symbol->typeinfo.elements == types[i].elements, "Symbol elements must match (%zu)", types[i].elements);

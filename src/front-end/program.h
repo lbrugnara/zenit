@@ -56,23 +56,7 @@ void zenit_program_free(struct ZenitProgram *program);
  */
 struct ZenitSymbol* zenit_program_add_symbol(struct ZenitProgram *program, struct ZenitSymbol *symbol);
 
-/*
- * Function: zenit_program_add_global_symbol
- *  Adds a new symbol to the global scope
- *
- * Parameters:
- *  <struct ZenitProgram> *program - Program object
- *  <struct ZenitSymbol> *symbol - Symbol to be added
- * 
- * Returns:
- *  <struct ZenitSymbol>* - Added symbol
- * 
- */
-struct ZenitSymbol* zenit_program_add_global_symbol(struct ZenitProgram *program, struct ZenitSymbol *symbol);
-
 bool zenit_program_has_symbol(struct ZenitProgram *program, const char *name);
-bool zenit_program_has_global_symbol(struct ZenitProgram *program, const char *name);
 struct ZenitSymbol* zenit_program_get_symbol(struct ZenitProgram *program, const char *symbol_name);
-struct ZenitSymbol* zenit_program_get_global_symbol(struct ZenitProgram *program, const char *symbol_name);
 
 #endif /* ZENIT_PROGRAM_H */
