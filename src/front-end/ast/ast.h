@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include "../token.h"
-#include "../type.h"
+#include "../types/type.h"
 
 #include "array.h"
 #include "attribute.h"
@@ -13,6 +13,7 @@
 #include "node.h"
 #include "property.h"
 #include "reference.h"
+#include "type.h"
 #include "variable.h"
 
 /*

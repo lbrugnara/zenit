@@ -3,7 +3,7 @@
 #include "context.h"
 #include "program.h"
 #include "source.h"
-#include "type.h"
+#include "types/type.h"
 
 /*
  * Function: error_free

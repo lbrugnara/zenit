@@ -84,7 +84,7 @@ static inline void copy_zenit_type_to_zir_type(struct ZenitTypeInfo *zenit_type,
             zir_type->type = ZIR_TYPE_UINT16;
             break;
 
-        case ZENIT_TYPE_CUSTOM:
+        case ZENIT_TYPE_STRUCT:
             zir_type->type = ZIR_TYPE_CUSTOM;
             break;
 

@@ -13,12 +13,12 @@
  *  typeinfo - Type information
  *
  * Returns:
- *  bool - *true* if the type is a native type or a custom type defined in the symbol
+ *  bool - *true* if the type is a native type or a struct type defined in the symbol
  *          table, otherwise this function returns *false*.
  */
 static bool is_type_defined(struct ZenitProgram *program, struct ZenitTypeInfo *typeinfo)
 {
-    if (typeinfo->type != ZENIT_TYPE_CUSTOM)
+    if (typeinfo->type != ZENIT_TYPE_STRUCT)
         return true;
 
     return zenit_program_has_symbol(program, typeinfo->name);
@@ -159,7 +159,7 @@ static struct ZenitTypeInfo* visit_reference_node(struct ZenitContext *ctx, stru
 static struct ZenitTypeInfo* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array)
 {
     // The array type is inferred in the inference pass, so we have information
-    // about it, but it can be a custom type that doesn't exist in the symbol
+    // about it, but it can be a struct type that doesn't exist in the symbol
     // table
     bool is_array_type_defined = is_type_defined(ctx->program, &array->base.typeinfo);
 

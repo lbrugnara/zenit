@@ -1,0 +1,15 @@
+#ifndef ZENIT_AST_TYPE_STRUCT_H
+#define ZENIT_AST_TYPE_STRUCT_H
+
+#include "type.h"
+
+struct ZenitStructTypeNode {
+    struct ZenitTypeNode base;
+    const char *name;
+    struct ZenitTypeNode **members;
+};
+
+struct ZenitStructTypeNode* zenit_node_type_struct_new(struct ZenitSourceLocation location, char *name);
+void zenit_node_type_struct_free(struct ZenitStructTypeNode *type_node);
+
+#endif /* ZENIT_AST_TYPE_STRUCT_H */

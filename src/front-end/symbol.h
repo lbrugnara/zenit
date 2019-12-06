@@ -2,7 +2,7 @@
 #define ZENIT_SYMBOL_H
 
 #include <fllib.h>
-#include "type.h"
+#include "types/type.h"
 
 /*
  * Struct: struct ZenitSymbol

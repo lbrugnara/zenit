@@ -50,10 +50,10 @@ void zenit_test_resolve_variables(void)
         { .elements = 0, .name = NULL, .type = ZENIT_TYPE_NONE, .is_array = false, .is_ref = false              },
 
         /* The type and number of elements is present in the variable declaration                               */
-        { .elements = 1, .name = "customType", .type = ZENIT_TYPE_CUSTOM, .is_array = false, .is_ref = false    },
+        { .elements = 1, .name = "customType", .type = ZENIT_TYPE_STRUCT, .is_array = false, .is_ref = false    },
 
         /* The type and number of elements is present in the variable declaration                               */
-        { .elements = 0, .name = "customType", .type = ZENIT_TYPE_CUSTOM, .is_array = true, .is_ref = false     },
+        { .elements = 0, .name = "customType", .type = ZENIT_TYPE_STRUCT, .is_array = true, .is_ref = false     },
 
         /* The type information will be inferred by the assignment, so the symbol                               */
         /* definition does not contain that information at this pass.                                           */

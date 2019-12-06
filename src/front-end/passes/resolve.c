@@ -192,7 +192,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     {
         zenit_context_error(ctx, variable_node->base.location, ZENIT_ERROR_DUPLICATED_SYMBOL, "Cannot redefine symbol '%s'", variable_node->name);
         return NULL;
-    }
+    }    
 
     // Visit the attributes and its properties
     visit_attribute_node_map(ctx, &variable_node->attributes);

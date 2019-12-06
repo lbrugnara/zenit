@@ -1,5 +1,6 @@
 #include <fllib.h>
 #include "primitive.h"
+#include "../types/primitive.h"
 
 struct ZenitPrimitiveNode* zenit_node_primitive_new(struct ZenitSourceLocation location, enum ZenitType type, union ZenitPrimitiveValue value)
 {
@@ -9,9 +10,7 @@ struct ZenitPrimitiveNode* zenit_node_primitive_new(struct ZenitSourceLocation l
 
     primitive_node->value = value;
 
-    primitive_node->base.typeinfo.type = type;
-    primitive_node->base.typeinfo.is_array = false;
-    primitive_node->base.typeinfo.elements = 1;
+    primitive_node->base.typeinfo = (struct ZenitTypeInfo*) zenit_type_primitive_new(type);
 
     return primitive_node;
 }

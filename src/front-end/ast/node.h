@@ -2,7 +2,7 @@
 #define ZENIT_AST_NODE_H
 
 #include "../token.h"
-#include "../type.h"
+#include "../types/type.h"
 
 /*
  * Enum: enum ZenitNodeType 
@@ -17,6 +17,10 @@ enum ZenitNodeType {
     ZENIT_NODE_IDENTIFIER,
     ZENIT_NODE_REFERENCE,
     ZENIT_NODE_CAST,
+    ZENIT_NODE_TYPE_ARRAY,
+    ZENIT_NODE_TYPE_PRIMITIVE,
+    ZENIT_NODE_TYPE_REFERENCE,
+    ZENIT_NODE_TYPE_STRUCT,
 };
 
 /*
@@ -29,9 +33,9 @@ enum ZenitNodeType {
  *  <struct ZenitTypeInfo> typeinfo: The type of the operand or operator represented by the node
  */
 struct ZenitNode {
-    enum ZenitNodeType type;
+    struct ZenitTypeInfo *typeinfo;
     struct ZenitSourceLocation location;
-    struct ZenitTypeInfo typeinfo;
+    enum ZenitNodeType type;
 };
 
 

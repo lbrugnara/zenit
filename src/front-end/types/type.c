@@ -103,8 +103,8 @@ enum ZenitType zenit_type_string_parse(const char *typestr)
             return mapping.type;
     }
 
-    // We simply assume the type is a custom type
-    return ZENIT_TYPE_CUSTOM;
+    // We simply assume the type is a struct type
+    return ZENIT_TYPE_STRUCT;
 }
 
 enum ZenitType zenit_type_slice_parse(struct FlSlice *slice)
@@ -116,8 +116,8 @@ enum ZenitType zenit_type_slice_parse(struct FlSlice *slice)
             return mapping.type;
     }
 
-    // We simply assume the type is a custom type
-    return ZENIT_TYPE_CUSTOM;
+    // We simply assume the type is a struct type
+    return ZENIT_TYPE_STRUCT;
 }
 
 /*
@@ -138,8 +138,8 @@ const char* zenit_type_to_string(const struct ZenitTypeInfo *typeinfo)
     if (fl_hashtable_has_key(type_string_mapping_pool, typeinfo))
         return fl_hashtable_get(type_string_mapping_pool, typeinfo);
 
-    // If the base type is a custom type, we use the custom type's name
-    const char *base_type = ZENIT_TYPE_CUSTOM == typeinfo->type ? typeinfo->name : NULL;
+    // If the base type is a struct type, we use the struct type's name
+    const char *base_type = ZENIT_TYPE_STRUCT == typeinfo->type ? typeinfo->name : NULL;
 
     // If it is a native type, we need to lookup its native string representation
     if (base_type == NULL)
@@ -187,7 +187,7 @@ const char* zenit_type_to_string(const struct ZenitTypeInfo *typeinfo)
  */
 const char* zenit_type_to_base_string(const struct ZenitTypeInfo *typeinfo)
 {
-    if (ZENIT_TYPE_CUSTOM == typeinfo->type)
+    if (ZENIT_TYPE_STRUCT == typeinfo->type)
         return typeinfo->name;
 
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)

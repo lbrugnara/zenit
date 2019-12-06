@@ -1,6 +1,8 @@
 #ifndef ZENIT_TYPE_H
 #define ZENIT_TYPE_H
 
+#define zenit_type_is_primitive(type) (type >= ZENIT_TYPE_UINT8 && type <= ZENIT_TYPE_UINT16)
+
 /*
  * Enum: enum ZenitType
  *  Enumerates all the native type supported by Zenit
@@ -10,7 +12,12 @@
  */
 enum ZenitType {
     ZENIT_TYPE_NONE,
-    ZENIT_TYPE_CUSTOM,
+
+    ZENIT_TYPE_REFERENCE,
+
+    ZENIT_TYPE_ARRAY,
+
+    ZENIT_TYPE_STRUCT,
 
     ZENIT_TYPE_UINT8,
     ZENIT_TYPE_UINT16,
@@ -23,7 +30,7 @@ enum ZenitType {
  *  Represents the information of a type. 
  * 
  * Members:
- *  <const char> *name: If the <enum ZenitType> is <ZENIT_TYPE_CUSTOM> this property should be present, otherwise NULL.
+ *  <const char> *name: If the <enum ZenitType> is <ZENIT_TYPE_STRUCT> this property should be present, otherwise NULL.
  *  <enum ZenitType> type: The raw type.
  *  <size_t> elements: Number of elements (1 for simple variables. 0, 1 or greater for arrays)
  *  <bool> is_array: True if the variable is an array
@@ -31,11 +38,7 @@ enum ZenitType {
  *  
  */
 struct ZenitTypeInfo {
-    const char *name;
     enum ZenitType type;
-    size_t elements;
-    bool is_array;
-    bool is_ref;
 };
 
 /*

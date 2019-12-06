@@ -5,6 +5,7 @@
 #include "primitive.h"
 #include "property.h"
 #include "reference.h"
+#include "type.h"
 #include "variable.h"
 
 /*
@@ -35,7 +36,8 @@ void zenit_node_free(struct ZenitNode *node)
     if (!node)
         return;
 
-    zenit_type_free(&node->typeinfo);
+    if (node->typeinfo)
+        zenit_type_free(node->typeinfo);
 
     if (node->type == ZENIT_NODE_LITERAL)
     {
@@ -68,5 +70,21 @@ void zenit_node_free(struct ZenitNode *node)
     else if (node->type == ZENIT_NODE_CAST)
     {
         zenit_node_cast_free((struct ZenitCastNode*)node);
+    }
+    else if (node->type == ZENIT_NODE_TYPE_ARRAY)
+    {
+        zenit_node_type_array_free((struct ZenitArrayTypeNode*)node);
+    }
+    else if (node->type == ZENIT_NODE_TYPE_PRIMITIVE)
+    {
+        zenit_node_type_primitive_free((struct ZenitPrimitiveTypeNode*)node);
+    }
+    else if (node->type == ZENIT_NODE_TYPE_REFERENCE)
+    {
+        zenit_node_type_reference_free((struct ZenitReferenceTypeNode*)node);
+    }
+    else if (node->type == ZENIT_NODE_TYPE_STRUCT)
+    {
+        zenit_node_type_struct_free((struct ZenitStructTypeNode*)node);
     }
 }

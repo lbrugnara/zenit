@@ -16,18 +16,29 @@ void zenit_test_nes_literal_variables(void)
 {
     const char *zenit_source = 
         "var a : uint8 = 1;"                                    "\n"
+
         "var b : uint8 = 2;"                                    "\n"
+
         "var c : uint16 = 0xDEAD;"                              "\n"
+
         "var d : uint16 = 0xBEEF;"                              "\n"
+
         "var e : uint16 = 0xAD;"                                "\n"
-        "#[NES(address: 0x2)]"                                  "\n"
-        "var f : uint16 = 0x7FF;"                               "\n"
-        "#[NES(address: 0x4)]"                                  "\n"
-        "var g : uint16 = 0xAF;"                                "\n"
-        "#[NES(address: 0x2000)]"                               "\n"
-        "var ppuctrl = 0;"                                      "\n"
+
+        //"#[NES(address: 0x2)]"                                  "\n"
+        //"var f : uint16 = 0x7FF;"                               "\n"
+
+        //"#[NES(address: 0x4)]"                                  "\n"
+        //"var g : uint16 = 0xAF;"                                "\n"
+
+        //"#[NES(address: 0x2000)]"                               "\n"
+        //"var ppuctrl = 0;"                                      "\n"
+
         "var arr = [ 0, 1, 2 ];"                                "\n"
+
         "var arrarr = [ [ 3, 4 ], [ 5, 6 ], [ 7, 8 ] ];"        "\n"
+        
+        "var f_ref = &a;"                                       "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
@@ -58,6 +69,8 @@ void zenit_test_nes_literal_variables(void)
     fl_expect("Data segment at 0x0E should be 0x06 (arrarr[1][1])", nes_program->data.bytes[0x0E] == 0x06);
     fl_expect("Data segment at 0x0F should be 0x07 (arrarr[2][0])", nes_program->data.bytes[0x0F] == 0x07);
     fl_expect("Data segment at 0x10 should be 0x08 (arrarr[2][1])", nes_program->data.bytes[0x10] == 0x08);
+    fl_expect("Data segment at 0x11 should be 0x02 (f_ref lo)",     nes_program->data.bytes[0x11] == 0x02);
+    fl_expect("Data segment at 0x12 should be 0x00 (f_ref hi)",     nes_program->data.bytes[0x12] == 0x00);
 
     zenit_nes_program_free(nes_program);
     zir_program_free(zir_program);

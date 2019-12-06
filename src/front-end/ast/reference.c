@@ -1,5 +1,6 @@
 #include <fllib.h>
 #include "reference.h"
+#include "../types/reference.h"
 
 struct ZenitReferenceNode* zenit_node_reference_new(struct ZenitSourceLocation location, struct ZenitNode *expression)
 {
@@ -7,6 +8,8 @@ struct ZenitReferenceNode* zenit_node_reference_new(struct ZenitSourceLocation l
     ref_node->base.type = ZENIT_NODE_REFERENCE;
     ref_node->base.location = location;
     ref_node->expression = expression;
+
+    ref_node->base.typeinfo = (struct ZenitTypeInfo*) zenit_type_reference_new(expression->typeinfo);
 
     return ref_node;
 }

@@ -62,10 +62,10 @@ void zenit_test_infer_variable_type(void)
         { .elements = 3, .name = NULL, .type = ZENIT_TYPE_UINT8, .is_array = true, .is_ref = false              },
 
         /* Nothing to infer here, but we want to make sure this pass doesn't affect it                          */
-        { .elements = 1, .name = "customType", .type = ZENIT_TYPE_CUSTOM, .is_array = false, .is_ref = false    },
+        { .elements = 1, .name = "customType", .type = ZENIT_TYPE_STRUCT, .is_array = false, .is_ref = false    },
 
         /* Nothing to infer here, but we want to make sure this pass doesn't affect it                          */
-        { .elements = 0, .name = "customType", .type = ZENIT_TYPE_CUSTOM, .is_array = true, .is_ref = false     },
+        { .elements = 0, .name = "customType", .type = ZENIT_TYPE_STRUCT, .is_array = true, .is_ref = false     },
 
         /* The type information is inferred from the assignment                                                 */
         { .elements = 1, .name = NULL, .type = ZENIT_TYPE_UINT8, .is_array = false, .is_ref = false             },

@@ -1,8 +1,6 @@
 #ifndef ZENIT_SOURCE_H
 #define ZENIT_SOURCE_H
 
-#include "source.h"
-
 /*
  * Enum: enum ZenitSourceType 
  *  The source code of a program can be

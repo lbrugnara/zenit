@@ -10,12 +10,20 @@ struct ZenitArrayNode* zenit_node_array_new(struct ZenitSourceLocation location)
 
     // Array type information: The type is NONE by default and is
     // updated accordingly in the inference pass based on its content
-    node->base.typeinfo.type = ZENIT_TYPE_NONE;
-    node->base.typeinfo.name = NULL;
-    node->base.typeinfo.elements = 0;
-    node->base.typeinfo.is_array = true;
+    node->base.typeinfo = (struct ZenitTypeInfo*) zenit_type_array_new();
 
     return node;
+}
+
+void zenit_node_array_add_element(struct ZenitArrayNode *array, struct ZenitNode *element)
+{
+    // Add the node to the elements list
+    array->elements = fl_array_append(array->elements, &element);
+
+    // Do the same for the type information
+    struct ZenitArrayTypeInfo *typeinfo = (struct ZenitArrayTypeInfo*) array->base.typeinfo;
+    typeinfo->members = fl_array_append(typeinfo->members, &element->typeinfo);
+    typeinfo->length++;
 }
 
 /*
@@ -33,7 +41,8 @@ void zenit_node_array_free(struct ZenitArrayNode *array)
     if (!array)
         return;
 
-    fl_array_free_each_pointer(array->elements, (FlArrayFreeElementFunc)zenit_node_free);
+    // No need to free the elements, they belong to other nodes
+    fl_array_free(array->elements);
 
     fl_free(array);
 }

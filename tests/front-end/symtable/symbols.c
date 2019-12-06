@@ -17,7 +17,7 @@ void zenit_test_symtable_api(void)
     const struct ZenitTypeInfo types[] = {
         { .elements = 1, .name = NULL, .type = ZENIT_TYPE_UINT8, .is_array = false      },
         { .elements = 2, .name = NULL, .type = ZENIT_TYPE_UINT8, .is_array = true       },
-        { .elements = 3, .name = "custom", .type = ZENIT_TYPE_CUSTOM, .is_array = true  }
+        { .elements = 3, .name = "custom", .type = ZENIT_TYPE_STRUCT, .is_array = true  }
     };
 
     const size_t count = sizeof(types) / sizeof(types[0]);

@@ -2,6 +2,7 @@
 #define ZENIT_AST_ARRAY_H
 
 #include "node.h"
+#include "../types/array.h"
 
 /*
  * Struct: struct ZenitArrayNode
@@ -18,6 +19,7 @@ struct ZenitArrayNode {
 };
 
 struct ZenitArrayNode* zenit_node_array_new(struct ZenitSourceLocation location);
+void zenit_node_array_add_element(struct ZenitArrayNode *array, struct ZenitNode *element);
 void zenit_node_array_free(struct ZenitArrayNode *array);
 
 #endif /* ZENIT_AST_ARRAY_H */

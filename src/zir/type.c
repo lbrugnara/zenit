@@ -112,7 +112,7 @@ const char* zir_type_to_string(const struct ZirTypeInfo *typeinfo)
     if (fl_hashtable_has_key(type_string_mapping_pool, typeinfo))
         return fl_hashtable_get(type_string_mapping_pool, typeinfo);
 
-    // If the base type is a custom type, we use the custom type's name
+    // If the base type is a struct type, we use the struct type's name
     const char *base_type = ZIR_TYPE_CUSTOM == typeinfo->type ? typeinfo->name : NULL;
 
     // If it is a native type, we need to lookup its native string representation
