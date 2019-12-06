@@ -1,8 +1,8 @@
 #ifndef ZENIT_CHECK_H
 #define ZENIT_CHECK_H
 
-#include "ast.h"
-#include "context.h"
+#include "../ast/ast.h"
+#include "../context.h"
 
 /*
  * Function: zenit_check_types

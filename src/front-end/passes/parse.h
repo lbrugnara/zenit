@@ -1,9 +1,9 @@
 #ifndef ZENIT_PARSE_H
 #define ZENIT_PARSE_H
 
-#include "context.h"
-#include "lexer.h"
-#include "ast.h"
+#include "../context.h"
+#include "../lexer.h"
+#include "../ast/ast.h"
 
 /*
  * Function: zenit_parse_source

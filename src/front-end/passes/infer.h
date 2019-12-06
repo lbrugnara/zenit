@@ -1,8 +1,8 @@
 #ifndef ZENIT_INFER_H
 #define ZENIT_INFER_H
 
-#include "ast.h"
-#include "context.h"
+#include "../ast/ast.h"
+#include "../context.h"
 
 /*
  * Function: zenit_infer_types

@@ -1,6 +1,6 @@
 #include "check.h"
-#include "program.h"
-#include "symbol.h"
+#include "../program.h"
+#include "../symbol.h"
 
 /*
  * Function: is_type_defined

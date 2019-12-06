@@ -1,9 +1,9 @@
 #include <fllib.h>
 
 #include "../../Test.h"
-#include "../../../src/front-end/infer.h"
-#include "../../../src/front-end/parse.h"
-#include "../../../src/front-end/resolve.h"
+#include "../../../src/front-end/passes/infer.h"
+#include "../../../src/front-end/passes/parse.h"
+#include "../../../src/front-end/passes/resolve.h"
 #include "../../../src/front-end/symtable.h"
 #include "tests.h"
 

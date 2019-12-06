@@ -1,10 +1,10 @@
 #include <fllib.h>
 #include <errno.h>
 #include <limits.h>
-#include "lexer.h"
 #include "parse.h"
-#include "parser.h"
-#include "ast.h"
+#include "../lexer.h"
+#include "../parser.h"
+#include "../ast/ast.h"
 
 #define consume_or_return(ctx, parser, token_type, tokenptr)                    \
     if (!zenit_parser_expects(parser, token_type, tokenptr))                    \

@@ -1,10 +1,10 @@
 #include <fllib.h>
 
 #include "../../Test.h"
-#include "../../../src/front-end/ast.h"
+#include "../../../src/front-end/ast/ast.h"
 #include "../../../src/front-end/context.h"
 #include "../../../src/front-end/lexer.h"
-#include "../../../src/front-end/parse.h"
+#include "../../../src/front-end/passes/parse.h"
 #include "tests.h"
 
 void zenit_test_parser_literal_integer(void)

@@ -1,6 +1,6 @@
 #include "infer.h"
-#include "program.h"
-#include "symbol.h"
+#include "../program.h"
+#include "../symbol.h"
 
 /*
  * Type: ZenitTypeInferrer

@@ -1,13 +1,12 @@
 #include "zirgen.h"
-#include "program.h"
-#include "symbol.h"
-#include "../zir/program.h"
-#include "../zir/instructions/operands/operand.h"
-#include "../zir/instructions/operands/array.h"
-#include "../zir/instructions/operands/primitive.h"
-#include "../zir/instructions/operands/reference.h"
-#include "../zir/instructions/operands/symbol.h"
-
+#include "../program.h"
+#include "../symbol.h"
+#include "../../zir/program.h"
+#include "../../zir/instructions/operands/operand.h"
+#include "../../zir/instructions/operands/array.h"
+#include "../../zir/instructions/operands/primitive.h"
+#include "../../zir/instructions/operands/reference.h"
+#include "../../zir/instructions/operands/symbol.h"
 
 #define assert_or_return(ctx, condition, location, message)                 \
         if (!(condition))                                                   \

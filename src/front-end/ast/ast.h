@@ -2,18 +2,18 @@
 #define ZENIT_NODE_H
 
 #include <stdint.h>
-#include "token.h"
-#include "type.h"
+#include "../token.h"
+#include "../type.h"
 
-#include "nodes/array.h"
-#include "nodes/attribute.h"
-#include "nodes/cast.h"
-#include "nodes/identifier.h"
-#include "nodes/primitive.h"
-#include "nodes/node.h"
-#include "nodes/property.h"
-#include "nodes/reference.h"
-#include "nodes/variable.h"
+#include "array.h"
+#include "attribute.h"
+#include "cast.h"
+#include "identifier.h"
+#include "primitive.h"
+#include "node.h"
+#include "property.h"
+#include "reference.h"
+#include "variable.h"
 
 /*
  * Struct: struct ZenitAst

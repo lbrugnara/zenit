@@ -1,5 +1,5 @@
 #include <fllib.h>
-#include "ast.h"
+#include "ast/ast.h"
 #include "context.h"
 #include "program.h"
 #include "source.h"

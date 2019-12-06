@@ -1,8 +1,8 @@
 #ifndef ZENIT_RESOLVE_H
 #define ZENIT_RESOLVE_H
 
-#include "ast.h"
-#include "context.h"
+#include "../ast/ast.h"
+#include "../context.h"
 
 /*
  * Function: zenit_resolve_symbols

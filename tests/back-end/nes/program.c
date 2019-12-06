@@ -2,12 +2,12 @@
 #include <fllib.h>
 
 #include "../../Test.h"
-#include "../../../src/front-end/check.h"
-#include "../../../src/front-end/infer.h"
-#include "../../../src/front-end/parse.h"
-#include "../../../src/front-end/resolve.h"
+#include "../../../src/front-end/passes/check.h"
+#include "../../../src/front-end/passes/infer.h"
+#include "../../../src/front-end/passes/parse.h"
+#include "../../../src/front-end/passes/resolve.h"
 #include "../../../src/front-end/symtable.h"
-#include "../../../src/front-end/zirgen.h"
+#include "../../../src/front-end/passes/zirgen.h"
 #include "../../../src/back-end/nes/program.h"
 #include "../../../src/back-end/nes/generate.h"
 #include "tests.h"

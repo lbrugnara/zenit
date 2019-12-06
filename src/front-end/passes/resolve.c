@@ -1,6 +1,6 @@
-#include "program.h"
 #include "resolve.h"
-#include "symbol.h"
+#include "../program.h"
+#include "../symbol.h"
 
 /*
  * Type: ZenitSymbolResolver

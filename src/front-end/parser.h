@@ -3,7 +3,7 @@
 
 #include "context.h"
 #include "lexer.h"
-#include "ast.h"
+#include "ast/ast.h"
 
 /*
  * Struct: struct ZenitParser

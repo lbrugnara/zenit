@@ -1,7 +1,7 @@
 #ifndef ZENIT_CONTEXT_H
 #define ZENIT_CONTEXT_H
 
-#include "ast.h"
+#include "ast/ast.h"
 #include "symtable.h"
 #include "source.h"
 

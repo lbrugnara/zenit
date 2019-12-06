@@ -2,7 +2,7 @@
 #include <errno.h>
 #include "lexer.h"
 #include "parser.h"
-#include "ast.h"
+#include "ast/ast.h"
 
 /* Public API */
 struct ZenitParser zenit_parser_new(struct ZenitSourceInfo *srcinfo)
