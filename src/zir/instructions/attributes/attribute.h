@@ -51,7 +51,8 @@ static inline struct ZirAttributeMap zir_attribute_map_new()
 
 static inline void zir_attribute_map_free(struct ZirAttributeMap *attr_map)
 {
-    fl_hashtable_free(attr_map->map);
+    if (attr_map->map)
+        fl_hashtable_free(attr_map->map);
 }
 
 static inline struct ZirAttribute* zir_attribute_map_add(struct ZirAttributeMap *attr_map, struct ZirAttribute *attribute)

@@ -53,7 +53,8 @@ void zenit_test_parser_variable_errors(void)
     for (size_t i=1; i <= expected_errors; i++, error++)
     {
         fl_vexpect(error->location.line == i && error->type == errors[i],
-            "Expected %s error: %s at line %u:%u", errors[i] == error->type ? "syntax" : "large integer", error->message, error->location.line, error->location.col);
+            "Expected %s error: %s at line %u:%u", errors[i] == error->type ? "syntax" : "large integer", 
+            error->message, error->location.line, error->location.col);
     }
 
     zenit_context_free(&ctx);

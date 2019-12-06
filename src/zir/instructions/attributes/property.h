@@ -49,7 +49,8 @@ static inline struct ZirPropertyMap zir_property_map_new()
 
 static inline void zir_property_map_free(struct ZirPropertyMap *property_map)
 {
-    fl_hashtable_free(property_map->map);
+    if (property_map->map)
+        fl_hashtable_free(property_map->map);
 }
 
 static inline struct ZirProperty* zir_property_map_add(struct ZirPropertyMap *property_map, struct ZirProperty *property)

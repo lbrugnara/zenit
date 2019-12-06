@@ -32,8 +32,7 @@ void zenit_node_array_free(struct ZenitArrayNode *array)
     if (!array)
         return;
 
-    // No need to free the elements, they belong to other nodes
-    fl_array_free(array->elements);
+    fl_array_free_each_pointer(array->elements, (FlArrayFreeElementFunc) zenit_node_free);
 
     fl_free(array);
 }

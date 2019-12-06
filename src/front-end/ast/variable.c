@@ -32,6 +32,9 @@ void zenit_node_variable_free(struct ZenitVariableNode *var_node)
     if (var_node->rvalue)
         zenit_node_free(var_node->rvalue);
 
+    if (var_node->type_decl)
+        zenit_node_free((struct ZenitNode*) var_node->type_decl);
+
     zenit_attribute_node_map_free(&var_node->attributes);
 
     fl_free(var_node);

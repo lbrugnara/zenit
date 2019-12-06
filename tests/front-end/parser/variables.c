@@ -7,6 +7,20 @@
 
 void zenit_test_parser_variable_literal(void)
 {
+    struct LiteralVariableTest {
+        enum ZenitNodeType node_type;
+        char *lhs_name;
+        enum ZenitType type_declaration;
+        enum ZenitNodeType rhs_node_type;
+        enum ZenitType rhs_type;
+        unsigned int rhs_value;
+    } tests[] = {
+        { ZENIT_NODE_VARIABLE, "num0", ZENIT_TYPE_NONE, ZENIT_NODE_PRIMITIVE, ZENIT_TYPE_UINT8, 0 },
+        { ZENIT_NODE_VARIABLE, "num1", ZENIT_TYPE_NONE, ZENIT_NODE_PRIMITIVE, ZENIT_TYPE_UINT8, 1 },
+        { ZENIT_NODE_VARIABLE, "num2", ZENIT_TYPE_NONE, ZENIT_NODE_PRIMITIVE, ZENIT_TYPE_UINT8, 2 },
+        { ZENIT_NODE_VARIABLE, "num3", ZENIT_TYPE_NONE, ZENIT_NODE_PRIMITIVE, ZENIT_TYPE_UINT8, 3 },
+    };
+
     const char *source = 
         "var num0 = 0;"
         "var num1 = 1;"
@@ -19,19 +33,20 @@ void zenit_test_parser_variable_literal(void)
     for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
         struct ZenitNode *node = ctx.ast->decls[i];
-        fl_expect("Node must be a variable declaration", node->type == ZENIT_NODE_VARIABLE);
+        struct LiteralVariableTest *test = tests + i;
 
-        struct ZenitVariableNode *var_decl = (struct ZenitVariableNode*)node;
+        fl_vexpect(test->node_type == node->type, "Node type is %s", zenit_node_print_type(node));
 
-        char name[5] = { 'n', 'u', 'm', (char)i + 48, '\0' };
-        
-        fl_vexpect(flm_cstring_equals(name, var_decl->name), "Variable name must be equals to \"%s\"", name);
-        fl_expect("Variable type is NONE because the type is inferred from the assignment", var_decl->type_decl->type == ZENIT_TYPE_NONE);
-        fl_expect("Right-hand side must be a literal node", var_decl->rvalue && var_decl->rvalue->type == ZENIT_NODE_PRIMITIVE);
+        struct ZenitVariableNode *var_decl = (struct ZenitVariableNode*) node;
 
-        struct ZenitPrimitiveNode *literal = (struct ZenitPrimitiveNode*)var_decl->rvalue;
-        fl_expect("Right-hand side expression must have uint8", literal->type == ZENIT_TYPE_UINT8);
-        fl_vexpect((size_t)literal->value.uint8 == i, "Right-hand side expression has value %zu", i);
+        fl_vexpect(flm_cstring_equals(test->lhs_name, var_decl->name), "Variable name must be equals to \"%s\"", test->lhs_name);
+        fl_expect("Variable type is NONE because the type is inferred from the assignment", var_decl->type_decl == NULL);
+        fl_expect("Right-hand side must be a literal node", var_decl->rvalue && var_decl->rvalue->type == test->rhs_node_type);
+
+        struct ZenitPrimitiveNode *literal = (struct ZenitPrimitiveNode*) var_decl->rvalue;
+
+        fl_expect("Right-hand side expression must have uint8", literal->type == test->rhs_type);
+        fl_vexpect(literal->value.uint8 == test->rhs_value, "Right-hand side expression has value %zu", test->rhs_value);
     }
 
     zenit_context_free(&ctx);
@@ -85,7 +100,7 @@ void zenit_test_parser_array_variable_literal(void)
         char name[5] = { 'n', 'u', 'm', (char)i + 48, '\0' };
         
         fl_vexpect(flm_cstring_equals(name, var_decl->name), "Variable name must be equals to \"%s\"", name);
-        fl_expect("Variable type is NONE because the type is inferred from the assignment", var_decl->type_decl->type == ZENIT_TYPE_NONE);
+        fl_expect("Variable type is NONE because the type is inferred from the assignment", var_decl->type_decl == NULL);
         fl_expect("Right-hand side must be an array initializer", var_decl->rvalue && var_decl->rvalue->type == ZENIT_NODE_ARRAY);
 
         struct ZenitArrayNode *array_init = (struct ZenitArrayNode*)var_decl->rvalue;        
@@ -202,7 +217,7 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
         fl_vexpect(
             var_decl->type_decl->type == ZENIT_TYPE_ARRAY
             && ((struct ZenitArrayTypeNode*) var_decl->type_decl)->length == elements[i]
-            && var_decl->type_decl->type == ZENIT_TYPE_UINT8,
+            && ((struct ZenitArrayTypeNode*) var_decl->type_decl)->members_type->type == ZENIT_TYPE_UINT8,
             "Variable type is array of %zu uint8 (\"%s\") because the type is present in the declaration", 
             elements[i],
             zenit_type_name(var_decl->type_decl->type));
@@ -258,7 +273,7 @@ void zenit_test_parser_variable_complex(void)
         char name[5] = { 'n', 'u', 'm', (char)i + 48, '\0' };
         
         fl_vexpect(flm_cstring_equals(name, var_decl->name), "Variable name must be equals to \"%s\"", name);
-        fl_expect("Variable type is NONE because the type is inferred from the assignment", var_decl->type_decl->type == ZENIT_TYPE_NONE);
+        fl_expect("Variable type is NONE because the type is inferred from the assignment", var_decl->type_decl == NULL);
 
         if (i == 0)
         {
@@ -329,7 +344,8 @@ void zenit_test_parser_variable_complex_typeinfo(void)
         }
         else if (i == 2)
         {
-            fl_vexpect(var_decl->type_decl->type == ZENIT_TYPE_UINT8 && var_decl->type_decl->type == ZENIT_TYPE_REFERENCE, 
+            fl_vexpect(var_decl->type_decl->type == ZENIT_TYPE_REFERENCE 
+                && ((struct ZenitReferenceTypeNode*) var_decl->type_decl)->element->type == ZENIT_TYPE_UINT8, 
                 "Variable type is \"%s\" because the type is present in the declaration", zenit_type_name(var_decl->type_decl->type));
             fl_expect("Right-hand side must be a reference operator node", var_decl->rvalue && var_decl->rvalue->type == ZENIT_NODE_REFERENCE);
 

@@ -58,7 +58,8 @@ static inline struct ZenitAttributeNodeMap zenit_attribute_node_map_new()
 
 static inline void zenit_attribute_node_map_free(struct ZenitAttributeNodeMap *mapptr)
 {
-    fl_hashtable_free(mapptr->map);
+    if (mapptr->map)
+        fl_hashtable_free(mapptr->map);
 }
 
 static inline struct ZenitAttributeNode* zenit_attribute_node_map_add(struct ZenitAttributeNodeMap *mapptr, struct ZenitAttributeNode *attr)

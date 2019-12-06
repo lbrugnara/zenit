@@ -20,5 +20,8 @@ void zenit_node_cast_free(struct ZenitCastNode *cast_node)
     if (cast_node->expression)
         zenit_node_free(cast_node->expression);
 
+    if (cast_node->type_decl)
+        zenit_node_free((struct ZenitNode*) cast_node->type_decl);
+
     fl_free(cast_node);
 }

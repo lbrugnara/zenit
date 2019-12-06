@@ -55,7 +55,8 @@ static inline struct ZenitPropertyNodeMap zenit_property_node_map_new()
 
 static inline void zenit_property_node_map_free(struct ZenitPropertyNodeMap *property_map)
 {
-    fl_hashtable_free(property_map->map);
+    if (property_map->map)
+        fl_hashtable_free(property_map->map);
 }
 
 static inline struct ZenitPropertyNode* zenit_property_node_map_add(struct ZenitPropertyNodeMap *property_map, struct ZenitPropertyNode *property)

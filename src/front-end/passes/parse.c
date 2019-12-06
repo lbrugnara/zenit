@@ -758,7 +758,7 @@ static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct Ze
     // Check for variables, functions, etc
     if (zenit_parser_next_is(parser, ZENIT_TOKEN_VAR))
     {
-        struct ZenitVariableNode *vardecl = (struct ZenitVariableNode*)parse_variable_declaration(parser, ctx);
+        struct ZenitVariableNode *vardecl = (struct ZenitVariableNode*) parse_variable_declaration(parser, ctx);
 
         // Something happened if vardecl is NULL, we need to free the memory for the attribute map and leave
         assert_or_goto(ctx, vardecl != NULL, ZENIT_ERROR_INTERNAL, NULL, on_parsing_error);
@@ -766,7 +766,7 @@ static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct Ze
         // Assign the attribute map (could be empty)
         vardecl->attributes = attributes;
 
-        return (struct ZenitNode*)vardecl;
+        return (struct ZenitNode*) vardecl;
     }
 
     // If the attribute map is not empty at this point, it means their usage is invalid
