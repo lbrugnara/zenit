@@ -85,11 +85,12 @@ static struct ZenitNode* parse_variable_declaration(struct ZenitParser *parser, 
 static struct ZenitNode* parse_expression_statement(struct ZenitParser *parser, struct ZenitContext *ctx);
 static struct ZenitNode* parse_statement(struct ZenitParser *parser, struct ZenitContext *ctx);
 static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
-static struct ZenitNode* parse_type_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
-static struct ZenitNode* parse_type_array_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
-static struct ZenitNode* parse_type_reference_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
+static struct ZenitTypeNode* parse_type_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
+static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
+static struct ZenitTypeNode* parse_type_reference_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
+static bool parse_integer_value(struct ZenitContext *ctx, struct ZenitToken *primitive_token, enum ZenitType *type, union ZenitPrimitiveValue *value);
 
-static struct ZenitNode* parse_type_array_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
+static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
 {
     struct ZenitToken bracket_token;
     consume_or_return(ctx, parser, ZENIT_TOKEN_LBRACKET, &bracket_token);
@@ -123,17 +124,17 @@ static struct ZenitNode* parse_type_array_declaration(struct ZenitParser *parser
 
     struct ZenitTypeNode *member_type = parse_type_declaration(parser, ctx);
 
-    return (struct ZenitNode*) zenit_node_type_array_new(bracket_token.location, member_type, length);
+    return (struct ZenitTypeNode*) zenit_node_type_array_new(bracket_token.location, member_type, length);
 }
 
-static struct ZenitNode* parse_type_reference_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
+static struct ZenitTypeNode* parse_type_reference_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
 {
     struct ZenitToken amp_token;
     consume_or_return(ctx, parser, ZENIT_TOKEN_AMPERSAND, &amp_token);
 
     struct ZenitTypeNode *element_type = parse_type_declaration(parser, ctx);
 
-    return (struct ZenitNode*) zenit_node_type_reference_new(amp_token.location, element_type);
+    return (struct ZenitTypeNode*) zenit_node_type_reference_new(amp_token.location, element_type);
 }
 
 /*
@@ -167,11 +168,11 @@ static struct ZenitTypeNode* parse_type_declaration(struct ZenitParser *parser, 
 
     if (zenit_type_is_primitive(zenit_type))
     {
-        return zenit_node_type_primitive_new(type_token.location, zenit_type);
+        return (struct ZenitTypeNode*) zenit_node_type_primitive_new(type_token.location, zenit_type);
     }
     else if (zenit_type == ZENIT_TYPE_STRUCT)
     {
-        return zenit_node_type_struct_new(type_token.location, token_to_string(&type_token));
+        return (struct ZenitTypeNode*) zenit_node_type_struct_new(type_token.location, token_to_string(&type_token));
     }
     
     zenit_context_error(ctx, type_token.location, ZENIT_ERROR_INTERNAL, "Unhandled type");
@@ -310,7 +311,7 @@ static struct ZenitNode* parse_array_initializer(struct ZenitParser *parser, str
         assert_or_goto(ctx, value != NULL, ZENIT_ERROR_INTERNAL, NULL, on_bad_expression_value);
 
         // Add the node to the elements list
-        zenit_node_array_add_element(array, value);
+        zenit_node_array_add_child(array, value);
 
         // If the next token IS NOT a right bracket, it MUST be a comma (even a trailing comma)
         if (!zenit_parser_next_is(parser, ZENIT_TOKEN_RBRACKET))

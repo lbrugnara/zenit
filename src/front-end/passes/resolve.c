@@ -1,6 +1,8 @@
 #include "resolve.h"
+#include "utils.h"
 #include "../program.h"
 #include "../symbol.h"
+#include "../types/system.h"
 
 /*
  * Type: ZenitSymbolResolver
@@ -13,7 +15,7 @@ typedef struct ZenitSymbol*(*ZenitSymbolResolver)(struct ZenitContext *ctx, stru
 
 // Visitor functions
 static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node);
-static struct ZenitSymbol* visit_leaf(struct ZenitContext *ctx, struct ZenitNode *node);
+static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *node);
 static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *node);
 static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *node);
 static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node);
@@ -30,11 +32,41 @@ static const ZenitSymbolResolver symbol_resolvers[] = {
     [ZENIT_NODE_ARRAY]      = (ZenitSymbolResolver) &visit_array_node,
     [ZENIT_NODE_REFERENCE]  = (ZenitSymbolResolver) &visit_reference_node,
     [ZENIT_NODE_CAST]       = (ZenitSymbolResolver) &visit_cast_node,
-    [ZENIT_NODE_LITERAL]    = (ZenitSymbolResolver) &visit_leaf,
+    [ZENIT_NODE_PRIMITIVE]    = (ZenitSymbolResolver) &visit_primitive_node,
 };
 
+static struct ZenitTypeInfo* build_type_info_from_declaration(struct ZenitTypeNode *type_decl)
+{
+    if (type_decl == NULL)
+        return NULL;
+
+    if (type_decl->base.type == ZENIT_NODE_TYPE_PRIMITIVE)
+        return (struct ZenitTypeInfo*) zenit_type_primitive_new(type_decl->type);
+
+    if (type_decl->base.type == ZENIT_NODE_TYPE_STRUCT)
+    {
+        struct ZenitStructTypeNode *struct_type_decl = (struct ZenitStructTypeNode*) type_decl;
+        // FIXME: Add members once they are implemented
+        return (struct ZenitTypeInfo*) zenit_type_struct_new(struct_type_decl->name);
+    }
+
+    if (type_decl->base.type == ZENIT_NODE_TYPE_REFERENCE)
+    {
+        struct ZenitReferenceTypeNode *ref_type_decl = (struct ZenitReferenceTypeNode*) type_decl;
+        return (struct ZenitTypeInfo*) zenit_type_reference_new(build_type_info_from_declaration(ref_type_decl->element));
+    }
+
+    if (type_decl->base.type == ZENIT_NODE_TYPE_ARRAY)
+    {
+        //struct ZenitArrayTypeNode *array_type_decl = (struct ZenitArrayTypeNode*) type_decl;
+        return (struct ZenitTypeInfo*) zenit_type_array_new();
+    }
+
+    return NULL;
+}
+
 /*
- * Function: visit_leaf
+ * Function: visit_primitive_node
  *  Some leaves in the AST do not perform symbol-related actions so this
  *  function simply returns NULL
  *
@@ -46,9 +78,9 @@ static const ZenitSymbolResolver symbol_resolvers[] = {
  *  struct ZenitSymbol* - This function always returns NULL
  *
  */
-static struct ZenitSymbol* visit_leaf(struct ZenitContext *ctx, struct ZenitNode *node)
+static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *node)
 {
-    return NULL;
+    return zenit_utils_new_readonly_symbol(ctx->program, (struct ZenitNode*) node, (struct ZenitTypeInfo*) zenit_type_primitive_new(node->type));
 }
 
 /*
@@ -66,9 +98,12 @@ static struct ZenitSymbol* visit_leaf(struct ZenitContext *ctx, struct ZenitNode
  */
 static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast_node)
 {
-    visit_node(ctx, cast_node->expression);
+    struct ZenitSymbol *expr_symbol = visit_node(ctx, cast_node->expression);
 
-    return NULL;
+    if (expr_symbol == NULL)
+        return NULL;
+
+    return zenit_utils_new_readonly_symbol(ctx->program, (struct ZenitNode*) cast_node, build_type_info_from_declaration(cast_node->type_decl));
 }
 
 /*
@@ -114,8 +149,12 @@ static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struc
  */
 static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *reference_node)
 {
-    visit_node(ctx, reference_node->expression);
-    return NULL;
+    struct ZenitSymbol *expr_symbol = visit_node(ctx, reference_node->expression);
+
+    if (expr_symbol == NULL)
+        return NULL;
+
+    return zenit_utils_new_readonly_symbol(ctx->program, (struct ZenitNode*) reference_node, (struct ZenitTypeInfo*) zenit_type_reference_new(expr_symbol->typeinfo));
 }
 
 /*
@@ -133,10 +172,15 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
  */
 static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array_node)
 {
-    for (size_t i=0; i < fl_array_length(array_node->elements); i++)
-        visit_node(ctx, array_node->elements[i]);
+    struct ZenitArrayTypeInfo *array_type = zenit_type_array_new();
 
-    return NULL;
+    for (size_t i=0; i < fl_array_length(array_node->elements); i++)
+    {
+        struct ZenitSymbol *element_symbol = visit_node(ctx, array_node->elements[i]);
+        zenit_type_array_add_member(array_type, element_symbol->typeinfo);
+    }
+
+    return zenit_utils_new_readonly_symbol(ctx->program, (struct ZenitNode*) array_node, (struct ZenitTypeInfo*) array_type);
 }
 
 /*
@@ -198,7 +242,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     visit_attribute_node_map(ctx, &variable_node->attributes);
 
     // Create and insert the symbol in the table
-    return zenit_program_add_symbol(ctx->program, zenit_symbol_new(variable_node->name, &variable_node->base.typeinfo));
+    return zenit_program_add_symbol(ctx->program, zenit_symbol_new(variable_node->name, build_type_info_from_declaration(variable_node->type_decl)));
 }
 
 /*

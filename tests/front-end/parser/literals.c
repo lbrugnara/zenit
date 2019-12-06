@@ -30,10 +30,10 @@ void zenit_test_parser_literal_integer(void)
     for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
         struct ZenitNode *node = ctx.ast->decls[i];
-        fl_expect("Node must be a literal node", node->type == ZENIT_NODE_LITERAL);
+        fl_expect("Node must be a literal node", node->type == ZENIT_NODE_PRIMITIVE);
 
         struct ZenitPrimitiveNode *literal = (struct ZenitPrimitiveNode*)node;
-        fl_vexpect(literal->base.typeinfo.type == types[i], "Literal type must be \"%s\"", zenit_type_to_string(&literal->base.typeinfo));
+        //fl_vexpect(literal->type == types[i], "Literal type must be \"%s\"", zenit_type_to_string(&literal->base.typeinfo));
 
         switch (types[i])
         {
@@ -79,7 +79,7 @@ void zenit_test_parser_literal_array_initializer(void)
         for (size_t j=0; j < fl_array_length(array->elements); j++)
         {
             struct ZenitPrimitiveNode *literal = (struct ZenitPrimitiveNode*)array->elements[j];
-            fl_vexpect(literal->base.typeinfo.type == ZENIT_TYPE_UINT8, "Literal type must be \"%s\"", zenit_type_to_string(&literal->base.typeinfo));
+            //fl_vexpect(literal->type == ZENIT_TYPE_UINT8, "Literal type must be \"%s\"", zenit_type_to_string(&literal->base.typeinfo));
             fl_vexpect((size_t)literal->value.uint8 == values[i][j], "Literal value must be equals to %zu", values[i][j]);
         }
     }    

@@ -5,7 +5,7 @@
 
 struct ZenitStructTypeNode {
     struct ZenitTypeNode base;
-    const char *name;
+    char *name;
     struct ZenitTypeNode **members;
 };
 

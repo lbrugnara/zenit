@@ -1,4 +1,5 @@
 #include "check.h"
+#include "utils.h"
 #include "../program.h"
 #include "../symbol.h"
 
@@ -21,7 +22,7 @@ static bool is_type_defined(struct ZenitProgram *program, struct ZenitTypeInfo *
     if (typeinfo->type != ZENIT_TYPE_STRUCT)
         return true;
 
-    return zenit_program_has_symbol(program, typeinfo->name);
+    return zenit_program_has_symbol(program, ((struct ZenitStructTypeInfo*) typeinfo)->name);
 }
 
 /*
@@ -49,7 +50,7 @@ static struct ZenitTypeInfo* visit_cast_node(struct ZenitContext *ctx, struct Ze
  *  An array indexed with a <enum ZenitNodeType> to get a <ZenitTypeChecker> function
  */
 static const ZenitTypeChecker checkers[] = {
-    [ZENIT_NODE_LITERAL]    = (ZenitTypeChecker) &visit_primitive_node,
+    [ZENIT_NODE_PRIMITIVE]    = (ZenitTypeChecker) &visit_primitive_node,
     [ZENIT_NODE_VARIABLE]   = (ZenitTypeChecker) &visit_variable_node,
     [ZENIT_NODE_ARRAY]      = (ZenitTypeChecker) &visit_array_node,
     [ZENIT_NODE_IDENTIFIER] = (ZenitTypeChecker) &visit_identifier_node,
@@ -70,21 +71,25 @@ static const ZenitTypeChecker checkers[] = {
  */
 static struct ZenitTypeInfo* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast)
 {
+    struct ZenitSymbol *symbol = zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) cast);
+
+    struct ZenitTypeInfo *expr_type = visit_node(ctx, cast->expression);
+
     // If the cast is implicit, we need to make sure we can up-cast the expression to the requested type
-    if ((cast->implicit && !zenit_type_can_assign(&cast->base.typeinfo, &cast->expression->typeinfo))
+    if ((cast->implicit && !zenit_type_can_assign(symbol->typeinfo, expr_type))
         // HACK: If the cast is explicit, we can check if "the other way assignment" around works for these types, 
         // in that, case we know it is safe to "truncate" the type :grimming:
-        || (!cast->implicit && !zenit_type_can_cast(&cast->base.typeinfo, &cast->expression->typeinfo))
+        || (!cast->implicit && !zenit_type_can_cast(symbol->typeinfo, expr_type))
     )
     {
         zenit_context_error(ctx, cast->base.location, ZENIT_ERROR_TYPE_MISSMATCH, "Cannot %s from type '%s' to '%s'", 
                 cast->implicit ? "implicitly cast" : "cast", 
-                zenit_type_to_string(&cast->expression->typeinfo),
-                zenit_type_to_string(&cast->base.typeinfo)
+                zenit_type_to_string(expr_type),
+                zenit_type_to_string(symbol->typeinfo)
         );
     }
 
-    return &cast->base.typeinfo;
+    return symbol->typeinfo;
 }
 
 /*
@@ -101,7 +106,7 @@ static struct ZenitTypeInfo* visit_cast_node(struct ZenitContext *ctx, struct Ze
  */
 static struct ZenitTypeInfo* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *primitive)
 {
-    return &primitive->base.typeinfo;
+    return zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) primitive)->typeinfo;
 }
 
 /*
@@ -117,7 +122,7 @@ static struct ZenitTypeInfo* visit_primitive_node(struct ZenitContext *ctx, stru
  */
 static struct ZenitTypeInfo* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *id_node)
 {
-    return &zenit_program_get_symbol(ctx->program, id_node->name)->typeinfo;
+    return zenit_program_get_symbol(ctx->program, id_node->name)->typeinfo;
 }
 
 /*
@@ -135,13 +140,13 @@ static struct ZenitTypeInfo* visit_reference_node(struct ZenitContext *ctx, stru
 {
     struct ZenitTypeInfo *expression_typeinfo = visit_node(ctx, reference_node->expression);
 
-    if (expression_typeinfo->is_ref)
+    if (expression_typeinfo->type == ZENIT_TYPE_REFERENCE)
     {
         zenit_context_error(ctx, reference_node->base.location, ZENIT_ERROR_INVALID_REFERENCE, 
                 "Cannot take a reference to another reference.");
     }
 
-    return &reference_node->base.typeinfo;
+    return zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) reference_node)->typeinfo;
 }
 
 /*
@@ -161,7 +166,7 @@ static struct ZenitTypeInfo* visit_array_node(struct ZenitContext *ctx, struct Z
     // The array type is inferred in the inference pass, so we have information
     // about it, but it can be a struct type that doesn't exist in the symbol
     // table
-    bool is_array_type_defined = is_type_defined(ctx->program, &array->base.typeinfo);
+    bool is_array_type_defined = is_type_defined(ctx->program, array->typeinfo);
 
     for (size_t i=0; i < fl_array_length(array->elements); i++)
     {
@@ -169,18 +174,18 @@ static struct ZenitTypeInfo* visit_array_node(struct ZenitContext *ctx, struct Z
 
         // If the type check fails, we add an error only if the array type is defined
         // because if not, we might be targeting a false positive error
-        if (is_array_type_defined && elem_typeinfo->type != array->base.typeinfo.type)
+        if (is_array_type_defined && elem_typeinfo->type != array->typeinfo->type)
         {
             zenit_context_error(ctx, array->elements[i]->location, ZENIT_ERROR_TYPE_MISSMATCH, 
                 "Cannot convert from type '%s' to '%s'", 
                 zenit_type_to_string(elem_typeinfo), 
-                zenit_type_to_string(&array->base.typeinfo)
+                zenit_type_to_string(array->typeinfo)
             );
         }
     }
 
     // We return the type of the array initializer
-    return &array->base.typeinfo;
+    return array->typeinfo;
 }
 
 
@@ -236,13 +241,13 @@ static struct ZenitTypeInfo* visit_variable_node(struct ZenitContext *ctx, struc
     struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx->program, variable_node->name);
 
     // Check if the variable's type is native or it is registered in the symbol table
-    bool is_var_type_defined = is_type_defined(ctx->program, &symbol->typeinfo);
+    bool is_var_type_defined = is_type_defined(ctx->program, symbol->typeinfo);
 
     // If the variable type is missing, we add an error
     if (!is_var_type_defined)
     {
         zenit_context_error(ctx, variable_node->base.location, ZENIT_ERROR_MISSING_SYMBOL, 
-            "Type '%s' is not defined", zenit_type_to_base_string(&variable_node->base.typeinfo));
+            "Type '%s' is not defined", zenit_type_to_base_string(symbol->typeinfo));
     }
 
     // We visit the right-hand side expression to do type checking in it
@@ -251,12 +256,12 @@ static struct ZenitTypeInfo* visit_variable_node(struct ZenitContext *ctx, struc
     // We check types to make sure the assignment is valid, but we do it only if
     // the variable type is valid, because if not, we might be targeting a false-positive
     // error
-    if (is_var_type_defined && !zenit_type_can_assign(&symbol->typeinfo, rhs_type))
+    if (is_var_type_defined && !zenit_type_can_assign(symbol->typeinfo, rhs_type))
     {
         zenit_context_error(ctx, variable_node->base.location, ZENIT_ERROR_TYPE_MISSMATCH, 
             "Cannot convert from type '%s' to '%s'", 
             zenit_type_to_string(rhs_type), 
-            zenit_type_to_string(&symbol->typeinfo)
+            zenit_type_to_string(symbol->typeinfo)
         );
     }
 
@@ -264,7 +269,7 @@ static struct ZenitTypeInfo* visit_variable_node(struct ZenitContext *ctx, struc
     visit_attribute_node_map(ctx, &variable_node->attributes);
 
     // The type information returned is always the one from the variable's symbol
-    return &symbol->typeinfo;
+    return symbol->typeinfo;
 }
 
 /*

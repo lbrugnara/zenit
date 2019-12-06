@@ -5,8 +5,11 @@
 
 struct ZenitStructTypeInfo {
     struct ZenitTypeInfo base;
-    const char *name;
+    char *name;
     struct ZenitTypeInfo *members;
 };
+
+struct ZenitStructTypeInfo* zenit_type_struct_new(char *name);
+void zenit_type_struct_free(struct ZenitStructTypeInfo *typeinfo);
 
 #endif /* ZENIT_TYPE_STRUCT_H */

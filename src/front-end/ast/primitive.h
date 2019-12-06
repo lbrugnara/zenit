@@ -18,7 +18,8 @@ union ZenitPrimitiveValue {
  * 
  */
 struct ZenitPrimitiveNode {
-    struct ZenitNode base;    
+    struct ZenitNode base;
+    enum ZenitType type;
     union ZenitPrimitiveValue value;
 };
 

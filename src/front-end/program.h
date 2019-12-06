@@ -57,6 +57,7 @@ void zenit_program_free(struct ZenitProgram *program);
 struct ZenitSymbol* zenit_program_add_symbol(struct ZenitProgram *program, struct ZenitSymbol *symbol);
 
 bool zenit_program_has_symbol(struct ZenitProgram *program, const char *name);
+
 struct ZenitSymbol* zenit_program_get_symbol(struct ZenitProgram *program, const char *symbol_name);
 
 #endif /* ZENIT_PROGRAM_H */

@@ -1,4 +1,5 @@
 #include "infer.h"
+#include "utils.h"
 #include "../program.h"
 #include "../symbol.h"
 
@@ -9,23 +10,23 @@
  *  The function returns a <struct ZenitTypeInfo> with the type retrieved from the symbol
  *  or inferred from the context.
  */
-typedef struct ZenitTypeInfo*(*ZenitTypeInferrer)(struct ZenitContext *ctx, struct ZenitNode *node);
+typedef struct ZenitSymbol*(*ZenitTypeInferrer)(struct ZenitContext *ctx, struct ZenitNode *node);
 
 // Visitor functions
-static struct ZenitTypeInfo* visit_node(struct ZenitContext *ctx, struct ZenitNode *node);
-static struct ZenitTypeInfo* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *node);
-static struct ZenitTypeInfo* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *node);
-static struct ZenitTypeInfo* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *node);
-static struct ZenitTypeInfo* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node);
-static struct ZenitTypeInfo* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *node);
-static struct ZenitTypeInfo* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *node);
+static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node);
+static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *node);
+static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *node);
+static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *node);
+static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node);
+static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *node);
+static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *node);
 
 /*
  * Variable: inferrers
  *  An array indexed with a <enum ZenitNodeType> to get a <ZenitTypeInferrer> function
  */
 static const ZenitTypeInferrer inferrers[] = {
-    [ZENIT_NODE_LITERAL]    = (ZenitTypeInferrer) &visit_primitive_node,
+    [ZENIT_NODE_PRIMITIVE]    = (ZenitTypeInferrer) &visit_primitive_node,
     [ZENIT_NODE_VARIABLE]   = (ZenitTypeInferrer) &visit_variable_node,
     [ZENIT_NODE_ARRAY]      = (ZenitTypeInferrer) &visit_array_node,
     [ZENIT_NODE_IDENTIFIER] = (ZenitTypeInferrer) &visit_identifier_node,
@@ -47,14 +48,14 @@ static const ZenitTypeInferrer inferrers[] = {
  *  struct ZenitTypeInfo* - The intrinsic type information of the cast node
  *
  */
-static struct ZenitTypeInfo* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast_node)
+static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast_node)
 {
     visit_node(ctx, cast_node->expression);
 
     // We always return the cast's type, if it is NONE, we will need information
     // from the context, and if that information is not present, we will error out
     // in the type check pass
-    return &cast_node->base.typeinfo;
+    return zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) cast_node);
 }
 
 /*
@@ -69,9 +70,9 @@ static struct ZenitTypeInfo* visit_cast_node(struct ZenitContext *ctx, struct Ze
  *  struct ZenitTypeInfo* - The intrinsic type information of the literal node
  *
  */
-static struct ZenitTypeInfo* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *node)
+static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *node)
 {
-    return &node->base.typeinfo;
+    return zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) node);
 }
 
 /*
@@ -87,9 +88,9 @@ static struct ZenitTypeInfo* visit_primitive_node(struct ZenitContext *ctx, stru
  *  struct ZenitTypeInfo* - The type information of the identifier
  *
  */
-static struct ZenitTypeInfo* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node)
+static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node)
 {
-    return &zenit_program_get_symbol(ctx->program, node->name)->typeinfo;
+    return zenit_program_get_symbol(ctx->program, node->name);
 }
 
 /*
@@ -105,15 +106,13 @@ static struct ZenitTypeInfo* visit_identifier_node(struct ZenitContext *ctx, str
  *  struct ZenitTypeInfo* - The inferred type of the array
  *
  */
-static struct ZenitTypeInfo* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *reference_node)
+static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *reference_node)
 {
-    struct ZenitTypeInfo *expression_typeinfo = visit_node(ctx, reference_node->expression);
+    visit_node(ctx, reference_node->expression);
 
-    // Update the type of the unary ref node
-    zenit_type_copy(&reference_node->base.typeinfo, expression_typeinfo);
-    reference_node->base.typeinfo.is_ref = true;
+    struct ZenitSymbol *ref_symbol = zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) reference_node);
 
-    return &reference_node->base.typeinfo;
+    return ref_symbol;
 }
 
 /*
@@ -130,45 +129,49 @@ static struct ZenitTypeInfo* visit_reference_node(struct ZenitContext *ctx, stru
  *  struct ZenitTypeInfo* - The inferred type of the array
  *
  */
-static struct ZenitTypeInfo* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array)
+static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array_node)
 {
-    size_t length = fl_array_length(array->elements);
+    struct ZenitSymbol *array_symbol = zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) array_node);
+    struct ZenitArrayTypeInfo *array_type = (struct ZenitArrayTypeInfo*) array_symbol->typeinfo;
 
-    struct ZenitTypeInfo **elements_type = fl_array_new(sizeof(struct ZenitTypeInfo*), length);
-    
-    struct ZenitTypeInfo common_type = { 0 };
-    bool inference_failed = false;
+    size_t length = fl_array_length(array_node->elements);
+
+    struct ZenitSymbol **array_elements = fl_array_new(sizeof(struct ZenitSymbol*), length);
+
+    struct ZenitTypeInfo *common_type = NULL;
 
     for (size_t i=0; i < length; i++)
     {
-        struct ZenitTypeInfo *elem_type = visit_node(ctx, array->elements[i]);
-        elements_type[i] = elem_type;
+        struct ZenitSymbol *elem_symbol = visit_node(ctx, array_node->elements[i]);
 
-        if (!zenit_type_unify(&common_type, elem_type))
+        array_elements[i] = elem_symbol;
+
+        if (common_type == NULL)
         {
-            inference_failed = true;
-            zenit_context_error(ctx, array->elements[i]->location, ZENIT_ERROR_INFERENCE, 
-                "Cannot find the common ancestor of types '%s' and '%s'", zenit_type_to_string(&common_type), zenit_type_to_string(elem_type));
+            common_type = zenit_type_copy(elem_symbol->typeinfo);
+            continue;
         }
-    }
 
-    if (!inference_failed)
-    {
-        // FIXME: Even though this work for uints it probably breaks
-        // for complex types (what does happen if common_type changes here??)
-        for (size_t i=0; i < length; i++)
-            zenit_type_unify(&common_type, elements_type[i]);
+        struct ZenitTypeInfo *tmp = zenit_type_unify(common_type, elem_symbol->typeinfo);
 
-        array->base.typeinfo.type = common_type.type;
-        array->base.typeinfo.name = common_type.name;
+        if (tmp == NULL)
+        {
+            zenit_context_error(ctx, array_node->elements[i]->location, ZENIT_ERROR_INFERENCE, 
+                    "Cannot find the common ancestor of types '%s' and '%s'", zenit_type_to_string(common_type), zenit_type_to_string(elem_symbol->typeinfo));
+            continue;
+        }
         
-        if (common_type.is_ref)
-            array->base.typeinfo.is_ref = true;
+        zenit_type_free(common_type);
+        common_type = tmp;
     }
 
-    fl_array_free(elements_type);
+    for (size_t i=0; i < length; i++)
+    {
+        struct ZenitTypeInfo *elem_new_type = zenit_symbol_set_type(array_elements[i], common_type);
+        zenit_type_array_add_member(array_type, elem_new_type);
+    }
 
-    return &array->base.typeinfo;
+    return array_symbol;
 }
 
 /*
@@ -220,41 +223,44 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
  *  struct ZenitTypeInfo* - The declared or inferred type of the variable
  *
  */
-static struct ZenitTypeInfo* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *variable_node)
+static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *variable_node)
 {
     // We need the symbol we introduced in the <zenit_resolve_symbols> pass
     struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx->program, variable_node->name);
 
     // We need to get the type of the right-hand side expression
-    struct ZenitTypeInfo *rhs_type = visit_node(ctx, variable_node->rvalue);
+    struct ZenitSymbol *rhs_symbol = visit_node(ctx, variable_node->rvalue);
 
-    if (symbol->typeinfo.type == ZENIT_TYPE_NONE && rhs_type->type != ZENIT_TYPE_NONE)
+    if (symbol->typeinfo->type == ZENIT_TYPE_NONE && rhs_symbol->typeinfo->type != ZENIT_TYPE_NONE)
     {
         // If symbol's type is none, we use the rhs type
-        zenit_type_copy(&symbol->typeinfo, rhs_type);
+        zenit_symbol_set_type(symbol, rhs_symbol->typeinfo);
     }
-    else if (symbol->typeinfo.type != ZENIT_TYPE_NONE && rhs_type->type == ZENIT_TYPE_NONE)
+    else if (symbol->typeinfo->type != ZENIT_TYPE_NONE && rhs_symbol->typeinfo->type == ZENIT_TYPE_NONE)
     {
         // If the rhs type is none, we update it using the variable's type
-        zenit_type_copy(rhs_type, &symbol->typeinfo);
+        zenit_symbol_set_type(rhs_symbol, symbol->typeinfo);
     }
-    else if (symbol->typeinfo.type == ZENIT_TYPE_NONE && rhs_type->type == ZENIT_TYPE_NONE)
+    else if (symbol->typeinfo->type == ZENIT_TYPE_NONE && rhs_symbol->typeinfo->type == ZENIT_TYPE_NONE)
     {
         // If both are none, it is an error for us
         zenit_context_error(ctx, variable_node->base.location, ZENIT_ERROR_INFERENCE, 
                 "Cannot infer type of variable '%s' from the right-hand expression. Try making the type explicit in the variable declaration.", variable_node->name);
     }
-    else if (!zenit_type_equals(&symbol->typeinfo, rhs_type))
+    else if (!zenit_type_equals(symbol->typeinfo, rhs_symbol->typeinfo))
     {   
         // Last resort: Both types are defined, so we assume an implicit cast, the type check pass will take care of it
-        variable_node->rvalue = (struct ZenitNode*)zenit_node_cast_new(variable_node->rvalue->location, variable_node->rvalue, &variable_node->base.typeinfo, true);
+        struct ZenitCastNode *cast_node = zenit_node_cast_new(variable_node->rvalue->location, variable_node->rvalue, true);
+        variable_node->rvalue = (struct ZenitNode*) cast_node;
+
+        zenit_utils_new_readonly_symbol(ctx->program, variable_node->rvalue, symbol->typeinfo);
     }
 
     // Visit the attributes and its properties
     visit_attribute_node_map(ctx, &variable_node->attributes);
 
     // Always the declared or inferred type. In case of error, we honor the variable type
-    return &symbol->typeinfo;
+    return symbol;
 }
 
 /*
@@ -270,7 +276,7 @@ static struct ZenitTypeInfo* visit_variable_node(struct ZenitContext *ctx, struc
  *  struct ZenitTypeInfo* - A pointer to an object containing type information or NULL
  *
  */
-static struct ZenitTypeInfo* visit_node(struct ZenitContext *ctx, struct ZenitNode *node)
+static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node)
 {
     return inferrers[node->type](ctx, node);
 }

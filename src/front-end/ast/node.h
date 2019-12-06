@@ -9,7 +9,7 @@
  *  Types of AST node
  */
 enum ZenitNodeType {
-    ZENIT_NODE_LITERAL,
+    ZENIT_NODE_PRIMITIVE,
     ZENIT_NODE_VARIABLE,
     ZENIT_NODE_ATTRIBUTE,
     ZENIT_NODE_PROPERTY,
@@ -33,11 +33,11 @@ enum ZenitNodeType {
  *  <struct ZenitTypeInfo> typeinfo: The type of the operand or operator represented by the node
  */
 struct ZenitNode {
-    struct ZenitTypeInfo *typeinfo;
-    struct ZenitSourceLocation location;
     enum ZenitNodeType type;
+    struct ZenitSourceLocation location;
 };
 
+char* zenit_node_print_type(struct ZenitNode *node);
 
 /*
  * Function: zenit_node_free

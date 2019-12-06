@@ -70,6 +70,8 @@ enum ZenitType zenit_type_string_parse(const char *typestr);
  */
 enum ZenitType zenit_type_slice_parse(struct FlSlice *slice);
 
+const char* zenit_type_name(enum ZenitType type);
+
 /*
  * Function: zenit_type_to_string
  *  Returns a string representation of the <struct ZenitTypeInfo> object.
@@ -105,19 +107,6 @@ const char* zenit_type_to_string(const struct ZenitTypeInfo *typeinfo);
 const char* zenit_type_to_base_string(const struct ZenitTypeInfo *typeinfo);
 
 /*
- * Function: zenit_type_copy
- *  Copies the information from the *src_type* into the *dest_type*
- *
- * Parameters:
- *  dest_type - Destination type object
- *  src_type - Source type object
- *
- * Returns:
- *  void - This function does not return a value
- */
-void zenit_type_copy(struct ZenitTypeInfo *dest_type, struct ZenitTypeInfo *src_type);
-
-/*
  * Function: zenit_type_equals
  *  Compares *type_a* and *type_b* to know if they are equals, including
  *  if they are arrays and their elements count
@@ -132,7 +121,9 @@ void zenit_type_copy(struct ZenitTypeInfo *dest_type, struct ZenitTypeInfo *src_
  */
 bool zenit_type_equals(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
 
-bool zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
+struct ZenitTypeInfo* zenit_type_copy(struct ZenitTypeInfo *src_type);
+
+struct ZenitTypeInfo* zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
 
 bool zenit_type_can_assign(struct ZenitTypeInfo *target_type, struct ZenitTypeInfo *value_type);
 

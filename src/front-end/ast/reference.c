@@ -9,8 +9,6 @@ struct ZenitReferenceNode* zenit_node_reference_new(struct ZenitSourceLocation l
     ref_node->base.location = location;
     ref_node->expression = expression;
 
-    ref_node->base.typeinfo = (struct ZenitTypeInfo*) zenit_type_reference_new(expression->typeinfo);
-
     return ref_node;
 }
 

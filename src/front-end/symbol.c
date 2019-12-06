@@ -9,9 +9,20 @@ struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitTypeInfo *typ
     struct ZenitSymbol *symbol = fl_malloc(sizeof(struct ZenitSymbol));
 
     symbol->name = fl_cstring_dup(name);
-    zenit_type_copy(&symbol->typeinfo, typeinfo);
+    symbol->typeinfo = typeinfo;
 
     return symbol;
+}
+
+struct ZenitTypeInfo* zenit_symbol_set_type(struct ZenitSymbol *symbol, struct ZenitTypeInfo *typeinfo)
+{
+    if (!symbol || !typeinfo)
+        return NULL;
+
+    if (symbol->typeinfo)
+        zenit_type_free(symbol->typeinfo);
+
+    return (symbol->typeinfo = zenit_type_copy(typeinfo));
 }
 
 void zenit_symbol_free(struct ZenitSymbol *symbol)
@@ -22,8 +33,8 @@ void zenit_symbol_free(struct ZenitSymbol *symbol)
     if (symbol->name)
         fl_cstring_free(symbol->name);
 
-    if (symbol->typeinfo.name)
-        fl_cstring_free(symbol->typeinfo.name);
+    if (symbol->typeinfo)
+        zenit_type_free(symbol->typeinfo);
 
     fl_free(symbol);
 }

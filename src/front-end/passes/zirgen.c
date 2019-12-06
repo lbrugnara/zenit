@@ -1,4 +1,5 @@
 #include "zirgen.h"
+#include "utils.h"
 #include "../program.h"
 #include "../symbol.h"
 #include "../../zir/program.h"
@@ -44,7 +45,7 @@ static struct ZirOperand* visit_cast_node(struct ZenitContext *ctx, struct ZirPr
  *  An array indexed with a <enum ZenitNodeType> to get a <ZirGenerator> function
  */
 static const ZirGenerator generators[] = {
-    [ZENIT_NODE_LITERAL]    = (ZirGenerator) &visit_primitive_node,
+    [ZENIT_NODE_PRIMITIVE]    = (ZirGenerator) &visit_primitive_node,
     [ZENIT_NODE_VARIABLE]   = (ZirGenerator) &visit_variable_node,
     [ZENIT_NODE_ARRAY]      = (ZirGenerator) &visit_array_node,
     [ZENIT_NODE_IDENTIFIER] = (ZirGenerator) &visit_identifier_node,
@@ -55,7 +56,7 @@ static const ZirGenerator generators[] = {
 static void import_zir_symbol_from_zenit_symbol(struct ZenitContext *ctx, struct ZenitSymbol *symbol, struct ZirProgram *program, bool global_symbol)
 {
     struct ZirSymbol *zir_symbol = zir_symbol_new(symbol->name, NULL, false);
-    copy_zenit_type_to_zir_type(&symbol->typeinfo, &zir_symbol->typeinfo);
+    copy_zenit_type_to_zir_type(symbol->typeinfo, &zir_symbol->typeinfo);
 
     zir_program_add_symbol(program, zir_symbol);
 }
@@ -93,10 +94,21 @@ static inline void copy_zenit_type_to_zir_type(struct ZenitTypeInfo *zenit_type,
             break;
     }
 
-    zir_type->elements = zenit_type->elements;
-    zir_type->is_array = zenit_type->is_array;
-    zir_type->is_ref = zenit_type->is_ref;
-    zir_type->name = zenit_type->name ? fl_cstring_dup(zenit_type->name) : NULL;
+    zir_type->elements = 1;
+    zir_type->is_array = false;
+    zir_type->is_ref = zenit_type->type == ZENIT_TYPE_REFERENCE;
+    zir_type->name = NULL;
+
+    if (zenit_type->type == ZENIT_TYPE_ARRAY)
+    {
+        zir_type->is_array = true;
+        zir_type->elements = fl_array_length(((struct ZenitArrayTypeInfo*) zenit_type)->members);
+    }
+    else if (zenit_type->type == ZENIT_TYPE_STRUCT)
+    {
+        struct ZenitStructTypeInfo *stype = (struct ZenitStructTypeInfo*) zenit_type;
+        zir_type->name = stype->name ? fl_cstring_dup(stype->name) : NULL;
+    }
 }
 
 static struct ZirAttributeMap zenit_attr_to_zir_attr(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitAttributeNodeMap zenit_attrs)
@@ -149,10 +161,12 @@ static struct ZirOperand* visit_cast_node(struct ZenitContext *ctx, struct ZirPr
     // that comes up from the casted expression
     if (zenit_cast->implicit)
         return visit_node(ctx, program, zenit_cast->expression);
+
+    struct ZenitSymbol *zenit_cast_symbol = zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) zenit_cast);
     
     // We use a temporal symbol for the cast's destination. We copy the type informaton from the Zenit cast's object type information
     struct ZirSymbol *temp_symbol = new_temp_symbol(program, false);
-    copy_zenit_type_to_zir_type(&zenit_cast->base.typeinfo, &temp_symbol->typeinfo);
+    copy_zenit_type_to_zir_type(zenit_cast_symbol->typeinfo, &temp_symbol->typeinfo);
 
     // We create the cast instruction with the temporal symbol as the destination operand
     struct ZirCastInstruction *cast_instr = zir_instruction_cast_new((struct ZirOperand*) zir_operand_symbol_new(temp_symbol));
@@ -179,11 +193,13 @@ static struct ZirOperand* visit_cast_node(struct ZenitContext *ctx, struct ZirPr
  */
 static struct ZirOperand* visit_primitive_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitPrimitiveNode *zenit_primitive)
 {
+    struct ZenitSymbol *zenit_primitive_symbol = zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) zenit_primitive);
+
     // First, we need to map the types and values between Zenit and ZIR
     enum ZirType zir_type = ZIR_TYPE_NONE;
     union ZirPrimitiveValue zir_value;
 
-    switch (zenit_primitive->base.typeinfo.type)
+    switch (zenit_primitive_symbol->typeinfo->type)
     {
         case ZENIT_TYPE_UINT8:
             zir_type = ZIR_TYPE_UINT8;
@@ -200,7 +216,7 @@ static struct ZirOperand* visit_primitive_node(struct ZenitContext *ctx, struct 
 
     // Then, we create a primitive operand, and we copy the type information from the Zenit node
     struct ZirPrimitiveOperand *zir_primitive = zir_operand_primitive_new(zir_type, zir_value);
-    copy_zenit_type_to_zir_type(&zenit_primitive->base.typeinfo, &zir_primitive->base.typeinfo);;
+    copy_zenit_type_to_zir_type(zenit_primitive_symbol->typeinfo, &zir_primitive->base.typeinfo);;
 
     // Now, we can create the load instruction
     struct ZirLoadInstruction *load_instr = zir_instruction_load_new((struct ZirOperand*) zir_primitive);
@@ -272,8 +288,10 @@ static struct ZirOperand* visit_array_node(struct ZenitContext *ctx, struct ZirP
 {
     struct ZirArrayOperand *zir_array = zir_operand_array_new();
 
+    struct ZenitSymbol *zenit_array_symbol = zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) zenit_array);
+
     // Copy the type information from the Zenit type information object
-    copy_zenit_type_to_zir_type(&zenit_array->base.typeinfo, &zir_array->base.typeinfo);
+    copy_zenit_type_to_zir_type(zenit_array_symbol->typeinfo, &zir_array->base.typeinfo);
 
     // Visit the array's elements to get the operands
     for (size_t i=0; i < fl_array_length(zenit_array->elements); i++)

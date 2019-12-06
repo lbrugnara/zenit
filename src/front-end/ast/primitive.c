@@ -5,12 +5,10 @@
 struct ZenitPrimitiveNode* zenit_node_primitive_new(struct ZenitSourceLocation location, enum ZenitType type, union ZenitPrimitiveValue value)
 {
     struct ZenitPrimitiveNode *primitive_node = fl_malloc(sizeof(struct ZenitPrimitiveNode));
-    primitive_node->base.type = ZENIT_NODE_LITERAL;
+    primitive_node->base.type = ZENIT_NODE_PRIMITIVE;
     primitive_node->base.location = location;
-
+    primitive_node->type = type;
     primitive_node->value = value;
-
-    primitive_node->base.typeinfo = (struct ZenitTypeInfo*) zenit_type_primitive_new(type);
 
     return primitive_node;
 }

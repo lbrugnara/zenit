@@ -15,11 +15,12 @@
  */
 struct ZenitArrayNode {
     struct ZenitNode base;
+    struct ZenitTypeInfo *typeinfo;
     struct ZenitNode **elements;
 };
 
 struct ZenitArrayNode* zenit_node_array_new(struct ZenitSourceLocation location);
-void zenit_node_array_add_element(struct ZenitArrayNode *array, struct ZenitNode *element);
+void zenit_node_array_add_child(struct ZenitArrayNode *array, struct ZenitNode *element);
 void zenit_node_array_free(struct ZenitArrayNode *array);
 
 #endif /* ZENIT_AST_ARRAY_H */

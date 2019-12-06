@@ -16,7 +16,7 @@ void zenit_type_reference_free(struct ZenitReferenceTypeInfo *typeinfo)
     if (!typeinfo)
         return;
 
-    // No need to free the element's typeinfo object, it belongs to another node
+    // No need to free the element's typeinfo object, it belongs to a symbol
 
     fl_free(typeinfo);
 }

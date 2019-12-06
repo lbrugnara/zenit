@@ -6,6 +6,7 @@ struct ZenitScope* zenit_scope_new(const char *id, enum ZenitSymtableType type, 
     scope->parent = parent;
     scope->children = fl_array_new(sizeof(struct ZenitScope*), 0);
     scope->symtable = zenit_symtable_new(type, id);
+    scope->temp_counter = 0;
 
     return scope;
 }

@@ -17,6 +17,7 @@ struct ZenitScope {
     struct ZenitScope *parent;
     struct ZenitScope **children;
     struct ZenitSymtable symtable;
+    unsigned long long temp_counter;
 };
 
 /*
