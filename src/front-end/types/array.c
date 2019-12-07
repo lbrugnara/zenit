@@ -21,7 +21,7 @@ void zenit_type_array_free(struct ZenitArrayTypeInfo *typeinfo)
     if (!typeinfo)
         return;
 
-    // No need to free the elements' typeinfo objects, each symbol will take care of
-    fl_array_free(typeinfo->members);
+    fl_array_free_each_pointer(typeinfo->members, (FlArrayFreeElementFunc) zenit_type_free);
+
     fl_free(typeinfo);
 }

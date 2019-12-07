@@ -71,7 +71,7 @@ static const ZenitTypeChecker checkers[] = {
  */
 static struct ZenitTypeInfo* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast)
 {
-    struct ZenitSymbol *symbol = zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) cast);
+    struct ZenitSymbol *symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) cast);
 
     struct ZenitTypeInfo *expr_type = visit_node(ctx, cast->expression);
 
@@ -106,7 +106,7 @@ static struct ZenitTypeInfo* visit_cast_node(struct ZenitContext *ctx, struct Ze
  */
 static struct ZenitTypeInfo* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *primitive)
 {
-    return zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) primitive)->typeinfo;
+    return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) primitive)->typeinfo;
 }
 
 /*
@@ -146,7 +146,7 @@ static struct ZenitTypeInfo* visit_reference_node(struct ZenitContext *ctx, stru
                 "Cannot take a reference to another reference.");
     }
 
-    return zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) reference_node)->typeinfo;
+    return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) reference_node)->typeinfo;
 }
 
 /*

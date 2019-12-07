@@ -117,7 +117,6 @@ void test_signal_handler(int sign)
 }
 
 #ifdef _WIN32
-#include "../src/os/WinEx.h"
 /*
  * Function: exception_filter
  *

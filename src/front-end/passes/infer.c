@@ -55,7 +55,7 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
     // We always return the cast's type, if it is NONE, we will need information
     // from the context, and if that information is not present, we will error out
     // in the type check pass
-    return zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) cast_node);
+    return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node);
 }
 
 /*
@@ -72,7 +72,7 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
  */
 static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *node)
 {
-    return zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) node);
+    return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) node);
 }
 
 /*
@@ -110,7 +110,7 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
 {
     visit_node(ctx, reference_node->expression);
 
-    struct ZenitSymbol *ref_symbol = zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) reference_node);
+    struct ZenitSymbol *ref_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) reference_node);
 
     return ref_symbol;
 }
@@ -131,7 +131,7 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
  */
 static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array_node)
 {
-    struct ZenitSymbol *array_symbol = zenit_utils_get_readonly_symbol(ctx->program, (struct ZenitNode*) array_node);
+    struct ZenitSymbol *array_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) array_node);
     struct ZenitArrayTypeInfo *array_type = (struct ZenitArrayTypeInfo*) array_symbol->typeinfo;
 
     size_t length = fl_array_length(array_node->elements);
@@ -157,7 +157,8 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
         if (tmp == NULL)
         {
             zenit_context_error(ctx, array_node->elements[i]->location, ZENIT_ERROR_INFERENCE, 
-                    "Cannot find the common ancestor of types '%s' and '%s'", zenit_type_to_string(common_type), zenit_type_to_string(elem_symbol->typeinfo));
+                    "Cannot find the common ancestor of types '%s' and '%s'", 
+                        zenit_type_to_string(common_type), zenit_type_to_string(elem_symbol->typeinfo));
             continue;
         }
         
@@ -168,8 +169,13 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
     for (size_t i=0; i < length; i++)
     {
         struct ZenitTypeInfo *elem_new_type = zenit_symbol_set_type(array_elements[i], common_type);
-        zenit_type_array_add_member(array_type, elem_new_type);
+        zenit_type_array_add_member(array_type, zenit_type_copy(elem_new_type));
     }
+
+    if (common_type)
+        zenit_type_free(common_type);
+
+    fl_array_free(array_elements);
 
     return array_symbol;
 }
@@ -253,7 +259,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
         struct ZenitCastNode *cast_node = zenit_node_cast_new(variable_node->rvalue->location, variable_node->rvalue, true);
         variable_node->rvalue = (struct ZenitNode*) cast_node;
 
-        zenit_utils_new_readonly_symbol(ctx->program, variable_node->rvalue, symbol->typeinfo);
+        zenit_utils_new_tmp_symbol(ctx->program, variable_node->rvalue, zenit_type_copy(symbol->typeinfo));
     }
 
     // Visit the attributes and its properties

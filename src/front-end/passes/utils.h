@@ -6,7 +6,7 @@
 #include "../ast/ast.h"
 #include "../types/system.h"
 
-static inline struct ZenitSymbol* zenit_utils_new_readonly_symbol(struct ZenitProgram *program, struct ZenitNode *node, struct ZenitTypeInfo *typeinfo)
+static inline struct ZenitSymbol* zenit_utils_new_tmp_symbol(struct ZenitProgram *program, struct ZenitNode *node, struct ZenitTypeInfo *typeinfo)
 {
     char name[1024] = { 0 };
     snprintf(name, 1024, "%%ro_%s_%u%u", zenit_node_print_type(node), node->location.line, node->location.col);
@@ -18,7 +18,7 @@ static inline struct ZenitSymbol* zenit_utils_new_readonly_symbol(struct ZenitPr
     return zenit_symbol;
 }
 
-static inline struct ZenitSymbol* zenit_utils_get_readonly_symbol(struct ZenitProgram *program, struct ZenitNode *node)
+static inline struct ZenitSymbol* zenit_utils_get_tmp_symbol(struct ZenitProgram *program, struct ZenitNode *node)
 {
     char name[1024] = { 0 };
     snprintf(name, 1024, "%%ro_%s_%u%u", zenit_node_print_type(node), node->location.line, node->location.col);

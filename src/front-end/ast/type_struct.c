@@ -8,7 +8,7 @@ struct ZenitStructTypeNode* zenit_node_type_struct_new(struct ZenitSourceLocatio
     type_node->base.base.type = ZENIT_NODE_TYPE_STRUCT;
     type_node->base.base.location = location;
     type_node->base.type = ZENIT_TYPE_STRUCT;
-    type_node->name = fl_cstring_dup(name);
+    type_node->name = name;
     type_node->members = fl_array_new(sizeof(struct ZenitTypeNode*), 0);
 
     return type_node;

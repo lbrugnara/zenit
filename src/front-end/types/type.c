@@ -163,20 +163,6 @@ enum ZenitType zenit_type_slice_parse(struct FlSlice *slice)
     return ZENIT_TYPE_STRUCT;
 }
 
-const char* zenit_type_name(enum ZenitType type)
-{
-    for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
-    {
-        struct TypeMapping mapping = type_mappings[i];
-        if (mapping.type == type)
-        {
-            return mapping.string;
-        }
-    }
-
-    return "<unknown>";
-}
-
 /*
  * Function: zenit_type_to_string
  *  This function has the added complexity of taking into account if 
@@ -223,9 +209,12 @@ const char* zenit_type_to_string(const struct ZenitTypeInfo *typeinfo)
     // Add the arrray information if needed
     if (ZENIT_TYPE_ARRAY == typeinfo->type)
     {
+        struct ZenitArrayTypeInfo *array_type = (struct ZenitArrayTypeInfo*) typeinfo;
+        base_type = fl_array_length(array_type->members) > 0 ? zenit_type_to_string(array_type->members[0]) : "void";
+
         fl_cstring_append(&string_value, "[");
         char tmp_string[20];
-        snprintf(tmp_string, 20, "%zu", fl_array_length(((struct ZenitStructTypeInfo*) typeinfo)->members));
+        snprintf(tmp_string, 20, "%zu", fl_array_length(array_type->members));
         fl_cstring_append(&string_value, tmp_string);
         fl_cstring_append(&string_value, "]");
     }
@@ -274,7 +263,10 @@ struct ZenitTypeInfo* zenit_type_copy(struct ZenitTypeInfo *src_type)
     }
 
     if (src_type->type == ZENIT_TYPE_REFERENCE)
-        return (struct ZenitTypeInfo*) zenit_type_reference_new(((struct ZenitReferenceTypeInfo*) src_type)->element);
+    {
+        struct ZenitTypeInfo *referred_type = zenit_type_copy(((struct ZenitReferenceTypeInfo*) src_type)->element);
+        return (struct ZenitTypeInfo*) zenit_type_reference_new(referred_type);
+    }
 
 
     if (src_type->type == ZENIT_TYPE_ARRAY)
@@ -282,7 +274,9 @@ struct ZenitTypeInfo* zenit_type_copy(struct ZenitTypeInfo *src_type)
         struct ZenitArrayTypeInfo *src_array = (struct ZenitArrayTypeInfo*) src_type;
         
         struct ZenitArrayTypeInfo *dst_array = zenit_type_array_new();
-        dst_array->members = fl_array_combine(dst_array->members, src_array->members);
+
+        for (size_t i=0; i < fl_array_length(src_array->members); i++)
+            zenit_type_array_add_member(dst_array, zenit_type_copy(src_array->members[i]));
         
         return (struct ZenitTypeInfo*) dst_array;
     }
