@@ -3,8 +3,7 @@
 
 #include "type.h"
 
-#define zenit_type_none_free zenit_type_free
-
 struct ZenitTypeInfo* zenit_type_none_new(void);
+void zenit_type_none_free(struct ZenitTypeInfo *typeinfo);
 
 #endif /* ZENIT_TYPE_NONE_H */

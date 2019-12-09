@@ -25,6 +25,11 @@ enum ZenitType {
     ZENIT_TYPE_END
 };
 
+struct ZenitTypeString {
+    unsigned long version;
+    char *value;
+};
+
 /*
  * Struct: struct ZenitTypeInfo
  *  Represents the information of a type. 
@@ -39,7 +44,10 @@ enum ZenitType {
  */
 struct ZenitTypeInfo {
     enum ZenitType type;
+    struct ZenitTypeString to_string;
 };
+
+unsigned long zenit_type_hash(struct ZenitTypeInfo *typeinfo);
 
 /*
  * Function: zenit_type_string_parse
@@ -88,7 +96,7 @@ enum ZenitType zenit_type_slice_parse(struct FlSlice *slice);
  *  information refer to the <zenit_type_to_base_string> function
  *
  */
-const char* zenit_type_to_string(const struct ZenitTypeInfo *typeinfo);
+const char* zenit_type_to_string(struct ZenitTypeInfo *typeinfo);
 
 /*
  * Function: zenit_type_to_base_string

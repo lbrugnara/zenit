@@ -16,6 +16,9 @@ void zenit_type_struct_free(struct ZenitStructTypeInfo *typeinfo)
     if (!typeinfo)
         return;
 
+    if (typeinfo->base.to_string.value != NULL)
+        fl_cstring_free(typeinfo->base.to_string.value);
+
     if (typeinfo->name)
         fl_cstring_free(typeinfo->name);
 

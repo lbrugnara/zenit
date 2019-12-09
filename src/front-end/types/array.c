@@ -21,6 +21,9 @@ void zenit_type_array_free(struct ZenitArrayTypeInfo *typeinfo)
     if (!typeinfo)
         return;
 
+    if (typeinfo->base.to_string.value != NULL)
+        fl_cstring_free(typeinfo->base.to_string.value);
+
     fl_array_free(typeinfo->members);
 
     fl_free(typeinfo);

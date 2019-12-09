@@ -9,3 +9,14 @@ struct ZenitTypeInfo* zenit_type_none_new(void)
 
     return typeinfo;
 }
+
+void zenit_type_none_free(struct ZenitTypeInfo *typeinfo)
+{
+    if (!typeinfo)
+        return;
+
+    if (typeinfo->to_string.value != NULL)
+        fl_cstring_free(typeinfo->to_string.value);
+
+    fl_free(typeinfo);
+}

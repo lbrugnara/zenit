@@ -17,16 +17,6 @@ static struct TypeMapping {
     { "uint16",     ZENIT_TYPE_UINT16 },
 };
 
-/*
- * Variable: type_string_mapping_pool
- *  Because many <struct ZenitTypeInfo> objects that are equals
- *  map to the same string representation, we use a hashtable
- *  to reuse those strings between them.
- *  The hashtable uses <struct ZenitTypeInfo> as key elements and 
- *  saves string for each value
- */
-static FlHashtable type_string_mapping_pool = NULL;
-
 static char* get_type_key(struct ZenitTypeInfo *typeinfo)
 {
     if (typeinfo->type == ZENIT_TYPE_STRUCT)
@@ -76,13 +66,11 @@ static char* get_type_key(struct ZenitTypeInfo *typeinfo)
 }
 
 /*
- * Function: hash_type
+ * Function: zenit_type_hash
  *  Creates a hash from a <struct ZenitTypeInfo> object
  */
-static unsigned long hash_type(const FlByte *key)
+unsigned long zenit_type_hash(struct ZenitTypeInfo *typeinfo)
 {
-    struct ZenitTypeInfo *typeinfo = (struct ZenitTypeInfo*)key;
-
     char *type_key = get_type_key(typeinfo);
 
     if (type_key == NULL)
@@ -97,72 +85,6 @@ static unsigned long hash_type(const FlByte *key)
     fl_cstring_free(type_key);
 
     return hash;
-}
-
-/*
- * Function: alloc_type_key
- *  Allocates a <struct ZenitTypeInfo> object into the *dest* pointer
- */
-static void alloc_type_key(FlByte **dest, const FlByte *src)
-{
-    struct ZenitTypeInfo *typeinfo = (struct ZenitTypeInfo*) src;
-
-    size_t size = 0;
-    if (typeinfo->type == ZENIT_TYPE_ARRAY)
-    {
-        size = sizeof(struct ZenitArrayTypeInfo);
-    }
-    else if (typeinfo->type == ZENIT_TYPE_REFERENCE)
-    {
-        size = sizeof(struct ZenitReferenceTypeInfo);
-    }
-    else if (typeinfo->type == ZENIT_TYPE_STRUCT)
-    {
-        size = sizeof(struct ZenitStructTypeInfo);
-    }
-    else if (zenit_type_is_primitive(typeinfo->type))
-    {
-        size = sizeof(struct ZenitPrimitiveTypeInfo);
-    }
-    else
-    {
-        size = sizeof(struct ZenitTypeInfo);
-    }
-
-    *dest = fl_malloc(size);
-    memcpy(*dest, src, size);
-}
-
-/*
- * Function: free_pool
- *  Called *atexit* this function frees the memory allocated
- *  by the <type_string_mapping_pool> variable
- */
-static void free_pool(void)
-{
-    fl_hashtable_free(type_string_mapping_pool);
-}
-
-/*
- * Function: init_pool
- *  Initializes the pool of mappings between <struct ZenitTypeInfo> objects
- *  and strings
- */
-static inline void init_pool(void)
-{
-    if (type_string_mapping_pool)
-        return;
-
-    type_string_mapping_pool = fl_hashtable_new_args((struct FlHashtableArgs) {
-        .hash_function = hash_type,
-        .key_allocator = alloc_type_key,
-        .key_comparer = (FlContainerEqualsFunction)zenit_type_equals,
-        .key_cleaner = fl_container_cleaner_pointer,
-        .value_cleaner = (FlContainerCleanupFunction)fl_cstring_free,
-        .value_allocator = NULL
-    });
-
-    atexit(free_pool);
 }
 
 enum ZenitType zenit_type_string_parse(const char *typestr)
@@ -198,21 +120,24 @@ enum ZenitType zenit_type_slice_parse(struct FlSlice *slice)
  *  allocated string, but we benefit from the <type_string_mapping_pool> variable
  *  to reuse strings.
  */
-const char* zenit_type_to_string(const struct ZenitTypeInfo *typeinfo)
+const char* zenit_type_to_string(struct ZenitTypeInfo *typeinfo)
 {
-    // FIXME: We can create a function for each ZENIT_TYPE_* object, that way complex
-    // types like "struct" and "arrays" can recursively add information. The current
-    // implementation is compatible with the previous version of the type system, so
-    // it allows us to quickly get on track
+    if (typeinfo == NULL)
+        return NULL;
 
-    // We need to initialize the pool first
-    if (!type_string_mapping_pool)
-        init_pool();
+    unsigned long type_hash = zenit_type_hash(typeinfo);
 
-    // If we already processed the string representation of the <struct ZenitTypeInfo> object
-    // we return it
-    if (fl_hashtable_has_key(type_string_mapping_pool, typeinfo))
-        return fl_hashtable_get(type_string_mapping_pool, typeinfo);
+    if (typeinfo->to_string.value == NULL)
+    {
+        // First call, initialize the value
+        typeinfo->to_string.value = fl_cstring_new(0);
+    }
+    else if (type_hash == typeinfo->to_string.version)
+    {
+        // If the type information didn't change, just return the 
+        // current value
+        return typeinfo->to_string.value;
+    }
 
     // If the base type is a struct type, we use the struct type's name
     const char *base_type = ZENIT_TYPE_STRUCT == typeinfo->type ? ((struct ZenitStructTypeInfo*) typeinfo)->name : NULL;
@@ -268,10 +193,13 @@ const char* zenit_type_to_string(const struct ZenitTypeInfo *typeinfo)
     // Add the base type
     fl_cstring_append(&string_value, base_type);
 
-    // Save the processed string version
-    fl_hashtable_add(type_string_mapping_pool, typeinfo, string_value);
+    // Update the string representation
+    typeinfo->to_string.version = type_hash;
+    typeinfo->to_string.value = fl_cstring_replace_realloc(typeinfo->to_string.value, typeinfo->to_string.value, string_value);
 
-    return string_value;
+    fl_cstring_free(string_value);
+
+    return typeinfo->to_string.value;
 }
 
 /*
@@ -568,31 +496,32 @@ bool zenit_type_can_cast(struct ZenitTypeInfo *target_type, struct ZenitTypeInfo
 
 void zenit_type_free(struct ZenitTypeInfo *typeinfo)
 {
+    if (!typeinfo)
+        return;
+
     if (typeinfo->type == ZENIT_TYPE_STRUCT)
     {
         zenit_type_struct_free((struct ZenitStructTypeInfo*) typeinfo);
         return;
     }
-
-    if (typeinfo->type == ZENIT_TYPE_REFERENCE)
+    else if (typeinfo->type == ZENIT_TYPE_REFERENCE)
     {
         zenit_type_reference_free((struct ZenitReferenceTypeInfo*) typeinfo);
         return;
     }
-
-
-    if (typeinfo->type == ZENIT_TYPE_ARRAY)
+    else if (typeinfo->type == ZENIT_TYPE_ARRAY)
     {
         zenit_type_array_free((struct ZenitArrayTypeInfo*) typeinfo);
         return;
     }
-
-    if (zenit_type_is_primitive(typeinfo->type))
+    else if (zenit_type_is_primitive(typeinfo->type))
     {
         zenit_type_primitive_free((struct ZenitPrimitiveTypeInfo*) typeinfo);
         return;
     }
-
-
-    fl_free(typeinfo);
+    else if (typeinfo->type == ZENIT_TYPE_NONE)
+    {
+        zenit_type_none_free(typeinfo);
+        return;
+    }
 }
