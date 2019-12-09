@@ -96,18 +96,26 @@ static inline void copy_zenit_type_to_zir_type(struct ZenitTypeInfo *zenit_type,
 
     zir_type->elements = 1;
     zir_type->is_array = false;
-    zir_type->is_ref = zenit_type->type == ZENIT_TYPE_REFERENCE;
     zir_type->name = NULL;
 
     if (zenit_type->type == ZENIT_TYPE_ARRAY)
     {
+        struct ZenitArrayTypeInfo *zenit_array_type = (struct ZenitArrayTypeInfo*) zenit_type;
+        copy_zenit_type_to_zir_type(zenit_array_type->member_type, zir_type);
         zir_type->is_array = true;
-        zir_type->elements = fl_array_length(((struct ZenitArrayTypeInfo*) zenit_type)->members);
+        zir_type->elements = zenit_array_type->length;
     }
     else if (zenit_type->type == ZENIT_TYPE_STRUCT)
     {
-        struct ZenitStructTypeInfo *stype = (struct ZenitStructTypeInfo*) zenit_type;
-        zir_type->name = stype->name ? fl_cstring_dup(stype->name) : NULL;
+        struct ZenitStructTypeInfo *zenit_struct_type = (struct ZenitStructTypeInfo*) zenit_type;
+        zir_type->type = ZIR_TYPE_CUSTOM;
+        zir_type->name = zenit_struct_type->name ? fl_cstring_dup(zenit_struct_type->name) : NULL;
+    }
+    else if (zenit_type->type == ZENIT_TYPE_REFERENCE)
+    {
+        struct ZenitReferenceTypeInfo *zenit_ref_type = (struct ZenitReferenceTypeInfo*) zenit_type;
+        copy_zenit_type_to_zir_type(zenit_ref_type->element, zir_type);
+        zir_type->is_ref = true;        
     }
 }
 

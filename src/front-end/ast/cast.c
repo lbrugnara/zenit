@@ -12,6 +12,19 @@ struct ZenitCastNode* zenit_node_cast_new(struct ZenitSourceLocation location, s
     return cast_node;
 }
 
+char* zenit_node_cast_uid(struct ZenitCastNode *cast)
+{
+    if (!cast)
+        return NULL;
+
+    char *format = "%%L%u_C%u_cast[i:%d]";
+    size_t length = snprintf(NULL, 0, format, cast->base.location.line, cast->base.location.col, cast->implicit);
+    char *id = fl_cstring_new(length);
+    snprintf(id, length+1, format, cast->base.location.line, cast->base.location.col, cast->implicit);
+    id[length] = '\0';
+    return id;
+}
+
 void zenit_node_cast_free(struct ZenitCastNode *cast_node)
 {
     if (!cast_node)

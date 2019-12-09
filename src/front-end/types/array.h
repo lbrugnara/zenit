@@ -4,9 +4,17 @@
 #include <stdlib.h>
 #include "type.h"
 
+enum ZenitArrayTypeInfoSource {
+    ZENIT_ARRAY_TYPE_DECL,
+    ZENIT_ARRAY_TYPE_INFER,
+};
+
 struct ZenitArrayTypeInfo {
     struct ZenitTypeInfo base;
     struct ZenitTypeInfo **members;
+    enum ZenitArrayTypeInfoSource source;
+    struct ZenitTypeInfo *member_type;
+    size_t length;
 };
 
 struct ZenitArrayTypeInfo* zenit_type_array_new(void);

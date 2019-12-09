@@ -11,6 +11,26 @@ struct ZenitVariableNode* zenit_node_variable_new(struct ZenitSourceLocation loc
     return var_node;
 }
 
+char* zenit_node_variable_uid(struct ZenitVariableNode *variable)
+{
+    if (!variable)
+        return NULL;
+
+    char *format = "%%L%u_C%u_variable[lhs:%s][rhs:%s]";
+
+    char *rhs_id = zenit_node_uid(variable->rvalue);
+
+    size_t length = snprintf(NULL, 0, format, variable->base.location.line, variable->base.location.col, variable->name, rhs_id != NULL ? rhs_id : "<missing>");
+    char *id = fl_cstring_new(length);
+    snprintf(id, length+1, format, variable->base.location.line, variable->base.location.col, variable->name, rhs_id != NULL ? rhs_id : "<missing>");
+    id[length] = '\0';
+
+    if (rhs_id != NULL)
+        fl_cstring_free(rhs_id);
+
+    return id;
+}
+
 /*
  * Function: zenit_node_variable_free
  *  Frees the memory of a <struct ZenitVariableNode> object

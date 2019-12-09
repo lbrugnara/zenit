@@ -41,14 +41,6 @@ struct ZenitTypeInfo {
     enum ZenitType type;
 };
 
-static inline struct ZenitTypeInfo* zenit_type_none_new()
-{
-    struct ZenitTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitTypeInfo));
-    typeinfo->type = ZENIT_TYPE_NONE;
-
-    return typeinfo;
-}
-
 /*
  * Function: zenit_type_string_parse
  *  Takes a string and returns the system type for that

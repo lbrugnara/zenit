@@ -24,6 +24,7 @@ struct ZenitPrimitiveNode {
 };
 
 struct ZenitPrimitiveNode* zenit_node_primitive_new(struct ZenitSourceLocation location, enum ZenitType type, union ZenitPrimitiveValue value);
+char* zenit_node_primitive_uid(struct ZenitPrimitiveNode *primitive);
 void zenit_node_primitive_free(struct ZenitPrimitiveNode *primitive_node);
 
 #endif /* ZENIT_AST_PRIMITIVE_H */

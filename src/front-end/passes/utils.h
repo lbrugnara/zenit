@@ -8,22 +8,33 @@
 
 static inline struct ZenitSymbol* zenit_utils_new_tmp_symbol(struct ZenitProgram *program, struct ZenitNode *node, struct ZenitTypeInfo *typeinfo)
 {
-    char name[1024] = { 0 };
-    snprintf(name, 1024, "%%ro_%s_%u%u", zenit_node_print_type(node), node->location.line, node->location.col);
+    char *name = zenit_node_uid(node);
+    if (zenit_program_has_symbol(program, name))
+    {
+        fl_cstring_free(name);
+        return NULL;
+    }
 
-    struct ZenitSymbol *zenit_symbol = zenit_symbol_new(name, typeinfo);
+    struct ZenitSymbol *symbol = zenit_symbol_new(name, typeinfo);
+    
+    struct ZenitSymbol *result = zenit_program_add_symbol(program, symbol);
 
-    zenit_program_add_symbol(program, zenit_symbol);
+    if (result == NULL)
+        zenit_symbol_free(symbol);
 
-    return zenit_symbol;
+    fl_cstring_free(name);
+
+    return result;
 }
 
 static inline struct ZenitSymbol* zenit_utils_get_tmp_symbol(struct ZenitProgram *program, struct ZenitNode *node)
 {
-    char name[1024] = { 0 };
-    snprintf(name, 1024, "%%ro_%s_%u%u", zenit_node_print_type(node), node->location.line, node->location.col);
+    char *name = zenit_node_uid(node);
+    struct ZenitSymbol *symbol = zenit_program_get_symbol(program, name);
 
-    return zenit_program_get_symbol(program, name);
+    fl_cstring_free(name);
+
+    return symbol;
 }
 
 #endif /* ZENIT_UTILS_H */

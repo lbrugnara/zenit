@@ -33,8 +33,7 @@ void zenit_symtable_free(struct ZenitSymtable *symtable)
 
 struct ZenitSymbol* zenit_symtable_add(struct ZenitSymtable *symtable, struct ZenitSymbol *symbol)
 {
-    fl_hashtable_add(symtable->symbols, symbol->name, symbol);
-    return symbol;
+    return (struct ZenitSymbol*) fl_hashtable_add(symtable->symbols, symbol->name, symbol);
 }
 
 bool zenit_symtable_has(struct ZenitSymtable *symtable, const char *symbol_name)
@@ -44,5 +43,5 @@ bool zenit_symtable_has(struct ZenitSymtable *symtable, const char *symbol_name)
 
 struct ZenitSymbol* zenit_symtable_get(struct ZenitSymtable *symtable, const char *symbol_name)
 {
-    return (struct ZenitSymbol*)fl_hashtable_get(symtable->symbols, symbol_name);
+    return (struct ZenitSymbol*) fl_hashtable_get(symtable->symbols, symbol_name);
 }

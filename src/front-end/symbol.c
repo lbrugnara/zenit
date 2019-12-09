@@ -19,10 +19,7 @@ struct ZenitTypeInfo* zenit_symbol_set_type(struct ZenitSymbol *symbol, struct Z
     if (!symbol || !typeinfo)
         return NULL;
 
-    if (symbol->typeinfo)
-        zenit_type_free(symbol->typeinfo);
-
-    return (symbol->typeinfo = zenit_type_copy(typeinfo));
+    return (symbol->typeinfo = typeinfo);
 }
 
 void zenit_symbol_free(struct ZenitSymbol *symbol)
@@ -32,9 +29,6 @@ void zenit_symbol_free(struct ZenitSymbol *symbol)
 
     if (symbol->name)
         fl_cstring_free(symbol->name);
-
-    if (symbol->typeinfo)
-        zenit_type_free(symbol->typeinfo);
 
     fl_free(symbol);
 }

@@ -3,6 +3,7 @@
 
 #include "type.h"
 #include "array.h"
+#include "none.h"
 #include "primitive.h"
 #include "reference.h"
 #include "struct.h"

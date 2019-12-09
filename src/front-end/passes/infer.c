@@ -136,19 +136,19 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 
     size_t length = fl_array_length(array_node->elements);
 
-    struct ZenitSymbol **array_elements = fl_array_new(sizeof(struct ZenitSymbol*), length);
+    struct ZenitSymbol **array_elements_symbols = fl_array_new(sizeof(struct ZenitSymbol*), length);
 
-    struct ZenitTypeInfo *common_type = NULL;
+    struct ZenitTypeInfo *common_type = array_type->member_type;
 
     for (size_t i=0; i < length; i++)
     {
         struct ZenitSymbol *elem_symbol = visit_node(ctx, array_node->elements[i]);
 
-        array_elements[i] = elem_symbol;
+        array_elements_symbols[i] = elem_symbol;
 
         if (common_type == NULL)
         {
-            common_type = zenit_type_copy(elem_symbol->typeinfo);
+            common_type = elem_symbol->typeinfo;
             continue;
         }
 
@@ -161,21 +161,21 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
                         zenit_type_to_string(common_type), zenit_type_to_string(elem_symbol->typeinfo));
             continue;
         }
-        
-        zenit_type_free(common_type);
+
         common_type = tmp;
     }
 
     for (size_t i=0; i < length; i++)
     {
-        struct ZenitTypeInfo *elem_new_type = zenit_symbol_set_type(array_elements[i], common_type);
-        zenit_type_array_add_member(array_type, zenit_type_copy(elem_new_type));
+        zenit_symbol_set_type(array_elements_symbols[i], common_type);
+        zenit_type_array_add_member(array_type, common_type);
     }
 
-    if (common_type)
-        zenit_type_free(common_type);
+    array_type->source = ZENIT_ARRAY_TYPE_INFER;
+    array_type->member_type = common_type;
+    array_type->length = length;
 
-    fl_array_free(array_elements);
+    fl_array_free(array_elements_symbols);
 
     return array_symbol;
 }
@@ -205,11 +205,29 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
         struct ZenitPropertyNode **properties = zenit_property_node_map_values(&attr->properties);
         for (size_t j=0; j < fl_array_length(properties); j++)
         {
-            struct ZenitPropertyNode *prop = properties[i];
-            visit_node(ctx, prop->value);
+            struct ZenitPropertyNode *prop = properties[j];
+
+            struct ZenitSymbol *prop_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) prop);
+
+
+            struct ZenitSymbol *value_symbol = visit_node(ctx, prop->value);
+
+            // FIXME: Properties do not have types -so far-, so it is safe to infer the type
+            // from the value
+            if (value_symbol->typeinfo->type == ZENIT_TYPE_NONE)
+            {
+                zenit_context_error(ctx, prop->base.location, ZENIT_ERROR_INFERENCE, 
+                "Cannot infer type of property '%s' from its value.", prop->name);
+            }
+            else
+            {
+                zenit_symbol_set_type(prop_symbol, value_symbol->typeinfo);
+            }
         }
+
         fl_array_free(properties);
     }
+
     fl_array_free(names);
 }
 
@@ -259,7 +277,13 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
         struct ZenitCastNode *cast_node = zenit_node_cast_new(variable_node->rvalue->location, variable_node->rvalue, true);
         variable_node->rvalue = (struct ZenitNode*) cast_node;
 
-        zenit_utils_new_tmp_symbol(ctx->program, variable_node->rvalue, zenit_type_copy(symbol->typeinfo));
+        struct ZenitSymbol *cast_symbol = zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node, symbol->typeinfo);
+
+        if (cast_symbol == NULL)
+        {
+            zenit_context_error(ctx, variable_node->base.location, ZENIT_ERROR_INFERENCE, 
+                "Cannot infer type of variable '%s' from the right-hand expression. Try making the type explicit in the variable declaration.", variable_node->name);
+        }
     }
 
     // Visit the attributes and its properties

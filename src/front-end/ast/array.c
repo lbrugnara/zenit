@@ -17,6 +17,19 @@ void zenit_node_array_add_child(struct ZenitArrayNode *array, struct ZenitNode *
     array->elements = fl_array_append(array->elements, &element);
 }
 
+char* zenit_node_array_uid(struct ZenitArrayNode *array)
+{
+    if (!array)
+        return NULL;
+
+    char *format = "%%L%u_C%u_array[e:%zu]";
+    size_t length = snprintf(NULL, 0, format, array->base.location.line, array->base.location.col, fl_array_length(array->elements));
+    char *id = fl_cstring_new(length);
+    snprintf(id, length+1, format, array->base.location.line, array->base.location.col, fl_array_length(array->elements));
+    id[length] = '\0';
+    return id;
+}
+
 /*
  f Function: zenit_node_array_free
  *  Releases the memory of a <struct ZenitArrayNode> object

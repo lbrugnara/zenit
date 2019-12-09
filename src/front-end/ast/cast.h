@@ -13,6 +13,7 @@ struct ZenitCastNode {
 };
 
 struct ZenitCastNode* zenit_node_cast_new(struct ZenitSourceLocation location, struct ZenitNode *expression, bool implicit);
+char* zenit_node_cast_uid(struct ZenitCastNode *cast);
 void zenit_node_cast_free(struct ZenitCastNode *cast_node);
 
 #endif /* ZENIT_AST_CAST_H */

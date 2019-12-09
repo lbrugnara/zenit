@@ -12,6 +12,26 @@ struct ZenitReferenceNode* zenit_node_reference_new(struct ZenitSourceLocation l
     return ref_node;
 }
 
+char* zenit_node_reference_uid(struct ZenitReferenceNode *reference)
+{
+    if (!reference)
+        return NULL;
+
+    char *format = "%%L%u_C%u_reference[e:%s]";
+
+    char *expr_id = zenit_node_uid(reference->expression);
+
+    size_t length = snprintf(NULL, 0, format, reference->base.location.line, reference->base.location.col, expr_id != NULL ? expr_id : "<missing>");
+    char *id = fl_cstring_new(length);
+    snprintf(id, length+1, format, reference->base.location.line, reference->base.location.col, expr_id != NULL ? expr_id : "<missing>");
+    id[length] = '\0';
+
+    if (expr_id != NULL)
+        fl_cstring_free(expr_id);
+
+    return id;
+}
+
 /*
  * Function: zenit_node_reference_free
  *  Releases the memory of the <struct ZenitReferenceNode> object

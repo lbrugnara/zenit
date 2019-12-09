@@ -26,6 +26,19 @@ static inline struct ZenitPropertyNode* zenit_node_property_new(struct ZenitSour
     return property;
 }
 
+static inline char* zenit_node_property_uid(struct ZenitPropertyNode *property)
+{
+    if (!property)
+        return NULL;
+
+    char *format = "%%L%u_C%u_property";
+    size_t length = snprintf(NULL, 0, format, property->base.location.line, property->base.location.col);
+    char *id = fl_cstring_new(length);
+    snprintf(id, length+1, format, property->base.location.line, property->base.location.col);
+    id[length] = '\0';
+    return id;
+}
+
 static inline void zenit_node_property_free(struct ZenitPropertyNode *node)
 {
     if (!node)

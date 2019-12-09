@@ -57,6 +57,54 @@ char* zenit_node_print_type(struct ZenitNode *node)
     return "unknown";
 }
 
+char* zenit_node_uid(struct ZenitNode *node)
+{
+    if (!node)
+        return NULL;
+
+    switch (node->type)
+    {
+        case ZENIT_NODE_PRIMITIVE:
+            return zenit_node_primitive_uid((struct ZenitPrimitiveNode*)node);
+
+        case ZENIT_NODE_VARIABLE:
+            return zenit_node_variable_uid((struct ZenitVariableNode*)node);
+
+        case ZENIT_NODE_ARRAY:
+            return zenit_node_array_uid((struct ZenitArrayNode*)node);
+
+        case ZENIT_NODE_REFERENCE:
+            return zenit_node_reference_uid((struct ZenitReferenceNode*)node);
+
+        case ZENIT_NODE_IDENTIFIER:
+            return zenit_node_identifier_uid((struct ZenitIdentifierNode*)node);
+
+        case ZENIT_NODE_ATTRIBUTE:
+            return zenit_node_attribute_uid((struct ZenitAttributeNode*)node);
+
+        case ZENIT_NODE_PROPERTY:
+            return zenit_node_property_uid((struct ZenitPropertyNode*)node);
+
+        case ZENIT_NODE_CAST:
+            return zenit_node_cast_uid((struct ZenitCastNode*)node);
+
+        case ZENIT_NODE_TYPE_ARRAY:
+            return zenit_node_type_array_uid((struct ZenitArrayTypeNode*)node);
+
+        case ZENIT_NODE_TYPE_PRIMITIVE:
+            return zenit_node_type_primitive_uid((struct ZenitPrimitiveTypeNode*)node);
+
+        case ZENIT_NODE_TYPE_REFERENCE:
+            return zenit_node_type_reference_uid((struct ZenitReferenceTypeNode*)node);
+
+        case ZENIT_NODE_TYPE_STRUCT:
+            return zenit_node_type_struct_uid((struct ZenitStructTypeNode*)node);
+    }
+
+    return NULL;
+}
+
+
 /*
  * Function: zenit_node_free
  *  Checks the node's *type* property to call the specific

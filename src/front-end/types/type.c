@@ -53,7 +53,11 @@ static char* get_type_key(struct ZenitTypeInfo *typeinfo)
         struct ZenitArrayTypeInfo *ati = (struct ZenitArrayTypeInfo*) typeinfo;
 
         size_t length = fl_array_length(ati->members);
-        char *key = fl_cstring_vdup("[array][n:%zu]", length);
+
+        size_t buffer_length = snprintf(NULL, 0, "[array][n:%zu]", length);
+        char *key = fl_cstring_new(buffer_length);
+        snprintf(key, buffer_length + 1, "[array][n:%zu]", length);
+        key[buffer_length] = '\0';
 
         for (size_t i=0; i < length; i++)
         {
@@ -101,8 +105,32 @@ static unsigned long hash_type(const FlByte *key)
  */
 static void alloc_type_key(FlByte **dest, const FlByte *src)
 {
-    *dest = fl_malloc(sizeof(struct ZenitTypeInfo));
-    memcpy(*dest, src, sizeof(struct ZenitTypeInfo));
+    struct ZenitTypeInfo *typeinfo = (struct ZenitTypeInfo*) src;
+
+    size_t size = 0;
+    if (typeinfo->type == ZENIT_TYPE_ARRAY)
+    {
+        size = sizeof(struct ZenitArrayTypeInfo);
+    }
+    else if (typeinfo->type == ZENIT_TYPE_REFERENCE)
+    {
+        size = sizeof(struct ZenitReferenceTypeInfo);
+    }
+    else if (typeinfo->type == ZENIT_TYPE_STRUCT)
+    {
+        size = sizeof(struct ZenitStructTypeInfo);
+    }
+    else if (zenit_type_is_primitive(typeinfo->type))
+    {
+        size = sizeof(struct ZenitPrimitiveTypeInfo);
+    }
+    else
+    {
+        size = sizeof(struct ZenitTypeInfo);
+    }
+
+    *dest = fl_malloc(size);
+    memcpy(*dest, src, size);
 }
 
 /*
@@ -210,17 +238,32 @@ const char* zenit_type_to_string(const struct ZenitTypeInfo *typeinfo)
     if (ZENIT_TYPE_ARRAY == typeinfo->type)
     {
         struct ZenitArrayTypeInfo *array_type = (struct ZenitArrayTypeInfo*) typeinfo;
-        base_type = fl_array_length(array_type->members) > 0 ? zenit_type_to_string(array_type->members[0]) : "void";
+
+        size_t members_count = 0;
+        if (array_type->member_type != NULL)
+        {
+            base_type = zenit_type_to_string(array_type->member_type);
+            members_count = array_type->length;
+        }
+        else
+        {
+            base_type = "<unknown>";
+            members_count = 0;
+        }
 
         fl_cstring_append(&string_value, "[");
         char tmp_string[20];
-        snprintf(tmp_string, 20, "%zu", fl_array_length(array_type->members));
+        snprintf(tmp_string, 20, "%zu", members_count);
         fl_cstring_append(&string_value, tmp_string);
         fl_cstring_append(&string_value, "]");
     }
 
     if (ZENIT_TYPE_REFERENCE == typeinfo->type)
+    {
         fl_cstring_append(&string_value, "&");
+        struct ZenitReferenceTypeInfo *ref_type = (struct ZenitReferenceTypeInfo*) typeinfo;
+        base_type = zenit_type_to_string(ref_type->element);
+    }
 
     // Add the base type
     fl_cstring_append(&string_value, base_type);
@@ -296,55 +339,64 @@ bool zenit_type_equals(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_
     if (type_a == NULL || type_b == NULL)
         return type_a == type_b;
 
-    if (type_a->type != type_b->type)
-        return false;
-
     if (type_a->type == ZENIT_TYPE_STRUCT)
     {
+        if (type_b->type != ZENIT_TYPE_STRUCT)
+            return false;
+
         // FIXME: Once the members are implemented we need to copy them too
         struct ZenitStructTypeInfo *s_type_a = (struct ZenitStructTypeInfo*) type_a;
         struct ZenitStructTypeInfo *s_type_b = (struct ZenitStructTypeInfo*) type_b;
         
+        if (s_type_a->name == NULL || s_type_b->name == NULL)
+            return s_type_a->name == s_type_b->name;
+
         return flm_cstring_equals(s_type_a->name, s_type_b->name);
     }
 
     if (type_a->type == ZENIT_TYPE_REFERENCE)
     {
+        if (type_b->type != ZENIT_TYPE_REFERENCE)
+            return false;
+
         struct ZenitReferenceTypeInfo *r_type_a = (struct ZenitReferenceTypeInfo*) type_a;
         struct ZenitReferenceTypeInfo *r_type_b = (struct ZenitReferenceTypeInfo*) type_b;
 
         return zenit_type_equals(r_type_a->element, r_type_b->element);
     }
 
-
     if (type_a->type == ZENIT_TYPE_ARRAY)
     {
-        struct ZenitArrayTypeInfo *a_type_a = (struct ZenitArrayTypeInfo*) type_a;
-        struct ZenitArrayTypeInfo *a_type_b = (struct ZenitArrayTypeInfo*) type_b;
-        
-        if (fl_array_length(a_type_a->members) != fl_array_length(a_type_b->members))
+        if (type_b->type != ZENIT_TYPE_ARRAY)
             return false;
 
-        for (size_t i=0; i < fl_array_length(a_type_a->members); i++)
-            if (!zenit_type_equals(a_type_a->members[i], a_type_b->members[i]))
-                return false;
-        
-        return true;
+        struct ZenitArrayTypeInfo *a_type_a = (struct ZenitArrayTypeInfo*) type_a;
+        struct ZenitArrayTypeInfo *a_type_b = (struct ZenitArrayTypeInfo*) type_b;
+
+        return a_type_a->length == a_type_b->length && zenit_type_equals(a_type_a->member_type, a_type_b->member_type);
     }
+
+    if (zenit_type_is_primitive(type_a->type) && zenit_type_is_primitive(type_b->type))
+        return type_a->type == type_b->type;
 
     return false;
 }
 
 struct ZenitTypeInfo* zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b)
 {
-    if (type_a->type == type_b->type && type_a->type == ZENIT_TYPE_NONE)
+    // FIXME: This is a pretty bad algorithm for unifying ... but it works for uints, so...
+
+    if (zenit_type_equals(type_a, type_b))
+        return type_a;
+
+    if (type_a->type == ZENIT_TYPE_NONE && type_b->type == ZENIT_TYPE_NONE)
         return NULL;
 
     if (type_a->type == ZENIT_TYPE_NONE)
-        return zenit_type_copy(type_b);
+        return type_b;
 
     if (type_b->type == ZENIT_TYPE_NONE)
-        return zenit_type_copy(type_a);
+        return type_a;
 
     if (zenit_type_is_primitive(type_a->type) && zenit_type_is_primitive(type_b->type))
     {
@@ -354,13 +406,57 @@ struct ZenitTypeInfo* zenit_type_unify(struct ZenitTypeInfo *type_a, struct Zeni
         if (a_uint && b_uint)
         {
             if (type_a->type > type_b->type)
-                return zenit_type_copy(type_a);
+                return type_a;
 
-            return zenit_type_copy(type_b);
+            return type_b;
         }
     }
 
-    // FIXME: Handle complex types
+    if (type_a->type == ZENIT_TYPE_STRUCT)
+    {
+        if (type_b->type != ZENIT_TYPE_STRUCT)
+            return NULL;
+
+        // FIXME: Once the members are implemented we need to copy them too
+        struct ZenitStructTypeInfo *s_type_a = (struct ZenitStructTypeInfo*) type_a;
+        struct ZenitStructTypeInfo *s_type_b = (struct ZenitStructTypeInfo*) type_b;
+        
+        if (flm_cstring_equals(s_type_a->name, s_type_b->name))
+            return type_a;
+
+        return NULL;
+    }
+
+    if (type_a->type == ZENIT_TYPE_REFERENCE)
+    {
+        if (type_b->type != ZENIT_TYPE_REFERENCE)
+            return NULL;
+
+        struct ZenitReferenceTypeInfo *r_type_a = (struct ZenitReferenceTypeInfo*) type_a;
+        struct ZenitReferenceTypeInfo *r_type_b = (struct ZenitReferenceTypeInfo*) type_b;
+
+        return zenit_type_unify(r_type_a->element, r_type_b->element);
+    }
+
+    if (type_a->type == ZENIT_TYPE_ARRAY)
+    {
+        if (type_b->type != ZENIT_TYPE_ARRAY)
+            return NULL;
+
+        struct ZenitArrayTypeInfo *a_type_a = (struct ZenitArrayTypeInfo*) type_a;
+        struct ZenitArrayTypeInfo *a_type_b = (struct ZenitArrayTypeInfo*) type_b;
+
+        if (a_type_a->length != a_type_b->length)
+            return NULL;
+
+        struct ZenitTypeInfo *unified = zenit_type_unify(a_type_a->member_type, a_type_b->member_type);
+
+        if (unified == NULL)
+            return NULL;
+        
+        // FIXME: We need a new type here, and we should ask the caller to register the type 
+        return type_a;
+    }
 
     return NULL;
 }
@@ -389,6 +485,50 @@ bool zenit_type_can_assign(struct ZenitTypeInfo *target_type, struct ZenitTypeIn
             if (target_type->type >= value_type->type)
                 return true;
         }
+    }
+
+    if (target_type->type == ZENIT_TYPE_STRUCT)
+    {
+        if (value_type->type != ZENIT_TYPE_STRUCT)
+            return false;
+
+        // FIXME: Once the members are implemented we need to copy them too
+        struct ZenitStructTypeInfo *s_target_type = (struct ZenitStructTypeInfo*) target_type;
+        struct ZenitStructTypeInfo *s_value_type = (struct ZenitStructTypeInfo*) value_type;
+        
+        if (flm_cstring_equals(s_target_type->name, s_value_type->name))
+            return true;
+
+        return false;
+    }
+
+    if (target_type->type == ZENIT_TYPE_REFERENCE)
+    {
+        if (value_type->type != ZENIT_TYPE_REFERENCE)
+            return false;
+
+        struct ZenitReferenceTypeInfo *r_target_type = (struct ZenitReferenceTypeInfo*) target_type;
+        struct ZenitReferenceTypeInfo *r_value_type = (struct ZenitReferenceTypeInfo*) value_type;
+
+        return zenit_type_can_assign(r_target_type->element, r_value_type->element);
+    }
+
+    if (target_type->type == ZENIT_TYPE_ARRAY)
+    {
+        if (value_type->type != ZENIT_TYPE_ARRAY)
+            return false;
+
+        struct ZenitArrayTypeInfo *a_target_type = (struct ZenitArrayTypeInfo*) target_type;
+        struct ZenitArrayTypeInfo *a_value_type = (struct ZenitArrayTypeInfo*) value_type;
+
+        if (a_target_type->length != a_value_type->length)
+            return false;
+
+        // If rhs is an empty array, as long as the target type is not NONE, it is safe to assign
+        if (a_target_type->length == 0 && a_value_type->member_type->type == ZENIT_TYPE_NONE)
+            return a_target_type->member_type->type != ZENIT_TYPE_NONE;
+
+        return zenit_type_can_assign(a_target_type->member_type, a_value_type->member_type);
     }
 
     return false;

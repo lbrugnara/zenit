@@ -9,6 +9,7 @@ struct ZenitReferenceTypeNode {
 };
 
 struct ZenitReferenceTypeNode* zenit_node_type_reference_new(struct ZenitSourceLocation location, struct ZenitTypeNode *type);
+char* zenit_node_type_reference_uid(struct ZenitReferenceTypeNode *type_node);
 void zenit_node_type_reference_free(struct ZenitReferenceTypeNode *type_node);
 
 #endif /* ZENIT_AST_TYPE_REFERENCE_H */

@@ -14,6 +14,19 @@ struct ZenitStructTypeNode* zenit_node_type_struct_new(struct ZenitSourceLocatio
     return type_node;
 }
 
+char* zenit_node_type_struct_uid(struct ZenitStructTypeNode *type_node)
+{
+    if (!type_node)
+        return NULL;
+
+    char *format = "%%L%u_C%u_type_struct";
+    size_t length = snprintf(NULL, 0, format, type_node->base.base.location.line, type_node->base.base.location.col);
+    char *id = fl_cstring_new(length);
+    snprintf(id, length+1, format, type_node->base.base.location.line, type_node->base.base.location.col);
+    id[length] = '\0';
+    return id;
+}
+
 void zenit_node_type_struct_free(struct ZenitStructTypeNode *type_node)
 {
     if (!type_node)
