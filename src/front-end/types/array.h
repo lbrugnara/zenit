@@ -19,6 +19,11 @@ struct ZenitArrayTypeInfo {
 
 struct ZenitArrayTypeInfo* zenit_type_array_new(void);
 void zenit_type_array_add_member(struct ZenitArrayTypeInfo *typeinfo, struct ZenitTypeInfo *element);
+unsigned long zenit_type_array_hash(struct ZenitArrayTypeInfo *typeinfo);
+struct ZenitArrayTypeInfo* zenit_type_array_copy(struct ZenitArrayTypeInfo *source);
+char* zenit_type_array_to_string(struct ZenitArrayTypeInfo *typeinfo);
+bool zenit_type_array_equals(struct ZenitArrayTypeInfo *type_a, struct ZenitTypeInfo *type_b);
+bool zenit_type_array_is_assignable_from(struct ZenitArrayTypeInfo *target_type, struct ZenitTypeInfo *value_type);
 void zenit_type_array_free(struct ZenitArrayTypeInfo *typeinfo);
 
 #endif /* ZENIT_TYPE_ARRAY_H */

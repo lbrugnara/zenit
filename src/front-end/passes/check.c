@@ -152,10 +152,10 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
     struct ZenitSymbol *expr_symbol = visit_node(ctx, cast->expression);
 
     // If the cast is implicit, we need to make sure we can up-cast the expression to the requested type
-    if ((cast->implicit && !zenit_type_can_assign(symbol->typeinfo, expr_symbol->typeinfo))
+    if ((cast->implicit && !zenit_type_is_assignable_from(symbol->typeinfo, expr_symbol->typeinfo))
         // HACK: If the cast is explicit, we can check if "the other way assignment" around works for these types, 
         // in that, case we know it is safe to "truncate" the type :grimming:
-        || (!cast->implicit && !zenit_type_can_cast(symbol->typeinfo, expr_symbol->typeinfo))
+        || (!cast->implicit && !zenit_type_is_castable_to(expr_symbol->typeinfo, symbol->typeinfo))
     )
     {
         zenit_context_error(ctx, cast->base.location, ZENIT_ERROR_TYPE_MISSMATCH, "Cannot %s from type '%s' to '%s'", 
@@ -354,7 +354,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     // We check types to make sure the assignment is valid, but we do it only if
     // the variable type is valid, because if not, we might be targeting a false-positive
     // error
-    if (is_var_type_defined && !zenit_type_can_assign(symbol->typeinfo, rhs_symbol->typeinfo))
+    if (is_var_type_defined && !zenit_type_is_assignable_from(symbol->typeinfo, rhs_symbol->typeinfo))
     {
         zenit_context_error(ctx, variable_node->base.location, ZENIT_ERROR_TYPE_MISSMATCH, 
             "Cannot convert from type '%s' to '%s'", 

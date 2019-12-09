@@ -10,6 +10,18 @@ struct ZenitTypeInfo* zenit_type_none_new(void)
     return typeinfo;
 }
 
+unsigned long zenit_type_none_hash(struct ZenitTypeInfo *typeinfo)
+{
+    unsigned long hash = 5381;
+    FlByte c;
+
+    char *type_key = "[none]";
+    for (size_t i=0; i < strlen(type_key); i++)
+        hash = ((hash << 5) + hash) + type_key[i];
+
+    return hash;
+}
+
 void zenit_type_none_free(struct ZenitTypeInfo *typeinfo)
 {
     if (!typeinfo)

@@ -50,24 +50,9 @@ struct ZenitTypeInfo {
 unsigned long zenit_type_hash(struct ZenitTypeInfo *typeinfo);
 
 /*
- * Function: zenit_type_string_parse
- *  Takes a string and returns the system type for that
+ * Function: zenit_type_from_slice
+ *  Takes a string slice and returns the system type for that
  *  representation.
- *
- * Parameters:
- *  typestr - String to match against the different system types
- *
- * Returns:
- *  enum ZenitType - The type that matches the string
- *
- */
-enum ZenitType zenit_type_string_parse(const char *typestr);
-
-
-/*
- * Function: zenit_type_slice_parse
- *  This function is similar to <zenit_type_string_parse>, the only
- *  difference is it takes a <struct FlSlice> object
  *
  * Parameters:
  *  slice - Sequence of bytes to match against the different system types
@@ -76,7 +61,7 @@ enum ZenitType zenit_type_string_parse(const char *typestr);
  *  enum ZenitType - The type that matches the sequence of bytes
  *
  */
-enum ZenitType zenit_type_slice_parse(struct FlSlice *slice);
+enum ZenitType zenit_type_from_slice(struct FlSlice *slice);
 
 /*
  * Function: zenit_type_to_string
@@ -89,28 +74,10 @@ enum ZenitType zenit_type_slice_parse(struct FlSlice *slice);
  *  typeinfo - <struct ZenitTypeInfo> object to get its string representation.
  *
  * Returns:
- *  const char* - String representation of the *typeinfo* object
- * 
- * Notes:
- *  To get the base type without any other
- *  information refer to the <zenit_type_to_base_string> function
+ *  char* - String representation of the *typeinfo* object
  *
  */
-const char* zenit_type_to_string(struct ZenitTypeInfo *typeinfo);
-
-/*
- * Function: zenit_type_to_base_string
- *  Returns the string representation of the <enum ZenitType> within the *typeinfo*
- *  object without any information regarding if it is an array or a reference.
- *
- * Parameters:
- *  typeinfo - <struct ZenitTypeInfo> object to get its <enum ZenitType> string representation.
- *
- * Returns:
- *  const char* - String representation of the <enum ZenitType> within the *typeinfo* object
- *
- */
-const char* zenit_type_to_base_string(const struct ZenitTypeInfo *typeinfo);
+char* zenit_type_to_string(struct ZenitTypeInfo *typeinfo);
 
 /*
  * Function: zenit_type_equals
@@ -131,9 +98,9 @@ struct ZenitTypeInfo* zenit_type_copy(struct ZenitTypeInfo *src_type);
 
 struct ZenitTypeInfo* zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
 
-bool zenit_type_can_assign(struct ZenitTypeInfo *target_type, struct ZenitTypeInfo *value_type);
+bool zenit_type_is_assignable_from(struct ZenitTypeInfo *target_type, struct ZenitTypeInfo *value_type);
 
-bool zenit_type_can_cast(struct ZenitTypeInfo *target_type, struct ZenitTypeInfo *cast_type);
+bool zenit_type_is_castable_to(struct ZenitTypeInfo *source_type, struct ZenitTypeInfo *target_cast_type);
 
 void zenit_type_free(struct ZenitTypeInfo *typeinfo);
 
