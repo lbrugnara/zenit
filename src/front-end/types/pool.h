@@ -2,30 +2,24 @@
 #define ZENIT_TYPE_POOL_H
 
 #include <fllib.h>
-#include "type.h"
+#include "system.h"
 
-typedef FlList ZenitTypePool;
+struct ZenitTypePool {
+    FlHashtable map;
+};
 
-static inline ZenitTypePool zenit_type_pool_new(void)
-{
-    return fl_list_new_args((struct FlListArgs) {
-        .value_cleaner = (FlContainerCleanupFunction) zenit_type_free
-    });
-}
+struct ZenitTypePool zenit_type_pool_new(void);
 
-static inline struct ZenitTypeInfo* zenit_type_pool_register(ZenitTypePool pool, struct ZenitTypeInfo *typeinfo)
-{
-    struct FlListNode *node = fl_list_append(pool, typeinfo);
+struct ZenitTypeInfo* zenit_type_pool_register(struct ZenitTypePool *pool, struct ZenitTypeInfo *typeinfo);
 
-    if (!node)
-        return NULL;
+void zenit_type_pool_free(struct ZenitTypePool *pool);
 
-    return (struct ZenitTypeInfo*) node->value;
-}
+struct ZenitArrayTypeInfo* zenit_type_pool_register_array(struct ZenitTypePool *pool, struct ZenitArrayTypeInfo *typeinfo);
+    
+struct ZenitPrimitiveTypeInfo* zenit_type_pool_register_primitive(struct ZenitTypePool *pool, struct ZenitPrimitiveTypeInfo *typeinfo);
 
-static inline void zenit_type_pool_free(ZenitTypePool pool)
-{
-    fl_list_free(pool);
-}
+struct ZenitReferenceTypeInfo* zenit_type_pool_register_reference(struct ZenitTypePool *pool, struct ZenitReferenceTypeInfo *typeinfo);
+
+struct ZenitStructTypeInfo* zenit_type_pool_register_struct(struct ZenitTypePool *pool, struct ZenitStructTypeInfo *typeinfo);
 
 #endif /* ZENIT_TYPE_POOL_H */

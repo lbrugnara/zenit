@@ -152,9 +152,12 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
             continue;
         }
 
-        struct ZenitTypeInfo *tmp = zenit_type_unify(common_type, elem_symbol->typeinfo);
+        // If the types are equals, no need to do anything
+        if (zenit_type_equals(common_type, elem_symbol->typeinfo))
+            continue;
 
-        if (tmp == NULL)
+        // At this point, we need to "unify" the types
+        if (!zenit_type_unify(common_type, elem_symbol->typeinfo, NULL))
         {
             zenit_context_error(ctx, array_node->elements[i]->location, ZENIT_ERROR_INFERENCE, 
                     "Cannot find the common ancestor of types '%s' and '%s'", 
@@ -162,7 +165,15 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
             continue;
         }
 
-        common_type = tmp;
+        if (!zenit_type_unify(common_type, elem_symbol->typeinfo, &common_type))
+        {
+            zenit_context_error(ctx, array_node->elements[i]->location, ZENIT_ERROR_INTERNAL, 
+                    "Internal error unifying types '%s' and '%s'", 
+                        zenit_type_to_string(common_type), zenit_type_to_string(elem_symbol->typeinfo));
+            continue;
+        }
+
+        zenit_type_pool_register(&ctx->program->type_pool, common_type);
     }
 
     for (size_t i=0; i < length; i++)

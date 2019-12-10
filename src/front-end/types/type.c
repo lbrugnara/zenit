@@ -115,83 +115,35 @@ bool zenit_type_equals(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_
     return false;
 }
 
-struct ZenitTypeInfo* zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b)
+bool zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b, struct ZenitTypeInfo **unified)
 {
-    // FIXME: This is a pretty bad algorithm for unifying ... but it works for uints, so...
-
-    if (zenit_type_equals(type_a, type_b))
-        return type_a;
-
-    if (type_a->type == ZENIT_TYPE_NONE && type_b->type == ZENIT_TYPE_NONE)
-        return NULL;
+    if (type_a == NULL || type_b == NULL)
+        return false;
 
     if (type_a->type == ZENIT_TYPE_NONE)
-        return type_b;
-
-    if (type_b->type == ZENIT_TYPE_NONE)
-        return type_a;
-
-    if (zenit_type_is_primitive(type_a->type) && zenit_type_is_primitive(type_b->type))
     {
-        bool a_uint = type_a->type >= ZENIT_TYPE_UINT8 && type_a->type <= ZENIT_TYPE_UINT16;
-        bool b_uint = type_b->type >= ZENIT_TYPE_UINT8 && type_b->type <= ZENIT_TYPE_UINT16;
-        
-        if (a_uint && b_uint)
-        {
-            if (type_a->type > type_b->type)
-                return type_a;
+        if (type_b->type == ZENIT_TYPE_NONE)
+            return false;
 
-            return type_b;
-        }
+        if (unified)
+            *unified = zenit_type_copy(type_b);
+
+        return true;
     }
 
     if (type_a->type == ZENIT_TYPE_STRUCT)
-    {
-        if (type_b->type != ZENIT_TYPE_STRUCT)
-            return NULL;
-
-        // FIXME: Once the members are implemented we need to copy them too
-        struct ZenitStructTypeInfo *s_type_a = (struct ZenitStructTypeInfo*) type_a;
-        struct ZenitStructTypeInfo *s_type_b = (struct ZenitStructTypeInfo*) type_b;
-        
-        if (flm_cstring_equals(s_type_a->name, s_type_b->name))
-            return type_a;
-
-        return NULL;
-    }
-
+        return zenit_type_struct_unify((struct ZenitStructTypeInfo*) type_a, type_b, unified);
+    
     if (type_a->type == ZENIT_TYPE_REFERENCE)
-    {
-        if (type_b->type != ZENIT_TYPE_REFERENCE)
-            return NULL;
-
-        struct ZenitReferenceTypeInfo *r_type_a = (struct ZenitReferenceTypeInfo*) type_a;
-        struct ZenitReferenceTypeInfo *r_type_b = (struct ZenitReferenceTypeInfo*) type_b;
-
-        return zenit_type_unify(r_type_a->element, r_type_b->element);
-    }
-
+        return zenit_type_reference_unify((struct ZenitReferenceTypeInfo*) type_a, type_b, unified);
+    
     if (type_a->type == ZENIT_TYPE_ARRAY)
-    {
-        if (type_b->type != ZENIT_TYPE_ARRAY)
-            return NULL;
-
-        struct ZenitArrayTypeInfo *a_type_a = (struct ZenitArrayTypeInfo*) type_a;
-        struct ZenitArrayTypeInfo *a_type_b = (struct ZenitArrayTypeInfo*) type_b;
-
-        if (a_type_a->length != a_type_b->length)
-            return NULL;
-
-        struct ZenitTypeInfo *unified = zenit_type_unify(a_type_a->member_type, a_type_b->member_type);
-
-        if (unified == NULL)
-            return NULL;
-        
-        // FIXME: We need a new type here, and we should ask the caller to register the type 
-        return type_a;
-    }
-
-    return NULL;
+        return zenit_type_array_unify((struct ZenitArrayTypeInfo*) type_a, type_b, unified);
+    
+    if (zenit_type_is_primitive(type_a->type))
+        return zenit_type_primitive_unify((struct ZenitPrimitiveTypeInfo*) type_a, type_b, unified);
+    
+    return false;
 }
 
 bool zenit_type_is_assignable_from(struct ZenitTypeInfo *target_type, struct ZenitTypeInfo *from_type)
@@ -217,32 +169,28 @@ bool zenit_type_is_assignable_from(struct ZenitTypeInfo *target_type, struct Zen
     return false;
 }
 
-
 bool zenit_type_is_castable_to(struct ZenitTypeInfo *source_type, struct ZenitTypeInfo *target_type)
 {
-    // If we can assign from the target type to the cast type, it means
-    // the types are compatible, and we could proceed with the down casting
-    // by truncating the target_type to a source_type
-    if (zenit_type_is_assignable_from(source_type, target_type))
-        return true;
+    // We can cast from or to NULL objects...
+    if (source_type == NULL || target_type == NULL)
+        return false;
 
     // We can't cast things we don't know
     if (target_type->type == ZENIT_TYPE_NONE || source_type->type == ZENIT_TYPE_NONE)
         return false;
 
-    bool target_is_uint = target_type->type >= ZENIT_TYPE_UINT8 && target_type->type <= ZENIT_TYPE_UINT16;
-    bool source_is_uint = source_type->type >= ZENIT_TYPE_UINT8 && source_type->type <= ZENIT_TYPE_UINT16;
-
-    // We can cast a reference to an unsigned integer
-    if (source_type->type == ZENIT_TYPE_REFERENCE && target_is_uint)
-        return true;
-
-    if (target_type->type == ZENIT_TYPE_REFERENCE && target_type->type != source_type->type)
-        return false;
-
-    if (target_is_uint && source_is_uint)
-        return true;
-
+    if (source_type->type == ZENIT_TYPE_STRUCT)
+        return zenit_type_struct_is_castable_to((struct ZenitStructTypeInfo*) source_type, target_type);
+    
+    if (source_type->type == ZENIT_TYPE_REFERENCE)
+        return zenit_type_reference_is_castable_to((struct ZenitReferenceTypeInfo*) source_type, target_type);
+    
+    if (source_type->type == ZENIT_TYPE_ARRAY)
+        return zenit_type_array_is_castable_to((struct ZenitArrayTypeInfo*) source_type, target_type);
+    
+    if (zenit_type_is_primitive(source_type->type))
+        return zenit_type_primitive_is_castable_to((struct ZenitPrimitiveTypeInfo*) source_type, target_type);
+    
     return false;
 }
 

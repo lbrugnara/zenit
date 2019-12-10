@@ -15,6 +15,8 @@ struct ZenitPrimitiveTypeInfo* zenit_type_primitive_copy(struct ZenitPrimitiveTy
 char* zenit_type_primitive_to_string(struct ZenitPrimitiveTypeInfo *typeinfo);
 bool zenit_type_primitive_equals(struct ZenitPrimitiveTypeInfo *type_a, struct ZenitTypeInfo *type_b);
 bool zenit_type_primitive_is_assignable_from(struct ZenitPrimitiveTypeInfo *target_type, struct ZenitTypeInfo *value_type);
+bool zenit_type_primitive_is_castable_to(struct ZenitPrimitiveTypeInfo *primitive_type, struct ZenitTypeInfo *target_type);
+bool zenit_type_primitive_unify(struct ZenitPrimitiveTypeInfo *primitive_type, struct ZenitTypeInfo *type_b, struct ZenitTypeInfo **unified);
 void zenit_type_primitive_free(struct ZenitPrimitiveTypeInfo *typeinfo);
 
 #endif /* ZENIT_TYPE_PRIMITIVE_H */

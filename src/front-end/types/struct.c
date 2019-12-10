@@ -105,6 +105,55 @@ bool zenit_type_struct_is_assignable_from(struct ZenitStructTypeInfo *target_typ
     return flm_cstring_equals(target_type->name, struct_from_type->name);
 }
 
+bool zenit_type_struct_is_castable_to(struct ZenitStructTypeInfo *struct_type, struct ZenitTypeInfo *target_type)
+{
+    if (struct_type == NULL || target_type == NULL)
+        return false;
+
+    if (zenit_type_struct_equals(struct_type, target_type))
+        return true;
+
+    // FIXME: Once the members are implemented we need to check them here
+    return false;
+}
+
+bool zenit_type_struct_unify(struct ZenitStructTypeInfo *struct_type, struct ZenitTypeInfo *type_b, struct ZenitTypeInfo **unified)
+{
+    if (struct_type == NULL || type_b == NULL)
+        return false;
+
+    if (type_b->type == ZENIT_TYPE_NONE)
+    {
+        if (unified)
+            *unified = (struct ZenitTypeInfo*) zenit_type_struct_copy(struct_type);
+        return true;
+    }
+
+    if (type_b->type != ZENIT_TYPE_STRUCT)
+        return false;
+
+    if (zenit_type_struct_equals(struct_type, type_b))
+    {
+        if (unified)
+            *unified = (struct ZenitTypeInfo*) zenit_type_struct_copy(struct_type);
+        return true;
+    }
+
+    struct ZenitStructTypeInfo *struct_type_b = (struct ZenitStructTypeInfo*) type_b;
+
+    // FIXME: Once the members are implemented we need to check them too    
+    if (!flm_cstring_equals(struct_type->name, struct_type_b->name))
+        return false;
+
+    if (unified)
+    {
+        *unified = (struct ZenitTypeInfo*) zenit_type_struct_new(struct_type->name);
+        // FIXME: Once the members are implemented we need to copy them too
+    }
+
+    return true;
+}
+
 void zenit_type_struct_free(struct ZenitStructTypeInfo *typeinfo)
 {
     if (!typeinfo)

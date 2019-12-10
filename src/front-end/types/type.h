@@ -96,7 +96,7 @@ bool zenit_type_equals(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_
 
 struct ZenitTypeInfo* zenit_type_copy(struct ZenitTypeInfo *src_type);
 
-struct ZenitTypeInfo* zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
+bool zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b, struct ZenitTypeInfo **unified);
 
 bool zenit_type_is_assignable_from(struct ZenitTypeInfo *target_type, struct ZenitTypeInfo *value_type);
 

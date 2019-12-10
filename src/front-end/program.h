@@ -15,7 +15,7 @@
 struct ZenitProgram {
     struct ZenitScope *global_scope;
     struct ZenitScope *current_scope;
-    ZenitTypePool types;
+    struct ZenitTypePool type_pool;
 };
 
 /*
@@ -61,20 +61,5 @@ struct ZenitSymbol* zenit_program_add_symbol(struct ZenitProgram *program, struc
 bool zenit_program_has_symbol(struct ZenitProgram *program, const char *name);
 
 struct ZenitSymbol* zenit_program_get_symbol(struct ZenitProgram *program, const char *symbol_name);
-
-struct ZenitTypeInfo* zenit_program_register_type(struct ZenitProgram *program, struct ZenitTypeInfo *typeinfo);
-
-#define zenit_program_register_type_array(program, typeinfo) \
-    ((struct ZenitArrayTypeInfo*) zenit_program_register_type((program), (struct ZenitTypeInfo*) (typeinfo)))
-    
-#define zenit_program_register_type_primitive(program, typeinfo) \
-    ((struct ZenitPrimitiveTypeInfo*) zenit_program_register_type((program), (struct ZenitTypeInfo*) (typeinfo)))
-
-#define zenit_program_register_type_reference(program, typeinfo) \
-    ((struct ZenitReferenceTypeInfo*) zenit_program_register_type((program), (struct ZenitTypeInfo*) (typeinfo)))
-
-#define zenit_program_register_type_struct(program, typeinfo) \
-    ((struct ZenitStructTypeInfo*) zenit_program_register_type((program), (struct ZenitTypeInfo*) (typeinfo)))
-
 
 #endif /* ZENIT_PROGRAM_H */

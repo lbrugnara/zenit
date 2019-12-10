@@ -83,7 +83,7 @@ bool zenit_type_primitive_equals(struct ZenitPrimitiveTypeInfo *type_a, struct Z
 
 bool zenit_type_primitive_is_assignable_from(struct ZenitPrimitiveTypeInfo *target_type, struct ZenitTypeInfo *from_type)
 {
-    if (!target_type || !from_type)
+    if (target_type == NULL || from_type == NULL)
         return false;
 
     if (!zenit_type_is_primitive(from_type->type))
@@ -99,6 +99,56 @@ bool zenit_type_primitive_is_assignable_from(struct ZenitPrimitiveTypeInfo *targ
     }
 
     return false;
+}
+
+bool zenit_type_primitive_is_castable_to(struct ZenitPrimitiveTypeInfo *primitive_type, struct ZenitTypeInfo *target_type)
+{
+    if (target_type == NULL || target_type == NULL)
+        return false;
+
+    // If the target_type is of the same type, it is safe to cast
+    if (zenit_type_primitive_equals(primitive_type, target_type))
+        return true;
+
+    bool primitive_is_uint = primitive_type->base.type >= ZENIT_TYPE_UINT8 && primitive_type->base.type <= ZENIT_TYPE_UINT16;
+    bool target_is_uint = target_type->type >= ZENIT_TYPE_UINT8 && target_type->type <= ZENIT_TYPE_UINT16;    
+
+    // It is safe to cast between uints
+    return primitive_is_uint && target_is_uint;
+}
+
+bool zenit_type_primitive_unify(struct ZenitPrimitiveTypeInfo *primitive_type, struct ZenitTypeInfo *type_b, struct ZenitTypeInfo **unified)
+{
+    if (primitive_type == NULL || type_b == NULL)
+        return false;
+
+    if (type_b->type == ZENIT_TYPE_NONE)
+    {
+        if (unified)
+            *unified = (struct ZenitTypeInfo*) zenit_type_primitive_copy(primitive_type);
+        return true;
+    }
+
+    if (zenit_type_primitive_equals(primitive_type, type_b))
+    {
+        if (unified)
+            *unified = (struct ZenitTypeInfo*) zenit_type_primitive_copy(primitive_type);
+        return true;
+    }
+
+    if (!zenit_type_is_primitive(type_b->type))
+        return false;
+
+    bool primitive_is_uint = primitive_type->base.type >= ZENIT_TYPE_UINT8 && primitive_type->base.type <= ZENIT_TYPE_UINT16;
+    bool b_uint = type_b->type >= ZENIT_TYPE_UINT8 && type_b->type <= ZENIT_TYPE_UINT16;
+    
+    if (primitive_is_uint != b_uint)
+        return false;
+
+    if (unified)
+        *unified = zenit_type_copy(primitive_type->base.type > type_b->type ?  (struct ZenitTypeInfo*) primitive_type : type_b);
+    
+    return true;
 }
 
 void zenit_type_primitive_free(struct ZenitPrimitiveTypeInfo *typeinfo)

@@ -18,17 +18,22 @@ struct ExpectedError {
     { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign uint16 to uint8 (<source>:%u:%u: %s)" },
     { ZENIT_ERROR_INVALID_REFERENCE, "Cannot take a reference to a reference (<source>:%u:%u: %s)" },
     { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from [2]uint16 to [2]uint8 (<source>:%u:%u: %s)" },
+    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from uint8 to &uint8 (<source>:%u:%u: %s)" },
 };
 
 void zenit_test_check_types_errors(void)
 {
     const char *source = 
-        "var sym_a : [0]custom = [];"               "\n"
-        "var sym_b : uint8 = [ 1, 2 ];"             "\n"
-        "var sym_c : [2]uint8 = 0;"                 "\n"
-        "var sym_d : uint8 = cast(1 : uint16);"     "\n"
-        "var sym_e = &&sym_b;"                      "\n"
-        "var sym_f : [2]uint8 = [ 0x1FF, 0x200];"   "\n"
+        "var sym_a : [0]custom = [];"                           "\n"
+        "var sym_b : uint8 = [ 1, 2 ];"                         "\n"
+        "var sym_c : [2]uint8 = 0;"                             "\n"
+        "var sym_d : uint8 = cast(1 : uint16);"                 "\n"
+        "var sym_e = &&sym_b;"                                  "\n"
+        "var sym_f : [2]uint8 = [ 0x1FF, 0x200];"               "\n"
+        "#[NES(address: 0x10)]"                                 "\n"
+        "var player = 1;"                                       "\n"
+        "var address = 0x10;"                                   "\n"
+        "var player_ref : &uint8 = cast(address : &uint8);"     "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);

@@ -13,7 +13,7 @@ struct ZenitReferenceTypeInfo* zenit_type_reference_new(struct ZenitTypeInfo *el
 
 unsigned long zenit_type_reference_hash(struct ZenitReferenceTypeInfo *typeinfo)
 {
-    static const char *format = "[ref][e:%s]";
+    static const char *format = "[ref][e:%lu]";
 
     char type_key[256] = { 0 };
     snprintf(type_key, 256, format, zenit_type_hash(typeinfo->element));
@@ -90,6 +90,64 @@ bool zenit_type_reference_is_assignable_from(struct ZenitReferenceTypeInfo *targ
     struct ZenitReferenceTypeInfo *ref_from_type = (struct ZenitReferenceTypeInfo*) from_type;
 
     return zenit_type_is_assignable_from(target_type->element, ref_from_type->element);
+}
+
+bool zenit_type_reference_is_castable_to(struct ZenitReferenceTypeInfo *reference, struct ZenitTypeInfo *target_type)
+{
+    if (target_type == NULL || target_type == NULL)
+        return false;
+
+    // Cast between the same types are valid
+    if (zenit_type_reference_equals(reference, target_type))
+        return true;
+
+    bool target_is_uint = target_type->type >= ZENIT_TYPE_UINT8 && target_type->type <= ZENIT_TYPE_UINT16;
+
+    // We can cast a reference to an unsigned integer
+    if (target_is_uint)
+        return true;
+
+    return false;
+}
+
+bool zenit_type_reference_unify(struct ZenitReferenceTypeInfo *ref_type, struct ZenitTypeInfo *type_b, struct ZenitTypeInfo **unified)
+{
+    if (ref_type == NULL || type_b == NULL)
+        return false;
+
+    if (type_b->type == ZENIT_TYPE_NONE)
+    {
+        if (unified)
+            *unified = (struct ZenitTypeInfo*) zenit_type_reference_copy(ref_type);
+        return true;
+    }
+
+    if (type_b->type != ZENIT_TYPE_REFERENCE)
+        return false;
+
+    if (zenit_type_reference_equals(ref_type, type_b))
+    {
+        if (unified)
+            *unified = (struct ZenitTypeInfo*) zenit_type_reference_copy(ref_type);
+        return true;
+    }
+
+    struct ZenitReferenceTypeInfo *ref_type_b = (struct ZenitReferenceTypeInfo*) type_b;
+
+    if (!zenit_type_unify(ref_type->element, ref_type_b->element, NULL))
+        return false;
+
+    if (unified)
+    {
+        struct ZenitTypeInfo *unified_element_type = NULL;
+    
+        if (!zenit_type_unify(ref_type->element, ref_type_b->element, &unified_element_type))
+            return false;
+    
+        *unified = (struct ZenitTypeInfo*) zenit_type_reference_new(unified_element_type);
+    }
+
+    return true;
 }
 
 void zenit_type_reference_free(struct ZenitReferenceTypeInfo *typeinfo)
