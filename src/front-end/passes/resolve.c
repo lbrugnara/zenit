@@ -15,7 +15,7 @@ typedef struct ZenitSymbol*(*ZenitSymbolResolver)(struct ZenitContext *ctx, stru
 
 // Visitor functions
 static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node);
-static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *node);
+static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *node);
 static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *node);
 static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *node);
 static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node);
@@ -32,7 +32,7 @@ static const ZenitSymbolResolver symbol_resolvers[] = {
     [ZENIT_NODE_ARRAY]      = (ZenitSymbolResolver) &visit_array_node,
     [ZENIT_NODE_REFERENCE]  = (ZenitSymbolResolver) &visit_reference_node,
     [ZENIT_NODE_CAST]       = (ZenitSymbolResolver) &visit_cast_node,
-    [ZENIT_NODE_PRIMITIVE]    = (ZenitSymbolResolver) &visit_primitive_node,
+    [ZENIT_NODE_UINT]       = (ZenitSymbolResolver) &visit_uint_node,
 };
 
 static struct ZenitTypeInfo* build_type_info_from_declaration(struct ZenitProgram *program, struct ZenitTypeNode *type_decl)
@@ -45,7 +45,8 @@ static struct ZenitTypeInfo* build_type_info_from_declaration(struct ZenitProgra
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_PRIMITIVE)
     {
-        typeinfo = (struct ZenitTypeInfo*) zenit_type_primitive_new(type_decl->type);
+        struct ZenitUintTypeNode *uint_type_decl = (struct ZenitUintTypeNode*) type_decl;
+        typeinfo = (struct ZenitTypeInfo*) zenit_type_uint_new(uint_type_decl->size);
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_STRUCT)
     {
@@ -80,7 +81,7 @@ static struct ZenitTypeInfo* build_type_info_from_declaration(struct ZenitProgra
 }
 
 /*
- * Function: visit_primitive_node
+ * Function: visit_uint_node
  *  Some leaves in the AST do not perform symbol-related actions so this
  *  function simply returns NULL
  *
@@ -92,9 +93,9 @@ static struct ZenitTypeInfo* build_type_info_from_declaration(struct ZenitProgra
  *  struct ZenitSymbol* - This function always returns NULL
  *
  */
-static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *node)
+static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *node)
 {
-    struct ZenitTypeInfo *typeinfo = zenit_type_pool_register(&ctx->program->type_pool, (struct ZenitTypeInfo*) zenit_type_primitive_new(node->type));
+    struct ZenitTypeInfo *typeinfo = zenit_type_pool_register(&ctx->program->type_pool, (struct ZenitTypeInfo*) zenit_type_uint_new(node->size));
 
     return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) node, typeinfo);
 }

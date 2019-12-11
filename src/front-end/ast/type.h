@@ -9,7 +9,7 @@ struct ZenitTypeNode {
 };
 
 #include "type_array.h"
-#include "type_primitive.h"
+#include "type_uint.h"
 #include "type_reference.h"
 #include "type_struct.h"
 

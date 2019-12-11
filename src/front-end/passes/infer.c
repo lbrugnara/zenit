@@ -14,7 +14,7 @@ typedef struct ZenitSymbol*(*ZenitTypeInferrer)(struct ZenitContext *ctx, struct
 
 // Visitor functions
 static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node);
-static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *node);
+static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitUintNode *node);
 static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *node);
 static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *node);
 static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node);
@@ -26,7 +26,7 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
  *  An array indexed with a <enum ZenitNodeType> to get a <ZenitTypeInferrer> function
  */
 static const ZenitTypeInferrer inferrers[] = {
-    [ZENIT_NODE_PRIMITIVE]    = (ZenitTypeInferrer) &visit_primitive_node,
+    [ZENIT_NODE_UINT]    = (ZenitTypeInferrer) &visit_primitive_node,
     [ZENIT_NODE_VARIABLE]   = (ZenitTypeInferrer) &visit_variable_node,
     [ZENIT_NODE_ARRAY]      = (ZenitTypeInferrer) &visit_array_node,
     [ZENIT_NODE_IDENTIFIER] = (ZenitTypeInferrer) &visit_identifier_node,
@@ -70,7 +70,7 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
  *  struct ZenitTypeInfo* - The intrinsic type information of the literal node
  *
  */
-static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *node)
+static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitUintNode *node)
 {
     return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) node);
 }

@@ -7,13 +7,14 @@
 
 static const char *node_str[] = {
     [ZENIT_NODE_IDENTIFIER] = "IDENTIFIER",
-    [ZENIT_NODE_PRIMITIVE]    = "LITERAL",
+    [ZENIT_NODE_UINT]    = "LITERAL",
 };
 
 struct PropertyTest {
     const char *name;
     const enum ZenitNodeType node_type;
     const enum ZenitType type;
+    const enum ZenitUintTypeSize size;
     const union {
         uint8_t uint8;
         uint16_t uint16;
@@ -57,7 +58,7 @@ static struct VariableAttributesTest tests[] = {
             { 
                 { "NES", 1, 
                     { 
-                        { .name = "address", .node_type = ZENIT_NODE_PRIMITIVE, .type = ZENIT_TYPE_UINT16, .value.uint16 = 8192 } 
+                        { .name = "address", .node_type = ZENIT_NODE_UINT, .type = ZENIT_TYPE_UINT, .size = ZENIT_UINT_16, .value.uint16 = 8192 } 
                     } 
                 },
             }
@@ -68,7 +69,7 @@ static struct VariableAttributesTest tests[] = {
                 { "NES", 2, 
                     { 
                         { .name = "segment", .node_type = ZENIT_NODE_IDENTIFIER, .value.id = "zp" }, 
-                        { .name = "address", .node_type = ZENIT_NODE_PRIMITIVE, .type = ZENIT_TYPE_UINT8, .value.uint8 = 0 } 
+                        { .name = "address", .node_type = ZENIT_NODE_UINT, .type = ZENIT_TYPE_UINT, .size = ZENIT_UINT_8, .value.uint8 = 0 } 
                     } 
                 },
             }
@@ -140,7 +141,7 @@ void zenit_test_parser_attributes_variables(void)
                     fl_vexpect(flm_cstring_equals(proptest->value.id, ((struct ZenitIdentifierNode*)propnode->value)->name), 
                         "'%s' property's value in attribute '%s' is expected to be '%s'", proptest->name, attrnode->name, proptest->value.id);
                 }
-                else if (proptest->node_type == ZENIT_NODE_PRIMITIVE)
+                else if (proptest->node_type == ZENIT_NODE_UINT)
                 {
                     bool is_valid = false;
                     uintmax_t test_value = 0;
@@ -152,12 +153,12 @@ void zenit_test_parser_attributes_variables(void)
                         {
                             case ZENIT_TYPE_UINT8:
                                 test_value = proptest->value.uint8;
-                                prop_value = ((struct ZenitPrimitiveNode*)propnode->value)->value.uint8;
+                                prop_value = ((struct ZenitUintNode*)propnode->value)->value.uint8;
                                 is_valid = true;
                                 break;
                             case ZENIT_TYPE_UINT16:
                                 test_value = proptest->value.uint16;
-                                prop_value = ((struct ZenitPrimitiveNode*)propnode->value)->value.uint16;
+                                prop_value = ((struct ZenitUintNode*)propnode->value)->value.uint16;
                                 is_valid = true;
                                 break;
                             default:

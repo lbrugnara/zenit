@@ -5,9 +5,10 @@
 
 enum ZenitType zenit_type_from_slice(struct FlSlice *slice)
 {
-    enum ZenitType type = zenit_type_primitive_from_slice(slice);
+    if (flm_cstring_equals_n("uint", (const char*) slice->sequence, 4))
+        return ZENIT_TYPE_UINT;
 
-    return type == ZENIT_TYPE_NONE ? ZENIT_TYPE_STRUCT : type;
+    return ZENIT_TYPE_STRUCT;
 }
 
 /*
@@ -28,8 +29,8 @@ unsigned long zenit_type_hash(struct ZenitTypeInfo *typeinfo)
     if (typeinfo->type == ZENIT_TYPE_ARRAY)
         return zenit_type_array_hash((struct ZenitArrayTypeInfo*) typeinfo);
     
-    if (zenit_type_is_primitive(typeinfo->type))
-        return zenit_type_primitive_hash((struct ZenitPrimitiveTypeInfo*) typeinfo);
+    if (typeinfo->type == ZENIT_TYPE_UINT)
+        return zenit_type_uint_hash((struct ZenitUintTypeInfo*) typeinfo);
     
     if (typeinfo->type == ZENIT_TYPE_NONE)
         return zenit_type_none_hash(typeinfo);
@@ -60,8 +61,8 @@ char* zenit_type_to_string(struct ZenitTypeInfo *typeinfo)
     if (typeinfo->type == ZENIT_TYPE_ARRAY)
         return zenit_type_array_to_string((struct ZenitArrayTypeInfo*) typeinfo);
     
-    if (zenit_type_is_primitive(typeinfo->type))
-        return zenit_type_primitive_to_string((struct ZenitPrimitiveTypeInfo*) typeinfo);
+    if (typeinfo->type == ZENIT_TYPE_UINT)
+        return zenit_type_uint_to_string((struct ZenitUintTypeInfo*) typeinfo);
     
     if (typeinfo->type == ZENIT_TYPE_NONE)
         return "<unknown>";
@@ -83,8 +84,8 @@ struct ZenitTypeInfo* zenit_type_copy(struct ZenitTypeInfo *src_type)
     if (src_type->type == ZENIT_TYPE_ARRAY)
         return (struct ZenitTypeInfo*) zenit_type_array_copy((struct ZenitArrayTypeInfo*) src_type);
     
-    if (zenit_type_is_primitive(src_type->type))
-        return (struct ZenitTypeInfo*) zenit_type_primitive_copy((struct ZenitPrimitiveTypeInfo*) src_type);
+    if (src_type->type == ZENIT_TYPE_UINT)
+        return (struct ZenitTypeInfo*) zenit_type_uint_copy((struct ZenitUintTypeInfo*) src_type);
     
     if (src_type->type == ZENIT_TYPE_NONE)
         return zenit_type_none_new();
@@ -106,8 +107,8 @@ bool zenit_type_equals(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_
     if (type_a->type == ZENIT_TYPE_ARRAY)
         return zenit_type_array_equals((struct ZenitArrayTypeInfo*) type_a, type_b);
     
-    if (zenit_type_is_primitive(type_a->type))
-        return zenit_type_primitive_equals((struct ZenitPrimitiveTypeInfo*) type_a, type_b);
+    if (type_a->type == ZENIT_TYPE_UINT)
+        return zenit_type_uint_equals((struct ZenitUintTypeInfo*) type_a, type_b);
     
     if (type_a->type == ZENIT_TYPE_NONE)
         return type_b->type == ZENIT_TYPE_NONE;
@@ -140,8 +141,8 @@ bool zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b
     if (type_a->type == ZENIT_TYPE_ARRAY)
         return zenit_type_array_unify((struct ZenitArrayTypeInfo*) type_a, type_b, unified);
     
-    if (zenit_type_is_primitive(type_a->type))
-        return zenit_type_primitive_unify((struct ZenitPrimitiveTypeInfo*) type_a, type_b, unified);
+    if (type_a->type == ZENIT_TYPE_UINT)
+        return zenit_type_uint_unify((struct ZenitUintTypeInfo*) type_a, type_b, unified);
     
     return false;
 }
@@ -163,8 +164,8 @@ bool zenit_type_is_assignable_from(struct ZenitTypeInfo *target_type, struct Zen
     if (target_type->type == ZENIT_TYPE_ARRAY)
         return zenit_type_array_is_assignable_from((struct ZenitArrayTypeInfo*) target_type, from_type);
     
-    if (zenit_type_is_primitive(target_type->type))
-        return zenit_type_primitive_is_assignable_from((struct ZenitPrimitiveTypeInfo*) target_type, from_type);
+    if (target_type->type == ZENIT_TYPE_UINT)
+        return zenit_type_uint_is_assignable_from((struct ZenitUintTypeInfo*) target_type, from_type);
     
     return false;
 }
@@ -188,8 +189,8 @@ bool zenit_type_is_castable_to(struct ZenitTypeInfo *source_type, struct ZenitTy
     if (source_type->type == ZENIT_TYPE_ARRAY)
         return zenit_type_array_is_castable_to((struct ZenitArrayTypeInfo*) source_type, target_type);
     
-    if (zenit_type_is_primitive(source_type->type))
-        return zenit_type_primitive_is_castable_to((struct ZenitPrimitiveTypeInfo*) source_type, target_type);
+    if (source_type->type == ZENIT_TYPE_UINT)
+        return zenit_type_uint_is_castable_to((struct ZenitUintTypeInfo*) source_type, target_type);
     
     return false;
 }
@@ -214,9 +215,9 @@ void zenit_type_free(struct ZenitTypeInfo *typeinfo)
         zenit_type_array_free((struct ZenitArrayTypeInfo*) typeinfo);
         return;
     }
-    else if (zenit_type_is_primitive(typeinfo->type))
+    else if (typeinfo->type == ZENIT_TYPE_UINT)
     {
-        zenit_type_primitive_free((struct ZenitPrimitiveTypeInfo*) typeinfo);
+        zenit_type_uint_free((struct ZenitUintTypeInfo*) typeinfo);
         return;
     }
     else if (typeinfo->type == ZENIT_TYPE_NONE)

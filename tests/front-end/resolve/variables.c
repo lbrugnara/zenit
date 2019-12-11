@@ -36,12 +36,13 @@ void zenit_test_resolve_primitives(void)
     struct Test {
         char *name;
         enum ZenitType decl_type;
+        enum ZenitUintTypeSize decl_type_size;
         char *decl_type_name;
     } tests[] = {
-        { "a", ZENIT_TYPE_UINT8,    "uint8"     },
-        { "b", ZENIT_TYPE_UINT8,    "uint8"     },
-        { "c", ZENIT_TYPE_UINT16,   "uint16"    },
-        { "d", ZENIT_TYPE_UINT8,    "uint8"     },
+        { "a", ZENIT_TYPE_UINT, ZENIT_UINT_8,    "uint8"     },
+        { "b", ZENIT_TYPE_UINT, ZENIT_UINT_8,    "uint8"     },
+        { "c", ZENIT_TYPE_UINT, ZENIT_UINT_16,   "uint16"    },
+        { "d", ZENIT_TYPE_UINT, ZENIT_UINT_8,    "uint8"     },
     };
 
     const size_t count = sizeof(tests) / sizeof(tests[0]);
@@ -60,7 +61,9 @@ void zenit_test_resolve_primitives(void)
 
         struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test->name);
 
-        fl_vexpect(symbol->typeinfo->type == test->decl_type, "Symbol type must be equals to '%s'", test->decl_type_name);
+        fl_vexpect(symbol->typeinfo->type == test->decl_type
+            && ((struct ZenitUintTypeInfo*) symbol->typeinfo)->size == test->decl_type_size,
+            "Symbol type must be equals to '%s'", test->decl_type_name);
     }
 
     zenit_context_free(&ctx);
@@ -82,11 +85,12 @@ void zenit_test_resolve_references(void)
         enum ZenitType decl_type;
         char *decl_type_name;
         enum ZenitType referred_type;
+        enum ZenitUintTypeSize referred_type_size;
         char *referred_type_name;
     } tests[] = {
-        { "b", ZENIT_TYPE_REFERENCE, "&uint8",      ZENIT_TYPE_UINT8,   "uint8"     },
-        { "c", ZENIT_TYPE_REFERENCE, "&uint8",      ZENIT_TYPE_UINT8,   "uint8"     },
-        { "e", ZENIT_TYPE_REFERENCE, "&uint16",     ZENIT_TYPE_UINT16,  "uint16"    },
+        { "b", ZENIT_TYPE_REFERENCE, "&uint8",      ZENIT_TYPE_UINT,    ZENIT_UINT_8,   "uint8"     },
+        { "c", ZENIT_TYPE_REFERENCE, "&uint8",      ZENIT_TYPE_UINT,    ZENIT_UINT_8,   "uint8"     },
+        { "e", ZENIT_TYPE_REFERENCE, "&uint16",     ZENIT_TYPE_UINT,    ZENIT_UINT_16,  "uint16"    },
     };
 
     const size_t count = sizeof(tests) / sizeof(tests[0]);
@@ -111,7 +115,9 @@ void zenit_test_resolve_references(void)
         {
             struct ZenitReferenceTypeInfo *ref_typeinfo = (struct ZenitReferenceTypeInfo*) symbol->typeinfo;
 
-            fl_vexpect(ref_typeinfo->element->type == test->referred_type, "Type of the referenced symbol must be equals to '%s'", test->referred_type_name);
+            fl_vexpect(ref_typeinfo->element->type == test->referred_type
+                && ((struct ZenitUintTypeInfo*) ref_typeinfo->element)->size == test->referred_type_size, 
+                "Type of the referenced symbol must be equals to '%s'", test->referred_type_name);
         }
     }
 
@@ -132,13 +138,14 @@ void zenit_test_resolve_arrays(void)
     struct Test {
         char *name;
         enum ZenitType member_type;
+        enum ZenitUintTypeSize member_type_size;        
         char *member_type_name;
         size_t length;
     } tests[] = {
-        { "a", ZENIT_TYPE_UINT8,    "uint8",        2   },
-        { "b", ZENIT_TYPE_NONE,     NULL,           3   },
-        { "c", ZENIT_TYPE_STRUCT,   "customType",   0   },
-        { "e", ZENIT_TYPE_UINT16,   "uint16",       1   },
+        { "a", ZENIT_TYPE_UINT,     ZENIT_UINT_8,   "uint8",        2   },
+        { "b", ZENIT_TYPE_NONE,     ZENIT_UINT_UNK, NULL,           3   },
+        { "c", ZENIT_TYPE_STRUCT,   ZENIT_UINT_UNK, "customType",   0   },
+        { "e", ZENIT_TYPE_UINT,     ZENIT_UINT_16,  "uint16",       1   },
     };
 
     const size_t count = sizeof(tests) / sizeof(tests[0]);
@@ -164,7 +171,17 @@ void zenit_test_resolve_arrays(void)
             struct ZenitArrayTypeInfo *array_typeinfo = (struct ZenitArrayTypeInfo*) symbol->typeinfo;
 
             fl_vexpect(array_typeinfo->length == test->length, "Number of elements in the array must be equals to %zu", test->length);
-            fl_vexpect(array_typeinfo->member_type->type == test->member_type, "Type of the array's member type must be equals to '%s'", test->member_type_name);
+            
+            if (array_typeinfo->member_type->type == ZENIT_TYPE_UINT)
+            {
+                fl_vexpect(array_typeinfo->member_type->type == test->member_type
+                    && ((struct ZenitUintTypeInfo*) array_typeinfo->member_type)->size == test->member_type_size,
+                    "Type of the array's member type must be equals to '%s'", test->member_type_name);
+            }
+            else
+            {
+                fl_vexpect(array_typeinfo->member_type->type == test->member_type, "Type of the array's member type must be equals to '%s'", test->member_type_name);
+            }
         }
     }
 

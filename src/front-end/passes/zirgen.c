@@ -33,7 +33,7 @@ typedef struct ZirOperand*(*ZirGenerator)(struct ZenitContext *ctx, struct ZirPr
 
 // Visitor functions
 static struct ZirOperand* visit_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitNode *node);
-static struct ZirOperand* visit_primitive_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitPrimitiveNode *primitive);
+static struct ZirOperand* visit_primitive_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitUintNode *primitive);
 static struct ZirOperand* visit_variable_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitVariableNode *vardecl);
 static struct ZirOperand* visit_array_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitArrayNode *array);
 static struct ZirOperand* visit_identifier_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitIdentifierNode *id_node);
@@ -45,7 +45,7 @@ static struct ZirOperand* visit_cast_node(struct ZenitContext *ctx, struct ZirPr
  *  An array indexed with a <enum ZenitNodeType> to get a <ZirGenerator> function
  */
 static const ZirGenerator generators[] = {
-    [ZENIT_NODE_PRIMITIVE]    = (ZirGenerator) &visit_primitive_node,
+    [ZENIT_NODE_UINT]    = (ZirGenerator) &visit_primitive_node,
     [ZENIT_NODE_VARIABLE]   = (ZirGenerator) &visit_variable_node,
     [ZENIT_NODE_ARRAY]      = (ZirGenerator) &visit_array_node,
     [ZENIT_NODE_IDENTIFIER] = (ZirGenerator) &visit_identifier_node,
@@ -77,12 +77,8 @@ static inline void copy_zenit_type_to_zir_type(struct ZenitTypeInfo *zenit_type,
 {
     switch (zenit_type->type)
     {
-        case ZENIT_TYPE_UINT8:
-            zir_type->type = ZIR_TYPE_UINT8;
-            break;
-
-        case ZENIT_TYPE_UINT16:
-            zir_type->type = ZIR_TYPE_UINT16;
+        case ZENIT_TYPE_UINT:
+            zir_type->type = ((struct ZenitUintTypeInfo*) zenit_type)->size == ZENIT_UINT_8 ? ZIR_TYPE_UINT8 : ZIR_TYPE_UINT16;
             break;
 
         case ZENIT_TYPE_STRUCT:
@@ -199,7 +195,7 @@ static struct ZirOperand* visit_cast_node(struct ZenitContext *ctx, struct ZirPr
  *  struct ZirOperand - A constant value operand
  *
  */
-static struct ZirOperand* visit_primitive_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitPrimitiveNode *zenit_primitive)
+static struct ZirOperand* visit_primitive_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitUintNode *zenit_primitive)
 {
     struct ZenitSymbol *zenit_primitive_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) zenit_primitive);
 
@@ -207,13 +203,13 @@ static struct ZirOperand* visit_primitive_node(struct ZenitContext *ctx, struct 
     enum ZirType zir_type = ZIR_TYPE_NONE;
     union ZirPrimitiveValue zir_value;
 
-    switch (zenit_primitive_symbol->typeinfo->type)
+    switch (((struct ZenitUintTypeInfo*) zenit_primitive_symbol->typeinfo)->size)
     {
-        case ZENIT_TYPE_UINT8:
+        case ZENIT_UINT_8:
             zir_type = ZIR_TYPE_UINT8;
             zir_value.uint8 = zenit_primitive->value.uint8;
             break;
-        case ZENIT_TYPE_UINT16:
+        case ZENIT_UINT_16:
             zir_type = ZIR_TYPE_UINT16;
             zir_value.uint16 = zenit_primitive->value.uint16;
             break;

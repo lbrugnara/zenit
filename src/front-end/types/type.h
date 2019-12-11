@@ -1,8 +1,6 @@
 #ifndef ZENIT_TYPE_H
 #define ZENIT_TYPE_H
 
-#define zenit_type_is_primitive(type) (type >= ZENIT_TYPE_UINT8 && type <= ZENIT_TYPE_UINT16)
-
 /*
  * Enum: enum ZenitType
  *  Enumerates all the native type supported by Zenit
@@ -19,8 +17,7 @@ enum ZenitType {
 
     ZENIT_TYPE_STRUCT,
 
-    ZENIT_TYPE_UINT8,
-    ZENIT_TYPE_UINT16,
+    ZENIT_TYPE_UINT,
 
     ZENIT_TYPE_END
 };

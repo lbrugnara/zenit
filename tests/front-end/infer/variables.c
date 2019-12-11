@@ -8,7 +8,7 @@
 #include "../../../src/front-end/symtable.h"
 #include "tests.h"
 
-void zenit_test_infer_variable_primitive(void)
+void zenit_test_infer_variable_uint(void)
 {
     const char *source = 
         "var sym_a = 2;"                        "\n"
@@ -21,13 +21,14 @@ void zenit_test_infer_variable_primitive(void)
     struct TestCase {
         char *name;
         enum ZenitType type;
+        enum ZenitUintTypeSize size;
         char *type_name;
     } tests[] = {
-        { "sym_a", ZENIT_TYPE_UINT8,    "uint8"  },
-        { "sym_b", ZENIT_TYPE_UINT8,    "uint8"  },
-        { "sym_c", ZENIT_TYPE_UINT8,    "uint8"  },
-        { "sym_d", ZENIT_TYPE_UINT16,   "uint16" },
-        { "sym_e", ZENIT_TYPE_UINT8,    "uint8"  },
+        { "sym_a", ZENIT_TYPE_UINT, ZENIT_UINT_8,    "uint8"  },
+        { "sym_b", ZENIT_TYPE_UINT, ZENIT_UINT_8,    "uint8"  },
+        { "sym_c", ZENIT_TYPE_UINT, ZENIT_UINT_8,    "uint8"  },
+        { "sym_d", ZENIT_TYPE_UINT, ZENIT_UINT_16,   "uint16" },
+        { "sym_e", ZENIT_TYPE_UINT, ZENIT_UINT_8,    "uint8"  },
     };
 
     const size_t count = sizeof(tests) / sizeof(tests[0]);
@@ -47,7 +48,9 @@ void zenit_test_infer_variable_primitive(void)
 
         struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test->name);
 
-        fl_vexpect(symbol->typeinfo->type == test->type, "Symbol %s's type must be %s", test->name, test->type_name);
+        fl_vexpect(symbol->typeinfo->type == test->type
+            && ((struct ZenitUintTypeInfo*) symbol->typeinfo)->size == test->size,
+            "Symbol %s's type must be %s", test->name, test->type_name);
     }
 
     zenit_context_free(&ctx);
@@ -68,11 +71,12 @@ void zenit_test_infer_variable_reference(void)
     struct TestCase {
         char *name;
         enum ZenitType ref_type;
+        enum ZenitUintTypeSize ref_size;
         char *ref_type_name;
     } tests[] = {
-        { "sym_c", ZENIT_TYPE_UINT8,        "uint8"     },
-        { "sym_d", ZENIT_TYPE_UINT16,       "uint16"    },
-        { "sym_e", ZENIT_TYPE_UINT16,       "uint16"   },
+        { "sym_c", ZENIT_TYPE_UINT, ZENIT_UINT_8,        "uint8"     },
+        { "sym_d", ZENIT_TYPE_UINT, ZENIT_UINT_16,       "uint16"    },
+        { "sym_e", ZENIT_TYPE_UINT, ZENIT_UINT_16,       "uint16"   },
     };
 
     const size_t count = sizeof(tests) / sizeof(tests[0]);
@@ -94,9 +98,11 @@ void zenit_test_infer_variable_reference(void)
 
         struct ZenitReferenceTypeInfo *ref_typeinfo = (struct ZenitReferenceTypeInfo*) symbol->typeinfo;
 
-        if (zenit_type_is_primitive(ref_typeinfo->element->type))
+        if (ref_typeinfo->element->type == ZENIT_TYPE_UINT)
         {
-            fl_vexpect(ref_typeinfo->element->type == test->ref_type, "Underlying type of the referenced variable in symbol %s's type must be %s", test->name, test->ref_type_name);
+            fl_vexpect(ref_typeinfo->element->type == test->ref_type
+                && ((struct ZenitUintTypeInfo*) ref_typeinfo->element)->size == test->ref_size,
+                "Underlying type of the referenced variable in symbol %s's type must be %s", test->name, test->ref_type_name);
         }
         else if (ref_typeinfo->element->type == ZENIT_TYPE_REFERENCE)
         {
@@ -133,21 +139,23 @@ void zenit_test_infer_variable_array(void)
     struct TestCase {
         char *name;
         enum ZenitType member_type;
+        enum ZenitUintTypeSize member_type_size;
         char *member_type_name;
         size_t length;
         enum ZenitType ref_member_type;
+        enum ZenitUintTypeSize ref_member_type_size;
     } tests[] = {
-        {   "sym_g",  ZENIT_TYPE_UINT8,         "uint8",        2,  ZENIT_TYPE_NONE     },
-        {   "sym_h",  ZENIT_TYPE_UINT8,         "uint8",        3,  ZENIT_TYPE_NONE     },
-        {   "sym_i",  ZENIT_TYPE_STRUCT,        "customType",   0,  ZENIT_TYPE_NONE     },
-        {   "sym_j",  ZENIT_TYPE_UINT16,        "uint16",       1,  ZENIT_TYPE_NONE     },
-        {   "sym_k",  ZENIT_TYPE_UINT16,        "uint16",       1,  ZENIT_TYPE_NONE     },
-        {   "sym_l",  ZENIT_TYPE_UINT16,        "uint16",       2,  ZENIT_TYPE_NONE     },
-        {   "sym_m",  ZENIT_TYPE_UINT16,        "uint16",       3,  ZENIT_TYPE_NONE     },
-        {   "sym_n",  ZENIT_TYPE_UINT16,        "uint16",       1,  ZENIT_TYPE_NONE     },
-        {   "sym_o",  ZENIT_TYPE_UINT8,         "uint8",        2,  ZENIT_TYPE_NONE     },
-        {   "sym_p",  ZENIT_TYPE_UINT16,        "uint16",       2,  ZENIT_TYPE_NONE     },
-        {   "sym_q",  ZENIT_TYPE_REFERENCE,     "&uint8",       2,  ZENIT_TYPE_UINT8    },
+        {   "sym_g",  ZENIT_TYPE_UINT,          ZENIT_UINT_8,       "uint8",        2,  ZENIT_TYPE_NONE,    ZENIT_UINT_UNK     },
+        {   "sym_h",  ZENIT_TYPE_UINT,          ZENIT_UINT_8,       "uint8",        3,  ZENIT_TYPE_NONE,    ZENIT_UINT_UNK     },
+        {   "sym_i",  ZENIT_TYPE_STRUCT,        ZENIT_UINT_UNK,     "customType",   0,  ZENIT_TYPE_NONE,    ZENIT_UINT_UNK     },
+        {   "sym_j",  ZENIT_TYPE_UINT,          ZENIT_UINT_16,      "uint16",       1,  ZENIT_TYPE_NONE,    ZENIT_UINT_UNK     },
+        {   "sym_k",  ZENIT_TYPE_UINT,          ZENIT_UINT_16,      "uint16",       1,  ZENIT_TYPE_NONE,    ZENIT_UINT_UNK     },
+        {   "sym_l",  ZENIT_TYPE_UINT,          ZENIT_UINT_16,      "uint16",       2,  ZENIT_TYPE_NONE,    ZENIT_UINT_UNK     },
+        {   "sym_m",  ZENIT_TYPE_UINT,          ZENIT_UINT_16,      "uint16",       3,  ZENIT_TYPE_NONE,    ZENIT_UINT_UNK     },
+        {   "sym_n",  ZENIT_TYPE_UINT,          ZENIT_UINT_16,      "uint16",       1,  ZENIT_TYPE_NONE,    ZENIT_UINT_UNK     },
+        {   "sym_o",  ZENIT_TYPE_UINT,          ZENIT_UINT_8,       "uint8",        2,  ZENIT_TYPE_NONE,    ZENIT_UINT_UNK     },
+        {   "sym_p",  ZENIT_TYPE_UINT,          ZENIT_UINT_16,      "uint16",       2,  ZENIT_TYPE_NONE,    ZENIT_UINT_UNK     },
+        {   "sym_q",  ZENIT_TYPE_REFERENCE,     ZENIT_UINT_UNK,     "&uint8",       2,  ZENIT_TYPE_UINT,    ZENIT_UINT_8       },
     };
 
     const size_t count = sizeof(tests) / sizeof(tests[0]);
@@ -175,7 +183,9 @@ void zenit_test_infer_variable_array(void)
 
         if (test->ref_member_type == ZENIT_TYPE_NONE)
         {
-            fl_vexpect(array_typeinfo->member_type->type == test->member_type, "Symbol '%s' must be an array of '%s'", symbol->name, test->member_type_name);
+            fl_vexpect(array_typeinfo->member_type->type == test->member_type
+                && (test->member_type != ZENIT_TYPE_UINT || ((struct ZenitUintTypeInfo*)array_typeinfo->member_type)->size == test->member_type_size),
+                "Symbol '%s' must be an array of '%s'", symbol->name, test->member_type_name);
         } 
         else if (test->ref_member_type != ZENIT_TYPE_NONE)
         {
@@ -183,7 +193,17 @@ void zenit_test_infer_variable_array(void)
             bool ref_type_is_valid = array_typeinfo->member_type->type == ZENIT_TYPE_REFERENCE
                                     && ((struct ZenitReferenceTypeInfo*) array_typeinfo->member_type)->element->type == test->ref_member_type;
 
-            fl_vexpect(is_ref && ref_type_is_valid, "Symbol '%s' must be an array of '%s'", symbol->name, test->member_type_name);
+            bool type_size_is_valid = true;
+
+            if (is_ref)
+            {
+                struct ZenitTypeInfo *ref_element = ((struct ZenitReferenceTypeInfo*) array_typeinfo->member_type)->element;
+                if (ref_element->type == ZENIT_TYPE_UINT)
+                    type_size_is_valid = ((struct ZenitUintTypeInfo*) ref_element)->size == test->ref_member_type_size;
+            }
+
+
+            fl_vexpect(is_ref && ref_type_is_valid && type_size_is_valid, "Symbol '%s' must be an array of '%s'", symbol->name, test->member_type_name);
         }
     }
 

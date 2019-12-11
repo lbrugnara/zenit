@@ -16,7 +16,7 @@ void zenit_type_pool_free(struct ZenitTypePool *pool);
 
 struct ZenitArrayTypeInfo* zenit_type_pool_register_array(struct ZenitTypePool *pool, struct ZenitArrayTypeInfo *typeinfo);
     
-struct ZenitPrimitiveTypeInfo* zenit_type_pool_register_primitive(struct ZenitTypePool *pool, struct ZenitPrimitiveTypeInfo *typeinfo);
+struct ZenitUintTypeInfo* zenit_type_pool_register_primitive(struct ZenitTypePool *pool, struct ZenitUintTypeInfo *typeinfo);
 
 struct ZenitReferenceTypeInfo* zenit_type_pool_register_reference(struct ZenitTypePool *pool, struct ZenitReferenceTypeInfo *typeinfo);
 

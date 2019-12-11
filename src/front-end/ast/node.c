@@ -2,7 +2,7 @@
 #include "attribute.h"
 #include "cast.h"
 #include "identifier.h"
-#include "primitive.h"
+#include "uint.h"
 #include "property.h"
 #include "reference.h"
 #include "type.h"
@@ -33,7 +33,7 @@ char* zenit_node_print_type(struct ZenitNode *node)
 
     switch (node->type)
     {
-        case ZENIT_NODE_PRIMITIVE:
+        case ZENIT_NODE_UINT:
             return "literal";
         case ZENIT_NODE_VARIABLE:
             return "var";
@@ -64,8 +64,8 @@ char* zenit_node_uid(struct ZenitNode *node)
 
     switch (node->type)
     {
-        case ZENIT_NODE_PRIMITIVE:
-            return zenit_node_primitive_uid((struct ZenitPrimitiveNode*)node);
+        case ZENIT_NODE_UINT:
+            return zenit_node_uint_uid((struct ZenitUintNode*)node);
 
         case ZENIT_NODE_VARIABLE:
             return zenit_node_variable_uid((struct ZenitVariableNode*)node);
@@ -92,7 +92,7 @@ char* zenit_node_uid(struct ZenitNode *node)
             return zenit_node_type_array_uid((struct ZenitArrayTypeNode*)node);
 
         case ZENIT_NODE_TYPE_PRIMITIVE:
-            return zenit_node_type_primitive_uid((struct ZenitPrimitiveTypeNode*)node);
+            return zenit_node_type_uint_uid((struct ZenitUintTypeNode*)node);
 
         case ZENIT_NODE_TYPE_REFERENCE:
             return zenit_node_type_reference_uid((struct ZenitReferenceTypeNode*)node);
@@ -117,8 +117,8 @@ void zenit_node_free(struct ZenitNode *node)
 
     switch (node->type)
     {
-        case ZENIT_NODE_PRIMITIVE:
-            zenit_node_primitive_free((struct ZenitPrimitiveNode*)node);
+        case ZENIT_NODE_UINT:
+            zenit_node_uint_free((struct ZenitUintNode*)node);
             break;
 
         case ZENIT_NODE_VARIABLE:
@@ -154,7 +154,7 @@ void zenit_node_free(struct ZenitNode *node)
             break;
 
         case ZENIT_NODE_TYPE_PRIMITIVE:
-            zenit_node_type_primitive_free((struct ZenitPrimitiveTypeNode*)node);
+            zenit_node_type_uint_free((struct ZenitUintTypeNode*)node);
             break;
 
         case ZENIT_NODE_TYPE_REFERENCE:

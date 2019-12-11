@@ -19,7 +19,8 @@ void zenit_test_parser_literal_integer(void)
     ;
 
     const size_t results[] = { 1, 2, 3, 255, 8192 };
-    const enum ZenitType types[] = { ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT16 };
+    const char *names[] = { "uint8", "uint8", "uint8", "uint8", "uint16" };
+    const enum ZenitUintTypeSize sizes[] = { ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_16 };
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
 
@@ -30,17 +31,16 @@ void zenit_test_parser_literal_integer(void)
     for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
     {
         struct ZenitNode *node = ctx.ast->decls[i];
-        fl_expect("Node must be a literal node", node->type == ZENIT_NODE_PRIMITIVE);
+        fl_expect("Node must be a uint node", node->type == ZENIT_NODE_UINT);
 
-        struct ZenitPrimitiveNode *literal = (struct ZenitPrimitiveNode*)node;
-        //fl_vexpect(literal->type == types[i], "Literal type must be \"%s\"", zenit_type_to_string(&literal->base.typeinfo));
+        struct ZenitUintNode *literal = (struct ZenitUintNode*)node;
 
-        switch (types[i])
+        switch (sizes[i])
         {
-            case ZENIT_TYPE_UINT8:
+            case ZENIT_UINT_8:
                 fl_vexpect((size_t)literal->value.uint8 == results[i], "Literal value must be equals to %zu", results[i]);
                 break;
-            case ZENIT_TYPE_UINT16:
+            case ZENIT_UINT_16:
                 fl_vexpect((size_t)literal->value.uint16 == results[i], "Literal value must be equals to %zu", results[i]);
                 break;
             default:
@@ -78,7 +78,7 @@ void zenit_test_parser_literal_array_initializer(void)
 
         for (size_t j=0; j < fl_array_length(array->elements); j++)
         {
-            struct ZenitPrimitiveNode *literal = (struct ZenitPrimitiveNode*)array->elements[j];
+            struct ZenitUintNode *literal = (struct ZenitUintNode*)array->elements[j];
             //fl_vexpect(literal->type == ZENIT_TYPE_UINT8, "Literal type must be \"%s\"", zenit_type_to_string(&literal->base.typeinfo));
             fl_vexpect((size_t)literal->value.uint8 == values[i][j], "Literal value must be equals to %zu", values[i][j]);
         }

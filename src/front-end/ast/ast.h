@@ -9,7 +9,7 @@
 #include "attribute.h"
 #include "cast.h"
 #include "identifier.h"
-#include "primitive.h"
+#include "uint.h"
 #include "node.h"
 #include "property.h"
 #include "reference.h"

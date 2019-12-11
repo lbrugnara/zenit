@@ -9,7 +9,7 @@
  *  Types of AST node
  */
 enum ZenitNodeType {
-    ZENIT_NODE_PRIMITIVE,
+    ZENIT_NODE_UINT,
     ZENIT_NODE_VARIABLE,
     ZENIT_NODE_ATTRIBUTE,
     ZENIT_NODE_PROPERTY,

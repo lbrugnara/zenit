@@ -12,13 +12,13 @@ void zenit_test_parser_variable_literal(void)
         char *lhs_name;
         enum ZenitType type_declaration;
         enum ZenitNodeType rhs_node_type;
-        enum ZenitType rhs_type;
+        enum ZenitUintTypeSize rhs_type_size;
         unsigned int rhs_value;
     } tests[] = {
-        { ZENIT_NODE_VARIABLE, "num0", ZENIT_TYPE_NONE, ZENIT_NODE_PRIMITIVE, ZENIT_TYPE_UINT8, 0 },
-        { ZENIT_NODE_VARIABLE, "num1", ZENIT_TYPE_NONE, ZENIT_NODE_PRIMITIVE, ZENIT_TYPE_UINT8, 1 },
-        { ZENIT_NODE_VARIABLE, "num2", ZENIT_TYPE_NONE, ZENIT_NODE_PRIMITIVE, ZENIT_TYPE_UINT8, 2 },
-        { ZENIT_NODE_VARIABLE, "num3", ZENIT_TYPE_NONE, ZENIT_NODE_PRIMITIVE, ZENIT_TYPE_UINT8, 3 },
+        { ZENIT_NODE_VARIABLE, "num0", ZENIT_TYPE_NONE, ZENIT_NODE_UINT, ZENIT_UINT_8, 0 },
+        { ZENIT_NODE_VARIABLE, "num1", ZENIT_TYPE_NONE, ZENIT_NODE_UINT, ZENIT_UINT_8, 1 },
+        { ZENIT_NODE_VARIABLE, "num2", ZENIT_TYPE_NONE, ZENIT_NODE_UINT, ZENIT_UINT_8, 2 },
+        { ZENIT_NODE_VARIABLE, "num3", ZENIT_TYPE_NONE, ZENIT_NODE_UINT, ZENIT_UINT_8, 3 },
     };
 
     const char *source = 
@@ -43,9 +43,9 @@ void zenit_test_parser_variable_literal(void)
         fl_expect("Variable type is NONE because the type is inferred from the assignment", var_decl->type_decl == NULL);
         fl_expect("Right-hand side must be a literal node", var_decl->rvalue && var_decl->rvalue->type == test->rhs_node_type);
 
-        struct ZenitPrimitiveNode *literal = (struct ZenitPrimitiveNode*) var_decl->rvalue;
+        struct ZenitUintNode *literal = (struct ZenitUintNode*) var_decl->rvalue;
 
-        fl_expect("Right-hand side expression must have uint8", literal->type == test->rhs_type);
+        fl_expect("Right-hand side expression must be uint8", literal->size == test->rhs_type_size);
         fl_vexpect(literal->value.uint8 == test->rhs_value, "Right-hand side expression has value %zu", test->rhs_value);
     }
 
@@ -65,21 +65,21 @@ void zenit_test_parser_array_variable_literal(void)
 
     const enum ZenitNodeType nodes[10][10] = {
         { (enum ZenitNodeType)-1 },
-        { ZENIT_NODE_PRIMITIVE },
-        { ZENIT_NODE_PRIMITIVE },
-        { ZENIT_NODE_PRIMITIVE },
-        { ZENIT_NODE_PRIMITIVE, ZENIT_NODE_PRIMITIVE }
+        { ZENIT_NODE_UINT },
+        { ZENIT_NODE_UINT },
+        { ZENIT_NODE_UINT },
+        { ZENIT_NODE_UINT, ZENIT_NODE_UINT }
     };
 
-    const enum ZenitType types[10][10] = {
-        { (enum ZenitType)-1 },
-        { ZENIT_TYPE_UINT8 }, 
-        { ZENIT_TYPE_UINT8 }, 
-        { ZENIT_TYPE_UINT8 }, 
-        { ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT8 } 
+    const enum ZenitUintTypeSize sizes[10][10] = {
+        { ZENIT_UINT_UNK },
+        { ZENIT_UINT_8 }, 
+        { ZENIT_UINT_8 }, 
+        { ZENIT_UINT_8 }, 
+        { ZENIT_UINT_8, ZENIT_UINT_8 } 
     };
 
-    const char *types_names[10][10] = {
+    const char *sizes_names[10][10] = {
         { NULL },
         { "uint8" }, 
         { "uint8" }, 
@@ -121,15 +121,15 @@ void zenit_test_parser_array_variable_literal(void)
 
             fl_vexpect(nodes[i][j] == value_node->type, "Array %s at position %zu is an integer literal", name, j);
 
-            if (value_node->type == ZENIT_NODE_PRIMITIVE)
+            if (value_node->type == ZENIT_NODE_UINT)
             {
-                struct ZenitPrimitiveNode *primitive_node = (struct ZenitPrimitiveNode*)value_node;
+                struct ZenitUintNode *primitive_node = (struct ZenitUintNode*)value_node;
                 fl_vexpect(
-                    primitive_node->type == types[i][j], 
+                    primitive_node->size == sizes[i][j], 
                     "Array %s at position %zu has type %s and value %d", 
                     name, 
                     j, 
-                    types_names[i][j], 
+                    sizes_names[i][j], 
                     values[i][j]
                 );
             }
@@ -150,11 +150,11 @@ void zenit_test_parser_variable_literal_typeinfo(void)
     ;
 
     const enum ZenitType var_types[10] = {
-        ZENIT_TYPE_UINT8,
-        ZENIT_TYPE_UINT8,
-        ZENIT_TYPE_UINT8,
-        ZENIT_TYPE_UINT8,
-        ZENIT_TYPE_UINT16,
+        ZENIT_TYPE_UINT,
+        ZENIT_TYPE_UINT,
+        ZENIT_TYPE_UINT,
+        ZENIT_TYPE_UINT,
+        ZENIT_TYPE_UINT,
     };
 
     const char *var_types_names[10] = {
@@ -165,15 +165,15 @@ void zenit_test_parser_variable_literal_typeinfo(void)
         "uint16",
     };
 
-    const enum ZenitType literal_types[10] = {
-        ZENIT_TYPE_UINT8,
-        ZENIT_TYPE_UINT8,
-        ZENIT_TYPE_UINT8,
-        ZENIT_TYPE_UINT8,
-        ZENIT_TYPE_UINT8,
+    const enum ZenitUintTypeSize literal_sizes[10] = {
+        ZENIT_UINT_8,
+        ZENIT_UINT_8,
+        ZENIT_UINT_8,
+        ZENIT_UINT_8,
+        ZENIT_UINT_8,
     };
     
-    const char *literal_types_names[10] = {
+    const char *literal_sizes_names[10] = {
         "uint8",
         "uint8",
         "uint8",
@@ -195,11 +195,15 @@ void zenit_test_parser_variable_literal_typeinfo(void)
         
         fl_vexpect(flm_cstring_equals(name, var_decl->name), "Variable name must be equals to \"%s\"", name);
         fl_vexpect(var_decl->type_decl->type == var_types[i], "Variable type is \"%s\" because the type is present in the declaration", var_types_names[i]);
-        fl_expect("Right-hand side must be a literal node", var_decl->rvalue && var_decl->rvalue->type == ZENIT_NODE_PRIMITIVE);
+        fl_expect("Right-hand side must be a literal node", var_decl->rvalue && var_decl->rvalue->type == ZENIT_NODE_UINT);
 
-        struct ZenitPrimitiveNode *literal = (struct ZenitPrimitiveNode*)var_decl->rvalue;
-        fl_vexpect(literal->type == literal_types[i], "Right-hand side expression must be of type \"%s\"", literal_types_names[i]);
-        fl_vexpect((size_t)literal->value.uint8 == i, "Right-hand side expression has value %zu", i);
+        struct ZenitUintNode *literal = (struct ZenitUintNode*)var_decl->rvalue;
+        fl_vexpect(literal->size == literal_sizes[i], "Right-hand side expression must be of type \"%s\"", literal_sizes_names[i]);
+
+        if (literal->size == ZENIT_UINT_8)
+            fl_vexpect((size_t)literal->value.uint8 == i, "Right-hand side expression has value %zu", i);
+        else if (literal->size == ZENIT_UINT_16)
+            fl_vexpect((size_t)literal->value.uint16 == i, "Right-hand side expression has value %zu", i);
     }
 
     zenit_context_free(&ctx);
@@ -227,21 +231,21 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
 
     const enum ZenitNodeType nodes[10][10] = {
         { (enum ZenitNodeType) -1 },
-        { ZENIT_NODE_PRIMITIVE },
-        { ZENIT_NODE_PRIMITIVE, ZENIT_NODE_PRIMITIVE },
-        { ZENIT_NODE_PRIMITIVE, ZENIT_NODE_PRIMITIVE, ZENIT_NODE_PRIMITIVE },
-        { ZENIT_NODE_PRIMITIVE, ZENIT_NODE_PRIMITIVE, ZENIT_NODE_PRIMITIVE, ZENIT_NODE_PRIMITIVE }
+        { ZENIT_NODE_UINT },
+        { ZENIT_NODE_UINT, ZENIT_NODE_UINT },
+        { ZENIT_NODE_UINT, ZENIT_NODE_UINT, ZENIT_NODE_UINT },
+        { ZENIT_NODE_UINT, ZENIT_NODE_UINT, ZENIT_NODE_UINT, ZENIT_NODE_UINT }
     };
 
-    const enum ZenitType types[10][10] = { 
-        { (enum ZenitType) -1 },
-        { ZENIT_TYPE_UINT8 }, 
-        { ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT8 }, 
-        { ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT8 }, 
-        { ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT8, ZENIT_TYPE_UINT8 } 
+    const enum ZenitUintTypeSize sizes[10][10] = { 
+        { ZENIT_UINT_UNK },
+        { ZENIT_UINT_8 }, 
+        { ZENIT_UINT_8, ZENIT_UINT_8 }, 
+        { ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8 }, 
+        { ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8 } 
     };
 
-    const char *literal_types_names[10][10] = { 
+    const char *literal_sizes_names[10][10] = { 
         { NULL },
         { "uint8" }, 
         { "uint8", "uint8" }, 
@@ -274,7 +278,7 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
         fl_vexpect(
             var_decl->type_decl->type == ZENIT_TYPE_ARRAY
             && ((struct ZenitArrayTypeNode*) var_decl->type_decl)->length == elements[i]
-            && ((struct ZenitArrayTypeNode*) var_decl->type_decl)->members_type->type == ZENIT_TYPE_UINT8,
+            && ((struct ZenitArrayTypeNode*) var_decl->type_decl)->members_type->type == ZENIT_TYPE_UINT,
             "Variable type is array of %zu uint8 (\"%s\") because the type is present in the declaration", 
             elements[i],
             var_types_names[i]);
@@ -291,15 +295,15 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
 
             fl_vexpect(nodes[i][j] == value_node->type, "Array %s at position %zu is an integer literal", name, j);
 
-            if (value_node->type == ZENIT_NODE_PRIMITIVE)
+            if (value_node->type == ZENIT_NODE_UINT)
             {
-                struct ZenitPrimitiveNode *primitive_node = (struct ZenitPrimitiveNode*)value_node;
+                struct ZenitUintNode *primitive_node = (struct ZenitUintNode*)value_node;
                 fl_vexpect(
-                    primitive_node->type == types[i][j], 
+                    primitive_node->size == sizes[i][j], 
                     "Array %s at position %zu has type \"%s\" and value %d", 
                     name, 
                     j, 
-                    literal_types_names[i][j], 
+                    literal_sizes_names[i][j], 
                     values[i][j]
                 );
             }
@@ -391,7 +395,7 @@ void zenit_test_parser_variable_complex_typeinfo(void)
 
         if (i == 0)
         {
-            fl_vexpect(var_decl->type_decl->type == ZENIT_TYPE_UINT8, "Variable type is \"%s\" because the type is present in the declaration", var_types_names[i]);
+            fl_vexpect(var_decl->type_decl->type == ZENIT_TYPE_UINT, "Variable type is \"%s\" because the type is present in the declaration", var_types_names[i]);
             fl_expect("Right-hand side must be an identifier node", var_decl->rvalue && var_decl->rvalue->type == ZENIT_NODE_IDENTIFIER);
 
             struct ZenitIdentifierNode *identifier = (struct ZenitIdentifierNode*)var_decl->rvalue;
@@ -399,7 +403,7 @@ void zenit_test_parser_variable_complex_typeinfo(void)
         }
         else if (i == 1)
         {
-            fl_vexpect(var_decl->type_decl->type == ZENIT_TYPE_UINT8, "Variable type is \"%s\" because the type is present in the declaration", var_types_names[i]);
+            fl_vexpect(var_decl->type_decl->type == ZENIT_TYPE_UINT, "Variable type is \"%s\" because the type is present in the declaration", var_types_names[i]);
             fl_expect("Right-hand side must be an identifier node", var_decl->rvalue && var_decl->rvalue->type == ZENIT_NODE_IDENTIFIER);
 
             struct ZenitIdentifierNode *identifier = (struct ZenitIdentifierNode*)var_decl->rvalue;
@@ -408,7 +412,7 @@ void zenit_test_parser_variable_complex_typeinfo(void)
         else if (i == 2)
         {
             fl_vexpect(var_decl->type_decl->type == ZENIT_TYPE_REFERENCE 
-                && ((struct ZenitReferenceTypeNode*) var_decl->type_decl)->element->type == ZENIT_TYPE_UINT8, 
+                && ((struct ZenitReferenceTypeNode*) var_decl->type_decl)->element->type == ZENIT_TYPE_UINT, 
                 "Variable type is \"%s\" because the type is present in the declaration", var_types_names[i]);
             fl_expect("Right-hand side must be a reference operator node", var_decl->rvalue && var_decl->rvalue->type == ZENIT_NODE_REFERENCE);
 

@@ -22,7 +22,7 @@ static bool is_type_defined(struct ZenitProgram *program, struct ZenitTypeInfo *
     if (typeinfo == NULL)
         return false;
 
-    if (zenit_type_is_primitive(typeinfo->type))
+    if (typeinfo->type == ZENIT_TYPE_UINT)
         return true;
 
     if (typeinfo->type == ZENIT_TYPE_REFERENCE)
@@ -60,7 +60,7 @@ static bool is_type_defined(struct ZenitProgram *program, struct ZenitTypeInfo *
 static struct ZenitTypeInfo* get_undefined_type(struct ZenitProgram *program, struct ZenitTypeInfo *typeinfo)
 {
     // Cannot be undefined
-    if (zenit_type_is_primitive(typeinfo->type))
+    if (typeinfo->type == ZENIT_TYPE_UINT)
         return NULL;
 
     if (typeinfo->type == ZENIT_TYPE_REFERENCE)
@@ -114,7 +114,7 @@ typedef struct ZenitSymbol*(*ZenitTypeChecker)(struct ZenitContext *ctx, struct 
 
 // Visitor functions
 static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node);
-static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *node);
+static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitUintNode *node);
 static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *node);
 static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *node);
 static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node);
@@ -126,7 +126,7 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
  *  An array indexed with a <enum ZenitNodeType> to get a <ZenitTypeChecker> function
  */
 static const ZenitTypeChecker checkers[] = {
-    [ZENIT_NODE_PRIMITIVE]    = (ZenitTypeChecker) &visit_primitive_node,
+    [ZENIT_NODE_UINT]    = (ZenitTypeChecker) &visit_primitive_node,
     [ZENIT_NODE_VARIABLE]   = (ZenitTypeChecker) &visit_variable_node,
     [ZENIT_NODE_ARRAY]      = (ZenitTypeChecker) &visit_array_node,
     [ZENIT_NODE_IDENTIFIER] = (ZenitTypeChecker) &visit_identifier_node,
@@ -180,7 +180,7 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
  * Returns:
  *  struct ZenitSymbol* - The primitive's type information
  */
-static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitPrimitiveNode *primitive)
+static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitUintNode *primitive)
 {
     return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) primitive);
 }

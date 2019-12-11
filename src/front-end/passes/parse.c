@@ -88,7 +88,7 @@ static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct Ze
 static struct ZenitTypeNode* parse_type_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
 static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
 static struct ZenitTypeNode* parse_type_reference_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
-static bool parse_integer_value(struct ZenitContext *ctx, struct ZenitToken *primitive_token, enum ZenitType *type, union ZenitPrimitiveValue *value);
+static bool parse_uint_value(struct ZenitContext *ctx, struct ZenitToken *primitive_token, enum ZenitUintTypeSize *size, union ZenitUintValue *value);
 
 static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
 {
@@ -99,19 +99,18 @@ static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *pa
     struct ZenitToken integer_token;
     consume_or_return(ctx, parser, ZENIT_TOKEN_INTEGER, &integer_token);    
     
-    enum ZenitType type = ZENIT_TYPE_NONE;
-    union ZenitPrimitiveValue value;
-
-    assert_or_return(ctx, parse_integer_value(ctx, &integer_token, &type, &value), ZENIT_ERROR_INTERNAL, NULL);
+    enum ZenitUintTypeSize size = ZENIT_UINT_UNK;
+    union ZenitUintValue value;
+    assert_or_return(ctx, parse_uint_value(ctx, &integer_token, &size, &value), ZENIT_ERROR_INTERNAL, NULL);
 
     size_t length = 0;
-    switch (type)
+    switch (size)
     {
-        case ZENIT_TYPE_UINT8:
+        case ZENIT_UINT_8:
             length = (size_t) value.uint8;
             break;
 
-        case ZENIT_TYPE_UINT16:
+        case ZENIT_UINT_16:
             length = (size_t) value.uint16;
             break;
         
@@ -166,9 +165,10 @@ static struct ZenitTypeNode* parse_type_declaration(struct ZenitParser *parser, 
 
     enum ZenitType zenit_type = zenit_type_from_slice(&type_token.value);
 
-    if (zenit_type_is_primitive(zenit_type))
+    if (zenit_type == ZENIT_TYPE_UINT)
     {
-        return (struct ZenitTypeNode*) zenit_node_type_primitive_new(type_token.location, zenit_type);
+        enum ZenitUintTypeSize size = zenit_type_uint_size_from_slice(&type_token.value);
+        return (struct ZenitTypeNode*) zenit_node_type_uint_new(type_token.location, size);
     }
     else if (zenit_type == ZENIT_TYPE_STRUCT)
     {
@@ -180,7 +180,7 @@ static struct ZenitTypeNode* parse_type_declaration(struct ZenitParser *parser, 
     return NULL;
 }
 
-static bool parse_integer_value(struct ZenitContext *ctx, struct ZenitToken *primitive_token, enum ZenitType *type, union ZenitPrimitiveValue *value)
+static bool parse_uint_value(struct ZenitContext *ctx, struct ZenitToken *primitive_token, enum ZenitUintTypeSize *size, union ZenitUintValue *value)
 {
     // This is the integer parsing logic (unsigned integers by now)
     char *endptr;
@@ -204,12 +204,12 @@ static bool parse_integer_value(struct ZenitContext *ctx, struct ZenitToken *pri
 
     if (temp_int <= UINT8_MAX)
     {
-        *type = ZENIT_TYPE_UINT8;
+        *size = ZENIT_UINT_8;
         value->uint8 = (uint8_t)temp_int;
     }
     else if (temp_int <= UINT16_MAX)
     {
-        *type = ZENIT_TYPE_UINT16;
+        *size = ZENIT_UINT_16;
         value->uint16 = (uint16_t)temp_int;
     }
     else
@@ -240,11 +240,11 @@ static struct ZenitNode* parse_integer_literal(struct ZenitParser *parser, struc
     struct ZenitToken number_token;
     consume_or_return(ctx, parser, ZENIT_TOKEN_INTEGER, &number_token);    
 
-    enum ZenitType type = ZENIT_TYPE_NONE;
-    union ZenitPrimitiveValue value;
-    assert_or_return(ctx, parse_integer_value(ctx, &number_token, &type, &value), ZENIT_ERROR_INTERNAL, NULL);
+    enum ZenitUintTypeSize size = ZENIT_UINT_UNK;
+    union ZenitUintValue value;
+    assert_or_return(ctx, parse_uint_value(ctx, &number_token, &size, &value), ZENIT_ERROR_INTERNAL, NULL);
 
-    struct ZenitPrimitiveNode *primitive_node = zenit_node_primitive_new(number_token.location, type, value);
+    struct ZenitUintNode *primitive_node = zenit_node_uint_new(number_token.location, size, value);
 
     assert_or_return(ctx, primitive_node != NULL, ZENIT_ERROR_INTERNAL, NULL);
 

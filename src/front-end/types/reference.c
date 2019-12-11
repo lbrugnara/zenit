@@ -101,10 +101,8 @@ bool zenit_type_reference_is_castable_to(struct ZenitReferenceTypeInfo *referenc
     if (zenit_type_reference_equals(reference, target_type))
         return true;
 
-    bool target_is_uint = target_type->type >= ZENIT_TYPE_UINT8 && target_type->type <= ZENIT_TYPE_UINT16;
-
     // We can cast a reference to an unsigned integer
-    if (target_is_uint)
+    if (target_type->type == ZENIT_TYPE_UINT)
         return true;
 
     return false;

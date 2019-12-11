@@ -47,8 +47,8 @@ struct ZenitTypeInfo* zenit_type_pool_register(struct ZenitTypePool *pool, struc
     if (typeinfo->type == ZENIT_TYPE_STRUCT)
         return (struct ZenitTypeInfo*) zenit_type_pool_register_struct(pool, (struct ZenitStructTypeInfo*) typeinfo);
 
-    if (zenit_type_is_primitive(typeinfo->type))
-        return (struct ZenitTypeInfo*) zenit_type_pool_register_primitive(pool, (struct ZenitPrimitiveTypeInfo*) typeinfo);
+    if (typeinfo->type == ZENIT_TYPE_UINT)
+        return (struct ZenitTypeInfo*) zenit_type_pool_register_primitive(pool, (struct ZenitUintTypeInfo*) typeinfo);
 
     return NULL;
 }
@@ -79,7 +79,7 @@ struct ZenitArrayTypeInfo* zenit_type_pool_register_array(struct ZenitTypePool *
     return typeinfo;
 }
     
-struct ZenitPrimitiveTypeInfo* zenit_type_pool_register_primitive(struct ZenitTypePool *pool, struct ZenitPrimitiveTypeInfo *typeinfo)
+struct ZenitUintTypeInfo* zenit_type_pool_register_primitive(struct ZenitTypePool *pool, struct ZenitUintTypeInfo *typeinfo)
 {
     if (typeinfo == NULL)
         return NULL;

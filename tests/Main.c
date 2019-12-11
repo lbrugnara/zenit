@@ -53,7 +53,7 @@ int main(int argc, char **argv)
             { "Resolve errors",                             &zenit_test_resolve_errors          },
         ),
         fl_test_suite("Infer",
-            { "Infer variable type using primitives",       &zenit_test_infer_variable_primitive    },
+            { "Infer variable type using primitives",       &zenit_test_infer_variable_uint    },
             { "Infer variable type using references",       &zenit_test_infer_variable_reference    },
             { "Infer variable type using arrays",           &zenit_test_infer_variable_array        },
             { "Inference errors",                           &zenit_test_infer_errors                },
