@@ -8,6 +8,22 @@
 #include "../../../src/front-end/types/system.h"
 #include "tests.h"
 
+#include "symbols.h"
+
+void zenit_test_resolve_too_many_symbols(void)
+{
+    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_FILE, "tests/front-end/resolve/symbols.zt");
+    bool is_valid = zenit_parse_source(&ctx);
+
+    zenit_resolve_symbols(&ctx);
+
+    size_t number_of_symbols = 500;
+    for (size_t i=0; i < number_of_symbols; i++)
+        fl_vexpect(zenit_program_has_symbol(ctx.program, symbols[i]), "Symbol '%s' must exist", symbols[i]);
+
+    zenit_context_free(&ctx);
+}
+
 void zenit_test_resolve_primitives(void)
 {
     const char *source = 
@@ -103,102 +119,54 @@ void zenit_test_resolve_references(void)
 }
 
 
+void zenit_test_resolve_arrays(void)
+{
+    const char *source = 
+        "var a : [2]uint8 = [ 1, 2 ];"      "\n"
+        "var b = [ 1, 2, 3 ];"              "\n"
+        "var c : [0]customType = [];"       "\n"
+        "var d : uint16 = 1;"               "\n"
+        "var e : [1]uint16 = [ d ];"        "\n"
+    ;
 
-// void zenit_test_resolve_variables(void)
-// {
-//     const char *source = 
-//         "var a : uint8 = 2;"                "\n"
-//         "var b : [2]uint8 = [ 1, 2 ];"      "\n"
-//         "var c = 1;"                        "\n"
-//         "var d = [ 1, 2, 3 ];"              "\n"
-//         "var e : customType = 0;"           "\n"
-//         "var f : [0]customType = [];"       "\n"
-//         "var g = c;"                    "\n"
-//         "var h : [1]uint8 = [ g ];"     "\n"
-//         "var i : &uint8 = &g;"          "\n"
-//         "var j = &g;"                   "\n"
-//     ;
+    struct Test {
+        char *name;
+        enum ZenitType member_type;
+        char *member_type_name;
+        size_t length;
+    } tests[] = {
+        { "a", ZENIT_TYPE_UINT8,    "uint8",        2   },
+        { "b", ZENIT_TYPE_NONE,     NULL,           3   },
+        { "c", ZENIT_TYPE_STRUCT,   "customType",   0   },
+        { "e", ZENIT_TYPE_UINT16,   "uint16",       1   },
+    };
 
-//     const char *names[] = { 
-//         "a", 
-//         "b",
-//         "c",
-//         "d",
-//         "e",
-//         "f",
-//         "g",
-//         "h",
-//         "i",
-//         "j",
-//     };
-    
-//     const struct ZenitTypeInfo types[] = {
-//         /* The type and number of elements is present in the variable declaration                               */
-//         { .elements = 1, .name = NULL, .type = ZENIT_TYPE_UINT8, .is_array = false, .is_ref = false             },
+    const size_t count = sizeof(tests) / sizeof(tests[0]);
 
-//         /* The type and number of elements is present in the variable declaration                               */
-//         { .elements = 2, .name = NULL, .type = ZENIT_TYPE_UINT8, .is_array = true, .is_ref = false              },
+    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    bool is_valid = zenit_parse_source(&ctx);
 
-//         /* The type information will be inferred by the assignment, so the symbol                               */
-//         /* definition does not contain that information at this pass.                                           */
-//         { .elements = 0, .name = NULL, .type = ZENIT_TYPE_NONE, .is_array = false, .is_ref = false              },
+    zenit_resolve_symbols(&ctx);
 
-//         /* Similar to the previous case, the type is not defined                                                */
-//         { .elements = 0, .name = NULL, .type = ZENIT_TYPE_NONE, .is_array = false, .is_ref = false              },
+    for (size_t i=0; i < count; i++)
+    {
+        struct Test *test = tests + i;
 
-//         /* The type and number of elements is present in the variable declaration                               */
-//         { .elements = 1, .name = "customType", .type = ZENIT_TYPE_STRUCT, .is_array = false, .is_ref = false    },
+        bool symbol_exists = zenit_program_has_symbol(ctx.program, test->name);
+        fl_vexpect(symbol_exists, "Symbol table must contain symbol \"%s\"", test->name);
 
-//         /* The type and number of elements is present in the variable declaration                               */
-//         { .elements = 0, .name = "customType", .type = ZENIT_TYPE_STRUCT, .is_array = true, .is_ref = false     },
+        struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test->name);
 
-//         /* The type information will be inferred by the assignment, so the symbol                               */
-//         /* definition does not contain that information at this pass.                                           */
-//         { .elements = 0, .name = NULL, .type = ZENIT_TYPE_NONE, .is_array = false, .is_ref = false              },
+        fl_vexpect(symbol->typeinfo->type == ZENIT_TYPE_ARRAY, "Symbol '%s' type must be equals to '%s'", symbol->name, zenit_type_to_string(symbol->typeinfo));
 
-//         /* The type and number of elements is present in the variable declaration                               */
-//         { .elements = 1, .name = NULL, .type = ZENIT_TYPE_UINT8, .is_array = true, .is_ref = false              },
+        if (test->member_type != ZENIT_TYPE_NONE)
+        {
+            struct ZenitArrayTypeInfo *array_typeinfo = (struct ZenitArrayTypeInfo*) symbol->typeinfo;
 
-//         /* The type information is inferred from the assignment                                                 */
-//         { .elements = 1, .name = NULL, .type = ZENIT_TYPE_UINT8, .is_array = false, .is_ref = true              },
+            fl_vexpect(array_typeinfo->length == test->length, "Number of elements in the array must be equals to %zu", test->length);
+            fl_vexpect(array_typeinfo->member_type->type == test->member_type, "Type of the array's member type must be equals to '%s'", test->member_type_name);
+        }
+    }
 
-//         /* The type information will be inferred by the assignment, so the symbol                               */
-//         /* definition does not contain that information at this pass.                                           */
-//         { .elements = 0, .name = NULL, .type = ZENIT_TYPE_NONE, .is_array = false, .is_ref = false              },
-//     };
-
-//     const size_t count = sizeof(types) / sizeof(types[0]);
-
-//     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
-//     bool is_valid = zenit_parse_source(&ctx);
-
-//     zenit_resolve_symbols(&ctx);
-    
-//     fl_vexpect(fl_hashtable_length(ctx.program->current_scope->symtable.symbols) == count, "Symbol table must contain %zu symbols", count);
-
-//     for (size_t i=0; i < count; i++)
-//     {
-//         fl_vexpect(zenit_program_has_symbol(ctx.program, names[i]), "Symbol table must contain symbol \"%s\"", names[i]);
-
-//         struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, names[i]);
-
-//         fl_vexpect(flm_cstring_equals(symbol->name, names[i]), "Symbol name must match (%s)", names[i]);
-//         fl_vexpect(symbol->typeinfo.elements == types[i].elements, "Symbol elements must match (%zu)", types[i].elements);
-
-//         if (types[i].is_array)
-//             fl_expect("Symbol must be an array", symbol->typeinfo.is_array);
-//         else
-//             fl_expect("Symbol must not be an array", !symbol->typeinfo.is_array);
-
-//         if (types[i].is_ref)
-//             fl_expect("Symbol must be a reference", symbol->typeinfo.is_ref);
-//         else
-//             fl_expect("Symbol must not be a reference", !symbol->typeinfo.is_ref);
-
-//         fl_vexpect(symbol->typeinfo.type == types[i].type, "Symbol type must match (%s)", zenit_type_to_string(types + i));
-//         fl_vexpect(((symbol->typeinfo.name == NULL && types[i].name == NULL) 
-//             || (flm_cstring_equals(symbol->typeinfo.name, types[i].name))), "Symbol type name must match (%s)", types[i].name ? types[i].name : "null");
-//     }
-
-//     zenit_context_free(&ctx);
-// }
+    zenit_context_free(&ctx);
+}

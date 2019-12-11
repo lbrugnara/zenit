@@ -64,7 +64,7 @@ char* zenit_type_to_string(struct ZenitTypeInfo *typeinfo)
         return zenit_type_primitive_to_string((struct ZenitPrimitiveTypeInfo*) typeinfo);
     
     if (typeinfo->type == ZENIT_TYPE_NONE)
-        return "<none>";
+        return "<unknown>";
 
     return NULL;
 }

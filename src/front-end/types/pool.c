@@ -13,9 +13,6 @@ struct ZenitTypePool zenit_type_pool_new(void)
     return (struct ZenitTypePool) {
         .map = fl_hashtable_new_args((struct FlHashtableArgs) {
             .hash_function = zenit_type_pool_hash,
-            //.key_allocator = fl_container_allocator_string,
-            //.key_comparer = fl_container_equals_string,
-            //.key_cleaner = fl_container_cleaner_pointer,
             .key_allocator = NULL,
             .key_comparer = fl_container_equals_pointer,
             .key_cleaner = NULL,
