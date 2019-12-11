@@ -81,18 +81,7 @@ void zenit_context_error(struct ZenitContext *ctx, struct ZenitSourceLocation lo
 
     va_list args;
     va_start(args, message);
-    size_t length = vsnprintf(NULL, 0, message, args);
-    va_end(args);
-
-    if (length == 0)
-    {
-        return;
-    }
-
-    char *formatted_msg = fl_cstring_new(length);
-    
-    va_start(args, message);
-    vsnprintf(formatted_msg, length+1, message, args);
+    char *formatted_msg = fl_cstring_vadup(message, args);
     va_end(args);
 
     struct ZenitError error = {

@@ -35,12 +35,7 @@ char* zenit_node_uint_uid(struct ZenitUintNode *uint)
             return NULL;
     }
 
-    char *format = "%%L%u_C%u_uint[n:%zu]";
-    size_t length = snprintf(NULL, 0, format, uint->base.location.line, uint->base.location.col, value);
-    char *id = fl_cstring_new(length);
-    snprintf(id, length+1, format, uint->base.location.line, uint->base.location.col, value);
-    id[length] = '\0';
-    return id;
+    return fl_cstring_vdup("%%L%u_C%u_uint[n:%zu]", uint->base.location.line, uint->base.location.col, value);
 }
 
 /*

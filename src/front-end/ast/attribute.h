@@ -33,12 +33,7 @@ static inline char* zenit_node_attribute_uid(struct ZenitAttributeNode *attribut
     if (!attribute)
         return NULL;
 
-    char *format = "%%L%u_C%u_attribute";
-    size_t length = snprintf(NULL, 0, format, attribute->base.location.line, attribute->base.location.col);
-    char *id = fl_cstring_new(length);
-    snprintf(id, length+1, format, attribute->base.location.line, attribute->base.location.col);
-    id[length] = '\0';
-    return id;
+    return fl_cstring_vdup("%%L%u_C%u_attribute[%s]", attribute->base.location.line, attribute->base.location.col, attribute->name);
 }
 
 static inline void zenit_node_attribute_free(struct ZenitAttributeNode *attribute_node)

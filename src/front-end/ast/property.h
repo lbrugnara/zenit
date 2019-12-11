@@ -31,12 +31,7 @@ static inline char* zenit_node_property_uid(struct ZenitPropertyNode *property)
     if (!property)
         return NULL;
 
-    char *format = "%%L%u_C%u_property";
-    size_t length = snprintf(NULL, 0, format, property->base.location.line, property->base.location.col);
-    char *id = fl_cstring_new(length);
-    snprintf(id, length+1, format, property->base.location.line, property->base.location.col);
-    id[length] = '\0';
-    return id;
+    return fl_cstring_vdup("%%L%u_C%u_property[%s]", property->base.location.line, property->base.location.col, property->name);
 }
 
 static inline void zenit_node_property_free(struct ZenitPropertyNode *node)

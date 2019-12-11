@@ -22,12 +22,7 @@ char* zenit_node_array_uid(struct ZenitArrayNode *array)
     if (!array)
         return NULL;
 
-    char *format = "%%L%u_C%u_array[e:%zu]";
-    size_t length = snprintf(NULL, 0, format, array->base.location.line, array->base.location.col, fl_array_length(array->elements));
-    char *id = fl_cstring_new(length);
-    snprintf(id, length+1, format, array->base.location.line, array->base.location.col, fl_array_length(array->elements));
-    id[length] = '\0';
-    return id;
+    return fl_cstring_vdup("%%L%u_C%u_array[e:%zu]", array->base.location.line, array->base.location.col, fl_array_length(array->elements));
 }
 
 /*

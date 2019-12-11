@@ -75,9 +75,7 @@ char* zenit_type_array_to_string(struct ZenitArrayTypeInfo *typeinfo)
     struct ZenitArrayTypeInfo *array_type = (struct ZenitArrayTypeInfo*) typeinfo;
 
     fl_cstring_append(&string_value, "[");
-    char tmp_string[20];
-    snprintf(tmp_string, 20, "%zu", array_type->length);
-    fl_cstring_append(&string_value, tmp_string);
+    fl_cstring_vappend(&string_value, "%zu", array_type->length);
     fl_cstring_append(&string_value, "]");
 
     fl_cstring_append(&string_value, zenit_type_to_string(array_type->member_type));

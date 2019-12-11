@@ -16,12 +16,7 @@ char* zenit_node_identifier_uid(struct ZenitIdentifierNode *identifier)
     if (!identifier)
         return NULL;
 
-    char *format = "%%L%u_C%u_id[n:%s]";
-    size_t length = snprintf(NULL, 0, format, identifier->base.location.line, identifier->base.location.col, identifier->name);
-    char *id = fl_cstring_new(length);
-    snprintf(id, length+1, format, identifier->base.location.line, identifier->base.location.col, identifier->name);
-    id[length] = '\0';
-    return id;
+    return fl_cstring_vdup("%%L%u_C%u_id[n:%s]", identifier->base.location.line, identifier->base.location.col, identifier->name);
 }
 
 /*

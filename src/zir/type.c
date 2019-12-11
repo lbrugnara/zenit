@@ -136,9 +136,7 @@ const char* zir_type_to_string(const struct ZirTypeInfo *typeinfo)
     if (typeinfo->is_array)
     {
         fl_cstring_append(&string_value, "[");
-        char tmp_string[20];
-        snprintf(tmp_string, 20, "%zu", typeinfo->elements);
-        fl_cstring_append(&string_value, tmp_string);
+        fl_cstring_vappend(&string_value, "%zu", typeinfo->elements);
         fl_cstring_append(&string_value, "]");
     }
 
