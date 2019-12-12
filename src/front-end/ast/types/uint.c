@@ -1,6 +1,6 @@
 #include <fllib.h>
 #include "type.h"
-#include "type_uint.h"
+#include "uint.h"
 
 struct ZenitUintTypeNode* zenit_node_type_uint_new(struct ZenitSourceLocation location, enum ZenitUintTypeSize size)
 {

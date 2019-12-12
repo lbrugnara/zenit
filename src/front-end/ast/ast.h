@@ -13,7 +13,7 @@
 #include "node.h"
 #include "property.h"
 #include "reference.h"
-#include "type.h"
+#include "types/type.h"
 #include "variable.h"
 
 /*

@@ -1,6 +1,6 @@
 #include <fllib.h>
 #include "type.h"
-#include "type_struct.h"
+#include "struct.h"
 
 struct ZenitStructTypeNode* zenit_node_type_struct_new(struct ZenitSourceLocation location, char *name)
 {

@@ -1,6 +1,6 @@
 #include <fllib.h>
 #include "type.h"
-#include "type_array.h"
+#include "array.h"
 
 struct ZenitArrayTypeNode* zenit_node_type_array_new(struct ZenitSourceLocation location, struct ZenitTypeNode *members_type, size_t length)
 {

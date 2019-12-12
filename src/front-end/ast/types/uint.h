@@ -2,7 +2,7 @@
 #define ZENIT_AST_TYPE_PRIMITIVE_H
 
 #include "type.h"
-#include "../types/uint.h"
+#include "../../types/uint.h"
 
 struct ZenitUintTypeNode {
     struct ZenitTypeNode base;

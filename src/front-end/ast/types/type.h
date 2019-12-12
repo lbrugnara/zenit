@@ -1,16 +1,16 @@
 #ifndef ZENIT_AST_TYPE_H
 #define ZENIT_AST_TYPE_H
 
-#include "node.h"
+#include "../node.h"
 
 struct ZenitTypeNode {
     struct ZenitNode base;
     enum ZenitType type;
 };
 
-#include "type_array.h"
-#include "type_uint.h"
-#include "type_reference.h"
-#include "type_struct.h"
+#include "array.h"
+#include "uint.h"
+#include "reference.h"
+#include "struct.h"
 
 #endif /* ZENIT_AST_TYPE_H */
