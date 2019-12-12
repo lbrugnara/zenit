@@ -43,7 +43,7 @@ static struct ZenitTypeInfo* build_type_info_from_declaration(struct ZenitProgra
     {
         typeinfo = zenit_type_none_new();
     }
-    else if (type_decl->base.type == ZENIT_NODE_TYPE_PRIMITIVE)
+    else if (type_decl->base.type == ZENIT_NODE_TYPE_UINT)
     {
         struct ZenitUintTypeNode *uint_type_decl = (struct ZenitUintTypeNode*) type_decl;
         typeinfo = (struct ZenitTypeInfo*) zenit_type_uint_new(uint_type_decl->size);

@@ -11,10 +11,6 @@ enum ZenitType zenit_type_from_slice(struct FlSlice *slice)
     return ZENIT_TYPE_STRUCT;
 }
 
-/*
- * Function: zenit_type_hash
- *  Creates a hash from a <struct ZenitTypeInfo> object
- */
 unsigned long zenit_type_hash(struct ZenitTypeInfo *typeinfo)
 {
     if (!typeinfo)

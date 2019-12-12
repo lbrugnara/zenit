@@ -10,8 +10,7 @@
  * 
  * Members:
  *  <struct ZenitNode> base: Basic information of the node object
- *  <struct ZenitNode> **values: Array of pointers to <struct ZenitNode>s that are the individual values
- *              of the array
+ *  <struct ZenitNode> **elements: Pointers to the array's node elements
  */
 struct ZenitArrayNode {
     struct ZenitNode base;

@@ -32,8 +32,6 @@ struct ZenitSymbol {
  */
 struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitTypeInfo *typeinfo);
 
-struct ZenitTypeInfo* zenit_symbol_set_type(struct ZenitSymbol *symbol, struct ZenitTypeInfo *typeinfo);
-
 /*
  * Function: zenit_symbol_free
  *  Releases the memory of the *symbol* object

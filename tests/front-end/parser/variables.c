@@ -35,7 +35,7 @@ void zenit_test_parser_variable_literal(void)
         struct ZenitNode *node = ctx.ast->decls[i];
         struct LiteralVariableTest *test = tests + i;
 
-        fl_vexpect(test->node_type == node->type, "Node type is %s", zenit_node_print_type(node));
+        fl_vexpect(test->node_type == node->type, "Node type is %s", zenit_node_type_to_string(node));
 
         struct ZenitVariableNode *var_decl = (struct ZenitVariableNode*) node;
 

@@ -58,7 +58,7 @@ static inline struct ZenitAttributeNodeMap zenit_attribute_node_map_new()
             .key_allocator = fl_container_allocator_string,
             .key_comparer = fl_container_equals_string,
             .key_cleaner = fl_container_cleaner_pointer,
-            .value_cleaner = (FlContainerCleanupFunction)zenit_node_free,
+            .value_cleaner = (FlContainerCleanupFunction) zenit_node_free,
             .value_allocator = NULL
         })
     };
@@ -72,7 +72,7 @@ static inline void zenit_attribute_node_map_free(struct ZenitAttributeNodeMap *m
 
 static inline struct ZenitAttributeNode* zenit_attribute_node_map_add(struct ZenitAttributeNodeMap *mapptr, struct ZenitAttributeNode *attr)
 {
-    return (struct ZenitAttributeNode*)fl_hashtable_add(mapptr->map, attr->name, attr);
+    return (struct ZenitAttributeNode*) fl_hashtable_add(mapptr->map, attr->name, attr);
 }
 
 static inline const char** zenit_attribute_node_map_keys(struct ZenitAttributeNodeMap *mapptr)
@@ -87,7 +87,7 @@ static inline struct ZenitAttributeNode** zenit_attribute_node_map_values(struct
 
 static inline struct ZenitAttributeNode* zenit_attribute_node_map_get(struct ZenitAttributeNodeMap *mapptr, const char *attrname)
 {
-    return (struct ZenitAttributeNode*)fl_hashtable_get(mapptr->map, attrname);
+    return (struct ZenitAttributeNode*) fl_hashtable_get(mapptr->map, attrname);
 }
 
 static inline size_t zenit_attribute_node_map_length(struct ZenitAttributeNodeMap *mapptr)

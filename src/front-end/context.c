@@ -10,10 +10,10 @@
  *  Frees the memory of an error object allocated with the <zenit_context_error> function
  *
  * Parameters:
- *  errorptr - Pointer to a <struct ZenitError> object
+ * <void> *errorptr: Pointer to a <struct ZenitError> object
  *
  * Returns:
- *  void - This function does not return a value
+ *  void: This function does not return a value
  *
  */
 static void error_free(void *errorptr)
@@ -45,8 +45,8 @@ struct ZenitContext zenit_context_new(enum ZenitSourceType type, const char *inp
 
 /*
  * Function: zenit_context_free
- *  Releases all the memory allocated by the <zenit_context_new> function
- *  but also if present, this function releases the memory of the <struct ZenitAst>
+ *  Releases all the memory allocated by the <zenit_context_new> function, the errors
+ *  array, and also if present, this function releases the memory of the <struct ZenitAst>
  *  object.
  */
 void zenit_context_free(struct ZenitContext *ctx)
@@ -68,8 +68,8 @@ void zenit_context_free(struct ZenitContext *ctx)
 
 /*
  * Function: zenit_context_error
- *  Initializes the *errors* property if needed and allocates memory for the formatted string. Both objects are
- *  deallocated by the <error_free> function.
+ *  Initializes the *errors* array if needed and appends a new error object to it. The memory allocated for the *errors*
+ *  array and the memory allocated for each error object is freed in the <zenit_context_free> function
  */
 void zenit_context_error(struct ZenitContext *ctx, struct ZenitSourceLocation location, enum ZenitErrorType type, const char *message, ...)
 {

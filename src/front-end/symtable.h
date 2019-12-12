@@ -35,11 +35,11 @@ struct ZenitSymtable {
  *  Creates a new symbol table
  *
  * Parameters:
- *  <enum ZenitSymtableType> type - The type of symbol table
+ *  <enum ZenitSymtableType> type: The type of symbol table
  *  <const char> *id: An identifier for the symbol table
  *
  * Returns:
- *  <struct ZenitSymtable> - The created symbol table
+ *  <struct ZenitSymtable>: The created symbol table
  *
  * Notes:
  *  The object returned by this function must be freed using the
@@ -52,10 +52,10 @@ struct ZenitSymtable zenit_symtable_new(enum ZenitSymtableType, const char *id);
  *  Releases the memory allocated in the *symtable* object
  *
  * Parameters:
- *  <struct ZenitSymtable> *symtable - Symbol table to be freed
+ *  <struct ZenitSymtable> *symtable: Symbol table to be freed
  *
  * Returns:
- *  void - This function does not return a value
+ *  void: This function does not return a value
  * 
  */
 void zenit_symtable_free(struct ZenitSymtable *symtable);
@@ -65,11 +65,11 @@ void zenit_symtable_free(struct ZenitSymtable *symtable);
  *  Adds the <struct ZenitSymbol> object to the symbol table
  *
  * Parameters:
- *  <struct ZenitSymtable> *symtable - The symbol table
- *  <struct ZenitSymbol> *symbol - The symbol to be added to the symbol table
+ *  <struct ZenitSymtable> *symtable: The symbol table
+ *  <struct ZenitSymbol> *symbol: The symbol to be added to the symbol table
  *
  * Returns:
- *  <struct ZenitSymbol>* - The symbol object
+ *  <struct ZenitSymbol>*: The symbol object
  *
  */
 struct ZenitSymbol* zenit_symtable_add(struct ZenitSymtable *symtable, struct ZenitSymbol *symbol);
@@ -79,11 +79,11 @@ struct ZenitSymbol* zenit_symtable_add(struct ZenitSymtable *symtable, struct Ze
  *  Checks if a symbol exists in the symbol table
  *
  * Parameters:
- *  <struct ZenitSymtable> *symtable - The symbol table
- *  <const char> *symbol_name - The symbol's name to look for
+ *  <struct ZenitSymtable> *symtable: The symbol table
+ *  <const char> *symbol_name: The symbol's name to look for
  *
  * Returns:
- *  bool - *true* if there is a symbol with the provided name, otherwise this function
+ *  bool: *true* if there is a symbol with the provided name, otherwise this function
  *          returns *false*.
  *
  */
@@ -94,11 +94,11 @@ bool zenit_symtable_has(struct ZenitSymtable *symtable, const char *symbol_name)
  *  This function returns a symbol from the symbol table if there is a value for the provided *symbol_name* key
  *
  * Parameters:
- *  <struct ZenitSymtable> *symtable - Symbol table
- *  <const char> *symbol_name - Key to lookup the symbol
+ *  <struct ZenitSymtable> *symtable: Symbol table
+ *  <const char> *symbol_name: Key to lookup the symbol
  *
  * Returns:
- *  <struct ZenitSymbol>* - Pointer to the symbol object or NULL
+ *  <struct ZenitSymbol>*: Pointer to the symbol object or NULL
  *
  */
 struct ZenitSymbol* zenit_symtable_get(struct ZenitSymtable *symtable, const char *symbol_name);

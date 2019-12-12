@@ -97,4 +97,4 @@ static inline bool zenit_property_node_map_has_key(struct ZenitPropertyNodeMap *
     return fl_hashtable_has_key(property_map->map, property_name);
 }
 
-#endif /* ZENIAST_T_PROPERTY_H */
+#endif /* ZENIT_AST_T_PROPERTY_H */

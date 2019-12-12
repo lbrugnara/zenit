@@ -55,10 +55,10 @@ struct ZenitToken {
  *  of the enum <enum ZenitTokenType> value
  *
  * Parameters:
- *  type - enumeration value
+ *  <enum ZenitTokenType> type: enumeration value
  *
  * Returns:
- *  const char* - String pointer
+ *  <const char>*: String pointer
  *
  */
 const char* zenit_token_print(enum ZenitTokenType type);

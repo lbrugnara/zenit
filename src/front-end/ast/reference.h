@@ -5,7 +5,7 @@
 
 /*
  * Struct: struct ZenitReferenceNode
- *  Represents taking an expression address (reference operator)
+ *  Represents taking an expression's address (reference operator)
  * 
  * Members:
  *  <struct ZenitNode> base: Basic information of the node object

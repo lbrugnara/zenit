@@ -18,7 +18,7 @@ enum ZenitNodeType {
     ZENIT_NODE_REFERENCE,
     ZENIT_NODE_CAST,
     ZENIT_NODE_TYPE_ARRAY,
-    ZENIT_NODE_TYPE_PRIMITIVE,
+    ZENIT_NODE_TYPE_UINT,
     ZENIT_NODE_TYPE_REFERENCE,
     ZENIT_NODE_TYPE_STRUCT,
 };
@@ -30,16 +30,37 @@ enum ZenitNodeType {
  * Members:
  *  <enum ZenitNodeType> type: The specific type of the AST node
  *  <struct ZenitSourceLocation> location: The place in the source code represented by the node
- *  <struct ZenitTypeInfo> typeinfo: The type of the operand or operator represented by the node
  */
 struct ZenitNode {
     enum ZenitNodeType type;
     struct ZenitSourceLocation location;
 };
 
-char* zenit_node_print_type(struct ZenitNode *node);
-
+/*
+ * Function: zenit_node_uid
+ *  Returns a UID for the node object
+ *
+ * Parameters:
+ *  <struct ZenitNode> *node: Node object
+ *
+ * Returns:
+ *  <char>*: UID of the node object
+ *
+ */
 char* zenit_node_uid(struct ZenitNode *node);
+
+/*
+ * Function: zenit_node_type_to_string
+ *  Returns a string representation of the node's type
+ *
+ * Parameters:
+ *  <struct ZenitNode> *node: Node object
+ *
+ * Returns:
+ *  <char>*: String representation of the node's type
+ * 
+ */
+char* zenit_node_type_to_string(struct ZenitNode *node);
 
 /*
  * Function: zenit_node_free
@@ -47,10 +68,14 @@ char* zenit_node_uid(struct ZenitNode *node);
  *  independently of the type of node
  *
  * Parameters:
- *  node - Node object to free
+ *  <struct ZenitNode> *node: Node object to free
  *
  * Returns:
- *  void - This function does not return a value
+ *  <void>: This function does not return a value
+ * 
+ * Notes:
+ *  All the objects compound with a <struct ZenitNode> object can be
+ *  freed using this function
  */
 void zenit_node_free(struct ZenitNode *node);
 

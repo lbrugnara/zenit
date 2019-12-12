@@ -11,7 +11,10 @@
  * Members:
  *  <struct ZenitNode> base: Basic information of the node object
  *  <char> *name: The variable name
- *  <struct ZenitNode> *value: The right-hand side expression that initializes the variable
+ *  <struct ZenitTypeNode> *type_decl: If present in the declaration, the variable's type
+ *  <struct ZenitNode> *rvalue: The right-hand side expression that initializes the variable
+ *  <struct ZenitAttributeNodeMap> attributes: If present, a list of all the variable's attributes
+ * 
  */
 struct ZenitVariableNode {
     struct ZenitNode base;

@@ -178,7 +178,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 
     for (size_t i=0; i < length; i++)
     {
-        zenit_symbol_set_type(array_elements_symbols[i], common_type);
+        array_elements_symbols[i]->typeinfo = common_type;
         zenit_type_array_add_member(array_type, common_type);
     }
 
@@ -232,7 +232,7 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
             }
             else
             {
-                zenit_symbol_set_type(prop_symbol, value_symbol->typeinfo);
+                prop_symbol->typeinfo = value_symbol->typeinfo;
             }
         }
 
@@ -269,12 +269,12 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     if (symbol->typeinfo->type == ZENIT_TYPE_NONE && rhs_symbol->typeinfo->type != ZENIT_TYPE_NONE)
     {
         // If symbol's type is none, we use the rhs type
-        zenit_symbol_set_type(symbol, rhs_symbol->typeinfo);
+        symbol->typeinfo = rhs_symbol->typeinfo;
     }
     else if (symbol->typeinfo->type != ZENIT_TYPE_NONE && rhs_symbol->typeinfo->type == ZENIT_TYPE_NONE)
     {
         // If the rhs type is none, we update it using the variable's type
-        zenit_symbol_set_type(rhs_symbol, symbol->typeinfo);
+        rhs_symbol->typeinfo = symbol->typeinfo;
     }
     else if (symbol->typeinfo->type == ZENIT_TYPE_NONE && rhs_symbol->typeinfo->type == ZENIT_TYPE_NONE)
     {

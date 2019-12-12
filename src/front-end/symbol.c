@@ -14,14 +14,6 @@ struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitTypeInfo *typ
     return symbol;
 }
 
-struct ZenitTypeInfo* zenit_symbol_set_type(struct ZenitSymbol *symbol, struct ZenitTypeInfo *typeinfo)
-{
-    if (!symbol || !typeinfo)
-        return NULL;
-
-    return (symbol->typeinfo = typeinfo);
-}
-
 void zenit_symbol_free(struct ZenitSymbol *symbol)
 {
     if (!symbol)

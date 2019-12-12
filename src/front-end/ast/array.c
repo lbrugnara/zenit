@@ -22,18 +22,23 @@ char* zenit_node_array_uid(struct ZenitArrayNode *array)
     if (!array)
         return NULL;
 
-    return fl_cstring_vdup("%%L%u_C%u_array[e:%zu]", array->base.location.line, array->base.location.col, fl_array_length(array->elements));
+    return fl_cstring_vdup(
+        "%%L%u_C%u_array[e:%zu]", 
+        array->base.location.line, 
+        array->base.location.col, 
+        fl_array_length(array->elements)
+    );
 }
 
 /*
  f Function: zenit_node_array_free
- *  Releases the memory of a <struct ZenitArrayNode> object
+ *  Releases the memory of an array node object
  *
  * Parameters:
- *  array - <struct ZenitArrayNode> object
+ *  <struct ZenitArrayNode> *array: Array node object
  *
  * Returns:
- *  void - This function does not return a value
+ *  <void>: This function does not return a value
  */
 void zenit_node_array_free(struct ZenitArrayNode *array)
 {

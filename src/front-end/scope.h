@@ -5,12 +5,13 @@
 
 /*
  * Struct: zenit_scope_new
- *  Represents a scope in the program that contains a symbol table
+ *  Represents a scope in the program
  * 
  * Members:
  *  <struct ZenitScope> *parent: Pointer to the parent scope
- *  <struct ZenitScope> **children: Set of children scopes
+ *  <struct ZenitScope> **children: Array of pointers to the scope's children
  *  <struct ZenitSymtable> symtable: Symbol table of the current scope
+ *  <unsigned long long> temp_counter: Counter for temporal symbols names
  * 
  */
 struct ZenitScope {
@@ -25,10 +26,12 @@ struct ZenitScope {
  *  Creates a new scope object
  *
  * Parameters:
- *  <>  - 
+ *  <const char> *id: Id of the scope object
+ *  <enum ZenitSymtableType> type: Type of symbol table for this scope
+ *  <struct ZenitScope> *parent: Pointer to a parent scope
  *
  * Returns:
- *  <struct ZenitScope>* - The created scope object
+ *  <struct ZenitScope>*: The created scope object
  *
  * Notes:
  *  The object returned by this function must be freed using the
@@ -41,10 +44,10 @@ struct ZenitScope* zenit_scope_new(const char *id, enum ZenitSymtableType type, 
  *  Releases the memory of the scope object
  *
  * Parameters:
- *  <struct ZenitScope> *scope - Scope to be freed
+ *  <struct ZenitScope> *scope: Scope to be freed
  *
  * Returns:
- *  void - This function does not return a value
+ *  <void>: This function does not return a value
  * 
  */
 void zenit_scope_free(struct ZenitScope *scope);

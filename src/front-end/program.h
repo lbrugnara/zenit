@@ -11,6 +11,7 @@
  * Members:
  *  <struct ZenitScope> *global: A pointer to the global scope
  *  <struct ZenitScope> *current: A pointer to the current scope
+ *  <struct ZenitTypePool> type_pool: Object that keeps track of the types objects created for this program
  */
 struct ZenitProgram {
     struct ZenitScope *global_scope;
@@ -23,7 +24,7 @@ struct ZenitProgram {
  *  Creates a new Zenit program object
  *
  * Returns:
- *  <struct ZenitProgram>* - The created program
+ *  <struct ZenitProgram>*: The created program
  *
  * Notes:
  *  The object returned by this function must be freed using the
@@ -36,10 +37,10 @@ struct ZenitProgram* zenit_program_new(void);
  *  Releases the memory of the program object
  *
  * Parameters:
- *  <struct ZenitProgram> *program - Program object to be freed
+ *  <struct ZenitProgram> *program: Program object to be freed
  *
  * Returns:
- *  void - This function does not return a value
+ *  <void>: This function does not return a value
  * 
  */
 void zenit_program_free(struct ZenitProgram *program);
@@ -49,17 +50,42 @@ void zenit_program_free(struct ZenitProgram *program);
  *  Adds a new symbol to the current scope
  *
  * Parameters:
- *  <struct ZenitProgram> *program - Program object
- *  <struct ZenitSymbol> *symbol - Symbol to be added
+ *  <struct ZenitProgram> *program: Program object
+ *  <struct ZenitSymbol> *symbol: Symbol to be added
  * 
  * Returns:
- *  <struct ZenitSymbol>* - Added symbol
+ *  <struct ZenitSymbol>*: Added symbol
  * 
  */
 struct ZenitSymbol* zenit_program_add_symbol(struct ZenitProgram *program, struct ZenitSymbol *symbol);
 
+/*
+ * Function: zenit_program_has_symbol
+ *  Returns *true* if the program contains a symbol with name equals to the string *name*
+ *
+ * Parameters:
+ *  <struct ZenitProgram> *program: Program object
+ *  <const char> *name: Name of the symbol
+ *
+ * Returns:
+ *  <bool>: *true* if there is a symbol with the provided *name* within the program object
+ *
+ */
 bool zenit_program_has_symbol(struct ZenitProgram *program, const char *name);
 
+/*
+ * Function: zenit_program_get_symbol
+ *  Returns the symbol with a name equals to the *symbol_name*, if such a symbol exists within the 
+ *  program object
+ *
+ * Parameters:
+ *  <struct ZenitProgram> *program: Program object
+ *  <const char> *symbol_name: Name of the symbol to retrieve from the program
+ *
+ * Returns:
+ *  <struct ZenitSymbol>*: A valid symbol if it exists, otherwise, this function returns NULL
+ * 
+ */
 struct ZenitSymbol* zenit_program_get_symbol(struct ZenitProgram *program, const char *symbol_name);
 
 #endif /* ZENIT_PROGRAM_H */

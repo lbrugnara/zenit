@@ -10,10 +10,10 @@ static struct ZenitSourceInfo* new_from_string(const char *content);
  *  object that contains it as the program's source code
  *
  * Parameters:
- *  filename - A valid filename with source code
+ *  <const char> *filename: A valid filename with source code
  *
  * Returns:
- *  struct ZenitSourceInfo* - Represents the program's source code
+ *  <struct ZenitSourceInfo>*: Represents the program's source code
  *
  */
 static struct ZenitSourceInfo* new_from_file(const char *filename)
@@ -39,10 +39,10 @@ static struct ZenitSourceInfo* new_from_file(const char *filename)
  *  as the program's source code
  *
  * Parameters:
- *  content - Program's source code
+ *  <const char> *content: Program's source code
  *
  * Returns:
- *  struct ZenitSourceInfo* - Represents the program's source code
+ *  <struct ZenitSourceInfo>*: Represents the program's source code
  *
  */
 static struct ZenitSourceInfo* new_from_string(const char *content)

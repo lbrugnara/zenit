@@ -30,9 +30,10 @@ struct ZenitSource {
  *  process.
  * 
  * Members:
- *  filename: If the source of the program's code is a file, the filename
- *  line: The line number
- *  col: The column number
+ *  <const char> *filename: If the source of the program's code is a file, the filename
+ *  <unsigned int> line: The line number
+ *  <unsigned int> col: The column number
+ * 
  */
 struct ZenitSourceLocation {
     const char *filename;
@@ -46,9 +47,8 @@ struct ZenitSourceLocation {
  *  of the location during the compilation process
  * 
  * Members:
- *  source: A <struct ZenitSource> object containing the program's code
- *  location: A <struct ZenitSourceLocation> object that keeps track of the
- *              line and column numbers
+ *  <struct ZenitSource> source: An object containing the program's code
+ *  <struct ZenitSourceLocation> location: An object that keeps track of theline and column numbers information
  */
 struct ZenitSourceInfo {
     struct ZenitSource source;
@@ -61,12 +61,12 @@ struct ZenitSourceInfo {
  *  and is ready to be used by a <struct ZenitContext> object.
  *
  * Parameters:
- *  type - The origin of the source code represented by a <enum ZenitSourceType> value
- *  input - A string that represents a filename or the source code based on the value
+ *  <enum ZenitSourceType> type: The origin of the source code represented by a <enum ZenitSourceType> value
+ *  <const char> *input: A string that represents a filename or the source code based on the value
  *          of the *type* parameter.
  *
  * Returns:
- *  struct ZenitSourceInfo* - Pointer to an object that is ready to be used by a <struct ZenitContext>
+ *  <struct ZenitSourceInfo>*: Pointer to an object that is ready to be used by a <struct ZenitContext>
  *                      object to start the compilation process
  * 
  * Notes:
@@ -82,10 +82,10 @@ struct ZenitSourceInfo* zenit_source_new(enum ZenitSourceType type, const char *
  *  with the <zenit_source_new> function.
  *
  * Parameters:
- *  srcinfo - Pointer to a <struct ZenitSourceInfo> object
+ *  <struct ZenitSourceInfo> *srcinfo: Pointer to a <struct ZenitSourceInfo> object
  *
  * Returns:
- *  void - This function does not return a value
+ *  <void>: This function does not return a value
  */
 void zenit_source_free(struct ZenitSourceInfo *srcinfo);
 

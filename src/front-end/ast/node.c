@@ -26,7 +26,7 @@ static inline void free_node_array_entry(void *nodeptr)
     zenit_node_free(node);
 }
 
-char* zenit_node_print_type(struct ZenitNode *node)
+char* zenit_node_type_to_string(struct ZenitNode *node)
 {
     if (!node)
         return "null";
@@ -35,20 +35,39 @@ char* zenit_node_print_type(struct ZenitNode *node)
     {
         case ZENIT_NODE_UINT:
             return "literal";
+
         case ZENIT_NODE_VARIABLE:
             return "var";
-        case ZENIT_NODE_ARRAY:
-            return "array";
-        case ZENIT_NODE_REFERENCE:
-            return "ref";
-        case ZENIT_NODE_IDENTIFIER:
-            return "id";
+
         case ZENIT_NODE_ATTRIBUTE:
             return "attr";
+
         case ZENIT_NODE_PROPERTY:
             return "prop";
+
+        case ZENIT_NODE_ARRAY:
+            return "array";
+
+        case ZENIT_NODE_IDENTIFIER:
+            return "id";
+
+        case ZENIT_NODE_REFERENCE:
+            return "ref";
+
         case ZENIT_NODE_CAST:
             return "cast";
+
+        case ZENIT_NODE_TYPE_ARRAY:
+            return "array type";
+
+        case ZENIT_NODE_TYPE_UINT:
+            return "uint type";
+
+        case ZENIT_NODE_TYPE_REFERENCE:
+            return "ref type";
+
+        case ZENIT_NODE_TYPE_STRUCT:
+            return "struct type";
         
         default:
             break;
@@ -91,7 +110,7 @@ char* zenit_node_uid(struct ZenitNode *node)
         case ZENIT_NODE_TYPE_ARRAY:
             return zenit_node_type_array_uid((struct ZenitArrayTypeNode*)node);
 
-        case ZENIT_NODE_TYPE_PRIMITIVE:
+        case ZENIT_NODE_TYPE_UINT:
             return zenit_node_type_uint_uid((struct ZenitUintTypeNode*)node);
 
         case ZENIT_NODE_TYPE_REFERENCE:
@@ -153,7 +172,7 @@ void zenit_node_free(struct ZenitNode *node)
             zenit_node_type_array_free((struct ZenitArrayTypeNode*)node);
             break;
 
-        case ZENIT_NODE_TYPE_PRIMITIVE:
+        case ZENIT_NODE_TYPE_UINT:
             zenit_node_type_uint_free((struct ZenitUintTypeNode*)node);
             break;
 

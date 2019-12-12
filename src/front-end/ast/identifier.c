@@ -21,13 +21,13 @@ char* zenit_node_identifier_uid(struct ZenitIdentifierNode *identifier)
 
 /*
  * Function: zenit_node_identifier_free
- *  Releases the memory of the <struct ZenitIdentifierNode> object
+ *  Releases the memory of the identifier node
  *
  * Parameters:
- *  identifier_node - Object to be freed.
+ *  <struct ZenitIdentifierNode> *identifier_node: Object to be freed.
  *
  * Returns:
- *  void - This function does not return a value
+ *  <void>: This function does not return a value
  */
 void zenit_node_identifier_free(struct ZenitIdentifierNode *identifier_node)
 {

@@ -25,6 +25,7 @@ void zenit_program_free(struct ZenitProgram *program)
 
 struct ZenitSymbol* zenit_program_add_symbol(struct ZenitProgram *program, struct ZenitSymbol *symbol)
 {
+    // FIXME: Fix this to add symbols to the global scope
     return zenit_symtable_add(&program->current_scope->symtable, symbol);
 }
 

@@ -33,10 +33,10 @@ struct ZenitAst {
  *  Releases the memory of a whole <struct ZenitAst> object
  *
  * Parameters:
- *  ast - AST object to free
+ *  <struct ZenitAst> *ast - AST object to free
  *
  * Returns:
- *  void - This function does not return a value
+ *  <void>: This function does not return a value
  */
 void zenit_ast_free(struct ZenitAst *ast);
 
