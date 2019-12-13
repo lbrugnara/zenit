@@ -2,7 +2,7 @@
 #define ZIR_SYMBOL_H
 
 #include <stdbool.h>
-#include "type.h"
+#include "types/system.h"
 
 /*
  * Struct: struct ZirSymbol
@@ -11,8 +11,7 @@
  */
 struct ZirSymbol {
     const char *name;
-    struct ZirTypeInfo typeinfo;
-    bool temporal;
+    struct ZirTypeInfo *typeinfo;
 };
 
 /*
@@ -32,7 +31,7 @@ struct ZirSymbol {
  *  The object returned by this function must be freed with the <zir_symbol_free> function
  *
  */
-struct ZirSymbol* zir_symbol_new(const char *name, struct ZirTypeInfo *typeinfo, bool temporal);
+struct ZirSymbol* zir_symbol_new(const char *name, struct ZirTypeInfo *typeinfo);
 
 /*
  * Function: zir_symbol_free

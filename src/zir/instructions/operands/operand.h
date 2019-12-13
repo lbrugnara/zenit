@@ -1,7 +1,7 @@
 #ifndef ZIR_OPERAND_H
 #define ZIR_OPERAND_H
 
-#include "../../type.h"
+#include "../../types/type.h"
 
 /*
  * Enum: enum ZirOperandType
@@ -9,7 +9,7 @@
  *  enum.
  */
 enum ZirOperandType {
-    ZIR_OPERAND_PRIMITIVE,
+    ZIR_OPERAND_UINT,
     ZIR_OPERAND_ARRAY,
     ZIR_OPERAND_SYMBOL,
     ZIR_OPERAND_REFERENCE
@@ -21,7 +21,6 @@ enum ZirOperandType {
  */
 struct ZirOperand {
     enum ZirOperandType type;
-    struct ZirTypeInfo typeinfo;
 };
 
 /*
@@ -55,5 +54,7 @@ void zir_operand_free(struct ZirOperand *operand);
  *
  */
 char* zir_operand_dump(struct ZirOperand *operand, char *output);
+
+char* zir_operand_type_dump(struct ZirOperand *operand, char *output);
 
 #endif /* ZIR_OPERAND_H */

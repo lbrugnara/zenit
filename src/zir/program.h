@@ -2,6 +2,7 @@
 #define ZIR_PROGRAM_H
 
 #include "block.h"
+#include "types/pool.h"
 
 /*
  * Struct: struct ZirProgram
@@ -14,6 +15,7 @@
 struct ZirProgram {
     struct ZirBlock *global;
     struct ZirBlock *current;
+    struct ZirTypePool type_pool;
 };
 
 /*

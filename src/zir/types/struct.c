@@ -2,21 +2,21 @@
 #include <stdlib.h>
 #include "struct.h"
 
-struct ZenitStructTypeInfo* zenit_type_struct_new(char *name)
+struct ZirStructTypeInfo* zir_type_struct_new(char *name)
 {
-    struct ZenitStructTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitStructTypeInfo));
-    typeinfo->base.type = ZENIT_TYPE_STRUCT;
+    struct ZirStructTypeInfo *typeinfo = fl_malloc(sizeof(struct ZirStructTypeInfo));
+    typeinfo->base.type = ZIR_TYPE_STRUCT;
     typeinfo->name = fl_cstring_dup(name);
     // FIXME: Allocate members array
     return typeinfo;
 }
 
-unsigned long zenit_type_struct_hash(struct ZenitStructTypeInfo *typeinfo)
+unsigned long zir_type_struct_hash(struct ZirStructTypeInfo *typeinfo)
 {
-    static const char *format = "[struct][n:%s]";
+    static const char *format = "[struct][n:%s][m:%zu]";
 
     char type_key[256] = { 0 };
-    snprintf(type_key, 256, format, typeinfo->name);
+    snprintf(type_key, 256, format, typeinfo->name, typeinfo->members ? fl_array_length(typeinfo->members) : 0);
 
     unsigned long hash = 5381;
     FlByte c;
@@ -27,29 +27,29 @@ unsigned long zenit_type_struct_hash(struct ZenitStructTypeInfo *typeinfo)
     return hash;
 }
 
-struct ZenitStructTypeInfo* zenit_type_struct_copy(struct ZenitStructTypeInfo *src_type)
+struct ZirStructTypeInfo* zir_type_struct_copy(struct ZirStructTypeInfo *src_type)
 {
     if (!src_type)
         return NULL;
 
     // FIXME: Once the members are implemented we need to copy them too
-    return zenit_type_struct_new(src_type->name);
+    return zir_type_struct_new(src_type->name);
 }
 
 
 /*
- * Function: zenit_type_to_string
+ * Function: zir_type_to_string
  *  This function has the added complexity of taking into account if 
  *  the type is an array and its size, therefore we need to use a heap
  *  allocated string, but we benefit from the <type_string_mapping_pool> variable
  *  to reuse strings.
  */
-char* zenit_type_struct_to_string(struct ZenitStructTypeInfo *typeinfo)
+char* zir_type_struct_to_string(struct ZirStructTypeInfo *typeinfo)
 {
     if (typeinfo == NULL)
         return NULL;
 
-    unsigned long type_hash = zenit_type_hash((struct ZenitTypeInfo*) typeinfo);
+    unsigned long type_hash = zir_type_hash((struct ZirTypeInfo*) typeinfo);
 
     if (typeinfo->base.to_string.value == NULL)
     {
@@ -74,16 +74,16 @@ char* zenit_type_struct_to_string(struct ZenitStructTypeInfo *typeinfo)
     return typeinfo->base.to_string.value;
 }
 
-bool zenit_type_struct_equals(struct ZenitStructTypeInfo *type_a, struct ZenitTypeInfo *type_b)
+bool zir_type_struct_equals(struct ZirStructTypeInfo *type_a, struct ZirTypeInfo *type_b)
 {
     if (type_a == NULL || type_b == NULL)
-        return (struct ZenitTypeInfo*) type_a == type_b;
+        return (struct ZirTypeInfo*) type_a == type_b;
 
-    if (type_b->type != ZENIT_TYPE_STRUCT)
+    if (type_b->type != ZIR_TYPE_STRUCT)
         return false;
 
     // FIXME: Once the members are implemented we need to copy them too
-    struct ZenitStructTypeInfo *type_b_struct = (struct ZenitStructTypeInfo*) type_b;
+    struct ZirStructTypeInfo *type_b_struct = (struct ZirStructTypeInfo*) type_b;
     
     if (type_a->name == NULL || type_b_struct->name == NULL)
         return type_a->name == type_b_struct->name;
@@ -91,55 +91,55 @@ bool zenit_type_struct_equals(struct ZenitStructTypeInfo *type_a, struct ZenitTy
     return flm_cstring_equals(type_a->name, type_b_struct->name);
 }
 
-bool zenit_type_struct_is_assignable_from(struct ZenitStructTypeInfo *target_type, struct ZenitTypeInfo *from_type)
+bool zir_type_struct_is_assignable_from(struct ZirStructTypeInfo *target_type, struct ZirTypeInfo *from_type)
 {
     if (!target_type || !from_type)
         return false;
 
-    if (from_type->type != ZENIT_TYPE_STRUCT)
+    if (from_type->type != ZIR_TYPE_STRUCT)
         return false;
 
     // FIXME: Once the members are implemented we need to copy them too
-    struct ZenitStructTypeInfo *struct_from_type = (struct ZenitStructTypeInfo*) from_type;
+    struct ZirStructTypeInfo *struct_from_type = (struct ZirStructTypeInfo*) from_type;
     
     return flm_cstring_equals(target_type->name, struct_from_type->name);
 }
 
-bool zenit_type_struct_is_castable_to(struct ZenitStructTypeInfo *struct_type, struct ZenitTypeInfo *target_type)
+bool zir_type_struct_is_castable_to(struct ZirStructTypeInfo *struct_type, struct ZirTypeInfo *target_type)
 {
     if (struct_type == NULL || target_type == NULL)
         return false;
 
-    if (zenit_type_struct_equals(struct_type, target_type))
+    if (zir_type_struct_equals(struct_type, target_type))
         return true;
 
     // FIXME: Once the members are implemented we need to check them here
     return false;
 }
 
-bool zenit_type_struct_unify(struct ZenitStructTypeInfo *struct_type, struct ZenitTypeInfo *type_b, struct ZenitTypeInfo **unified)
+bool zir_type_struct_unify(struct ZirStructTypeInfo *struct_type, struct ZirTypeInfo *type_b, struct ZirTypeInfo **unified)
 {
     if (struct_type == NULL || type_b == NULL)
         return false;
 
-    if (type_b->type == ZENIT_TYPE_NONE)
+    if (type_b->type == ZIR_TYPE_NONE)
     {
         if (unified)
-            *unified = (struct ZenitTypeInfo*) zenit_type_struct_copy(struct_type);
+            *unified = (struct ZirTypeInfo*) zir_type_struct_copy(struct_type);
         return true;
     }
 
-    if (type_b->type != ZENIT_TYPE_STRUCT)
+    if (type_b->type != ZIR_TYPE_STRUCT)
         return false;
 
-    if (zenit_type_struct_equals(struct_type, type_b))
+    if (zir_type_struct_equals(struct_type, type_b))
     {
         if (unified)
-            *unified = (struct ZenitTypeInfo*) zenit_type_struct_copy(struct_type);
+            *unified = (struct ZirTypeInfo*) zir_type_struct_copy(struct_type);
         return true;
     }
 
-    struct ZenitStructTypeInfo *struct_type_b = (struct ZenitStructTypeInfo*) type_b;
+    struct ZirStructTypeInfo *struct_type_b = (struct ZirStructTypeInfo*) type_b;
 
     // FIXME: Once the members are implemented we need to check them too    
     if (!flm_cstring_equals(struct_type->name, struct_type_b->name))
@@ -147,14 +147,23 @@ bool zenit_type_struct_unify(struct ZenitStructTypeInfo *struct_type, struct Zen
 
     if (unified)
     {
-        *unified = (struct ZenitTypeInfo*) zenit_type_struct_new(struct_type->name);
+        *unified = (struct ZirTypeInfo*) zir_type_struct_new(struct_type->name);
         // FIXME: Once the members are implemented we need to copy them too
     }
 
     return true;
 }
 
-void zenit_type_struct_free(struct ZenitStructTypeInfo *typeinfo)
+size_t zir_type_struct_size(struct ZirStructTypeInfo *typeinfo)
+{
+    if (!typeinfo)
+        return 0;
+
+    // FIXME: Add the size of the members
+    return 0;
+}
+
+void zir_type_struct_free(struct ZirStructTypeInfo *typeinfo)
 {
     if (!typeinfo)
         return;

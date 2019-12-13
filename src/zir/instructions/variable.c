@@ -19,7 +19,9 @@ void zir_instruction_variable_free(struct ZirVariableInstruction *instruction)
 char* zir_instruction_variable_dump(struct ZirVariableInstruction *vardecl, char *output)
 {
     output = zir_operand_dump(vardecl->base.destination, output);
-    fl_cstring_vappend(&output, " : %s = ", zir_type_to_string(&vardecl->base.destination->typeinfo));
+    fl_cstring_append(&output, " : ");
+    output = zir_operand_type_dump(vardecl->base.destination, output);
+    fl_cstring_append(&output, " = ");
     output = zir_operand_dump(vardecl->source, output);
 
     if (zir_attribute_map_length(&vardecl->attributes) != 0)

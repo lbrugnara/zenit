@@ -62,9 +62,8 @@ static struct ZenitTypeInfo* build_type_info_from_declaration(struct ZenitProgra
     else if (type_decl->base.type == ZENIT_NODE_TYPE_ARRAY)
     {
         struct ZenitArrayTypeNode *array_type_decl = (struct ZenitArrayTypeNode*) type_decl;
-        struct ZenitArrayTypeInfo *array_type = zenit_type_array_new();
+        struct ZenitArrayTypeInfo *array_type = zenit_type_array_new(build_type_info_from_declaration(program, array_type_decl->members_type));
         array_type->source = ZENIT_ARRAY_TYPE_DECL;
-        array_type->member_type = build_type_info_from_declaration(program, array_type_decl->members_type);
         array_type->length = array_type_decl->length;
 
         typeinfo = (struct ZenitTypeInfo*) array_type;
@@ -191,13 +190,10 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
  */
 static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array_node)
 {
-    struct ZenitArrayTypeInfo *array_type = zenit_type_pool_register_array(&ctx->program->type_pool, zenit_type_array_new());
+    struct ZenitArrayTypeInfo *array_type = zenit_type_pool_register_array(&ctx->program->type_pool, zenit_type_array_new(zenit_type_none_new()));
     
     // The length is the number of elements within the array initializer
     array_type->length = fl_array_length(array_node->elements);
-
-    // The member's type is NONE by now, the infer pass will take care of it
-    array_type->member_type = zenit_type_pool_register(&ctx->program->type_pool, zenit_type_none_new());
 
     for (size_t i=0; i < fl_array_length(array_node->elements); i++)
     {

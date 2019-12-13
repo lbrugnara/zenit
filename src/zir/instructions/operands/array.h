@@ -6,11 +6,13 @@
 
 struct ZirArrayOperand {
     struct ZirOperand base;
+    struct ZirArrayTypeInfo *typeinfo;
     struct ZirOperand **elements;
 };
 
-struct ZirArrayOperand* zir_operand_array_new(void);
+struct ZirArrayOperand* zir_operand_array_new(struct ZirArrayTypeInfo *typeinfo);
 void zir_operand_array_free(struct ZirArrayOperand *operand);
 char* zir_operand_array_dump(struct ZirArrayOperand *operand, char *output);
+char* zir_operand_array_type_dump(struct ZirArrayOperand *array, char *output);
 
 #endif /* ZIR_OPERAND_ARRAY_H */

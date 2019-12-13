@@ -4,7 +4,7 @@
 #include "instruction.h"
 #include "operands/operand.h"
 #include "operands/symbol.h"
-#include "../type.h"
+#include "../types/type.h"
 
 struct ZirCastInstruction {
     struct ZirInstruction base;

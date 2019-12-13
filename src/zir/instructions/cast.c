@@ -18,10 +18,13 @@ void zir_instruction_cast_free(struct ZirCastInstruction *instruction)
 char* zir_instruction_cast_dump(struct ZirCastInstruction *cast, char *output)
 {
     output = zir_operand_dump(cast->base.destination, output);
-    fl_cstring_vappend(&output, " : %s = cast(", zir_type_to_string(&cast->base.destination->typeinfo));
-
+    fl_cstring_append(&output, " : ");
+    output = zir_operand_type_dump(cast->base.destination, output);
+    fl_cstring_append(&output, " = cast(");
     output = zir_operand_dump(cast->source, output);
-    fl_cstring_vappend(&output, ", %s)", zir_type_to_string(&cast->base.destination->typeinfo));
+    fl_cstring_append(&output, ", ");
+    output = zir_operand_type_dump(cast->base.destination, output);
+    fl_cstring_append(&output, ")");
     fl_cstring_append(&output, "\n");
 
     return output;

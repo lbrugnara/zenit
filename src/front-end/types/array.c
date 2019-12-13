@@ -1,11 +1,12 @@
 #include <fllib.h>
 #include "array.h"
 
-struct ZenitArrayTypeInfo* zenit_type_array_new(void)
+struct ZenitArrayTypeInfo* zenit_type_array_new(struct ZenitTypeInfo *member_type)
 {
     struct ZenitArrayTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitArrayTypeInfo));
     typeinfo->base.type = ZENIT_TYPE_ARRAY;
     typeinfo->members = fl_array_new(sizeof(struct ZenitArrayTypeInfo*), 0);
+    typeinfo->member_type = member_type;
 
     return typeinfo;
 }
@@ -18,7 +19,7 @@ void zenit_type_array_add_member(struct ZenitArrayTypeInfo *typeinfo, struct Zen
 
 unsigned long zenit_type_array_hash(struct ZenitArrayTypeInfo *typeinfo)
 {
-    static const char *format = "[array][n:%zu][e:%lu]";
+    static const char *format = "[array][e:%lu]";
 
     char type_key[256] = { 0 };
     snprintf(type_key, 256, format, typeinfo->length, zenit_type_hash(typeinfo->member_type));
@@ -37,11 +38,10 @@ struct ZenitArrayTypeInfo* zenit_type_array_copy(struct ZenitArrayTypeInfo *sour
     if (!source)
         return NULL;
 
-    struct ZenitArrayTypeInfo *dest = zenit_type_array_new();
+    struct ZenitArrayTypeInfo *dest = zenit_type_array_new(zenit_type_copy(source->member_type));
 
     dest->base.type = source->base.type;
     dest->length = source->length;
-    dest->member_type = zenit_type_copy(source->member_type);
     dest->source = source->source;
 
     for (size_t i=0; i < fl_array_length(source->members); i++)
@@ -182,11 +182,10 @@ bool zenit_type_array_unify(struct ZenitArrayTypeInfo *array_type, struct ZenitT
         if (!zenit_type_unify(array_type->member_type, arr_type_b->member_type, &unified_member_type))
             return false;
 
-        struct ZenitArrayTypeInfo *unified_array_type = zenit_type_array_new();
+        struct ZenitArrayTypeInfo *unified_array_type = zenit_type_array_new(unified_member_type);
         *unified = (struct ZenitTypeInfo*) unified_array_type;
 
         unified_array_type->length = array_type->length;
-        unified_array_type->member_type = unified_member_type;
         unified_array_type->source = array_type->source;
 
         for (size_t i=0; i < fl_array_length(array_type->members); i++)

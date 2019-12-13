@@ -12,5 +12,6 @@ struct ZirSymbolOperand {
 struct ZirSymbolOperand* zir_operand_symbol_new(struct ZirSymbol *symbol);
 void zir_operand_symbol_free(struct ZirSymbolOperand *operand);
 char* zir_operand_symbol_dump(struct ZirSymbolOperand *operand, char *output);
+char* zir_operand_symbol_type_dump(struct ZirSymbolOperand *operand, char *output);
 
 #endif /* ZIR_OPERAND_SYMBOL_H */

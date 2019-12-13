@@ -1,12 +1,13 @@
 #include <fllib.h>
 #include "array.h"
-#include "../../type.h"
+#include "../../types/array.h"
 
-struct ZirArrayOperand* zir_operand_array_new(void)
+struct ZirArrayOperand* zir_operand_array_new(struct ZirArrayTypeInfo *typeinfo)
 {
     struct ZirArrayOperand *operand = fl_malloc(sizeof(struct ZirArrayOperand));
     operand->base.type = ZIR_OPERAND_ARRAY;
     operand->elements = fl_array_new(sizeof(struct ZirOperand*), 0);
+    operand->typeinfo = typeinfo;
 
     return operand;
 }
@@ -15,8 +16,6 @@ void zir_operand_array_free(struct ZirArrayOperand *operand)
 {
     if (!operand)
         return;
-
-    zir_type_free(&operand->base.typeinfo);
 
     fl_array_free(operand->elements);
 
@@ -41,3 +40,10 @@ char* zir_operand_array_dump(struct ZirArrayOperand *array, char *output)
 
     return output;
 }
+
+char* zir_operand_array_type_dump(struct ZirArrayOperand *array, char *output)
+{
+    fl_cstring_vappend(&output, "%s", zir_type_array_to_string(array->typeinfo));
+    return output;
+}
+
