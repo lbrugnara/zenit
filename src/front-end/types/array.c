@@ -144,67 +144,79 @@ bool zenit_type_array_is_castable_to(struct ZenitArrayTypeInfo *array_type, stru
     return zenit_type_is_castable_to(array_type->member_type, target_array_type->member_type);
 }
 
-bool zenit_type_array_unify(struct ZenitArrayTypeInfo *array_type, struct ZenitTypeInfo *type_b, struct ZenitTypeInfo **unified)
+struct ZenitTypeInfo* zenit_type_array_unify(struct ZenitArrayTypeInfo *array_type, struct ZenitTypeInfo *type_b)
+{
+    if (array_type == NULL || type_b == NULL)
+        return NULL;
+
+    if (type_b->type == ZENIT_TYPE_NONE)
+    {
+        struct ZenitTypeInfo *unified = (struct ZenitTypeInfo*) zenit_type_array_copy(array_type);
+        unified->source = ZENIT_TYPE_SRC_INFERRED;
+        return unified;
+    }
+
+    if (type_b->type != ZENIT_TYPE_ARRAY)
+        return NULL;
+
+    if (zenit_type_array_equals(array_type, type_b))
+    {
+        struct ZenitTypeInfo *unified = (struct ZenitTypeInfo*) zenit_type_array_copy(array_type);
+        unified->source = ZENIT_TYPE_SRC_INFERRED;
+        return unified;
+    }
+
+    struct ZenitArrayTypeInfo *arr_type_b = (struct ZenitArrayTypeInfo*) type_b;
+
+    if (array_type->length != arr_type_b->length)
+        return NULL;
+
+    if (!zenit_type_can_unify(array_type->member_type, arr_type_b->member_type))
+        return NULL;
+    
+    struct ZenitTypeInfo *unified_member_type = zenit_type_unify(array_type->member_type, arr_type_b->member_type);
+
+    bool can_unify = true;
+    for (size_t i=0; i < fl_array_length(array_type->members); i++)
+        can_unify = can_unify && zenit_type_can_unify(unified_member_type, array_type->members[i]);
+
+    if (can_unify)
+    {
+        struct ZenitArrayTypeInfo *unified_array_type = zenit_type_array_new(ZENIT_TYPE_SRC_INFERRED, unified_member_type);
+        unified_array_type->length = array_type->length;
+        for (size_t i=0; i < fl_array_length(array_type->members); i++)
+        {
+            struct ZenitTypeInfo *unified_type = zenit_type_unify(unified_member_type, array_type->members[i]);
+            zenit_type_array_add_member(unified_array_type, unified_type);
+        }
+
+        return (struct ZenitTypeInfo*) unified_array_type;
+    }
+    
+    zenit_type_free(unified_member_type);
+    return NULL;
+}
+
+bool zenit_type_array_can_unify(struct ZenitArrayTypeInfo *array_type, struct ZenitTypeInfo *type_b)
 {
     if (array_type == NULL || type_b == NULL)
         return false;
 
     if (type_b->type == ZENIT_TYPE_NONE)
-    {
-        if (unified)
-        {
-            *unified = (struct ZenitTypeInfo*) zenit_type_array_copy(array_type);
-            (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
-        }
         return true;
-    }
 
     if (type_b->type != ZENIT_TYPE_ARRAY)
         return false;
 
     if (zenit_type_array_equals(array_type, type_b))
-    {
-        if (unified)
-        {
-            *unified = (struct ZenitTypeInfo*) zenit_type_array_copy(array_type);
-            (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
-        }
         return true;
-    }
 
     struct ZenitArrayTypeInfo *arr_type_b = (struct ZenitArrayTypeInfo*) type_b;
 
     if (array_type->length != arr_type_b->length)
         return false;
 
-    if (!zenit_type_unify(array_type->member_type, arr_type_b->member_type, NULL))
-        return false;
-    
-    if (unified)
-    {
-        struct ZenitTypeInfo *unified_member_type = NULL;
-
-        // If this is false, it is an unknown error...
-        if (!zenit_type_unify(array_type->member_type, arr_type_b->member_type, &unified_member_type))
-            return false;
-
-        struct ZenitArrayTypeInfo *unified_array_type = zenit_type_array_new(ZENIT_TYPE_SRC_INFERRED, unified_member_type);
-        *unified = (struct ZenitTypeInfo*) unified_array_type;
-
-        unified_array_type->length = array_type->length;
-
-        for (size_t i=0; i < fl_array_length(array_type->members); i++)
-        {
-            struct ZenitTypeInfo *unified_type = NULL;
-
-            if (!zenit_type_unify(unified_member_type, array_type->members[i], &unified_type))
-                return false;
-
-            zenit_type_array_add_member(unified_array_type, unified_type);
-        }
-    }
-
-    return true;
+    return zenit_type_can_unify(array_type->member_type, arr_type_b->member_type);
 }
 
 void zenit_type_array_free(struct ZenitArrayTypeInfo *typeinfo)

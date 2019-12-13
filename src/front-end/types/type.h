@@ -146,7 +146,9 @@ struct ZenitTypeInfo* zenit_type_copy(struct ZenitTypeInfo *src_type);
  * Notes:
  *  If *unified* is NULL, this function does not allocate memory and it just returns *true* or *false*.
  */
-bool zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b, struct ZenitTypeInfo **unified);
+struct ZenitTypeInfo* zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
+
+bool zenit_type_can_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
 
 /*
  * Function: zenit_type_is_assignable_from

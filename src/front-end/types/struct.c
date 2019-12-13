@@ -118,45 +118,59 @@ bool zenit_type_struct_is_castable_to(struct ZenitStructTypeInfo *struct_type, s
     return false;
 }
 
-bool zenit_type_struct_unify(struct ZenitStructTypeInfo *struct_type, struct ZenitTypeInfo *type_b, struct ZenitTypeInfo **unified)
+struct ZenitTypeInfo* zenit_type_struct_unify(struct ZenitStructTypeInfo *struct_type, struct ZenitTypeInfo *type_b)
 {
     if (struct_type == NULL || type_b == NULL)
-        return false;
+        return NULL;
 
     if (type_b->type == ZENIT_TYPE_NONE)
     {
-        if (unified)
-        {
-            *unified = (struct ZenitTypeInfo*) zenit_type_struct_copy(struct_type);
-            (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
-        }
-        return true;
+        struct ZenitTypeInfo *unified = (struct ZenitTypeInfo*) zenit_type_struct_copy(struct_type);
+        unified->source = ZENIT_TYPE_SRC_INFERRED;
+        return unified;
     }
 
     if (type_b->type != ZENIT_TYPE_STRUCT)
-        return false;
+        return NULL;
 
     if (zenit_type_struct_equals(struct_type, type_b))
     {
-        if (unified)
-        {
-            *unified = (struct ZenitTypeInfo*) zenit_type_struct_copy(struct_type);
-            (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
-        }
-        return true;
+        struct ZenitTypeInfo *unified = (struct ZenitTypeInfo*) zenit_type_struct_copy(struct_type);
+        unified->source = ZENIT_TYPE_SRC_INFERRED;
+        return unified;
     }
 
     struct ZenitStructTypeInfo *struct_type_b = (struct ZenitStructTypeInfo*) type_b;
 
     // FIXME: Once the members are implemented we need to check them too    
     if (!flm_cstring_equals(struct_type->name, struct_type_b->name))
+        return NULL;
+
+    // FIXME: Once the members are implemented we need to copy them too
+    struct ZenitTypeInfo *unified = (struct ZenitTypeInfo*) zenit_type_struct_new(ZENIT_TYPE_SRC_INFERRED, struct_type->name);
+
+    return unified;
+}
+
+bool zenit_type_struct_can_unify(struct ZenitStructTypeInfo *struct_type, struct ZenitTypeInfo *type_b)
+{
+    if (struct_type == NULL || type_b == NULL)
         return false;
 
-    if (unified)
-    {
-        *unified = (struct ZenitTypeInfo*) zenit_type_struct_new(ZENIT_TYPE_SRC_INFERRED, struct_type->name);
-        // FIXME: Once the members are implemented we need to copy them too
-    }
+    if (type_b->type == ZENIT_TYPE_NONE)
+        return true;
+
+    if (type_b->type != ZENIT_TYPE_STRUCT)
+        return false;
+
+    if (zenit_type_struct_equals(struct_type, type_b))
+        return true;
+
+    struct ZenitStructTypeInfo *struct_type_b = (struct ZenitStructTypeInfo*) type_b;
+
+    // FIXME: Once the members are implemented we need to check them too    
+    if (!flm_cstring_equals(struct_type->name, struct_type_b->name))
+        return false;
 
     return true;
 }

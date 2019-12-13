@@ -6,7 +6,6 @@ struct ZenitProgram* zenit_program_new()
     struct ZenitProgram *program = fl_malloc(sizeof(struct ZenitProgram));
     program->global_scope = zenit_scope_new("global", ZENIT_SYMTABLE_GLOBAL, NULL);
     program->current_scope = program->global_scope;
-    program->type_pool = zenit_type_pool_new();
 
     return program;
 }
@@ -17,8 +16,6 @@ void zenit_program_free(struct ZenitProgram *program)
         return;
         
     zenit_scope_free(program->global_scope);
-
-    zenit_type_pool_free(&program->type_pool);
 
     fl_free(program);
 }

@@ -2,7 +2,6 @@
 #define ZENIT_PROGRAM_H
 
 #include "scope.h"
-#include "types/pool.h"
 
 /*
  * Struct: struct ZenitProgram
@@ -11,12 +10,10 @@
  * Members:
  *  <struct ZenitScope> *global: A pointer to the global scope
  *  <struct ZenitScope> *current: A pointer to the current scope
- *  <struct ZenitTypePool> type_pool: Object that keeps track of the types objects created for this program
  */
 struct ZenitProgram {
     struct ZenitScope *global_scope;
     struct ZenitScope *current_scope;
-    struct ZenitTypePool type_pool;
 };
 
 /*

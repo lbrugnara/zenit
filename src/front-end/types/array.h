@@ -19,7 +19,8 @@ char* zenit_type_array_to_string(struct ZenitArrayTypeInfo *typeinfo);
 bool zenit_type_array_equals(struct ZenitArrayTypeInfo *type_a, struct ZenitTypeInfo *type_b);
 bool zenit_type_array_is_assignable_from(struct ZenitArrayTypeInfo *target_type, struct ZenitTypeInfo *value_type);
 bool zenit_type_array_is_castable_to(struct ZenitArrayTypeInfo *array_type, struct ZenitTypeInfo *target_type);
-bool zenit_type_array_unify(struct ZenitArrayTypeInfo *array_type, struct ZenitTypeInfo *type_b, struct ZenitTypeInfo **unified);
+struct ZenitTypeInfo* zenit_type_array_unify(struct ZenitArrayTypeInfo *array_type, struct ZenitTypeInfo *type_b);
+bool zenit_type_array_can_unify(struct ZenitArrayTypeInfo *array_type, struct ZenitTypeInfo *type_b);
 void zenit_type_array_free(struct ZenitArrayTypeInfo *typeinfo);
 
 #endif /* ZENIT_TYPE_ARRAY_H */

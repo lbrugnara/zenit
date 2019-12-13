@@ -216,7 +216,8 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
 {
     struct ZenitSymbol *expression_symbol = visit_node(ctx, reference_node->expression);
 
-    if (expression_symbol->typeinfo->type == ZENIT_TYPE_REFERENCE)
+    // FIXME: Cannot take a reference to a temporal symbol (temporal expression, primitive, etc)
+    if (expression_symbol->name[0] == '%' && expression_symbol->typeinfo->type == ZENIT_TYPE_REFERENCE)
     {
         zenit_context_error(ctx, reference_node->base.location, ZENIT_ERROR_INVALID_REFERENCE, 
                 "Cannot take a reference to another reference.");

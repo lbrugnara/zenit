@@ -103,7 +103,29 @@ bool zenit_type_uint_is_castable_to(struct ZenitUintTypeInfo *uint_type, struct 
     return target_type->type == ZENIT_TYPE_UINT;
 }
 
-bool zenit_type_uint_unify(struct ZenitUintTypeInfo *uint_type, struct ZenitTypeInfo *type_b, struct ZenitTypeInfo **unified)
+struct ZenitTypeInfo* zenit_type_uint_unify(struct ZenitUintTypeInfo *uint_type, struct ZenitTypeInfo *type_b)
+{
+    if (uint_type == NULL || type_b == NULL)
+        return NULL;
+
+    if (type_b->type != ZENIT_TYPE_NONE && type_b->type != ZENIT_TYPE_UINT)
+        return NULL;
+
+    if (type_b->type == ZENIT_TYPE_NONE || zenit_type_uint_equals(uint_type, type_b))
+    {
+        struct ZenitTypeInfo *unified = (struct ZenitTypeInfo*) zenit_type_uint_copy(uint_type);
+        unified->source = ZENIT_TYPE_SRC_INFERRED;
+        return unified;
+    }
+
+    // At this point, type_b must be a uint
+    struct ZenitUintTypeInfo *uint_b = (struct ZenitUintTypeInfo*) type_b;
+    struct ZenitTypeInfo *unified = (struct ZenitTypeInfo*) zenit_type_uint_copy(uint_type->size > uint_b->size ? uint_type : uint_b);
+    unified->source = ZENIT_TYPE_SRC_INFERRED;
+    return unified;
+}
+
+bool zenit_type_uint_can_unify(struct ZenitUintTypeInfo *uint_type, struct ZenitTypeInfo *type_b)
 {
     if (uint_type == NULL || type_b == NULL)
         return false;
@@ -111,24 +133,6 @@ bool zenit_type_uint_unify(struct ZenitUintTypeInfo *uint_type, struct ZenitType
     if (type_b->type != ZENIT_TYPE_NONE && type_b->type != ZENIT_TYPE_UINT)
         return false;
 
-    if (type_b->type == ZENIT_TYPE_NONE || zenit_type_uint_equals(uint_type, type_b))
-    {
-        if (unified)
-        {
-            *unified = (struct ZenitTypeInfo*) zenit_type_uint_copy(uint_type);
-            (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
-        }
-        return true;
-    }
-
-    // At this point, type_b must be a uint
-    if (unified)
-    {
-        struct ZenitUintTypeInfo *uint_b = (struct ZenitUintTypeInfo*) type_b;
-        *unified = (struct ZenitTypeInfo*) zenit_type_uint_copy(uint_type->size > uint_b->size ? uint_type : uint_b);
-        (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
-    }
-    
     return true;
 }
 

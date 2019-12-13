@@ -115,15 +115,15 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
     // If the types are equals, no need to do anything
     if (!zenit_type_equals(ref_typeinfo->element, expr_symbol->typeinfo))
     {
-        struct ZenitTypeInfo *tmp = NULL;
-        if (!zenit_type_unify(ref_typeinfo->element, expr_symbol->typeinfo, &tmp))
+        if (!zenit_type_can_unify(ref_typeinfo->element, expr_symbol->typeinfo))
         {
             zenit_context_error(ctx, reference_node->base.location, ZENIT_ERROR_INFERENCE, 
                     "Cannot find the common ancestor of types '%s' and '%s'", 
                         zenit_type_to_string(ref_typeinfo->element), zenit_type_to_string(expr_symbol->typeinfo));
         }
-        zenit_type_free(ref_typeinfo->element);
-        ref_typeinfo->element = tmp;
+        struct ZenitTypeInfo *tmp = ref_typeinfo->element;
+        ref_typeinfo->element = zenit_type_unify(ref_typeinfo->element, expr_symbol->typeinfo);
+        zenit_type_free(tmp);
     }
 
     return ref_symbol;
@@ -171,7 +171,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
             continue;
 
         // At this point, we need to "unify" the types
-        if (!zenit_type_unify(common_type, elem_symbol->typeinfo, NULL))
+        if (!zenit_type_can_unify(common_type, elem_symbol->typeinfo))
         {
             zenit_context_error(ctx, array_node->elements[i]->location, ZENIT_ERROR_INFERENCE, 
                     "Cannot find the common ancestor of types '%s' and '%s'", 
@@ -179,16 +179,9 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
             continue;
         }
 
-        struct ZenitTypeInfo *tmp = NULL;
-        if (!zenit_type_unify(common_type, elem_symbol->typeinfo, &tmp))
-        {
-            zenit_context_error(ctx, array_node->elements[i]->location, ZENIT_ERROR_INTERNAL, 
-                    "Internal error unifying types '%s' and '%s'", 
-                        zenit_type_to_string(common_type), zenit_type_to_string(elem_symbol->typeinfo));
-            continue;
-        }
-        zenit_type_free(common_type);
-        common_type = tmp;
+        struct ZenitTypeInfo *tmp = common_type;
+        common_type = zenit_type_unify(common_type, elem_symbol->typeinfo);
+        zenit_type_free(tmp);
     }
 
     for (size_t i=0; i < length; i++)
@@ -303,10 +296,9 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     }
     else if (zenit_type_is_assignable_from(symbol->typeinfo, rhs_symbol->typeinfo))
     {
-        struct ZenitTypeInfo *tmp = NULL;
-        zenit_type_unify(symbol->typeinfo, rhs_symbol->typeinfo, &tmp);
-        zenit_type_free(symbol->typeinfo);
-        symbol->typeinfo = tmp;
+        struct ZenitTypeInfo *tmp = symbol->typeinfo;
+        symbol->typeinfo = zenit_type_unify(symbol->typeinfo, rhs_symbol->typeinfo);
+        zenit_type_free(tmp);
     }
     else if (!zenit_type_equals(symbol->typeinfo, rhs_symbol->typeinfo))
     {   

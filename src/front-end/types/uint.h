@@ -23,7 +23,8 @@ char* zenit_type_uint_to_string(struct ZenitUintTypeInfo *typeinfo);
 bool zenit_type_uint_equals(struct ZenitUintTypeInfo *type_a, struct ZenitTypeInfo *type_b);
 bool zenit_type_uint_is_assignable_from(struct ZenitUintTypeInfo *target_type, struct ZenitTypeInfo *value_type);
 bool zenit_type_uint_is_castable_to(struct ZenitUintTypeInfo *primitive_type, struct ZenitTypeInfo *target_type);
-bool zenit_type_uint_unify(struct ZenitUintTypeInfo *primitive_type, struct ZenitTypeInfo *type_b, struct ZenitTypeInfo **unified);
+struct ZenitTypeInfo* zenit_type_uint_unify(struct ZenitUintTypeInfo *primitive_type, struct ZenitTypeInfo *type_b);
+bool zenit_type_uint_can_unify(struct ZenitUintTypeInfo *primitive_type, struct ZenitTypeInfo *type_b);
 void zenit_type_uint_free(struct ZenitUintTypeInfo *typeinfo);
 
 #endif /* ZENIT_TYPE_UINT_H */
