@@ -40,8 +40,6 @@ struct ZenitArrayTypeInfo* zenit_type_array_copy(struct ZenitArrayTypeInfo *sour
         return NULL;
 
     struct ZenitArrayTypeInfo *dest = zenit_type_array_new(source->base.source, zenit_type_copy(source->member_type));
-
-    dest->base.type = source->base.type;
     dest->length = source->length;
 
     for (size_t i=0; i < fl_array_length(source->members); i++)
@@ -216,7 +214,14 @@ bool zenit_type_array_can_unify(struct ZenitArrayTypeInfo *array_type, struct Ze
     if (array_type->length != arr_type_b->length)
         return false;
 
-    return zenit_type_can_unify(array_type->member_type, arr_type_b->member_type);
+    if (!zenit_type_can_unify(array_type->member_type, arr_type_b->member_type))
+        return false;
+
+    for (size_t i=0; i < fl_array_length(array_type->members); i++)
+        if (!zenit_type_can_unify(array_type->members[i], arr_type_b->members[i]))
+            return false;
+
+    return true;
 }
 
 void zenit_type_array_free(struct ZenitArrayTypeInfo *typeinfo)

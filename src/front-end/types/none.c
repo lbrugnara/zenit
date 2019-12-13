@@ -6,7 +6,7 @@ struct ZenitTypeInfo* zenit_type_none_new(void)
 {
     struct ZenitTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitTypeInfo));
     typeinfo->type = ZENIT_TYPE_NONE;
-    typeinfo->source = ZENIT_TYPE_SRC_IMPLICIT;
+    typeinfo->source = ZENIT_TYPE_SRC_INFERRED;
 
     return typeinfo;
 }

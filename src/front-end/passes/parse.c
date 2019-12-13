@@ -152,10 +152,15 @@ static struct ZenitTypeNode* parse_type_reference_declaration(struct ZenitParser
  */
 static struct ZenitTypeNode* parse_type_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
 {
+    // Check for a reference
+    if (zenit_parser_next_is(parser, ZENIT_TOKEN_AMPERSAND))    
+        return parse_type_reference_declaration(parser, ctx);
+
     // Check if it is an array
     if (zenit_parser_next_is(parser, ZENIT_TOKEN_LBRACKET))
         return parse_type_array_declaration(parser, ctx);
 
+    // Check for a reference
     if (zenit_parser_next_is(parser, ZENIT_TOKEN_AMPERSAND))    
         return parse_type_reference_declaration(parser, ctx);
 

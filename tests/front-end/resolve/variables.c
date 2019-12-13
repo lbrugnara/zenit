@@ -2,6 +2,7 @@
 
 #include "../../Test.h"
 #include "../../../src/front-end/passes/parse.h"
+#include "../../../src/front-end/passes/utils.h"
 #include "../../../src/front-end/program.h"
 #include "../../../src/front-end/passes/resolve.h"
 #include "../../../src/front-end/symtable.h"
@@ -69,6 +70,20 @@ void zenit_test_resolve_primitives(void)
     zenit_context_free(&ctx);
 }
 
+struct RefTest {
+    const char *sym_name;
+    const char *sym_type_hint;
+    const char *sym_type;
+} ref_tests[] = {
+    { "a",      "<unknown>",        "uint8",          },
+    { "b",      "<unknown>",        "&uint8",         },
+    { "c",      "&uint8",           "&uint8",         },
+    { "d",      "uint16",           "uint16",         },
+    { "e",      "&uint16",          "&uint16",        },
+    { "f",      "[2]uint8",         "[2]uint8",       },
+    { "g",      "&[2]uint8",        "&[2]uint8",      },
+    { "h",      "[1]&[2]uint8",     "[1]&[2]uint8",   },
+};
 
 void zenit_test_resolve_references(void)
 {
@@ -78,46 +93,43 @@ void zenit_test_resolve_references(void)
         "var c : &uint8 = &a;"          "\n"
         "var d : uint16 = 0x1FF;"       "\n"
         "var e : &uint16 = &d;"         "\n"
+        "var f : [2]uint8 = [ 0, 1 ];"  "\n"
+        "var g : &[2]uint8 = &f;"       "\n"
+        "var h : [1]&[2]uint8 = [ g ];" "\n"
     ;
-
-    struct Test {
-        char *name;
-        enum ZenitType decl_type;
-        char *decl_type_name;
-        enum ZenitType referred_type;
-        enum ZenitUintTypeSize referred_type_size;
-        char *referred_type_name;
-    } tests[] = {
-        { "b", ZENIT_TYPE_REFERENCE, "&uint8",      ZENIT_TYPE_UINT,    ZENIT_UINT_8,   "uint8"     },
-        { "c", ZENIT_TYPE_REFERENCE, "&uint8",      ZENIT_TYPE_UINT,    ZENIT_UINT_8,   "uint8"     },
-        { "e", ZENIT_TYPE_REFERENCE, "&uint16",     ZENIT_TYPE_UINT,    ZENIT_UINT_16,  "uint16"    },
-    };
-
-    const size_t count = sizeof(tests) / sizeof(tests[0]);
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
     bool is_valid = zenit_parse_source(&ctx);
 
     zenit_resolve_symbols(&ctx);
 
-    for (size_t i=0; i < count; i++)
+    for (size_t i=0; i < sizeof(ref_tests) / sizeof(ref_tests[0]); i++)
     {
-        struct Test *test = tests + i;
+        struct RefTest *test = ref_tests + i;
 
-        bool symbol_exists = zenit_program_has_symbol(ctx.program, test->name);
-        fl_vexpect(symbol_exists, "Symbol table must contain symbol \"%s\"", test->name);
+        fl_vexpect(zenit_program_has_symbol(ctx.program, test->sym_name), 
+            "Symbol '%s' must exist in the program", test->sym_name);
 
-        struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test->name);
+        struct ZenitSymbol *sym = zenit_program_get_symbol(ctx.program, test->sym_name);
 
-        fl_vexpect(symbol->typeinfo->type == test->decl_type, "Symbol '%s' type must be equals to '%s'", symbol->name, test->decl_type_name);
+        fl_vexpect(flm_cstring_equals(test->sym_type, zenit_type_to_string(sym->typeinfo)), 
+            "Type of '%s' must be '%s'", test->sym_name, test->sym_type);
 
-        if (test->decl_type != ZENIT_TYPE_NONE)
+        for (size_t j=0; j < fl_array_length(ctx.ast->decls); j++)
         {
-            struct ZenitReferenceTypeInfo *ref_typeinfo = (struct ZenitReferenceTypeInfo*) symbol->typeinfo;
+            if (ctx.ast->decls[j]->type == ZENIT_NODE_VARIABLE)
+            {
+                struct ZenitVariableNode *varnode = (struct ZenitVariableNode*) ctx.ast->decls[j];
+                if (!flm_cstring_equals(test->sym_name, varnode->name))
+                    continue;
 
-            fl_vexpect(ref_typeinfo->element->type == test->referred_type
-                && ((struct ZenitUintTypeInfo*) ref_typeinfo->element)->size == test->referred_type_size, 
-                "Type of the referenced symbol must be equals to '%s'", test->referred_type_name);
+                struct ZenitTypeInfo *type_hint = build_type_info_from_declaration(varnode->type_decl);
+
+                fl_vexpect(flm_cstring_equals(test->sym_type_hint, zenit_type_to_string(type_hint)), 
+                    "Type information present in '%s' declaration must be '%s'", test->sym_name, test->sym_type_hint);
+
+                zenit_type_free(type_hint);
+            }
         }
     }
 
