@@ -22,5 +22,8 @@ void zenit_symbol_free(struct ZenitSymbol *symbol)
     if (symbol->name)
         fl_cstring_free(symbol->name);
 
+    if (symbol->typeinfo)
+        zenit_type_free(symbol->typeinfo);
+
     fl_free(symbol);
 }

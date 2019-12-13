@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include "struct.h"
 
-struct ZenitStructTypeInfo* zenit_type_struct_new(char *name)
+struct ZenitStructTypeInfo* zenit_type_struct_new(enum ZenitTypeSource source, char *name)
 {
     struct ZenitStructTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitStructTypeInfo));
     typeinfo->base.type = ZENIT_TYPE_STRUCT;
+    typeinfo->base.source = source;
     typeinfo->name = fl_cstring_dup(name);
     // FIXME: Allocate members array
     return typeinfo;
@@ -33,7 +34,7 @@ struct ZenitStructTypeInfo* zenit_type_struct_copy(struct ZenitStructTypeInfo *s
         return NULL;
 
     // FIXME: Once the members are implemented we need to copy them too
-    return zenit_type_struct_new(src_type->name);
+    return zenit_type_struct_new(src_type->base.source, src_type->name);
 }
 
 
@@ -125,7 +126,10 @@ bool zenit_type_struct_unify(struct ZenitStructTypeInfo *struct_type, struct Zen
     if (type_b->type == ZENIT_TYPE_NONE)
     {
         if (unified)
+        {
             *unified = (struct ZenitTypeInfo*) zenit_type_struct_copy(struct_type);
+            (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
+        }
         return true;
     }
 
@@ -135,7 +139,10 @@ bool zenit_type_struct_unify(struct ZenitStructTypeInfo *struct_type, struct Zen
     if (zenit_type_struct_equals(struct_type, type_b))
     {
         if (unified)
+        {
             *unified = (struct ZenitTypeInfo*) zenit_type_struct_copy(struct_type);
+            (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
+        }
         return true;
     }
 
@@ -147,7 +154,7 @@ bool zenit_type_struct_unify(struct ZenitStructTypeInfo *struct_type, struct Zen
 
     if (unified)
     {
-        *unified = (struct ZenitTypeInfo*) zenit_type_struct_new(struct_type->name);
+        *unified = (struct ZenitTypeInfo*) zenit_type_struct_new(ZENIT_TYPE_SRC_INFERRED, struct_type->name);
         // FIXME: Once the members are implemented we need to copy them too
     }
 
@@ -164,6 +171,8 @@ void zenit_type_struct_free(struct ZenitStructTypeInfo *typeinfo)
 
     if (typeinfo->name)
         fl_cstring_free(typeinfo->name);
+
+    // FIXME: Clean members' memory once they are implemented
 
     fl_free(typeinfo);
 }

@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include "reference.h"
 
-struct ZenitReferenceTypeInfo* zenit_type_reference_new(struct ZenitTypeInfo *element)
+struct ZenitReferenceTypeInfo* zenit_type_reference_new(enum ZenitTypeSource source, struct ZenitTypeInfo *element)
 {
     struct ZenitReferenceTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitReferenceTypeInfo));
     typeinfo->base.type = ZENIT_TYPE_REFERENCE;
+    typeinfo->base.source = source;
     typeinfo->element = element;
 
     return typeinfo;
@@ -32,7 +33,7 @@ struct ZenitReferenceTypeInfo* zenit_type_reference_copy(struct ZenitReferenceTy
     if (!src_type)
         return NULL;
 
-    return zenit_type_reference_new(zenit_type_copy(src_type->element));
+    return zenit_type_reference_new(src_type->base.source, zenit_type_copy(src_type->element));
 }
 
 char* zenit_type_reference_to_string(struct ZenitReferenceTypeInfo *typeinfo)
@@ -116,7 +117,10 @@ bool zenit_type_reference_unify(struct ZenitReferenceTypeInfo *ref_type, struct 
     if (type_b->type == ZENIT_TYPE_NONE)
     {
         if (unified)
+        {
             *unified = (struct ZenitTypeInfo*) zenit_type_reference_copy(ref_type);
+            (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
+        }
         return true;
     }
 
@@ -126,7 +130,10 @@ bool zenit_type_reference_unify(struct ZenitReferenceTypeInfo *ref_type, struct 
     if (zenit_type_reference_equals(ref_type, type_b))
     {
         if (unified)
+        {
             *unified = (struct ZenitTypeInfo*) zenit_type_reference_copy(ref_type);
+            (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
+        }
         return true;
     }
 
@@ -142,7 +149,7 @@ bool zenit_type_reference_unify(struct ZenitReferenceTypeInfo *ref_type, struct 
         if (!zenit_type_unify(ref_type->element, ref_type_b->element, &unified_element_type))
             return false;
     
-        *unified = (struct ZenitTypeInfo*) zenit_type_reference_new(unified_element_type);
+        *unified = (struct ZenitTypeInfo*) zenit_type_reference_new(ZENIT_TYPE_SRC_INFERRED, unified_element_type);
     }
 
     return true;
@@ -155,6 +162,9 @@ void zenit_type_reference_free(struct ZenitReferenceTypeInfo *typeinfo)
 
     if (typeinfo->base.to_string.value != NULL)
         fl_cstring_free(typeinfo->base.to_string.value);
+
+    if (typeinfo->element)
+        zenit_type_free(typeinfo->element);
 
     fl_free(typeinfo);
 }

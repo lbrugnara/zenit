@@ -15,7 +15,7 @@ struct ZenitUintTypeInfo {
     enum ZenitUintTypeSize size;
 };
 
-struct ZenitUintTypeInfo* zenit_type_uint_new(enum ZenitUintTypeSize size);
+struct ZenitUintTypeInfo* zenit_type_uint_new(enum ZenitTypeSource source, enum ZenitUintTypeSize size);
 enum ZenitUintTypeSize zenit_type_uint_size_from_slice(struct FlSlice *slice);
 unsigned long zenit_type_uint_hash(struct ZenitUintTypeInfo *typeinfo);
 struct ZenitUintTypeInfo* zenit_type_uint_copy(struct ZenitUintTypeInfo *src_type);

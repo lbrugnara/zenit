@@ -8,7 +8,7 @@ struct ZenitReferenceTypeInfo {
     struct ZenitTypeInfo *element;
 };
 
-struct ZenitReferenceTypeInfo* zenit_type_reference_new(struct ZenitTypeInfo *element);
+struct ZenitReferenceTypeInfo* zenit_type_reference_new(enum ZenitTypeSource source, struct ZenitTypeInfo *element);
 unsigned long zenit_type_reference_hash(struct ZenitReferenceTypeInfo *typeinfo);
 struct ZenitReferenceTypeInfo* zenit_type_reference_copy(struct ZenitReferenceTypeInfo *src_type);
 char* zenit_type_reference_to_string(struct ZenitReferenceTypeInfo *typeinfo);

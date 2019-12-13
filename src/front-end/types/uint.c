@@ -11,6 +11,16 @@ static struct TypeMapping {
     { "uint16",     ZENIT_UINT_16   },
 };
 
+struct ZenitUintTypeInfo* zenit_type_uint_new(enum ZenitTypeSource source, enum ZenitUintTypeSize size)
+{
+    struct ZenitUintTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitUintTypeInfo));
+    typeinfo->base.type = ZENIT_TYPE_UINT;
+    typeinfo->base.source = source;
+    typeinfo->size = size;
+
+    return typeinfo;
+}
+
 enum ZenitUintTypeSize zenit_type_uint_size_from_slice(struct FlSlice *slice)
 {
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
@@ -21,15 +31,6 @@ enum ZenitUintTypeSize zenit_type_uint_size_from_slice(struct FlSlice *slice)
     }
 
     return ZENIT_UINT_UNK;
-}
-
-struct ZenitUintTypeInfo* zenit_type_uint_new(enum ZenitUintTypeSize size)
-{
-    struct ZenitUintTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitUintTypeInfo));
-    typeinfo->base.type = ZENIT_TYPE_UINT;
-    typeinfo->size = size;
-
-    return typeinfo;
 }
 
 unsigned long zenit_type_uint_hash(struct ZenitUintTypeInfo *typeinfo)
@@ -53,7 +54,7 @@ struct ZenitUintTypeInfo* zenit_type_uint_copy(struct ZenitUintTypeInfo *src_typ
     if (!src_type)
         return NULL;
 
-    return zenit_type_uint_new(src_type->size);
+    return zenit_type_uint_new(src_type->base.source, src_type->size);
 }
 
 char* zenit_type_uint_to_string(struct ZenitUintTypeInfo *typeinfo)
@@ -113,7 +114,10 @@ bool zenit_type_uint_unify(struct ZenitUintTypeInfo *uint_type, struct ZenitType
     if (type_b->type == ZENIT_TYPE_NONE || zenit_type_uint_equals(uint_type, type_b))
     {
         if (unified)
+        {
             *unified = (struct ZenitTypeInfo*) zenit_type_uint_copy(uint_type);
+            (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
+        }
         return true;
     }
 
@@ -122,6 +126,7 @@ bool zenit_type_uint_unify(struct ZenitUintTypeInfo *uint_type, struct ZenitType
     {
         struct ZenitUintTypeInfo *uint_b = (struct ZenitUintTypeInfo*) type_b;
         *unified = (struct ZenitTypeInfo*) zenit_type_uint_copy(uint_type->size > uint_b->size ? uint_type : uint_b);
+        (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
     }
     
     return true;

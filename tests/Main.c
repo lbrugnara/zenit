@@ -59,7 +59,8 @@ int main(int argc, char **argv)
             { "Inference errors",                           &zenit_test_infer_errors                },
         ),
         fl_test_suite("Check",
-            { "Type check errors",  &zenit_test_check_types_errors  }
+            { "Type check success", &zenit_test_check_types_variables   },
+            { "Type check errors",  &zenit_test_check_types_errors      }
         ),
         fl_test_suite("zirgen",
             { "Generate ZIR variables", &zenit_test_generate_ir_variables   },

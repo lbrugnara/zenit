@@ -37,16 +37,30 @@ struct ZenitTypeString {
 };
 
 /*
+ * Enum: enum ZenitTypeSource
+ *  Identifies the source of the type information
+ *  present in a <struct ZenitTypeInfo> object
+ *
+ */
+enum ZenitTypeSource {
+    ZENIT_TYPE_SRC_IMPLICIT,
+    ZENIT_TYPE_SRC_EXPLICIT,
+    ZENIT_TYPE_SRC_INFERRED,
+};
+
+/*
  * Struct: struct ZenitTypeInfo
  *  Represents the information of a type. 
  * 
  * Members:
  *  <enum ZenitType> type: The raw type.
+ *  <enum ZenitTypeSource> source: The source of the information present in the type object
  *  <struct ZenitTypeString> to_string: Keeps track of the string representation of the type object
  *  
  */
 struct ZenitTypeInfo {
     enum ZenitType type;
+    enum ZenitTypeSource source;
     struct ZenitTypeString to_string;
 };
 

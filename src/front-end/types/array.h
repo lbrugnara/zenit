@@ -4,20 +4,14 @@
 #include <stdlib.h>
 #include "type.h"
 
-enum ZenitArrayTypeInfoSource {
-    ZENIT_ARRAY_TYPE_DECL,
-    ZENIT_ARRAY_TYPE_INFER,
-};
-
 struct ZenitArrayTypeInfo {
     struct ZenitTypeInfo base;
     struct ZenitTypeInfo **members;
-    enum ZenitArrayTypeInfoSource source;
     struct ZenitTypeInfo *member_type;
     size_t length;
 };
 
-struct ZenitArrayTypeInfo* zenit_type_array_new(struct ZenitTypeInfo *member_type);
+struct ZenitArrayTypeInfo* zenit_type_array_new(enum ZenitTypeSource source, struct ZenitTypeInfo *member_type);
 void zenit_type_array_add_member(struct ZenitArrayTypeInfo *typeinfo, struct ZenitTypeInfo *element);
 unsigned long zenit_type_array_hash(struct ZenitArrayTypeInfo *typeinfo);
 struct ZenitArrayTypeInfo* zenit_type_array_copy(struct ZenitArrayTypeInfo *source);

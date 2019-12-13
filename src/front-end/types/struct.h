@@ -9,7 +9,7 @@ struct ZenitStructTypeInfo {
     struct ZenitTypeInfo *members;
 };
 
-struct ZenitStructTypeInfo* zenit_type_struct_new(char *name);
+struct ZenitStructTypeInfo* zenit_type_struct_new(enum ZenitTypeSource source, char *name);
 unsigned long zenit_type_struct_hash(struct ZenitStructTypeInfo *typeinfo);
 struct ZenitStructTypeInfo* zenit_type_struct_copy(struct ZenitStructTypeInfo *src_type);
 char* zenit_type_struct_to_string(struct ZenitStructTypeInfo *typeinfo);

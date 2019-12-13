@@ -1,10 +1,11 @@
 #include <fllib.h>
 #include "array.h"
 
-struct ZenitArrayTypeInfo* zenit_type_array_new(struct ZenitTypeInfo *member_type)
+struct ZenitArrayTypeInfo* zenit_type_array_new(enum ZenitTypeSource source, struct ZenitTypeInfo *member_type)
 {
     struct ZenitArrayTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitArrayTypeInfo));
     typeinfo->base.type = ZENIT_TYPE_ARRAY;
+    typeinfo->base.source = source;
     typeinfo->members = fl_array_new(sizeof(struct ZenitArrayTypeInfo*), 0);
     typeinfo->member_type = member_type;
 
@@ -38,11 +39,10 @@ struct ZenitArrayTypeInfo* zenit_type_array_copy(struct ZenitArrayTypeInfo *sour
     if (!source)
         return NULL;
 
-    struct ZenitArrayTypeInfo *dest = zenit_type_array_new(zenit_type_copy(source->member_type));
+    struct ZenitArrayTypeInfo *dest = zenit_type_array_new(source->base.source, zenit_type_copy(source->member_type));
 
     dest->base.type = source->base.type;
     dest->length = source->length;
-    dest->source = source->source;
 
     for (size_t i=0; i < fl_array_length(source->members); i++)
         zenit_type_array_add_member(dest, zenit_type_copy(source->members[i]));
@@ -151,8 +151,11 @@ bool zenit_type_array_unify(struct ZenitArrayTypeInfo *array_type, struct ZenitT
 
     if (type_b->type == ZENIT_TYPE_NONE)
     {
-        if (unified) 
+        if (unified)
+        {
             *unified = (struct ZenitTypeInfo*) zenit_type_array_copy(array_type);
+            (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
+        }
         return true;
     }
 
@@ -161,8 +164,11 @@ bool zenit_type_array_unify(struct ZenitArrayTypeInfo *array_type, struct ZenitT
 
     if (zenit_type_array_equals(array_type, type_b))
     {
-        if (unified) 
+        if (unified)
+        {
             *unified = (struct ZenitTypeInfo*) zenit_type_array_copy(array_type);
+            (*unified)->source = ZENIT_TYPE_SRC_INFERRED;
+        }
         return true;
     }
 
@@ -182,11 +188,10 @@ bool zenit_type_array_unify(struct ZenitArrayTypeInfo *array_type, struct ZenitT
         if (!zenit_type_unify(array_type->member_type, arr_type_b->member_type, &unified_member_type))
             return false;
 
-        struct ZenitArrayTypeInfo *unified_array_type = zenit_type_array_new(unified_member_type);
+        struct ZenitArrayTypeInfo *unified_array_type = zenit_type_array_new(ZENIT_TYPE_SRC_INFERRED, unified_member_type);
         *unified = (struct ZenitTypeInfo*) unified_array_type;
 
         unified_array_type->length = array_type->length;
-        unified_array_type->source = array_type->source;
 
         for (size_t i=0; i < fl_array_length(array_type->members); i++)
         {
@@ -210,7 +215,9 @@ void zenit_type_array_free(struct ZenitArrayTypeInfo *typeinfo)
     if (typeinfo->base.to_string.value != NULL)
         fl_cstring_free(typeinfo->base.to_string.value);
 
-    fl_array_free(typeinfo->members);
+    zenit_type_free(typeinfo->member_type);
+
+    fl_array_free_each_pointer(typeinfo->members, (FlArrayFreeElementFunc) zenit_type_free);
 
     fl_free(typeinfo);
 }

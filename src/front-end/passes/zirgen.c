@@ -110,7 +110,7 @@ static inline struct ZirTypeInfo* new_zir_type_from_zenit_type(struct ZirProgram
     if (zenit_type->type == ZENIT_TYPE_STRUCT)
     {
         struct ZenitStructTypeInfo *zenit_struct = (struct ZenitStructTypeInfo*) zenit_type;
-        return zir_type_pool_register(&program->type_pool, (struct ZirTypeInfo*) zenit_type_struct_new(zenit_struct->name));
+        return zir_type_pool_register(&program->type_pool, (struct ZirTypeInfo*) zir_type_struct_new(zenit_struct->name));
     }
 
     if (zenit_type->type == ZENIT_TYPE_ARRAY)
