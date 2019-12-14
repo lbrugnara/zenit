@@ -1,6 +1,7 @@
 #ifndef ZIR_TYPE_H
 #define ZIR_TYPE_H
 
+#include <stdlib.h>
 #include <stdbool.h>
 
 /*

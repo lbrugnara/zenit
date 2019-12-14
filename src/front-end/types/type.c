@@ -1,5 +1,6 @@
 #include <fllib.h>
 #include <stdlib.h>
+#include <limits.h>
 #include "type.h"
 #include "system.h"
 
