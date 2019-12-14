@@ -276,7 +276,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
     for (size_t i=0; i < fl_array_length(array_node->elements); i++)
     {
         // If we received a typehint, and we used it to infer the array type, we can pass the member_type property as a hint
-        struct ZenitSymbol *elem_symbol = visit_node(ctx, array_node->elements[i], typehint != NULL ? array_type->member_type : NULL);
+        struct ZenitSymbol *elem_symbol = visit_node(ctx, array_node->elements[i], typehint_used ? array_type->member_type : NULL);
 
         // If the types can be "unified", that means, finding a common ancestor between
         // them, we can try that
