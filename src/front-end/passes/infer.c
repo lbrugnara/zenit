@@ -34,10 +34,17 @@ static const ZenitTypeInferrer inferrers[] = {
     [ZENIT_NODE_CAST]       = (ZenitTypeInferrer) &visit_cast_node,
 };
 
-static inline void unify_symbols_type(struct ZenitSymbol *symbol_a, struct ZenitSymbol *symbol_b)
+enum ZenitTypeUnifyResult {
+    ZENIT_TYPE_UNIFY_NONE,
+    ZENIT_TYPE_UNIFY_LEFT,
+    ZENIT_TYPE_UNIFY_RIGHT,
+    ZENIT_TYPE_UNIFY_BOTH
+};
+
+static inline enum ZenitTypeUnifyResult unify_symbols_type(struct ZenitSymbol *symbol_a, struct ZenitSymbol *symbol_b)
 {
     if (zenit_type_equals(symbol_a->typeinfo, symbol_b->typeinfo))
-        return;
+        return ZENIT_TYPE_UNIFY_BOTH;
 
     struct ZenitTypeInfo *unified = zenit_type_unify(symbol_a->typeinfo, symbol_b->typeinfo);
 
@@ -45,26 +52,31 @@ static inline void unify_symbols_type(struct ZenitSymbol *symbol_a, struct Zenit
     // as the type information they currently hold has its roots in the inference process,
     // because we can't change the type of a symbol with an intrinsic type information nor
     // doing that with a symbol that got its type from the hint the user provided in the source
+    enum ZenitTypeUnifyResult result = ZENIT_TYPE_UNIFY_NONE;
 
     if (symbol_a->typeinfo->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(symbol_a->typeinfo, unified))
     {
         zenit_type_free(symbol_a->typeinfo);
         symbol_a->typeinfo = zenit_type_copy(unified);
+        result++;
     }
 
     if (symbol_b->typeinfo->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(symbol_b->typeinfo, unified))
     {
         zenit_type_free(symbol_b->typeinfo);
         symbol_b->typeinfo = zenit_type_copy(unified);
+        result++;
     }
 
     zenit_type_free(unified);
+
+    return result;
 }
 
-static inline void unify_symbol_type(struct ZenitSymbol *symbol, struct ZenitTypeInfo **typeinfo)
+static inline enum ZenitTypeUnifyResult unify_symbol_type(struct ZenitSymbol *symbol, struct ZenitTypeInfo **typeinfo)
 {
     if (zenit_type_equals(symbol->typeinfo, *typeinfo))
-        return;
+        return ZENIT_TYPE_UNIFY_BOTH;
 
     struct ZenitTypeInfo *unified = zenit_type_unify(symbol->typeinfo, *typeinfo);
 
@@ -72,26 +84,31 @@ static inline void unify_symbol_type(struct ZenitSymbol *symbol, struct ZenitTyp
     // as the type information they currently hold has its roots in the inference process,
     // because we can't change the type of a symbol with an intrinsic type information nor
     // doing that with a type hinted by the user
+    enum ZenitTypeUnifyResult result = ZENIT_TYPE_UNIFY_NONE;
 
     if (symbol->typeinfo->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(symbol->typeinfo, unified))
     {
         zenit_type_free(symbol->typeinfo);
         symbol->typeinfo = zenit_type_copy(unified);
+        result++;
     }
 
     if ((*typeinfo)->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(*typeinfo, unified))
     {
         zenit_type_free(*typeinfo);
         *typeinfo = zenit_type_copy(unified);
+        result++;
     }
 
     zenit_type_free(unified);
+
+    return result;
 }
 
-static inline void unify_types(struct ZenitTypeInfo **typeinfo_a, struct ZenitTypeInfo **typeinfo_b)
+static inline enum ZenitTypeUnifyResult unify_types(struct ZenitTypeInfo **typeinfo_a, struct ZenitTypeInfo **typeinfo_b)
 {
     if (zenit_type_equals(*typeinfo_a, *typeinfo_b))
-        return;
+        return ZENIT_TYPE_UNIFY_BOTH;
 
     struct ZenitTypeInfo *unified = zenit_type_unify(*typeinfo_a, *typeinfo_b);
 
@@ -99,20 +116,25 @@ static inline void unify_types(struct ZenitTypeInfo **typeinfo_a, struct ZenitTy
     // as the type information they currently hold has its roots in the inference process,
     // because we can't change a type with an intrinsic type information nor
     // doing that with a type hinted by the user
+    enum ZenitTypeUnifyResult result = ZENIT_TYPE_UNIFY_NONE;
 
     if ((*typeinfo_a)->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(*typeinfo_a, unified))
     {
         zenit_type_free(*typeinfo_a);
         *typeinfo_a = zenit_type_copy(unified);
+        result++;
     }
 
     if ((*typeinfo_b)->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(*typeinfo_b, unified))
     {
         zenit_type_free(*typeinfo_b);
         *typeinfo_b = zenit_type_copy(unified);
+        result++;
     }
 
     zenit_type_free(unified);
+
+    return result;
 }
 
 /*
@@ -134,10 +156,19 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
     struct ZenitSymbol *cast_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node);
     struct ZenitSymbol *casted_expression = visit_node(ctx, cast_node->expression, NULL);
 
-    if (cast_node->implicit && !zenit_type_is_castable_to(casted_expression->typeinfo, cast_symbol->typeinfo))
+    if (typehint != NULL && zenit_type_can_unify(cast_symbol->typeinfo, typehint))
     {
-        if (zenit_type_can_unify(cast_symbol->typeinfo, casted_expression->typeinfo))
-            unify_symbols_type(cast_symbol, casted_expression);
+        // FIXME: Should we check the result of this call?
+        unify_symbol_type(cast_symbol, &typehint);
+    }
+    else if (typehint == NULL && cast_symbol->typeinfo->type == ZENIT_TYPE_NONE)
+    {
+        zenit_context_error(
+            ctx, 
+            cast_node->base.location, 
+            ZENIT_ERROR_INFERENCE, 
+            "Cannot infer the type of the cast expression, try adding a type hint"
+        );
     }
 
     return cast_symbol;
@@ -232,57 +263,41 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 {
     struct ZenitSymbol *array_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) array_node);
 
+    bool typehint_used = false;
     if (typehint != NULL && zenit_type_can_unify(array_symbol->typeinfo, typehint))
     {
         unify_symbol_type(array_symbol, &typehint);
+        typehint_used = true;
     }
 
     struct ZenitArrayTypeInfo *array_type = (struct ZenitArrayTypeInfo*) array_symbol->typeinfo;
-
-    //struct ZenitSymbol **array_elements_symbols = fl_array_new(sizeof(struct ZenitSymbol*), length);
-
-    struct ZenitTypeInfo *common_type = zenit_type_copy(array_type->member_type);
-
-    for (size_t i=0; i < fl_array_length(array_node->elements); i++)
-    {
-        struct ZenitSymbol *elem_symbol = visit_node(ctx, array_node->elements[i], NULL);
-
-        //array_elements_symbols[i] = elem_symbol;
-
-        if (common_type == NULL)
-        {
-            common_type = zenit_type_copy(elem_symbol->typeinfo);
-            continue;
-        }
-
-        if (zenit_type_can_unify(elem_symbol->typeinfo, common_type))
-        {
-            unify_symbol_type(elem_symbol, &common_type);
-        }
-        else
-        {
-            zenit_context_error(ctx, array_node->elements[i]->location, ZENIT_ERROR_INFERENCE, 
-                    "Cannot find the common ancestor of types '%s' and '%s'", 
-                        zenit_type_to_string(common_type), zenit_type_to_string(elem_symbol->typeinfo));
-        }
-    }
-
-    for (size_t i=0; i < fl_array_length(array_node->elements); i++)
-    {
-        zenit_type_free(array_type->members[i]);
-        array_type->members[i] = zenit_type_copy(common_type);
-        //zenit_type_free(array_elements_symbols[i]->typeinfo);
-        //array_elements_symbols[i]->typeinfo = zenit_type_copy(common_type);
-        //zenit_type_array_add_member(array_type, zenit_type_copy(common_type));
-    }
-    
-    zenit_type_free(array_type->member_type);
-    array_type->member_type = zenit_type_copy(common_type);
-    zenit_type_free(common_type);
     array_type->length = fl_array_length(array_node->elements);
 
-    //fl_array_free(array_elements_symbols);
+    for (size_t i=0; i < fl_array_length(array_node->elements); i++)
+    {
+        // If we received a typehint, and we used it to infer the array type, we can pass the member_type property as a hint
+        struct ZenitSymbol *elem_symbol = visit_node(ctx, array_node->elements[i], typehint != NULL ? array_type->member_type : NULL);
 
+        // If the types can be "unified", that means, finding a common ancestor between
+        // them, we can try that
+        enum ZenitTypeUnifyResult unify_result = ZENIT_TYPE_UNIFY_NONE;
+
+        if (zenit_type_can_unify(elem_symbol->typeinfo, array_type->member_type))
+            unify_result = unify_symbol_type(elem_symbol, &array_type->member_type);
+
+        if (unify_result == ZENIT_TYPE_UNIFY_NONE && zenit_type_is_castable_to(array_type->member_type, elem_symbol->typeinfo))
+        {
+            // Last resort: We assume an implicit cast, the type check pass will take care of it
+            struct ZenitCastNode *cast_node = zenit_node_cast_new(array_node->elements[i]->location, array_node->elements[i], true);
+            array_node->elements[i] = (struct ZenitNode*) cast_node;
+
+            zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node, zenit_type_copy(elem_symbol->typeinfo));
+        }
+
+        zenit_type_free(array_type->members[i]);
+        array_type->members[i] = zenit_type_copy(array_type->member_type);
+    }
+    
     return array_symbol;
 }
 
@@ -355,11 +370,13 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     {   
         // If the types can be "unified", that means, finding a common ancestor between
         // them, we can try that
+        enum ZenitTypeUnifyResult unify_result = ZENIT_TYPE_UNIFY_NONE;
+
         if (zenit_type_can_unify(symbol->typeinfo, rhs_symbol->typeinfo))
-        {
-            unify_symbols_type(symbol, rhs_symbol);
-        }
-        else if (zenit_type_is_castable_to(rhs_symbol->typeinfo, symbol->typeinfo))
+            unify_result = unify_symbols_type(symbol, rhs_symbol);
+
+
+        if (unify_result == ZENIT_TYPE_UNIFY_NONE && zenit_type_is_castable_to(rhs_symbol->typeinfo, symbol->typeinfo))
         {
             // Last resort: We assume an implicit cast, the type check pass will take care of it
             struct ZenitCastNode *cast_node = zenit_node_cast_new(variable_node->rvalue->location, variable_node->rvalue, true);

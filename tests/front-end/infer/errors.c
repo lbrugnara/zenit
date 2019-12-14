@@ -10,8 +10,8 @@
 void zenit_test_infer_errors(void)
 {
     const char *source = 
-        "var sym_a : [0]custom = [];"               "\n"
-        "var sym_b : [2]uint8 = [ 1, sym_a ];"      "\n"
+        "var a = 0x1;"                   "\n"
+        "var b = cast(a);"               "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);

@@ -19,6 +19,7 @@ struct ExpectedError {
     { ZENIT_ERROR_INVALID_REFERENCE, "Cannot take a reference to a reference (<source>:%u:%u: %s)" },
     { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from [2]uint16 to [2]uint8 (<source>:%u:%u: %s)" },
     { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from uint8 to &uint8 (<source>:%u:%u: %s)" },
+    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from [0]custom to [2]uint8 (<source>:%u:%u: %s)" },
 };
 
 void zenit_test_check_types_errors(void)
@@ -34,6 +35,7 @@ void zenit_test_check_types_errors(void)
         "var player = 1;"                                       "\n"
         "var address = 0x10;"                                   "\n"
         "var player_ref : &uint8 = cast(address : &uint8);"     "\n"
+        "var sym_h : [2]uint8 = [ 1, sym_a ];"                  "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);

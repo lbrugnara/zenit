@@ -254,14 +254,14 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 
         // If the type check fails, we add an error only if the array type is defined
         // because if not, we might be targeting a false positive error
-        //if (is_array_type_defined && element_symbol->typeinfo->type != array_symbol->typeinfo->type)
-        //{
-        //    zenit_context_error(ctx, array->elements[i]->location, ZENIT_ERROR_TYPE_MISSMATCH, 
-        //        "Cannot convert from type '%s' to '%s'", 
-        //        zenit_type_to_string(element_symbol->typeinfo), 
-        //        zenit_type_to_string(array_symbol->typeinfo)
-        //    );
-        //}
+        if (is_array_type_defined && !zenit_type_is_assignable_from(array_type->member_type, element_symbol->typeinfo))
+        {
+            zenit_context_error(ctx, array->elements[i]->location, ZENIT_ERROR_TYPE_MISSMATCH, 
+                "Cannot convert from type '%s' to '%s'", 
+                zenit_type_to_string(element_symbol->typeinfo), 
+                zenit_type_to_string(array_symbol->typeinfo)
+            );
+        }
     }
 
     // We return the type of the array initializer
