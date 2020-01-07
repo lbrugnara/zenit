@@ -19,6 +19,9 @@ void zir_operand_array_free(struct ZirArrayOperand *operand)
 
     fl_array_free(operand->elements);
 
+    if (operand->typeinfo)
+        zir_type_array_free(operand->typeinfo);
+
     fl_free(operand);
 }
 

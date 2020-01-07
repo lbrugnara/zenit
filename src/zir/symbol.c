@@ -20,5 +20,8 @@ void zir_symbol_free(struct ZirSymbol *symbol)
     if (symbol->name)
         fl_cstring_free(symbol->name);
 
+    if (symbol->typeinfo)
+        zir_type_free(symbol->typeinfo);
+
     fl_free(symbol);
 }

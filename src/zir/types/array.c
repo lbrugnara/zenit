@@ -219,7 +219,9 @@ void zir_type_array_free(struct ZirArrayTypeInfo *typeinfo)
     if (typeinfo->base.to_string.value != NULL)
         fl_cstring_free(typeinfo->base.to_string.value);
 
-    fl_array_free(typeinfo->members);
+    zir_type_free(typeinfo->member_type);
+
+    fl_array_free_each_pointer(typeinfo->members, (FlArrayFreeElementFunc) zir_type_free);
 
     fl_free(typeinfo);
 }

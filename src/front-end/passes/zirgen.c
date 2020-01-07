@@ -97,20 +97,20 @@ static inline struct ZirTypeInfo* new_zir_type_from_zenit_type(struct ZirProgram
                 break;
         }
 
-        return zir_type_pool_register(&program->type_pool, (struct ZirTypeInfo*) zir_type_uint_new(size));
+        return (struct ZirTypeInfo*) zir_type_uint_new(size);
     }
 
     if (zenit_type->type == ZENIT_TYPE_REFERENCE)
     {
         struct ZenitReferenceTypeInfo *zenit_ref = (struct ZenitReferenceTypeInfo*) zenit_type;
         struct ZirTypeInfo *zir_element_type = new_zir_type_from_zenit_type(program, zenit_ref->element);
-        return zir_type_pool_register(&program->type_pool, (struct ZirTypeInfo*) zir_type_reference_new(zir_element_type));
+        return (struct ZirTypeInfo*) zir_type_reference_new(zir_element_type);
     }
 
     if (zenit_type->type == ZENIT_TYPE_STRUCT)
     {
         struct ZenitStructTypeInfo *zenit_struct = (struct ZenitStructTypeInfo*) zenit_type;
-        return zir_type_pool_register(&program->type_pool, (struct ZirTypeInfo*) zir_type_struct_new(zenit_struct->name));
+        return (struct ZirTypeInfo*) zir_type_struct_new(zenit_struct->name);
     }
 
     if (zenit_type->type == ZENIT_TYPE_ARRAY)
@@ -125,11 +125,11 @@ static inline struct ZirTypeInfo* new_zir_type_from_zenit_type(struct ZirProgram
         for (size_t i=0; i < fl_array_length(zenit_array->members); i++)
             zir_type_array_add_member(zir_array, new_zir_type_from_zenit_type(program, zenit_array->members[i]));
 
-        return zir_type_pool_register(&program->type_pool, (struct ZirTypeInfo*) zir_array);
+        return (struct ZirTypeInfo*) zir_array;
     }
 
     if (zenit_type->type == ZENIT_TYPE_NONE)
-        return zir_type_pool_register(&program->type_pool, zir_type_none_new());
+        return zir_type_none_new();
 
     return NULL;
 }

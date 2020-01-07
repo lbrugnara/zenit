@@ -17,6 +17,9 @@ void zir_operand_uint_free(struct ZirUintOperand *uint)
     if (!uint)
         return;
 
+    if (uint->typeinfo)
+        zir_type_uint_free(uint->typeinfo);
+
     fl_free(uint);
 }
 

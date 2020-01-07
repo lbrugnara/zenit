@@ -174,5 +174,7 @@ void zir_type_struct_free(struct ZirStructTypeInfo *typeinfo)
     if (typeinfo->name)
         fl_cstring_free(typeinfo->name);
 
+    // FIXME: Free the members once they are implemented
+
     fl_free(typeinfo);
 }

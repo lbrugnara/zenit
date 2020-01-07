@@ -166,5 +166,8 @@ void zir_type_reference_free(struct ZirReferenceTypeInfo *typeinfo)
     if (typeinfo->base.to_string.value != NULL)
         fl_cstring_free(typeinfo->base.to_string.value);
 
+    if (typeinfo->element)
+        zir_type_free(typeinfo->element);
+
     fl_free(typeinfo);
 }
