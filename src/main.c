@@ -21,7 +21,7 @@ int main(int argc, char **argv)
         || !zenit_check_types(&ctx))
     {
         zenit_context_print_errors(&ctx);
-        return -1;
+        return -2;
     }
     
     struct ZirProgram *zir_program = zenit_generate_zir(&ctx);
@@ -29,18 +29,18 @@ int main(int argc, char **argv)
     if (!zir_program)
     {
         zenit_context_print_errors(&ctx);
-        return -2;
+        return -3;
     }
 
     struct ZenitNesProgram *nes_program = zenit_nes_generate_program(zir_program);
 
     if (!nes_program)
-        return -3;
+        return -4;
 
     struct ZenitNesRom *rom = zenit_nes_rom_new(nes_program);
 
     if (!rom)
-        return -4;
+        return -5;
 
     zenit_nes_rom_dump(rom, argv[2]);
     

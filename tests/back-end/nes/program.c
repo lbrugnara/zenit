@@ -48,9 +48,9 @@ void zenit_test_nes_program(void)
         ""                                                      "\n"
         "#[NES(address: 0xFFFA)]"                               "\n"
         "var vectors : [3]uint16 = ["                           "\n"
-        "    0x8026,                    // NMI"                 "\n"
-        "    0x8000,                    // Reset"               "\n"
-        "    0x8027,                    // IRQ"                 "\n"
+        "    cast(&nmi : uint16),       // NMI"                 "\n"
+        "    cast(&reset : uint16),     // Reset"               "\n"
+        "    cast(&irq : uint16),       // IRQ"                 "\n"
         "];"                                                    "\n"
     ;
 

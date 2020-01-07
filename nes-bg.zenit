@@ -36,6 +36,6 @@ var nmi = [
 
 #[NES(address: 0xFFFA)]
 var vectors : [2]uint16 = [
-    0x8017,                     // NMI
-    0x8000,                     // Reset
+    cast(&nmi),                 // NMI
+    cast(&reset),               // Reset
 ];

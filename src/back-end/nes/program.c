@@ -42,6 +42,11 @@ struct ZenitNesProgram* zenit_nes_program_new()
         .bytes = fl_array_new(sizeof(uint8_t), 0x8000),
     };
 
+    // "Auto" expands
+    program->tmp = (struct ZenitNesTmpSegment){
+        .bytes = fl_array_new(sizeof(uint8_t), 0x0),
+    };
+
     return program;
 }
 
@@ -58,6 +63,8 @@ void zenit_nes_program_free(struct ZenitNesProgram *program)
 
     fl_array_free(program->data.slots);
     fl_array_free(program->data.bytes);
+
+    fl_array_free(program->tmp.bytes);
 
     fl_free(program);
 }
