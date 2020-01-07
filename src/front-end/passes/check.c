@@ -126,7 +126,7 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
  *  An array indexed with a <enum ZenitNodeType> to get a <ZenitTypeChecker> function
  */
 static const ZenitTypeChecker checkers[] = {
-    [ZENIT_NODE_UINT]    = (ZenitTypeChecker) &visit_primitive_node,
+    [ZENIT_NODE_UINT]       = (ZenitTypeChecker) &visit_primitive_node,
     [ZENIT_NODE_VARIABLE]   = (ZenitTypeChecker) &visit_variable_node,
     [ZENIT_NODE_ARRAY]      = (ZenitTypeChecker) &visit_array_node,
     [ZENIT_NODE_IDENTIFIER] = (ZenitTypeChecker) &visit_identifier_node,

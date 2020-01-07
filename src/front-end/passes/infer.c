@@ -26,7 +26,7 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
  *  An array indexed with a <enum ZenitNodeType> to get a <ZenitTypeInferrer> function
  */
 static const ZenitTypeInferrer inferrers[] = {
-    [ZENIT_NODE_UINT]    = (ZenitTypeInferrer) &visit_primitive_node,
+    [ZENIT_NODE_UINT]       = (ZenitTypeInferrer) &visit_primitive_node,
     [ZENIT_NODE_VARIABLE]   = (ZenitTypeInferrer) &visit_variable_node,
     [ZENIT_NODE_ARRAY]      = (ZenitTypeInferrer) &visit_array_node,
     [ZENIT_NODE_IDENTIFIER] = (ZenitTypeInferrer) &visit_identifier_node,
@@ -56,15 +56,13 @@ static inline enum ZenitTypeUnifyResult unify_symbols_type(struct ZenitSymbol *s
 
     if (symbol_a->typeinfo->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(symbol_a->typeinfo, unified))
     {
-        zenit_type_free(symbol_a->typeinfo);
-        symbol_a->typeinfo = zenit_type_copy(unified);
+        zenit_symbol_set_type(symbol_a, unified);
         result++;
     }
 
     if (symbol_b->typeinfo->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(symbol_b->typeinfo, unified))
     {
-        zenit_type_free(symbol_b->typeinfo);
-        symbol_b->typeinfo = zenit_type_copy(unified);
+        zenit_symbol_set_type(symbol_b, unified);
         result++;
     }
 
@@ -88,8 +86,7 @@ static inline enum ZenitTypeUnifyResult unify_symbol_type(struct ZenitSymbol *sy
 
     if (symbol->typeinfo->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(symbol->typeinfo, unified))
     {
-        zenit_type_free(symbol->typeinfo);
-        symbol->typeinfo = zenit_type_copy(unified);
+        zenit_symbol_set_type(symbol, unified);
         result++;
     }
 
@@ -97,38 +94,6 @@ static inline enum ZenitTypeUnifyResult unify_symbol_type(struct ZenitSymbol *sy
     {
         zenit_type_free(*typeinfo);
         *typeinfo = zenit_type_copy(unified);
-        result++;
-    }
-
-    zenit_type_free(unified);
-
-    return result;
-}
-
-static inline enum ZenitTypeUnifyResult unify_types(struct ZenitTypeInfo **typeinfo_a, struct ZenitTypeInfo **typeinfo_b)
-{
-    if (zenit_type_equals(*typeinfo_a, *typeinfo_b))
-        return ZENIT_TYPE_UNIFY_BOTH;
-
-    struct ZenitTypeInfo *unified = zenit_type_unify(*typeinfo_a, *typeinfo_b);
-
-    // This function will update the type information of the type objects as long
-    // as the type information they currently hold has its roots in the inference process,
-    // because we can't change a type with an intrinsic type information nor
-    // doing that with a type hinted by the user
-    enum ZenitTypeUnifyResult result = ZENIT_TYPE_UNIFY_NONE;
-
-    if ((*typeinfo_a)->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(*typeinfo_a, unified))
-    {
-        zenit_type_free(*typeinfo_a);
-        *typeinfo_a = zenit_type_copy(unified);
-        result++;
-    }
-
-    if ((*typeinfo_b)->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(*typeinfo_b, unified))
-    {
-        zenit_type_free(*typeinfo_b);
-        *typeinfo_b = zenit_type_copy(unified);
         result++;
     }
 
@@ -156,12 +121,9 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
     struct ZenitSymbol *cast_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node);
     struct ZenitSymbol *casted_expression = visit_node(ctx, cast_node->expression, NULL);
 
-    if (typehint != NULL && zenit_type_can_unify(cast_symbol->typeinfo, typehint))
-    {
-        // FIXME: Should we check the result of this call?
-        unify_symbol_type(cast_symbol, &typehint);
-    }
-    else if (typehint == NULL && cast_symbol->typeinfo->type == ZENIT_TYPE_NONE)
+    // If there is no type hint from the context and the cast expression has no type hint
+    // either, we can't infer the type
+    if (typehint == NULL && cast_symbol->typeinfo->type == ZENIT_TYPE_NONE)
     {
         zenit_context_error(
             ctx, 
@@ -169,6 +131,11 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
             ZENIT_ERROR_INFERENCE, 
             "Cannot infer the type of the cast expression, try adding a type hint"
         );
+    }
+    else if (typehint != NULL && zenit_type_can_unify(cast_symbol->typeinfo, typehint))
+    {
+        // FIXME: Should we check the result of this call?
+        unify_symbol_type(cast_symbol, &typehint);
     }
 
     return cast_symbol;
@@ -224,13 +191,19 @@ static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struc
  */
 static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *reference_node, struct ZenitTypeInfo *typehint)
 {
+    // Visit the expression node to get its symbol
     struct ZenitSymbol *expr_symbol = visit_node(ctx, reference_node->expression, NULL);
+
+    // Get the reference symbol and its type
     struct ZenitSymbol *ref_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) reference_node);
     struct ZenitReferenceTypeInfo *ref_typeinfo = (struct ZenitReferenceTypeInfo*) ref_symbol->typeinfo;
 
     // If the types are equals, no need to do anything
     if (!zenit_type_equals(ref_typeinfo->element, expr_symbol->typeinfo))
     {
+        // FIXME: By now this situation can't happen, as the reference type is equals
+        // to the expression type, and the expression must be a valid symbol (no forward
+        // references yet)
         if (!zenit_type_can_unify(ref_typeinfo->element, expr_symbol->typeinfo))
         {
             zenit_context_error(ctx, reference_node->base.location, ZENIT_ERROR_INFERENCE, 
@@ -250,6 +223,7 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
  *  The array initializer always has type NONE before this pass, so we here update it
  *  to be the type of the first element within the array that has a type different from
  *  NONE.
+ *  If we receive a type hint, we also use that to infer the array type.
  *
  * Parameters:
  *  ctx - Context object
@@ -266,6 +240,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
     bool typehint_used = false;
     if (typehint != NULL && zenit_type_can_unify(array_symbol->typeinfo, typehint))
     {
+        // No need to check the unification result, the array type is NONE
         unify_symbol_type(array_symbol, &typehint);
         typehint_used = true;
     }
@@ -275,19 +250,18 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 
     for (size_t i=0; i < fl_array_length(array_node->elements); i++)
     {
-        // If we received a typehint, and we used it to infer the array type, we can pass the member_type property as a hint
+        // If we received a type hint, and we used it to infer the array type, we can pass the member_type property as a hint
         struct ZenitSymbol *elem_symbol = visit_node(ctx, array_node->elements[i], typehint_used ? array_type->member_type : NULL);
 
-        // If the types can be "unified", that means, finding a common ancestor between
-        // them, we can try that
+        // Try to unify the types
         enum ZenitTypeUnifyResult unify_result = ZENIT_TYPE_UNIFY_NONE;
 
         if (zenit_type_can_unify(elem_symbol->typeinfo, array_type->member_type))
             unify_result = unify_symbol_type(elem_symbol, &array_type->member_type);
 
+        // If the unify result is NONE, we need to assume an implicit cast, and then the type check pass will take care of it
         if (unify_result == ZENIT_TYPE_UNIFY_NONE && zenit_type_is_castable_to(array_type->member_type, elem_symbol->typeinfo))
         {
-            // Last resort: We assume an implicit cast, the type check pass will take care of it
             struct ZenitCastNode *cast_node = zenit_node_cast_new(array_node->elements[i]->location, array_node->elements[i], true);
             array_node->elements[i] = (struct ZenitNode*) cast_node;
 
@@ -343,9 +317,9 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
 /*
  * Function: visit_variable_node
  *  This function infers the variable type from the right-hand side expression
- *  or the other way around. If the type of both elements are <ZENIT_TYPE_NON> 
+ *  or the other way around. If the type of both elements are <ZENIT_TYPE_NONE> 
  *  this function adds a new error because that means we can't infer their types.
- *  If both types are defined bu are not equals, we don't need to do anything here,
+ *  If both types are defined but are not equals, we don't need to do anything here,
  *  the type checking pass will take care of it.
  *
  * Parameters:
@@ -361,24 +335,23 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     // We need the symbol we introduced in the <zenit_resolve_symbols> pass
     struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx->program, variable_node->name);
 
-    // We need to get the type of the right-hand side expression
+    // We need to get the symbol of the right-hand side expression. (if the variable definition has a type hint, we pass that hint to the visitor)
     struct ZenitSymbol *rhs_symbol = visit_node(ctx, variable_node->rvalue, symbol->typeinfo->source == ZENIT_TYPE_SRC_HINT ? symbol->typeinfo : NULL);
 
-    // If the types are equals, we don't have to do anything here, but if not, we need to
-    // take action about that
+    // If the types are equals, we don't have to do anything here, but if they not, we need to
+    // take an action about that
     if (!zenit_type_equals(symbol->typeinfo, rhs_symbol->typeinfo))
     {   
-        // If the types can be "unified", that means, finding a common ancestor between
-        // them, we can try that
+        // Try to unify the types
         enum ZenitTypeUnifyResult unify_result = ZENIT_TYPE_UNIFY_NONE;
 
         if (zenit_type_can_unify(symbol->typeinfo, rhs_symbol->typeinfo))
             unify_result = unify_symbols_type(symbol, rhs_symbol);
 
 
+        // If the unify result is NONE, we need to assume an implicit cast, and then the type check pass will take care of it
         if (unify_result == ZENIT_TYPE_UNIFY_NONE && zenit_type_is_castable_to(rhs_symbol->typeinfo, symbol->typeinfo))
         {
-            // Last resort: We assume an implicit cast, the type check pass will take care of it
             struct ZenitCastNode *cast_node = zenit_node_cast_new(variable_node->rvalue->location, variable_node->rvalue, true);
             variable_node->rvalue = (struct ZenitNode*) cast_node;
 
@@ -389,7 +362,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     // Visit the attributes and its properties
     visit_attribute_node_map(ctx, &variable_node->attributes);
 
-    // Always the declared or inferred type. In case of error, we honor the variable type
+    // We always return the variable symbol
     return symbol;
 }
 

@@ -45,7 +45,7 @@ static struct ZirOperand* visit_cast_node(struct ZenitContext *ctx, struct ZirPr
  *  An array indexed with a <enum ZenitNodeType> to get a <ZirGenerator> function
  */
 static const ZirGenerator generators[] = {
-    [ZENIT_NODE_UINT]    = (ZirGenerator) &visit_uint_node,
+    [ZENIT_NODE_UINT]       = (ZirGenerator) &visit_uint_node,
     [ZENIT_NODE_VARIABLE]   = (ZirGenerator) &visit_variable_node,
     [ZENIT_NODE_ARRAY]      = (ZirGenerator) &visit_array_node,
     [ZENIT_NODE_IDENTIFIER] = (ZirGenerator) &visit_identifier_node,
@@ -378,21 +378,6 @@ static struct ZirOperand* visit_node(struct ZenitContext *ctx, struct ZirProgram
 {
     return generators[node->type](ctx, program, node);
 }
-/*
-static void import_zir_symbols_from_zenit_symbols(struct ZenitContext *ctx, struct ZirProgram *program)
-{
-    // FIXME: Use a zenit_program function to get all the symbols
-    // FIXME: Use the scopes!
-    char **names = fl_hashtable_keys(ctx->program->global_scope->symtable.symbols);
-
-    for (size_t i=0; i < fl_array_length(names); i++)
-    {
-        struct ZenitSymbol *zenit_symbol = zenit_program_get_symbol(ctx->program, names[i]);
-        import_zir_symbol_from_zenit_symbol(ctx, zenit_symbol, program, ctx->program->global_scope->symtable.type == ZENIT_SYMTABLE_GLOBAL);
-    }
-
-    fl_array_free(names);
-}*/
 
 /*
  * Function: zenit_generate_zir
@@ -405,7 +390,6 @@ struct ZirProgram* zenit_generate_zir(struct ZenitContext *ctx)
         return NULL;
 
     struct ZirProgram *program = zir_program_new();
-    //import_zir_symbols_from_zenit_symbols(ctx, program);
 
     size_t errors = zenit_context_error_count(ctx);
 
