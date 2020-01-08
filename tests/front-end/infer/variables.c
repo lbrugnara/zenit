@@ -136,7 +136,7 @@ void zenit_test_infer_variable_array(void)
         "var sym_p = [ 0x1, 0x200];"                                    "\n"
         "var sym_q : [2]&uint8 = [ &sym_a, cast(&sym_b : &uint8) ];"    "\n"
         "var sym_r : [2]uint16 = [ 0x1, 0x2 ];"                         "\n"
-        "var sym_s : [2]uint8 = [ 0x1FF, 0x2FF ];"                         "\n"
+        "var sym_s : [2]uint8 = [ 0x1FF, 0x2FF ];"                      "\n"
     ;
 
     struct TestCase {

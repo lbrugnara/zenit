@@ -214,6 +214,9 @@ static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struc
  */
 static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *reference_node)
 {
+    struct ZenitSymbol *ref_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) reference_node);
+    struct ZenitReferenceTypeInfo *ref_type = (struct ZenitReferenceTypeInfo*) ref_symbol->typeinfo;
+
     struct ZenitSymbol *expression_symbol = visit_node(ctx, reference_node->expression);
 
     // FIXME: Cannot take a reference to a temporal symbol (temporal expression, primitive, etc)
@@ -223,7 +226,16 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
                 "Cannot take a reference to another reference.");
     }
 
-    return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) reference_node);
+    if (!zenit_type_is_assignable_from(ref_type->element, expression_symbol->typeinfo))
+    {
+        zenit_context_error(ctx, reference_node->base.location, ZENIT_ERROR_TYPE_MISSMATCH, 
+            "A reference to a '%s' cannot be interpreted as reference to '%s'", 
+            zenit_type_to_string(expression_symbol->typeinfo), 
+            zenit_type_to_string(ref_type->element)
+        );
+    }
+
+    return ref_symbol;
 }
 
 /*
@@ -245,7 +257,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 
     // The array type is inferred in the inference pass, so we have information
     // about it, but it can be a struct type that doesn't exist in the symbol
-    // table
+    // table, so the <is_type_defined> function will tell us that
     bool is_array_type_defined = is_type_defined(ctx->program, array_symbol->typeinfo);
 
     for (size_t i=0; i < fl_array_length(array->elements); i++)
@@ -259,7 +271,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
             zenit_context_error(ctx, array->elements[i]->location, ZENIT_ERROR_TYPE_MISSMATCH, 
                 "Cannot convert from type '%s' to '%s'", 
                 zenit_type_to_string(element_symbol->typeinfo), 
-                zenit_type_to_string(((struct ZenitArrayTypeInfo*) array_symbol->typeinfo)->member_type)
+                zenit_type_to_string(array_type->member_type)
             );
         }
     }
@@ -358,7 +370,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     if (is_var_type_defined && !zenit_type_is_assignable_from(symbol->typeinfo, rhs_symbol->typeinfo))
     {
         zenit_context_error(ctx, variable_node->base.location, ZENIT_ERROR_TYPE_MISSMATCH, 
-            "Cannot convert from type '%s' to '%s'", 
+            "Cannot assign from type '%s' to '%s'", 
             zenit_type_to_string(rhs_symbol->typeinfo), 
             zenit_type_to_string(symbol->typeinfo)
         );

@@ -298,7 +298,6 @@ static struct ZenitNode* parse_literal_expression(struct ZenitParser *parser, st
 static struct ZenitNode* parse_array_initializer(struct ZenitParser *parser, struct ZenitContext *ctx)
 {
     struct ZenitToken lbracket_token;
-
     consume_or_return(ctx, parser, ZENIT_TOKEN_LBRACKET, &lbracket_token);
 
     // Allocate memory for the array node and fill the basic information
@@ -306,24 +305,22 @@ static struct ZenitNode* parse_array_initializer(struct ZenitParser *parser, str
 
     assert_or_return(ctx, array != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize an array initializer node");
 
-    // Keep iterating until get an EOF token or breaking out from inside 
     while (zenit_parser_has_input(parser) && !zenit_parser_next_is(parser, ZENIT_TOKEN_RBRACKET))
     {
         // Each element in the array initializer is an expression
-        struct ZenitNode *value = parse_expression(parser, ctx);
+        struct ZenitNode *expression = parse_expression(parser, ctx);
 
-        // Something happened parsing the element, we need to leave
-        assert_or_goto(ctx, value != NULL, ZENIT_ERROR_INTERNAL, NULL, on_bad_expression_value);
+        // Something happened while parsing the element, we need to leave
+        assert_or_goto(ctx, expression != NULL, ZENIT_ERROR_INTERNAL, NULL, on_bad_expression_value);
 
         // Add the node to the elements list
-        zenit_node_array_add_child(array, value);
+        zenit_node_array_add_child(array, expression);
 
         // If the next token IS NOT a right bracket, it MUST be a comma (even a trailing comma)
         if (!zenit_parser_next_is(parser, ZENIT_TOKEN_RBRACKET))
             consume_or_goto(ctx, parser, ZENIT_TOKEN_COMMA, NULL, on_bad_expression_value);
     }
 
-    // If the following token is not the right bracket, we reached the EOF token
     consume_or_goto(ctx, parser, ZENIT_TOKEN_RBRACKET, NULL, on_missing_bracket);
 
     // Return the parsed array initializer

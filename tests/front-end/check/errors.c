@@ -21,6 +21,13 @@ struct ExpectedError {
     { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from uint8 to &uint8 (<source>:%u:%u: %s)" },
     { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from [0]custom to [2]uint8 (<source>:%u:%u: %s)" },
     { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from &uint8 to uint8 (<source>:%u:%u: %s)" },
+    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from [2]uint8 to [1]uint8 (<source>:%u:%u: %s)" },
+    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from [2]uint8 to [1]uint8 (<source>:%u:%u: %s)" },
+    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from 'custom' to uint8 (<source>:%u:%u: %s)" },
+    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from uint8 to &uint8 (<source>:%u:%u: %s)" },
+    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from uint8 to &uint8 (<source>:%u:%u: %s)" },
+    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign from [1]&uint8 to [2]&uint8 (<source>:%u:%u: %s)" },
+    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign from &uint8 to &[1]uint8 (<source>:%u:%u: %s)" },
 };
 
 void zenit_test_check_types_errors(void)
@@ -39,6 +46,15 @@ void zenit_test_check_types_errors(void)
         "var sym_h : [2]uint8 = [ 1, sym_a ];"                  "\n"
         "var a = 0x20;"                                         "\n"
         "var b = [ 0x1, 0x2, &a ];"                             "\n"
+        "var c : [1]uint8 = [ 0x1, 0x2 ];"                      "\n"
+        // The cast can be inferred from the type hint
+        "var d : [1]uint8 = [ 0x1, cast(0x1FF) ];"              "\n"
+        "var e : [1]&uint8 = [ 0x1 ];"                          "\n"
+        // cast(0x1 : &uint8) is inferred because of the type hint
+        "var f : [1]&uint8 = [ cast(0x1) ];"                    "\n"
+        // cast(0x1 : &uint8) is inferred because of the type hint
+        "var g : [2]&uint8 = [ cast(0x1) ];"                    "\n"
+        "var h : &[1]uint8 = &a;"                               "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);

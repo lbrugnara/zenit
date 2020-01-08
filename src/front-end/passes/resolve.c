@@ -123,9 +123,10 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
     if (expr_symbol == NULL)
         return NULL;
 
-    // At this point, we can't make sure the type information of the referred expression is valid or finished, so the best we can do is to "infer"
-    // a reference type for the current information we got from the visit to the expression's node
-    struct ZenitTypeInfo *typeinfo = (struct ZenitTypeInfo*) zenit_type_reference_new(ZENIT_TYPE_SRC_INFERRED, zenit_type_copy(expr_symbol->typeinfo));
+    // Unless the expr_symbol type source is different from INFERRED, we can't make sure the type information of the referred expression 
+    // is valid or finished, so the best we can do is to "infer" a reference type for the information we got from the visit to the expression's node
+    enum ZenitTypeSource source = expr_symbol->typeinfo->source != ZENIT_TYPE_SRC_INFERRED ? expr_symbol->typeinfo->source : ZENIT_TYPE_SRC_INFERRED;
+    struct ZenitTypeInfo *typeinfo = (struct ZenitTypeInfo*) zenit_type_reference_new(source, zenit_type_copy(expr_symbol->typeinfo));
 
     return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) reference_node, typeinfo);
 }
@@ -145,21 +146,21 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
 static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array_node)
 {
     // We start creating an array type, we flag it as INFERRED because the truth is, at this point we can't make
-    // sure of its type, so we will need help/confirmation from the inference and type checking passes.
+    // sure of its type, so we will need help/confirmation from the inference and type check passes.
     struct ZenitArrayTypeInfo *array_type = zenit_type_array_new(ZENIT_TYPE_SRC_INFERRED, zenit_type_none_new());
     
     // The length is the number of elements within the array initializer, that's something we know
     array_type->length = fl_array_length(array_node->elements);
 
     // If there are elements within the array, we can check if all them are equals,
-    // in which case we are sure the array's member_type property can be updated from NONE
+    // in which case we can make sure the array's member_type property can be updated from NONE
     // to the specifc type. In case they are not equals (even though they could be "unified"), we
     // will need to wait for the inference pass to know the exact type of the array
     bool member_type_is_known = array_type->length > 0;
     for (size_t i=0; i < fl_array_length(array_node->elements); i++)
     {
         // On every array entry, we visit the node to get the symbol, and we use that
-        // to add type information about each element
+        // to track the type information of each element
         struct ZenitSymbol *element_symbol = visit_node(ctx, array_node->elements[i]);
 
         struct ZenitTypeInfo *element_typeinfo = NULL;
@@ -181,6 +182,8 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
             member_type_is_known = false;
     }
 
+    // If the member type is known, we can free the memory of the NONE type assigned to member_type
+    // and copy the new member_type from one of the array elements
     if (member_type_is_known)
     {
         zenit_type_free(array_type->member_type);
@@ -276,10 +279,9 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     else if (rhs_symbol)
     {
         // If the variable does not contain a type hint, we take the type from the 
-        // right-hand side (we flag it as INFERRED so the inference pass can freely
-        // adapt it if needed)
+        // right-hand side
         typeinfo = zenit_type_copy(rhs_symbol->typeinfo);
-        typeinfo->source = ZENIT_TYPE_SRC_INFERRED;
+        //typeinfo->source = ZENIT_TYPE_SRC_INFERRED;
     }
     else
     {

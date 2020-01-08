@@ -10,8 +10,9 @@
 void zenit_test_infer_errors(void)
 {
     const char *source = 
-        "var a = 0x1;"                   "\n"
-        "var b = cast(a);"               "\n"
+        "var a = 0x1;"                  "\n"
+        "var b = cast(a);"              "\n"
+        "var c = 0x1FF;"                "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
@@ -23,7 +24,7 @@ void zenit_test_infer_errors(void)
     fl_expect("Infer pass must fail with 1 error", !valid_infer && zenit_context_error_count(&ctx) == 1);
     
     fl_vexpect(ctx.errors[0].type == ZENIT_ERROR_INFERENCE, 
-        "Cannot unify types (<source>:%u:%u): %s", ctx.errors[0].location.line, ctx.errors[0].location.col, ctx.errors[0].message);
+        "The type of the cast expression cannot be inferred because there is no enough context information (<source>:%u:%u): %s", ctx.errors[0].location.line, ctx.errors[0].location.col, ctx.errors[0].message);
 
     zenit_context_free(&ctx);
 }
