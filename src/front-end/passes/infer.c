@@ -57,13 +57,13 @@ static inline enum ZenitTypeUnifyResult unify_symbols_type(struct ZenitSymbol *s
     if (symbol_a->typeinfo->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(symbol_a->typeinfo, unified))
     {
         zenit_symbol_set_type(symbol_a, unified);
-        result++;
+        result = ZENIT_TYPE_UNIFY_LEFT;
     }
 
     if (symbol_b->typeinfo->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(symbol_b->typeinfo, unified))
     {
         zenit_symbol_set_type(symbol_b, unified);
-        result++;
+        result = ZENIT_TYPE_UNIFY_RIGHT + result;
     }
 
     zenit_type_free(unified);
@@ -87,14 +87,14 @@ static inline enum ZenitTypeUnifyResult unify_symbol_type(struct ZenitSymbol *sy
     if (symbol->typeinfo->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(symbol->typeinfo, unified))
     {
         zenit_symbol_set_type(symbol, unified);
-        result++;
+        result = ZENIT_TYPE_UNIFY_LEFT;
     }
 
     if ((*typeinfo)->source == ZENIT_TYPE_SRC_INFERRED && !zenit_type_equals(*typeinfo, unified))
     {
         zenit_type_free(*typeinfo);
         *typeinfo = zenit_type_copy(unified);
-        result++;
+        result = ZENIT_TYPE_UNIFY_RIGHT + result;
     }
 
     zenit_type_free(unified);

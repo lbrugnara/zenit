@@ -259,7 +259,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
             zenit_context_error(ctx, array->elements[i]->location, ZENIT_ERROR_TYPE_MISSMATCH, 
                 "Cannot convert from type '%s' to '%s'", 
                 zenit_type_to_string(element_symbol->typeinfo), 
-                zenit_type_to_string(array_symbol->typeinfo)
+                zenit_type_to_string(((struct ZenitArrayTypeInfo*) array_symbol->typeinfo)->member_type)
             );
         }
     }
@@ -337,7 +337,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     bool is_var_type_defined = is_type_defined(ctx->program, symbol->typeinfo);
 
     // If the variable type is missing, we add an error
-    if (!is_var_type_defined)
+    if (!is_var_type_defined && symbol->typeinfo->source == ZENIT_TYPE_SRC_HINT)
     {
         struct ZenitTypeInfo *typeinfo = get_undefined_type(ctx->program, symbol->typeinfo);
         

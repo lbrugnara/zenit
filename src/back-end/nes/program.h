@@ -5,6 +5,10 @@
 #include <fllib.h>
 #include "opcode.h"
 
+#include "../../zir/block.h"
+#include "../../zir/symbol.h"
+#include "../../zir/instructions/attributes/attribute.h"
+
 enum ZenitNesSegment {
     ZENIT_NES_SEGMENT_ZP,
     ZENIT_NES_SEGMENT_DATA,
@@ -51,6 +55,7 @@ struct ZenitNesProgram {
 
 struct ZenitNesProgram* zenit_nes_program_new(void);
 void zenit_nes_program_free(struct ZenitNesProgram *program);
+struct ZenitNesSymbol* zenit_nes_program_reserve_symbol(struct ZenitNesProgram *program, struct ZirBlock *block, struct ZirAttributeMap *attributes, struct ZirSymbol *zir_symbol);
 
 //uint16_t zenit_nes_program_emit_label(struct ZenitNesProgram *program);
 //uint8_t zenit_nes_program_calc_rel_addr(struct ZenitNesProgram *program, uint16_t address);

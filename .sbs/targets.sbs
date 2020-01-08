@@ -8,7 +8,7 @@ compile zenit-objects {
         "src/front-end/.*[.]c$",
         "src/zir/.*[.]c$",
 
-        "src/back-end/nes/(opcode|rom|program|generate)[.]c$"
+        "src/back-end/nes/.*[.]c$"
     ]
 }
 
