@@ -11,14 +11,12 @@ enum ZirArrayTypeInfoSource {
 
 struct ZirArrayTypeInfo {
     struct ZirTypeInfo base;
-    struct ZirTypeInfo **members;
     enum ZirArrayTypeInfoSource source;
     struct ZirTypeInfo *member_type;
     size_t length;
 };
 
 struct ZirArrayTypeInfo* zir_type_array_new(void);
-void zir_type_array_add_member(struct ZirArrayTypeInfo *typeinfo, struct ZirTypeInfo *element);
 unsigned long zir_type_array_hash(struct ZirArrayTypeInfo *typeinfo);
 struct ZirArrayTypeInfo* zir_type_array_copy(struct ZirArrayTypeInfo *source);
 char* zir_type_array_to_string(struct ZirArrayTypeInfo *typeinfo);

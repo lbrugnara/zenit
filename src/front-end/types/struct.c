@@ -7,6 +7,7 @@ struct ZenitStructTypeInfo* zenit_type_struct_new(enum ZenitTypeSource source, c
     struct ZenitStructTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitStructTypeInfo));
     typeinfo->base.type = ZENIT_TYPE_STRUCT;
     typeinfo->base.source = source;
+    typeinfo->base.sealed = false;
     typeinfo->name = fl_cstring_dup(name);
     // FIXME: Allocate members array
     return typeinfo;

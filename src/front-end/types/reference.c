@@ -7,6 +7,7 @@ struct ZenitReferenceTypeInfo* zenit_type_reference_new(enum ZenitTypeSource sou
     struct ZenitReferenceTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitReferenceTypeInfo));
     typeinfo->base.type = ZENIT_TYPE_REFERENCE;
     typeinfo->base.source = source;
+    typeinfo->base.sealed = false;
     typeinfo->element = element;
 
     return typeinfo;

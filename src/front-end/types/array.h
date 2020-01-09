@@ -6,13 +6,11 @@
 
 struct ZenitArrayTypeInfo {
     struct ZenitTypeInfo base;
-    struct ZenitTypeInfo **members;
     struct ZenitTypeInfo *member_type;
     size_t length;
 };
 
 struct ZenitArrayTypeInfo* zenit_type_array_new(enum ZenitTypeSource source, struct ZenitTypeInfo *member_type);
-void zenit_type_array_add_member(struct ZenitArrayTypeInfo *typeinfo, struct ZenitTypeInfo *element);
 unsigned long zenit_type_array_hash(struct ZenitArrayTypeInfo *typeinfo);
 struct ZenitArrayTypeInfo* zenit_type_array_copy(struct ZenitArrayTypeInfo *source);
 char* zenit_type_array_to_string(struct ZenitArrayTypeInfo *typeinfo);

@@ -54,14 +54,14 @@ static inline enum ZenitTypeUnifyResult unify_symbols_type(struct ZenitSymbol *s
     // doing that with a symbol that got its type from the hint the user provided in the source
     enum ZenitTypeUnifyResult result = ZENIT_TYPE_UNIFY_NONE;
 
-    if (symbol_a->typeinfo->source == ZENIT_TYPE_SRC_INFERRED)
+    if (!symbol_a->typeinfo->sealed)
     {
         if (!zenit_type_equals(symbol_a->typeinfo, unified))
             zenit_symbol_set_type(symbol_a, unified);
         result = ZENIT_TYPE_UNIFY_LEFT;
     }
 
-    if (symbol_b->typeinfo->source == ZENIT_TYPE_SRC_INFERRED)
+    if (!symbol_b->typeinfo->sealed)
     {
         if (!zenit_type_equals(symbol_b->typeinfo, unified))
             zenit_symbol_set_type(symbol_b, unified);
@@ -86,14 +86,14 @@ static inline enum ZenitTypeUnifyResult unify_symbol_type(struct ZenitSymbol *sy
     // doing that with a type hinted by the user
     enum ZenitTypeUnifyResult result = ZENIT_TYPE_UNIFY_NONE;
 
-    if (symbol->typeinfo->source == ZENIT_TYPE_SRC_INFERRED)
+    if (!symbol->typeinfo->sealed)
     {
         if (!zenit_type_equals(symbol->typeinfo, unified))
             zenit_symbol_set_type(symbol, unified);
         result = ZENIT_TYPE_UNIFY_LEFT;
     }
 
-    if ((*typeinfo)->source == ZENIT_TYPE_SRC_INFERRED)
+    if (!(*typeinfo)->sealed)
     {
         if (!zenit_type_equals(*typeinfo, unified))
         {
@@ -143,6 +143,8 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
         // FIXME: Should we check the result of this call?
         unify_symbol_type(cast_symbol, &typehint);
     }
+
+    cast_symbol->typeinfo->sealed = true;
 
     return cast_symbol;
 }
@@ -231,6 +233,8 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
         zenit_utils_get_update_symbol(ctx->program, (struct ZenitNode*) reference_node, ref_symbol->name);
     }
 
+    ref_symbol->typeinfo->sealed = true;
+
     return ref_symbol;
 }
 
@@ -257,6 +261,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
     // and we can also use it with every element within the array
     // If the typehint is not null, at the end of this check, we will get a "member" type hint
     struct ZenitTypeInfo *member_type_hint = NULL;
+    bool hint_needs_cleanup = false;
     if (typehint != NULL)
     {
         if (zenit_type_can_unify(array_symbol->typeinfo, typehint))
@@ -273,21 +278,16 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
             // If we can't unify the types, but the type hint is an array too, we can use it's member type as a hint for the
             // elements to visit. Even if the type check pass rejects the operations later, this allows us to provide more context
             // for the elements.
-            // NOTE: The user provided the type hint, because of that we TRY to make use of it, but it can be an error too, because
-            // of that we change the "source" of the type information to "inferred" below
-
-            // Create a copy of the type hint array's member_type, set its source type as "inferred" (it can be overwritten by other types).
-            struct ZenitArrayTypeInfo *array_type = (struct ZenitArrayTypeInfo*) array_symbol->typeinfo;
-            zenit_type_free(array_type->member_type);
-            array_type->member_type = zenit_type_copy(((struct ZenitArrayTypeInfo*) typehint)->member_type);
-            array_type->member_type->source = ZENIT_TYPE_SRC_INFERRED;
-
             // E.G.: 
             //  "var a : [1]&uint8 = [ cast(0x1) ];" 
             //  In this case, &uint8 will be passed as a hint to the element "cast(0x1)", and the inference
             //  pass will interpret that as "cast(0x1 : &uint8)", even though the type check pass will reject
             //  the cast (cannot cast from uint8 to &uint8)
-            member_type_hint = array_type->member_type;
+            // NOTE: The user provided the type hint, because of that we TRY to make use of it, but it can be an error too, because
+            // of that we change the "source" of the type information to "inferred"
+            member_type_hint = zenit_type_copy(((struct ZenitArrayTypeInfo*) typehint)->member_type);
+            member_type_hint->source = ZENIT_TYPE_SRC_INFERRED;
+            hint_needs_cleanup = true;
         }
     }    
 
@@ -319,15 +319,10 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
         }
     }
 
-    // We assume all the members have type equals to the array's member type (it might differ from the
-    // element's actual type, but that's something the type check pass will take care of).
-    // NOTE: Here we are working on the ZenitArrayTypeInfo object, NOT on the element's type object, because
-    // of that we do this for all the type entries within the ZenitArrayTypeInfo (we are inferring the array's type)
-    for (size_t i=0; i < fl_array_length(array_type->members); i++)
-    {
-        zenit_type_free(array_type->members[i]);
-        array_type->members[i] = zenit_type_copy(array_type->member_type);
-    }
+    if (hint_needs_cleanup)
+        zenit_type_free(member_type_hint);
+
+    array_symbol->typeinfo->sealed = true;
     
     return array_symbol;
 }
@@ -416,6 +411,8 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
             zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node, zenit_type_copy(symbol->typeinfo));
         }
     }
+
+    symbol->typeinfo->sealed = true;
 
     // Visit the attributes and its properties
     visit_attribute_node_map(ctx, &variable_node->attributes);

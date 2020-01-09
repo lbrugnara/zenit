@@ -49,7 +49,9 @@ static const ZenitSymbolResolver symbol_resolvers[] = {
 static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *node)
 {
     // A uint has an intrinsic type, which means it can't be changed by the inference pass
-    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) node, (struct ZenitTypeInfo*) zenit_type_uint_new(ZENIT_TYPE_SRC_INTRINSIC, node->size));
+    struct ZenitUintTypeInfo *uint_typeinfo = zenit_type_uint_new(ZENIT_TYPE_SRC_INTRINSIC, node->size);
+    uint_typeinfo->base.sealed = true;
+    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) node, (struct ZenitTypeInfo*) uint_typeinfo);
 }
 
 /*
@@ -155,6 +157,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
     // to the specifc type. In case they are not equals (even though they could be "unified"), we
     // will need to wait for the inference pass to know the exact type of the array
     bool member_type_is_known = array_type->length > 0;
+    struct ZenitTypeInfo *first = NULL;
     for (size_t i=0; i < fl_array_length(array_node->elements); i++)
     {
         // On every array entry, we visit the node to get the symbol, and we use that
@@ -163,21 +166,13 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 
         struct ZenitTypeInfo *element_typeinfo = NULL;
         if (element_symbol != NULL)
-        {
-            element_typeinfo = zenit_type_copy(element_symbol->typeinfo);
-        }
-        else
-        {
-            // Something happened, we use a dummy type to continue with the compilation, but the "visit_node" 
-            // call should have added an error
-            element_typeinfo =  zenit_type_none_new();
-        }
+            element_typeinfo = element_symbol->typeinfo;
 
-        // We update the array type with the element's type information
-        zenit_type_array_add_member(array_type, element_typeinfo);
-
-        if (i > 0 && member_type_is_known && !zenit_type_equals(array_type->members[0], array_type->members[i]))
+        if (i > 0 && member_type_is_known && (element_typeinfo == NULL || !zenit_type_equals(first, element_typeinfo)))
             member_type_is_known = false;
+        
+        if (first == NULL && element_typeinfo != NULL)
+            first = element_typeinfo;
     }
 
     // If the member type is known, we can free the memory of the NONE type assigned to member_type
@@ -185,7 +180,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
     if (member_type_is_known)
     {
         zenit_type_free(array_type->member_type);
-        array_type->member_type = zenit_type_copy(array_type->members[0]);
+        array_type->member_type = zenit_type_copy(first);
     }
 
     return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) array_node, (struct ZenitTypeInfo*) array_type);
@@ -279,6 +274,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
         // If the variable does not contain a type hint, we take the type from the 
         // right-hand side
         typeinfo = zenit_type_copy(rhs_symbol->typeinfo);
+        typeinfo->sealed = rhs_symbol->typeinfo->sealed;
     }
     else
     {

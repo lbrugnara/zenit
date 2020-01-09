@@ -122,9 +122,6 @@ static inline struct ZirTypeInfo* new_zir_type_from_zenit_type(struct ZirProgram
         zir_array->length = zenit_array->length;
         zir_array->member_type = new_zir_type_from_zenit_type(program, zenit_array->member_type);
         
-        for (size_t i=0; i < fl_array_length(zenit_array->members); i++)
-            zir_type_array_add_member(zir_array, new_zir_type_from_zenit_type(program, zenit_array->members[i]));
-
         return (struct ZirTypeInfo*) zir_array;
     }
 

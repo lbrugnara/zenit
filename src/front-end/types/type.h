@@ -66,6 +66,7 @@ struct ZenitTypeInfo {
     enum ZenitType type;
     enum ZenitTypeSource source;
     struct ZenitTypeString to_string;
+    bool sealed;
 };
 
 /*

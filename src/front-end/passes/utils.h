@@ -18,17 +18,20 @@ static struct ZenitTypeInfo* build_type_info_from_declaration(struct ZenitTypeNo
     {
         struct ZenitUintTypeNode *uint_type_decl = (struct ZenitUintTypeNode*) type_decl;
         typeinfo = (struct ZenitTypeInfo*) zenit_type_uint_new(ZENIT_TYPE_SRC_HINT, uint_type_decl->size);
+        typeinfo->sealed = true;
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_STRUCT)
     {
         // FIXME: Add members once they are implemented
         struct ZenitStructTypeNode *struct_type_decl = (struct ZenitStructTypeNode*) type_decl;
         typeinfo = (struct ZenitTypeInfo*) zenit_type_struct_new(ZENIT_TYPE_SRC_HINT, struct_type_decl->name);
+        typeinfo->sealed = true;
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_REFERENCE)
     {
         struct ZenitReferenceTypeNode *ref_type_decl = (struct ZenitReferenceTypeNode*) type_decl;
         typeinfo = (struct ZenitTypeInfo*) zenit_type_reference_new(ZENIT_TYPE_SRC_HINT, build_type_info_from_declaration(ref_type_decl->element));
+        typeinfo->sealed = true;
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_ARRAY)
     {
@@ -36,13 +39,8 @@ static struct ZenitTypeInfo* build_type_info_from_declaration(struct ZenitTypeNo
         struct ZenitArrayTypeInfo *array_type = zenit_type_array_new(ZENIT_TYPE_SRC_HINT, build_type_info_from_declaration(array_type_decl->members_type));
         array_type->length = array_type_decl->length;
 
-        // We know the length of the array, and we know the declared type, so we populate the array type with every
-        // element and its declared type
-        for (size_t i=0; i < array_type->length; i++)
-            zenit_type_array_add_member(array_type, build_type_info_from_declaration(array_type_decl->members_type));
-
         typeinfo = (struct ZenitTypeInfo*) array_type;
-        
+        typeinfo->sealed = true;
     }
     else
     {

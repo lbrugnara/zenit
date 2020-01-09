@@ -66,8 +66,8 @@ char* zenit_symtable_dump(struct ZenitSymtable *symtable, char *output)
 
     for (size_t i=0; i < fl_array_length(symbols); i++)
     {
-        if (symbols[i]->name[0] == '%')
-            continue;
+        //if (symbols[i]->name[0] == '%')
+        //    continue;
         output = zenit_symbol_dump(symbols[i], output);
     }
 

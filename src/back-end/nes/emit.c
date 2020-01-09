@@ -2,33 +2,46 @@
 
 void zenit_nes_emit_store_array(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, size_t offset, struct ZirArrayOperand *array)
 {
-    if (nes_symbol->segment == ZENIT_NES_SEGMENT_DATA)
+    // If the symbol is in the data segment, we just assign the value
+    for (size_t i=0; i < fl_array_length(array->elements); i++)
     {
-        // If the symbol is in the data segment, we just assign the value
-        for (size_t i=0; i < fl_array_length(array->elements); i++)
+        struct ZirOperand *operand = array->elements[i];
+        
+        if (operand->type == ZIR_OPERAND_UINT)
         {
-            struct ZirOperand *operand = array->elements[i];
+            struct ZirUintOperand *uint_elem = (struct ZirUintOperand*)operand;
             
-            if (operand->type == ZIR_OPERAND_UINT)
-            {
-                struct ZirUintOperand *uint_elem = (struct ZirUintOperand*)operand;
-                zenit_nes_emit_store_uint(program, nes_symbol, offset + (i * zir_type_uint_size(uint_elem->typeinfo)), uint_elem);
-            }
-            else if (operand->type == ZIR_OPERAND_ARRAY)
-            {
-                struct ZirArrayOperand *array_elem = (struct ZirArrayOperand*)operand;
-                zenit_nes_emit_store_array(program, nes_symbol, offset + (i * zir_type_array_size(array_elem->typeinfo)), array_elem);
-            }
-            else if (operand->type == ZIR_OPERAND_REFERENCE)
-            {
-                struct ZirReferenceOperand *ref_elem = (struct ZirReferenceOperand*)operand;
-                zenit_nes_emit_store_reference(program, nes_symbol, offset + (i * zir_type_reference_size(ref_elem->typeinfo)), ref_elem);
-            }
-            else if (operand->type == ZIR_OPERAND_SYMBOL)
-            {
-                struct ZirSymbolOperand *symbol_elem = (struct ZirSymbolOperand*)operand;
-                zenit_nes_emit_store_symbol(program, nes_symbol, offset + (i * zir_type_size(symbol_elem->symbol->typeinfo)), symbol_elem);
-            }
+            size_t uint_size = zir_type_uint_size(uint_elem->typeinfo);
+            size_t store_size = nes_symbol->element_size < uint_size ? nes_symbol->element_size : uint_size;
+
+            zenit_nes_emit_store_uint(program, nes_symbol, offset + (i * store_size), uint_elem);
+        }
+        else if (operand->type == ZIR_OPERAND_ARRAY)
+        {
+            struct ZirArrayOperand *array_elem = (struct ZirArrayOperand*)operand;
+
+            size_t array_size = zir_type_array_size(array_elem->typeinfo);
+            size_t store_size = nes_symbol->element_size < array_size ? nes_symbol->element_size : array_size;
+
+            zenit_nes_emit_store_array(program, nes_symbol, offset + (i * store_size), array_elem);
+        }
+        else if (operand->type == ZIR_OPERAND_REFERENCE)
+        {
+            struct ZirReferenceOperand *ref_elem = (struct ZirReferenceOperand*)operand;
+
+            size_t ref_size = zir_type_reference_size(ref_elem->typeinfo);
+            size_t store_size = nes_symbol->element_size < ref_size ? nes_symbol->element_size : ref_size;
+
+            zenit_nes_emit_store_reference(program, nes_symbol, offset + (i * store_size), ref_elem);
+        }
+        else if (operand->type == ZIR_OPERAND_SYMBOL)
+        {
+            struct ZirSymbolOperand *symbol_elem = (struct ZirSymbolOperand*)operand;
+
+            size_t symbol_size = zir_type_size(symbol_elem->symbol->typeinfo);
+            size_t store_size = nes_symbol->element_size < symbol_size ? nes_symbol->element_size : symbol_size;
+
+            zenit_nes_emit_store_symbol(program, nes_symbol, offset + (i * store_size), symbol_elem);
         }
     }
 }
@@ -151,21 +164,29 @@ void zenit_nes_emit_store_uint(struct ZenitNesProgram *program, struct ZenitNesS
         if (nes_symbol->segment == ZENIT_NES_SEGMENT_ZP || nes_symbol->segment == ZENIT_NES_SEGMENT_CODE)
         {
             zenit_nes_program_emit_imm(&program->startup, NES_OP_LDA, (uint8_t)(uint_operand->value.uint16 & 0xFF));
-            zenit_nes_program_emit_imm(&program->startup, NES_OP_LDX, (uint8_t)((uint_operand->value.uint16 >> 8) & 0xFF));
             zenit_nes_program_emit_zpg(&program->startup, NES_OP_STA, (uint8_t)(target_address));
-            zenit_nes_program_emit_zpg(&program->startup, NES_OP_STX, (uint8_t)(target_address + 1));
+
+            if (nes_symbol->element_size == 2 /*bytes*/)
+            {
+                zenit_nes_program_emit_imm(&program->startup, NES_OP_LDX, (uint8_t)((uint_operand->value.uint16 >> 8) & 0xFF));
+                zenit_nes_program_emit_zpg(&program->startup, NES_OP_STX, (uint8_t)(target_address + 1));
+            }
         }
         else if (nes_symbol->segment == ZENIT_NES_SEGMENT_DATA)
         {
             uint8_t *slot = program->data.bytes + (target_address - program->data.base_address);
-            *slot       = uint_operand->value.uint16 & 0xFF;
-            *(slot+1)   = (uint_operand->value.uint16 >> 8) & 0xFF;
+            *slot = uint_operand->value.uint16 & 0xFF;
+            
+            if (nes_symbol->element_size == 2 /*bytes*/)
+                *(slot+1)   = (uint_operand->value.uint16 >> 8) & 0xFF;
         }
         else if (nes_symbol->segment == ZENIT_NES_SEGMENT_TMP)
         {
             uint8_t *slot = program->tmp.bytes + target_address;
-            *slot       = uint_operand->value.uint16 & 0xFF;
-            *(slot+1)   = (uint_operand->value.uint16 >> 8) & 0xFF;
+            *slot = uint_operand->value.uint16 & 0xFF;
+            
+            if (nes_symbol->element_size == 2 /*bytes*/)
+                *(slot+1) = (uint_operand->value.uint16 >> 8) & 0xFF;
         }
     }
 }

@@ -16,6 +16,7 @@ struct ZenitUintTypeInfo* zenit_type_uint_new(enum ZenitTypeSource source, enum 
     struct ZenitUintTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitUintTypeInfo));
     typeinfo->base.type = ZENIT_TYPE_UINT;
     typeinfo->base.source = source;
+    typeinfo->base.sealed = false;
     typeinfo->size = size;
 
     return typeinfo;

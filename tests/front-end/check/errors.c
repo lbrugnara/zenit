@@ -95,20 +95,30 @@ void zenit_test_check_types_errors(void)
         "var k : &[3]uint8 = &j;"                               "\n"
     ;
 
+    size_t error_count = sizeof(expected_errors) / sizeof(expected_errors[0]);
+    size_t run_errors = 0;
+    bool run_success = false;
+
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
 
     fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
     fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
-    fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
+    
+    run_success = zenit_infer_types(&ctx);
+    run_errors = zenit_context_error_count(&ctx);
 
-    size_t error_count = sizeof(expected_errors) / sizeof(expected_errors[0]);
-    bool success = zenit_check_types(&ctx);
-    size_t errors = zenit_context_error_count(&ctx);
-    if (errors != error_count)
-    {
-        ;
-    }
-    fl_vexpect(!success && errors == error_count, "Type check pass must fail with %zu error(s)", error_count);
+    if (run_errors != error_count)
+        zenit_context_print_errors(&ctx);
+
+    fl_expect("Type inference pass should not contain errors", run_success);
+
+    run_success = zenit_check_types(&ctx);
+    run_errors = zenit_context_error_count(&ctx);
+
+    if (run_errors != error_count)
+        zenit_context_print_errors(&ctx);
+
+    fl_vexpect(!run_success && run_errors == error_count, "Type check pass must fail with %zu error(s) (errors: %zu)", error_count, run_errors);
     
     for (size_t i=0; i < error_count; i++)
     {

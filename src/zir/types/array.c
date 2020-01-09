@@ -5,15 +5,8 @@ struct ZirArrayTypeInfo* zir_type_array_new(void)
 {
     struct ZirArrayTypeInfo *typeinfo = fl_malloc(sizeof(struct ZirArrayTypeInfo));
     typeinfo->base.type = ZIR_TYPE_ARRAY;
-    typeinfo->members = fl_array_new(sizeof(struct ZirArrayTypeInfo*), 0);
 
     return typeinfo;
-}
-
-void zir_type_array_add_member(struct ZirArrayTypeInfo *typeinfo, struct ZirTypeInfo *element)
-{
-    // Do the same for the type information
-    typeinfo->members = fl_array_append(typeinfo->members, &element);
 }
 
 unsigned long zir_type_array_hash(struct ZirArrayTypeInfo *typeinfo)
@@ -44,9 +37,6 @@ struct ZirArrayTypeInfo* zir_type_array_copy(struct ZirArrayTypeInfo *source)
     dest->member_type = zir_type_copy(source->member_type);
     dest->source = source->source;
 
-    for (size_t i=0; i < fl_array_length(source->members); i++)
-        zir_type_array_add_member(dest, zir_type_copy(source->members[i]));
-    
     return dest;
 }
 
@@ -188,16 +178,6 @@ bool zir_type_array_unify(struct ZirArrayTypeInfo *array_type, struct ZirTypeInf
         unified_array_type->length = array_type->length;
         unified_array_type->member_type = unified_member_type;
         unified_array_type->source = array_type->source;
-
-        for (size_t i=0; i < fl_array_length(array_type->members); i++)
-        {
-            struct ZirTypeInfo *unified_type = NULL;
-
-            if (!zir_type_unify(unified_member_type, array_type->members[i], &unified_type))
-                return false;
-
-            zir_type_array_add_member(unified_array_type, unified_type);
-        }
     }
 
     return true;
@@ -220,8 +200,6 @@ void zir_type_array_free(struct ZirArrayTypeInfo *typeinfo)
         fl_cstring_free(typeinfo->base.to_string.value);
 
     zir_type_free(typeinfo->member_type);
-
-    fl_array_free_each_pointer(typeinfo->members, (FlArrayFreeElementFunc) zir_type_free);
 
     fl_free(typeinfo);
 }
