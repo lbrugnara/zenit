@@ -45,3 +45,12 @@ struct ZenitSymbol* zenit_symtable_get(struct ZenitSymtable *symtable, const cha
 {
     return (struct ZenitSymbol*) fl_hashtable_get(symtable->symbols, symbol_name);
 }
+
+struct ZenitSymbol* zenit_symtable_remove(struct ZenitSymtable *symtable, const char *symbol_name)
+{
+    struct ZenitSymbol *symbol = fl_hashtable_get(symtable->symbols, symbol_name);
+
+    fl_hashtable_remove(symtable->symbols, symbol_name, true, false);
+
+    return symbol;
+}

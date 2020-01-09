@@ -215,17 +215,17 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
             if (unify_result != ZENIT_TYPE_UNIFY_NONE)
                 element_type_hint = ((struct ZenitReferenceTypeInfo*) ref_symbol->typeinfo)->element;
         }
-        else if (typehint->type == ZENIT_TYPE_REFERENCE)
+        else if (typehint->type == ZENIT_TYPE_REFERENCE && ref_symbol->typeinfo->source == ZENIT_TYPE_SRC_INFERRED)
         {
             // If we can't unify the types, but the type hint is a ref too, we can use it's element type as a hint for the
             // expression visitor, even though the type check pass could reject the operation later
             // NOTE: As long as the reference type's source is INFERRED, we can change its type
-            if (ref_symbol->typeinfo->source == ZENIT_TYPE_SRC_INFERRED)
-            {
-                zenit_type_free(ref_symbol->typeinfo);
-                ref_symbol->typeinfo = zenit_type_copy(typehint);
-                element_type_hint = ((struct ZenitReferenceTypeInfo*) ref_symbol->typeinfo)->element;
-            }
+            struct ZenitReferenceTypeInfo *ref_type = ((struct ZenitReferenceTypeInfo*) ref_symbol->typeinfo);
+            zenit_type_free(ref_type->element);
+            ref_type->element = zenit_type_copy(((struct ZenitReferenceTypeInfo*) typehint)->element);
+            ref_type->element->source = ZENIT_TYPE_SRC_INFERRED;
+            
+            element_type_hint = ref_type->element;
         }
     }
 
@@ -244,12 +244,21 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
     // an implicit cast, and then the type check pass will take care of it
     if (unify_result == ZENIT_TYPE_UNIFY_NONE && zenit_type_is_castable_to(ref_type->element, expr_symbol->typeinfo))
     {
-        // NOTE: We are actually updating the AST here, the cast node will replace the expression's node, because of that
-        // we also need to add a new temp symbol (resolving)
+        // NOTE: The structure of the reference node changes, and so does its UID, because of that we need to update the
+        // temporal symbol tied to the reference node (which is variable ref_symbol)
+
+        // Create the cast node for the expression being referenced
         struct ZenitCastNode *cast_node = zenit_node_cast_new(reference_node->expression->location, reference_node->expression, true);
+
+        // This call affects the reference node's structure and its UID
         reference_node->expression = (struct ZenitNode*) cast_node;
 
+        // We add the temporal symbol for the cast node
         zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node, zenit_type_copy(ref_type->element));
+
+        // Finally, we update the symbol table with the updated node (with its new UID) and the -now- obsolete symbol name
+        // (the old UID, which is the name of the temporal symbol)
+        zenit_utils_get_update_symbol(ctx->program, (struct ZenitNode*) reference_node, ref_symbol->name);
     }
 
     return ref_symbol;
@@ -292,32 +301,23 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
         else if (typehint->type == ZENIT_TYPE_ARRAY)
         {
             // If we can't unify the types, but the type hint is an array too, we can use it's member type as a hint for the
-            // elements to visit, even though the type check pass will reject the operations
-            if (((struct ZenitArrayTypeInfo*) typehint)->length == ((struct ZenitArrayTypeInfo*) array_symbol->typeinfo)->length)
-            {
-                zenit_type_free(array_symbol->typeinfo);
-                array_symbol->typeinfo = zenit_type_copy(typehint);
+            // elements to visit. Even if the type check pass rejects the operations later, this allows us to provide more context
+            // for the elements.
+            // NOTE: The user provided the type hint, because of that we TRY to make use of it, but it can be an error too, because
+            // of that we change the "source" of the type information to "inferred" below
 
-                // E.G.: 
-                //  "var a : [1]&uint8 = [ cast(0x1) ];" 
-                //  In this case, &uint8 will be passed as a hint to the element "cast(0x1)", and the inference
-                //  pass will interpret that as "cast(0x1 : &uint8)", even though the type check pass will reject
-                //  the cast (cannot cast from uint8 to &uint8)
-                member_type_hint = ((struct ZenitArrayTypeInfo*) array_symbol->typeinfo)->member_type;
-            }
-            else
-            {
-                // Finally, if the length differs between the array types, we just take the member_type from
-                // the array, as it might help us to infer other types, even though all these could fail later
-                // in the type check pass
-                // E.G.: 
-                //  "var a : [2]&uint8 = [ cast(0x1) ];" 
-                //  In this case, &uint8 will be passed as a hint to the element "cast(0x1)", and the inference
-                //  pass will interpret that as "cast(0x1 : &uint8)", even though the type check pass will reject
-                //  the cast (cannot cast from uint8 to &uint8) and finally the assignment from [1]&uint8 to [2]&uint8
-                //  is also invalid
-                member_type_hint = ((struct ZenitArrayTypeInfo*) typehint)->member_type;
-            }
+            // Create a copy of the type hint array's member_type, set its source type as "inferred" (it can be overwritten by other types).
+            struct ZenitArrayTypeInfo *array_type = (struct ZenitArrayTypeInfo*) array_symbol->typeinfo;
+            zenit_type_free(array_type->member_type);
+            array_type->member_type = zenit_type_copy(((struct ZenitArrayTypeInfo*) typehint)->member_type);
+            array_type->member_type->source = ZENIT_TYPE_SRC_INFERRED;
+
+            // E.G.: 
+            //  "var a : [1]&uint8 = [ cast(0x1) ];" 
+            //  In this case, &uint8 will be passed as a hint to the element "cast(0x1)", and the inference
+            //  pass will interpret that as "cast(0x1 : &uint8)", even though the type check pass will reject
+            //  the cast (cannot cast from uint8 to &uint8)
+            member_type_hint = array_type->member_type;
         }
     }    
 
@@ -340,8 +340,8 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
         // an implicit cast, and then the type check pass will take care of it
         if (unify_result == ZENIT_TYPE_UNIFY_NONE && zenit_type_is_castable_to(array_type->member_type, elem_symbol->typeinfo))
         {
-            // NOTE: We are actually updating the AST here, the cast node will replace the current element's node, because of that
-            // we also need to add a new temp symbol (resolving)
+            // NOTE: the ZenitArrayNode structure changes, but we don't need to worry about its UID changing because the
+            // elements of the array are ignored when calculating its UID
             struct ZenitCastNode *cast_node = zenit_node_cast_new(array_node->elements[i]->location, array_node->elements[i], true);
             array_node->elements[i] = (struct ZenitNode*) cast_node;
 
@@ -438,6 +438,8 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
         // If the unify result is NONE, we need to assume an implicit cast, and then the type check pass will take care of it
         if (unify_result == ZENIT_TYPE_UNIFY_NONE && zenit_type_is_castable_to(rhs_symbol->typeinfo, symbol->typeinfo))
         {
+            // NOTE: the ZenitVariableNode structure changes, but we don't need to worry about its UID changing because of that
+            // as the variables are always accessed by its name, and not by the UID
             struct ZenitCastNode *cast_node = zenit_node_cast_new(variable_node->rvalue->location, variable_node->rvalue, true);
             variable_node->rvalue = (struct ZenitNode*) cast_node;
 

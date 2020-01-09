@@ -15,7 +15,16 @@ struct Test {
 } tests[] = {
     { "a",          "[3][2]uint8"   },
     { "a_ref",      "&[3][2]uint8"  },
-    { "a_ref_ref",  "&&[3][2]uint8"  },
+    { "a_ref_ref",  "&&[3][2]uint8" },
+    { "sym_t",      "[1]uint8"      },
+
+    { "l",          "[3]uint16"     }, // FIXME: l shouldn't change once it is inferred
+    { "m",          "&[3]uint16"    },
+    { "n",          "&[3]uint8"     },
+
+    { "o",          "[3]uint8"      }, // FIXME: o shouldn't change once it is inferred
+    { "p",          "&[3]uint8"     },
+    { "q",          "&[3]uint16"    },
 };
 
 void zenit_test_check_types_variables(void)
@@ -24,6 +33,15 @@ void zenit_test_check_types_variables(void)
         "var a = [ [ 3, 4 ], [ 5, 6 ], [ 7, 8 ] ];"         "\n"
         "var a_ref = &a;"                                   "\n"
         "var a_ref_ref = &a_ref;"                           "\n"
+        "var sym_t : [1]uint8 = [ cast(0x1FF) ];"           "\n" // The cast type must be inferred from the type hint
+        
+        "var l = [ 1, 2, 3];"                               "\n"
+        "var m : &[3]uint16 = &l;"                          "\n"
+        "var n : &[3]uint8 = cast(&l : &[3]uint8);"         "\n"
+
+        "var o = [ 1, 2, 3];"                               "\n"
+        "var p : &[3]uint8 = &o;"                           "\n"
+        "var q : &[3]uint16 = &o;"                          "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);

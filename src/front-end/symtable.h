@@ -103,4 +103,19 @@ bool zenit_symtable_has(struct ZenitSymtable *symtable, const char *symbol_name)
  */
 struct ZenitSymbol* zenit_symtable_get(struct ZenitSymtable *symtable, const char *symbol_name);
 
+/*
+ * Function: zenit_symtable_remove
+ *  This function removes the symbol that matches with the *symbol_name* from the symbol table
+ *  and returns the removed object
+ *
+ * Parameters:
+ *  <struct ZenitSymtable> *symtable: Symbol table
+ *  <const char> *symbol_name: Key to lookup the symbol to remove
+ *
+ * Returns:
+ *  struct ZenitSymbol*: Removed symbol
+ *
+ */
+struct ZenitSymbol* zenit_symtable_remove(struct ZenitSymtable *symtable, const char *symbol_name);
+
 #endif /* ZENIT_SYMTABLE_H */

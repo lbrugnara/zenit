@@ -37,3 +37,9 @@ struct ZenitSymbol* zenit_program_get_symbol(struct ZenitProgram *program, const
     // FIXME: Fix this to lookup symbols in different scopes
     return zenit_symtable_get(&program->current_scope->symtable, symbol_name);
 }
+
+struct ZenitSymbol* zenit_program_remove_symbol(struct ZenitProgram *program, const char *symbol_name)
+{
+    // FIXME: Fix this to lookup symbols in different scopes
+    return zenit_symtable_remove(&program->current_scope->symtable, symbol_name);
+}

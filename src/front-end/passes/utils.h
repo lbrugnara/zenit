@@ -75,10 +75,42 @@ static inline struct ZenitSymbol* zenit_utils_new_tmp_symbol(struct ZenitProgram
     return result;
 }
 
+static inline struct ZenitSymbol* zenit_utils_get_update_symbol(struct ZenitProgram *program, struct ZenitNode *node, const char *old_name)
+{
+    if (!zenit_program_has_symbol(program, old_name))
+        return NULL;
+
+    struct ZenitSymbol *symbol = zenit_program_remove_symbol(program, old_name);
+
+    char *name = zenit_node_uid(node);
+
+    // FIXME: We can add an "update" function in the symbol module
+    if (symbol->name)
+        fl_cstring_free(symbol->name);
+
+    symbol->name = name;
+
+    zenit_program_add_symbol(program, symbol);
+
+    return symbol;
+}
+
+
 static inline struct ZenitSymbol* zenit_utils_get_tmp_symbol(struct ZenitProgram *program, struct ZenitNode *node)
 {
     char *name = zenit_node_uid(node);
     struct ZenitSymbol *symbol = zenit_program_get_symbol(program, name);
+
+    fl_cstring_free(name);
+
+    return symbol;
+}
+
+static inline struct ZenitSymbol* zenit_utils_remove_tmp_symbol(struct ZenitProgram *program, struct ZenitNode *node)
+{
+    char *name = zenit_node_uid(node);
+    
+    struct ZenitSymbol *symbol = zenit_program_remove_symbol(program, name);
 
     fl_cstring_free(name);
 

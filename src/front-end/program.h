@@ -85,4 +85,19 @@ bool zenit_program_has_symbol(struct ZenitProgram *program, const char *name);
  */
 struct ZenitSymbol* zenit_program_get_symbol(struct ZenitProgram *program, const char *symbol_name);
 
+/*
+ * Function: zenit_program_remove_symbol
+ *  This function removes the symbol that matches with the *symbol_name* from the program
+ *  and returns the removed object
+ *
+ * Parameters:
+ *  <struct ZenitProgram> *program: Program object
+ *  <const char> *symbol_name: Name of the symbol to remove from the program
+ *
+ * Returns:
+ *  struct ZenitSymbol*: Removed symbol
+ *
+ */
+struct ZenitSymbol* zenit_program_remove_symbol(struct ZenitProgram *program, const char *symbol_name);
+
 #endif /* ZENIT_PROGRAM_H */
