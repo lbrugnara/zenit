@@ -54,3 +54,24 @@ struct ZenitSymbol* zenit_symtable_remove(struct ZenitSymtable *symtable, const 
 
     return symbol;
 }
+
+char* zenit_symtable_dump(struct ZenitSymtable *symtable, char *output)
+{
+    if (symtable->type == ZENIT_SYMTABLE_GLOBAL)
+        fl_cstring_append(&output, "GLOBAL\n");
+    else
+        fl_cstring_vappend(&output, "FUNCTION: %s\n", symtable->id);
+
+    struct ZenitSymbol **symbols = fl_hashtable_values(symtable->symbols);
+
+    for (size_t i=0; i < fl_array_length(symbols); i++)
+    {
+        if (symbols[i]->name[0] == '%')
+            continue;
+        output = zenit_symbol_dump(symbols[i], output);
+    }
+
+    fl_array_free(symbols);
+
+    return output;
+}

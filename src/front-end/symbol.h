@@ -59,4 +59,6 @@ void zenit_symbol_set_type(struct ZenitSymbol *symbol, struct ZenitTypeInfo *typ
  */
 void zenit_symbol_free(struct ZenitSymbol *symbol);
 
+char* zenit_symbol_dump(struct ZenitSymbol *symbol, char *output);
+
 #endif /* ZENIT_SYMBOL_H */

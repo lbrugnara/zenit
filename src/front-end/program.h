@@ -100,4 +100,6 @@ struct ZenitSymbol* zenit_program_get_symbol(struct ZenitProgram *program, const
  */
 struct ZenitSymbol* zenit_program_remove_symbol(struct ZenitProgram *program, const char *symbol_name);
 
+char* zenit_program_dump(struct ZenitProgram *program);
+
 #endif /* ZENIT_PROGRAM_H */

@@ -33,3 +33,9 @@ void zenit_symbol_free(struct ZenitSymbol *symbol)
 
     fl_free(symbol);
 }
+
+char* zenit_symbol_dump(struct ZenitSymbol *symbol, char *output)
+{
+    fl_cstring_vappend(&output, "%s: %s\n", symbol->name, symbol->typeinfo != NULL ? zenit_type_to_string(symbol->typeinfo) : "<no type info>");
+    return output;
+}

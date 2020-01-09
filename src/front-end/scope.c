@@ -28,3 +28,17 @@ void zenit_scope_free(struct ZenitScope *scope)
 
     fl_free(scope);
 }
+
+char* zenit_scope_dump(struct ZenitScope *scope, char *output)
+{
+    output = zenit_symtable_dump(&scope->symtable, output);
+    fl_cstring_append(&output, "\n");
+
+    for (size_t i=0; i < fl_array_length(scope->children); i++)
+    {
+        output = zenit_scope_dump(scope->children[i], output);
+        fl_cstring_append(&output, "\n");
+    }
+
+    return output;
+}

@@ -135,7 +135,7 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
             ctx, 
             cast_node->base.location, 
             ZENIT_ERROR_INFERENCE, 
-            "Cannot infer the type of the cast expression, try adding a type hint"
+            "Cannot infer the type of the cast expression, try adding a type hint to the cast expression"
         );
     }
     else if (typehint != NULL && zenit_type_can_unify(cast_symbol->typeinfo, typehint))

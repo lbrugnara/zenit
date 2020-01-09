@@ -52,4 +52,6 @@ struct ZenitScope* zenit_scope_new(const char *id, enum ZenitSymtableType type, 
  */
 void zenit_scope_free(struct ZenitScope *scope);
 
+char* zenit_scope_dump(struct ZenitScope *scope, char *output);
+
 #endif /* ZENIT_SCOPE_H */

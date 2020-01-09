@@ -123,10 +123,8 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
     if (expr_symbol == NULL)
         return NULL;
 
-    // Unless the expr_symbol type source is different from INFERRED, we can't make sure the type information of the referred expression 
-    // is valid or finished, so the best we can do is to "infer" a reference type for the information we got from the visit to the expression's node
-    enum ZenitTypeSource source = expr_symbol->typeinfo->source != ZENIT_TYPE_SRC_INFERRED ? expr_symbol->typeinfo->source : ZENIT_TYPE_SRC_INFERRED;
-    struct ZenitTypeInfo *typeinfo = (struct ZenitTypeInfo*) zenit_type_reference_new(source, zenit_type_copy(expr_symbol->typeinfo));
+    // The source of the reference type comes from the source of the referenced expression
+    struct ZenitTypeInfo *typeinfo = (struct ZenitTypeInfo*) zenit_type_reference_new(expr_symbol->typeinfo->source, zenit_type_copy(expr_symbol->typeinfo));
 
     return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) reference_node, typeinfo);
 }
@@ -281,7 +279,6 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
         // If the variable does not contain a type hint, we take the type from the 
         // right-hand side
         typeinfo = zenit_type_copy(rhs_symbol->typeinfo);
-        //typeinfo->source = ZENIT_TYPE_SRC_INFERRED;
     }
     else
     {
