@@ -25,6 +25,9 @@ struct Test {
     { "o",          "[3]uint16"     },
     { "p",          "&[3]uint8"     },
     { "q",          "&[3]uint16"    },
+
+    { "r",          "[2]uint8"      },
+    { "s",          "[2]uint16"     },
 };
 
 void zenit_test_check_types_variables(void)
@@ -42,6 +45,9 @@ void zenit_test_check_types_variables(void)
         "var o = [ 0x1FF, 0x2FF, 0x3FF];"                   "\n"
         "var p : &[3]uint8 = cast(&o);"                     "\n"
         "var q : &[3]uint16 = &o;"                          "\n"
+
+        "var r = [ 0x1, 0x2 ];"                             "\n" // FIXME: Seal r type information (the following line changes r to be '[2]uint16')
+        "var s : [2]uint16 = r;"                            "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);

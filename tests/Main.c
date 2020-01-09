@@ -67,8 +67,9 @@ int main(int argc, char **argv)
             { "Generate ZIR casts",     &zenit_test_generate_ir_casts       }
         ),
         fl_test_suite("nes",
-            { "NES global variables",   &zenit_test_nes_literal_variables    },
-            { "Sample program",         &zenit_test_nes_program             },
+            { "NES global variables",   &zenit_test_nes_literal_variables       },
+            { "Sample program",         &zenit_test_nes_program                 },
+            { "Cast operations",        &zenit_test_nes_cast                    },
         ),
         NULL
     );

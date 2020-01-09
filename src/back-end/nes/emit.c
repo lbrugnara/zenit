@@ -38,19 +38,38 @@ void zenit_nes_emit_store_symbol(struct ZenitNesProgram *program, struct ZenitNe
     uint16_t target_address = nes_symbol->address + offset;
     struct ZenitNesSymbol *source_symbol = fl_hashtable_get(program->symbols, symbol_operand->symbol->name);
 
+    // We need to get the destination slot
+    uint8_t *destination = NULL;
     // FIXME: Handle ZP and CODE
     if (nes_symbol->segment == ZENIT_NES_SEGMENT_DATA)
     {
-        uint8_t *slot = program->data.bytes + (target_address - program->data.base_address);
+        destination = program->data.bytes + (target_address - program->data.base_address);
+    }
+    else if (nes_symbol->segment == ZENIT_NES_SEGMENT_TMP)
+    {
+        destination = program->tmp.bytes + target_address;
+    }
 
-        // FIXME: Handle casts (fill)
-        if (source_symbol->segment == ZENIT_NES_SEGMENT_TMP)
-        {
-            for (size_t i=0; i < source_symbol->size; i++)
-            {
-                *(slot+i) = program->tmp.bytes[source_symbol->address + i];
-            }
-        }
+    // Now we need to know from where we need to get the source values
+    uint8_t *source = NULL;
+    // FIXME: Handle ZP and CODE
+    if (source_symbol->segment == ZENIT_NES_SEGMENT_TMP)
+    {
+        source = program->tmp.bytes + source_symbol->address;
+    }
+    else if (source_symbol->segment == ZENIT_NES_SEGMENT_DATA)
+    {
+        source = program->data.bytes + source_symbol->address - program->data.base_address;
+    }
+
+    // Process the copy, including checks for down casting or up casting
+    for (size_t i=0, j=0; j < source_symbol->elements; i++, j++)
+    {
+        size_t to_copy = source_symbol->element_size > nes_symbol->element_size 
+            ? nes_symbol->element_size 
+            : source_symbol->element_size;
+
+        memcpy(destination + nes_symbol->element_size * i, source + source_symbol->element_size * j, to_copy);
     }
 }
 
