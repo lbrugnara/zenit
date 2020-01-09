@@ -199,40 +199,10 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
 {
     // Get the reference symbol and its type
     struct ZenitSymbol *ref_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) reference_node);
-
-    // If we received a type hint from the calling context, we can use it to update our ref's element type,
-    // and we can also use it with the referenced expression
-    // If the typehint is not null, at the end of this check, we will get a "member" type hint
-    struct ZenitTypeInfo *element_type_hint = NULL;
-    if (typehint != NULL)
-    {
-        if (zenit_type_can_unify(ref_symbol->typeinfo, typehint))
-        {
-            enum ZenitTypeUnifyResult unify_result = unify_symbol_type(ref_symbol, &typehint);
-
-            // Take the -probably- updated element type to use it as a hint for the elements to visit
-            // NOTE: If typehint_used is false, something odd happened
-            if (unify_result != ZENIT_TYPE_UNIFY_NONE)
-                element_type_hint = ((struct ZenitReferenceTypeInfo*) ref_symbol->typeinfo)->element;
-        }
-        else if (typehint->type == ZENIT_TYPE_REFERENCE && ref_symbol->typeinfo->source == ZENIT_TYPE_SRC_INFERRED)
-        {
-            // If we can't unify the types, but the type hint is a ref too, we can use it's element type as a hint for the
-            // expression visitor, even though the type check pass could reject the operation later
-            // NOTE: As long as the reference type's source is INFERRED, we can change its type
-            struct ZenitReferenceTypeInfo *ref_type = ((struct ZenitReferenceTypeInfo*) ref_symbol->typeinfo);
-            zenit_type_free(ref_type->element);
-            ref_type->element = zenit_type_copy(((struct ZenitReferenceTypeInfo*) typehint)->element);
-            ref_type->element->source = ZENIT_TYPE_SRC_INFERRED;
-            
-            element_type_hint = ref_type->element;
-        }
-    }
-
     struct ZenitReferenceTypeInfo *ref_type = (struct ZenitReferenceTypeInfo*) ref_symbol->typeinfo;
 
     // Visit the expression node to get its symbol
-    struct ZenitSymbol *expr_symbol = visit_node(ctx, reference_node->expression, element_type_hint);
+    struct ZenitSymbol *expr_symbol = visit_node(ctx, reference_node->expression, NULL);
 
     // Try to unify the types
     enum ZenitTypeUnifyResult unify_result = ZENIT_TYPE_UNIFY_NONE;
