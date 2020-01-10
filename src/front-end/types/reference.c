@@ -104,7 +104,7 @@ bool zenit_type_reference_is_castable_to(struct ZenitReferenceTypeInfo *referenc
         return true;
 
     if (target_type->type == ZENIT_TYPE_REFERENCE)
-        return zenit_type_is_castable_to(reference->element, ((struct ZenitReferenceTypeInfo*) target_type)->element);
+        return zenit_type_is_assignable_from(reference->element, ((struct ZenitReferenceTypeInfo*) target_type)->element);
 
     // We can cast a reference to an unsigned integer
     if (target_type->type == ZENIT_TYPE_UINT)

@@ -46,6 +46,10 @@ struct ExpectedError {
     { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign from &uint8 to &[1]uint8 (<source>:%u:%u: %s)" },
 
     { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign from &[3]uint16 to &[3]uint8 (<source>:%u:%u: %s)" },
+
+    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from &uint8 to &uint16 (<source>:%u:%u: %s)" },
+
+    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from &[2]uint8 to &[2]uint16 (<source>:%u:%u: %s)" },
 };
 
 void zenit_test_check_types_errors(void)
@@ -93,6 +97,13 @@ void zenit_test_check_types_errors(void)
 
         "var j = [ 0x1FF, 0x200, 0x201];"                       "\n"
         "var k : &[3]uint8 = &j;"                               "\n"
+
+        // Cannot cast a reference from a smaller type to a larger type
+        "var l = cast(&a : &uint16);"                           "\n"
+
+        "var m : [2]uint8 = [ 0x1, 0x2 ];"                      "\n"
+        "var n : [2]uint16 = [ 0x1FF, 0x2FF ];"                 "\n"
+        "var o = [ &m, &n ];"                                   "\n"
     ;
 
     size_t error_count = sizeof(expected_errors) / sizeof(expected_errors[0]);
