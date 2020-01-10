@@ -43,6 +43,8 @@ void zenit_test_nes_literal_variables(void)
         "var aarr_ref = &aarr;"                                 "\n"
         "var aarr_ref_ref = &aarr_ref;"                         "\n"
         "var ppuctrl_ref = &ppuctrl;"                           "\n"
+
+        "var aaarr = [ [ [ 3, 4 ] ], [ [ 5, 6 ] ], [ [ 7, 8 ] ] ];" "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
@@ -83,6 +85,12 @@ void zenit_test_nes_literal_variables(void)
     fl_expect("Data segment at 0x18 should be 0x80 (aarr_ref_ref hi)",  nes_program->data.bytes[0x18] == 0x80);
     fl_expect("Data segment at 0x19 should be 0x00 (ppuctrl_ref lo)",   nes_program->data.bytes[0x19] == 0x00);
     fl_expect("Data segment at 0x1A should be 0x20 (ppuctrl_ref hi)",   nes_program->data.bytes[0x1A] == 0x20);
+    fl_expect("Data segment at 0x1B should be 0x03 (aarr[0][0][0])",    nes_program->data.bytes[0x1B] == 0x03);
+    fl_expect("Data segment at 0x1C should be 0x04 (aarr[0][0][1])",    nes_program->data.bytes[0x1C] == 0x04);
+    fl_expect("Data segment at 0x1D should be 0x05 (aarr[1][0][0])",    nes_program->data.bytes[0x1D] == 0x05);
+    fl_expect("Data segment at 0x1E should be 0x06 (aarr[1][0][1])",    nes_program->data.bytes[0x1E] == 0x06);
+    fl_expect("Data segment at 0x1F should be 0x07 (aarr[2][0][0])",    nes_program->data.bytes[0x1F] == 0x07);
+    fl_expect("Data segment at 0x20 should be 0x08 (aarr[2][0][1])",    nes_program->data.bytes[0x20] == 0x08);
 
     zenit_nes_program_free(nes_program);
     zir_program_free(zir_program);

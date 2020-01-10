@@ -1,6 +1,6 @@
 #include "emit.h"
 
-void zenit_nes_emit_store_array(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, size_t offset, struct ZirArrayOperand *array)
+void zenit_nes_emit_store_array(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, size_t offset, size_t gap, struct ZirArrayOperand *array)
 {
     // If the symbol is in the data segment, we just assign the value
     for (size_t i=0; i < fl_array_length(array->elements); i++)
@@ -10,38 +10,22 @@ void zenit_nes_emit_store_array(struct ZenitNesProgram *program, struct ZenitNes
         if (operand->type == ZIR_OPERAND_UINT)
         {
             struct ZirUintOperand *uint_elem = (struct ZirUintOperand*)operand;
-            
-            size_t uint_size = zir_type_uint_size(uint_elem->typeinfo);
-            size_t store_size = nes_symbol->element_size < uint_size ? nes_symbol->element_size : uint_size;
-
-            zenit_nes_emit_store_uint(program, nes_symbol, offset + (i * store_size), uint_elem);
+            zenit_nes_emit_store_uint(program, nes_symbol, offset + (i * gap), uint_elem);
         }
         else if (operand->type == ZIR_OPERAND_ARRAY)
         {
             struct ZirArrayOperand *array_elem = (struct ZirArrayOperand*)operand;
-
-            size_t array_size = zir_type_array_size(array_elem->typeinfo);
-            size_t store_size = nes_symbol->element_size < array_size ? nes_symbol->element_size : array_size;
-
-            zenit_nes_emit_store_array(program, nes_symbol, offset + (i * store_size), array_elem);
+            zenit_nes_emit_store_array(program, nes_symbol, offset + (i * gap), zir_type_size(array_elem->typeinfo->member_type), array_elem);
         }
         else if (operand->type == ZIR_OPERAND_REFERENCE)
         {
             struct ZirReferenceOperand *ref_elem = (struct ZirReferenceOperand*)operand;
-
-            size_t ref_size = zir_type_reference_size(ref_elem->typeinfo);
-            size_t store_size = nes_symbol->element_size < ref_size ? nes_symbol->element_size : ref_size;
-
-            zenit_nes_emit_store_reference(program, nes_symbol, offset + (i * store_size), ref_elem);
+            zenit_nes_emit_store_reference(program, nes_symbol, offset + (i * gap), ref_elem);
         }
         else if (operand->type == ZIR_OPERAND_SYMBOL)
         {
             struct ZirSymbolOperand *symbol_elem = (struct ZirSymbolOperand*)operand;
-
-            size_t symbol_size = zir_type_size(symbol_elem->symbol->typeinfo);
-            size_t store_size = nes_symbol->element_size < symbol_size ? nes_symbol->element_size : symbol_size;
-
-            zenit_nes_emit_store_symbol(program, nes_symbol, offset + (i * store_size), symbol_elem);
+            zenit_nes_emit_store_symbol(program, nes_symbol, offset + (i * gap), symbol_elem);
         }
     }
 }

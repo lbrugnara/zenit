@@ -70,7 +70,7 @@ static void visit_cast_instruction(struct ZirCastInstruction *instruction, struc
     }
     else if (instruction->source->type == ZIR_OPERAND_ARRAY)
     {
-        zenit_nes_emit_store_array(program, nes_symbol, 0, (struct ZirArrayOperand*) instruction->source);
+        zenit_nes_emit_store_array(program, nes_symbol, 0, nes_symbol->element_size, (struct ZirArrayOperand*) instruction->source);
     }
     else if (instruction->source->type == ZIR_OPERAND_REFERENCE)
     {
@@ -107,7 +107,7 @@ static void visit_variable_instruction(struct ZirVariableInstruction *instructio
     }
     else if (instruction->source->type == ZIR_OPERAND_ARRAY)
     {
-        zenit_nes_emit_store_array(program, nes_symbol, 0, (struct ZirArrayOperand*) instruction->source);
+        zenit_nes_emit_store_array(program, nes_symbol, 0, nes_symbol->element_size, (struct ZirArrayOperand*) instruction->source);
     }
     else if (instruction->source->type == ZIR_OPERAND_REFERENCE)
     {
