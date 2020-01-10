@@ -13,15 +13,10 @@
  */
 enum ZirType {
     ZIR_TYPE_NONE,
-
     ZIR_TYPE_REFERENCE,
-
     ZIR_TYPE_ARRAY,
-
     ZIR_TYPE_STRUCT,
-
     ZIR_TYPE_UINT,
-
     ZIR_TYPE_END
 };
 
@@ -107,24 +102,6 @@ bool zir_type_equals(struct ZirTypeInfo *type_a, struct ZirTypeInfo *type_b);
 struct ZirTypeInfo* zir_type_copy(struct ZirTypeInfo *src_type);
 
 /*
- * Function: zir_type_unify
- *  Searches for a common ancestor between *type_a* and *type_b*.
- *
- * Parameters:
- *  <struct ZirTypeInfo> *type_a: Type object
- *  <struct ZirTypeInfo> *type_b: Type object
- *  <struct ZirTypeInfo> **unified: If a common ancestor between A and B exists, and *unified* is not NULL, a
- *   copy of the common ancestor will be allocated in the pointer pointed by this parameter.
- * 
- * Returns:
- *  <bool>: *true* if a common ancestor between types A and B exists, otherwise, this function returns *false*.
- *
- * Notes:
- *  If *unified* is NULL, this function does not allocate memory and it just returns *true* or *false*.
- */
-bool zir_type_unify(struct ZirTypeInfo *type_a, struct ZirTypeInfo *type_b, struct ZirTypeInfo **unified);
-
-/*
  * Function: zir_type_is_assignable_from
  *  Checks if the type represented by the *target_type* object accepts assignments from the type represented
  *  by the *value_type* object
@@ -154,6 +131,17 @@ bool zir_type_is_assignable_from(struct ZirTypeInfo *target_type, struct ZirType
  */
 bool zir_type_is_castable_to(struct ZirTypeInfo *source_type, struct ZirTypeInfo *target_cast_type);
 
+/*
+ * Function: zir_type_size
+ *  Returns the size needed to store an instance of the provided type (in bytes)
+ *
+ * Parameters:
+ *  <struct ZirTypeInfo> *type: Type object
+ *
+ * Returns:
+ *  size_t: Size needed to store an instance of the type
+ * 
+ */
 size_t zir_type_size(struct ZirTypeInfo *type);
 
 /*

@@ -108,46 +108,6 @@ bool zir_type_reference_is_castable_to(struct ZirReferenceTypeInfo *reference, s
     return false;
 }
 
-bool zir_type_reference_unify(struct ZirReferenceTypeInfo *ref_type, struct ZirTypeInfo *type_b, struct ZirTypeInfo **unified)
-{
-    if (ref_type == NULL || type_b == NULL)
-        return false;
-
-    if (type_b->type == ZIR_TYPE_NONE)
-    {
-        if (unified)
-            *unified = (struct ZirTypeInfo*) zir_type_reference_copy(ref_type);
-        return true;
-    }
-
-    if (type_b->type != ZIR_TYPE_REFERENCE)
-        return false;
-
-    if (zir_type_reference_equals(ref_type, type_b))
-    {
-        if (unified)
-            *unified = (struct ZirTypeInfo*) zir_type_reference_copy(ref_type);
-        return true;
-    }
-
-    struct ZirReferenceTypeInfo *ref_type_b = (struct ZirReferenceTypeInfo*) type_b;
-
-    if (!zir_type_unify(ref_type->element, ref_type_b->element, NULL))
-        return false;
-
-    if (unified)
-    {
-        struct ZirTypeInfo *unified_element_type = NULL;
-    
-        if (!zir_type_unify(ref_type->element, ref_type_b->element, &unified_element_type))
-            return false;
-    
-        *unified = (struct ZirTypeInfo*) zir_type_reference_new(unified_element_type);
-    }
-
-    return true;
-}
-
 size_t zir_type_reference_size(struct ZirReferenceTypeInfo *typeinfo)
 {
     if (!typeinfo)

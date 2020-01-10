@@ -23,7 +23,6 @@ char* zir_type_uint_to_string(struct ZirUintTypeInfo *typeinfo);
 bool zir_type_uint_equals(struct ZirUintTypeInfo *type_a, struct ZirTypeInfo *type_b);
 bool zir_type_uint_is_assignable_from(struct ZirUintTypeInfo *target_type, struct ZirTypeInfo *value_type);
 bool zir_type_uint_is_castable_to(struct ZirUintTypeInfo *primitive_type, struct ZirTypeInfo *target_type);
-bool zir_type_uint_unify(struct ZirUintTypeInfo *primitive_type, struct ZirTypeInfo *type_b, struct ZirTypeInfo **unified);
 size_t zir_type_uint_size(struct ZirUintTypeInfo *typeinfo);
 void zir_type_uint_free(struct ZirUintTypeInfo *typeinfo);
 

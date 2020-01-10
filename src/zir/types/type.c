@@ -105,37 +105,6 @@ bool zir_type_equals(struct ZirTypeInfo *type_a, struct ZirTypeInfo *type_b)
     return false;
 }
 
-bool zir_type_unify(struct ZirTypeInfo *type_a, struct ZirTypeInfo *type_b, struct ZirTypeInfo **unified)
-{
-    if (type_a == NULL || type_b == NULL)
-        return false;
-
-    if (type_a->type == ZIR_TYPE_NONE)
-    {
-        if (type_b->type == ZIR_TYPE_NONE)
-            return false;
-
-        if (unified)
-            *unified = zir_type_copy(type_b);
-
-        return true;
-    }
-
-    if (type_a->type == ZIR_TYPE_STRUCT)
-        return zir_type_struct_unify((struct ZirStructTypeInfo*) type_a, type_b, unified);
-    
-    if (type_a->type == ZIR_TYPE_REFERENCE)
-        return zir_type_reference_unify((struct ZirReferenceTypeInfo*) type_a, type_b, unified);
-    
-    if (type_a->type == ZIR_TYPE_ARRAY)
-        return zir_type_array_unify((struct ZirArrayTypeInfo*) type_a, type_b, unified);
-    
-    if (type_a->type == ZIR_TYPE_UINT)
-        return zir_type_uint_unify((struct ZirUintTypeInfo*) type_a, type_b, unified);
-    
-    return false;
-}
-
 bool zir_type_is_assignable_from(struct ZirTypeInfo *target_type, struct ZirTypeInfo *from_type)
 {
     if (target_type == NULL || from_type == NULL)

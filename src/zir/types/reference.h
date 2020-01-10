@@ -15,7 +15,6 @@ char* zir_type_reference_to_string(struct ZirReferenceTypeInfo *typeinfo);
 bool zir_type_reference_equals(struct ZirReferenceTypeInfo *type_a, struct ZirTypeInfo *type_b);
 bool zir_type_reference_is_assignable_from(struct ZirReferenceTypeInfo *target_type, struct ZirTypeInfo *value_type);
 bool zir_type_reference_is_castable_to(struct ZirReferenceTypeInfo *reference, struct ZirTypeInfo *target_type);
-bool zir_type_reference_unify(struct ZirReferenceTypeInfo *ref_type, struct ZirTypeInfo *type_b, struct ZirTypeInfo **unified);
 size_t zir_type_reference_size(struct ZirReferenceTypeInfo *typeinfo);
 void zir_type_reference_free(struct ZirReferenceTypeInfo *typeinfo);
 

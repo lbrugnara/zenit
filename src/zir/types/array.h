@@ -23,7 +23,6 @@ char* zir_type_array_to_string(struct ZirArrayTypeInfo *typeinfo);
 bool zir_type_array_equals(struct ZirArrayTypeInfo *type_a, struct ZirTypeInfo *type_b);
 bool zir_type_array_is_assignable_from(struct ZirArrayTypeInfo *target_type, struct ZirTypeInfo *value_type);
 bool zir_type_array_is_castable_to(struct ZirArrayTypeInfo *array_type, struct ZirTypeInfo *target_type);
-bool zir_type_array_unify(struct ZirArrayTypeInfo *array_type, struct ZirTypeInfo *type_b, struct ZirTypeInfo **unified);
 size_t zir_type_array_size(struct ZirArrayTypeInfo *typeinfo);
 void zir_type_array_free(struct ZirArrayTypeInfo *typeinfo);
 

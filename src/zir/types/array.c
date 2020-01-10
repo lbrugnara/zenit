@@ -134,55 +134,6 @@ bool zir_type_array_is_castable_to(struct ZirArrayTypeInfo *array_type, struct Z
     return zir_type_is_castable_to(array_type->member_type, target_array_type->member_type);
 }
 
-bool zir_type_array_unify(struct ZirArrayTypeInfo *array_type, struct ZirTypeInfo *type_b, struct ZirTypeInfo **unified)
-{
-    if (array_type == NULL || type_b == NULL)
-        return false;
-
-    if (type_b->type == ZIR_TYPE_NONE)
-    {
-        if (unified) 
-            *unified = (struct ZirTypeInfo*) zir_type_array_copy(array_type);
-        return true;
-    }
-
-    if (type_b->type != ZIR_TYPE_ARRAY)
-        return false;
-
-    if (zir_type_array_equals(array_type, type_b))
-    {
-        if (unified) 
-            *unified = (struct ZirTypeInfo*) zir_type_array_copy(array_type);
-        return true;
-    }
-
-    struct ZirArrayTypeInfo *arr_type_b = (struct ZirArrayTypeInfo*) type_b;
-
-    if (array_type->length != arr_type_b->length)
-        return false;
-
-    if (!zir_type_unify(array_type->member_type, arr_type_b->member_type, NULL))
-        return false;
-    
-    if (unified)
-    {
-        struct ZirTypeInfo *unified_member_type = NULL;
-
-        // If this is false, it is an unknown error...
-        if (!zir_type_unify(array_type->member_type, arr_type_b->member_type, &unified_member_type))
-            return false;
-
-        struct ZirArrayTypeInfo *unified_array_type = zir_type_array_new();
-        *unified = (struct ZirTypeInfo*) unified_array_type;
-
-        unified_array_type->length = array_type->length;
-        unified_array_type->member_type = unified_member_type;
-        unified_array_type->source = array_type->source;
-    }
-
-    return true;
-}
-
 size_t zir_type_array_size(struct ZirArrayTypeInfo *typeinfo)
 {
     if (!typeinfo)

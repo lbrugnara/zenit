@@ -117,43 +117,6 @@ bool zir_type_struct_is_castable_to(struct ZirStructTypeInfo *struct_type, struc
     return false;
 }
 
-bool zir_type_struct_unify(struct ZirStructTypeInfo *struct_type, struct ZirTypeInfo *type_b, struct ZirTypeInfo **unified)
-{
-    if (struct_type == NULL || type_b == NULL)
-        return false;
-
-    if (type_b->type == ZIR_TYPE_NONE)
-    {
-        if (unified)
-            *unified = (struct ZirTypeInfo*) zir_type_struct_copy(struct_type);
-        return true;
-    }
-
-    if (type_b->type != ZIR_TYPE_STRUCT)
-        return false;
-
-    if (zir_type_struct_equals(struct_type, type_b))
-    {
-        if (unified)
-            *unified = (struct ZirTypeInfo*) zir_type_struct_copy(struct_type);
-        return true;
-    }
-
-    struct ZirStructTypeInfo *struct_type_b = (struct ZirStructTypeInfo*) type_b;
-
-    // FIXME: Once the members are implemented we need to check them too    
-    if (!flm_cstring_equals(struct_type->name, struct_type_b->name))
-        return false;
-
-    if (unified)
-    {
-        *unified = (struct ZirTypeInfo*) zir_type_struct_new(struct_type->name);
-        // FIXME: Once the members are implemented we need to copy them too
-    }
-
-    return true;
-}
-
 size_t zir_type_struct_size(struct ZirStructTypeInfo *typeinfo)
 {
     if (!typeinfo)

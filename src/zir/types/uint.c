@@ -102,31 +102,6 @@ bool zir_type_uint_is_castable_to(struct ZirUintTypeInfo *uint_type, struct ZirT
     return target_type->type == ZIR_TYPE_UINT;
 }
 
-bool zir_type_uint_unify(struct ZirUintTypeInfo *uint_type, struct ZirTypeInfo *type_b, struct ZirTypeInfo **unified)
-{
-    if (uint_type == NULL || type_b == NULL)
-        return false;
-
-    if (type_b->type != ZIR_TYPE_NONE && type_b->type != ZIR_TYPE_UINT)
-        return false;
-
-    if (type_b->type == ZIR_TYPE_NONE || zir_type_uint_equals(uint_type, type_b))
-    {
-        if (unified)
-            *unified = (struct ZirTypeInfo*) zir_type_uint_copy(uint_type);
-        return true;
-    }
-
-    // At this point, type_b must be a uint
-    if (unified)
-    {
-        struct ZirUintTypeInfo *uint_b = (struct ZirUintTypeInfo*) type_b;
-        *unified = (struct ZirTypeInfo*) zir_type_uint_copy(uint_type->size > uint_b->size ? uint_type : uint_b);
-    }
-    
-    return true;
-}
-
 size_t zir_type_uint_size(struct ZirUintTypeInfo *typeinfo)
 {
     if (!typeinfo)
