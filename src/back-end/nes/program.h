@@ -51,6 +51,7 @@ struct ZenitNesProgram {
     struct ZenitNesDataSegment data;
     struct ZenitNesCodeSegment startup;
     struct ZenitNesCodeSegment code;
+    bool static_context;
 };
 
 struct ZenitNesProgram* zenit_nes_program_new(void);

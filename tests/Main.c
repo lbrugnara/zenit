@@ -67,10 +67,13 @@ int main(int argc, char **argv)
             { "Generate ZIR casts",     &zenit_test_generate_ir_casts       }
         ),
         fl_test_suite("nes",
-            { "NES global variables",   &zenit_test_nes_literal_variables       },
-            { "Cast operations",        &zenit_test_nes_cast                    },
-            { "Sample program",         &zenit_test_nes_program                 },
-            { "Sample rom",             &zenit_test_nes_rom                     },
+            { "NES global variables",           &zenit_test_nes_global_vars         },
+            { "NES global variables (ZP)",      &zenit_test_nes_global_vars_zp      },
+            { "NES global variables (DATA)",    &zenit_test_nes_global_vars_data    },
+            { "NES global variables (CODE)",    &zenit_test_nes_global_vars_code    },
+            { "Cast operations",                &zenit_test_nes_cast                },
+            { "Compile NES program",            &zenit_test_nes_program             },
+            { "Compile NES ROM",                &zenit_test_nes_rom                 },
         ),
         NULL
     );

@@ -18,6 +18,9 @@ struct ZenitNesProgram* zenit_nes_program_new()
 {
     struct ZenitNesProgram *program = fl_malloc(sizeof(struct ZenitNesProgram));
 
+    // We start in the static context (global)
+    program->static_context = true;
+
     program->code = (struct ZenitNesCodeSegment) {
         .pc = 0,
         .bytes = fl_array_new(sizeof(uint8_t), UINT16_MAX),

@@ -15,8 +15,7 @@ void zenit_nes_emit_store_array(struct ZenitNesProgram *program, struct ZenitNes
         
         if (operand->type == ZIR_OPERAND_UINT)
         {
-            struct ZirUintOperand *uint_elem = (struct ZirUintOperand*)operand;
-            zenit_nes_emit_store_uint(program, nes_symbol, offset + (i * gap), uint_elem);
+            zenit_nes_emit_store_uint(program, nes_symbol, offset + (i * gap), (struct ZirUintOperand*) operand);
         }
         else if (operand->type == ZIR_OPERAND_ARRAY)
         {
@@ -25,13 +24,11 @@ void zenit_nes_emit_store_array(struct ZenitNesProgram *program, struct ZenitNes
         }
         else if (operand->type == ZIR_OPERAND_REFERENCE)
         {
-            struct ZirReferenceOperand *ref_elem = (struct ZirReferenceOperand*)operand;
-            zenit_nes_emit_store_reference(program, nes_symbol, offset + (i * gap), ref_elem);
+            zenit_nes_emit_store_reference(program, nes_symbol, offset + (i * gap), (struct ZirReferenceOperand*) operand);
         }
         else if (operand->type == ZIR_OPERAND_SYMBOL)
         {
-            struct ZirSymbolOperand *symbol_elem = (struct ZirSymbolOperand*)operand;
-            zenit_nes_emit_store_symbol(program, nes_symbol, offset + (i * gap), symbol_elem);
+            zenit_nes_emit_store_symbol(program, nes_symbol, offset + (i * gap), (struct ZirSymbolOperand*) operand);
         }
     }
 }
@@ -76,33 +73,49 @@ void zenit_nes_emit_store_symbol(struct ZenitNesProgram *program, struct ZenitNe
 
     uint16_t target_address = nes_symbol->address + offset;
 
-    if (nes_symbol->segment == ZENIT_NES_SEGMENT_ZP && source_symbol->segment == ZENIT_NES_SEGMENT_ZP)
+    if (nes_symbol->segment == ZENIT_NES_SEGMENT_ZP)
     {
-        // FIXME: fix this suboptimal implementation
-        size_t to_copy = source_symbol->element_size > nes_symbol->element_size 
-                ? nes_symbol->element_size 
-                : source_symbol->element_size;
+        struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
 
-        for (size_t i=0; i < to_copy; i++)
+        if (source_symbol->segment == ZENIT_NES_SEGMENT_ZP)
         {
-            // FIXME: Select startup or code based on the program current's block
-            zenit_nes_program_emit_zpg(&program->startup, NES_OP_LDA, (uint8_t)(source_symbol->address + i));
-            zenit_nes_program_emit_zpg(&program->startup, NES_OP_STA, (uint8_t)(target_address + i));
-        }
+            // FIXME: fix this suboptimal implementation
+            size_t to_copy = source_symbol->element_size > nes_symbol->element_size 
+                    ? nes_symbol->element_size 
+                    : source_symbol->element_size;
 
-        if (nes_symbol->element_size > source_symbol->element_size)
-        {
-            // FIXME: Select startup or code based on the program current's block
-            zenit_nes_program_emit_imm(&program->startup, NES_OP_LDA, 0x0);
-            for (size_t i = to_copy; i < nes_symbol->element_size; i++)
-                zenit_nes_program_emit_zpg(&program->startup, NES_OP_STA, (uint8_t)(target_address + i));
+            for (size_t i=0; i < to_copy; i++)
+            {
+                zenit_nes_program_emit_zpg(target_segment, NES_OP_LDA, (uint8_t)(source_symbol->address + i));
+                zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+            }
+
+            if (nes_symbol->element_size > source_symbol->element_size)
+            {
+                zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+                for (size_t i = to_copy; i < nes_symbol->element_size; i++)
+                    zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+            }
         }
-    }
-    else if (nes_symbol->segment == ZENIT_NES_SEGMENT_ZP)
-    {
-        if (source_symbol->segment == ZENIT_NES_SEGMENT_CODE)
+        else if (source_symbol->segment == ZENIT_NES_SEGMENT_CODE)
         {
-            // FIXME: Handle the CODE segment
+            // FIXME: fix this suboptimal implementation
+            size_t to_copy = source_symbol->element_size > nes_symbol->element_size 
+                    ? nes_symbol->element_size 
+                    : source_symbol->element_size;
+
+            for (size_t i=0; i < to_copy; i++)
+            {
+                zenit_nes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+                zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+            }
+
+            if (nes_symbol->element_size > source_symbol->element_size)
+            {
+                zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+                for (size_t i = to_copy; i < nes_symbol->element_size; i++)
+                    zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+            }
         }
         else if (source_symbol->segment == ZENIT_NES_SEGMENT_DATA)
         {
@@ -113,31 +126,74 @@ void zenit_nes_emit_store_symbol(struct ZenitNesProgram *program, struct ZenitNe
 
             for (size_t i=0; i < to_copy; i++)
             {
-                // FIXME: Select startup or code based on the program current's block
-                zenit_nes_program_emit_imm(&program->startup, NES_OP_LDA, *((program->data.bytes + source_symbol->address - program->data.base_address) + i));
-                zenit_nes_program_emit_zpg(&program->startup, NES_OP_STA, (uint8_t)(target_address + i));
+                if (program->static_context)
+                {
+                    // NOTE: In static context we can directly copy the value from the DATA segment
+                    zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, program->data.bytes[source_symbol->address - program->data.base_address + i]);
+                }
+                else
+                {
+                    // NOTE: If we are not in static context, we need to get the current -possibly modified- value from the DATA segment
+                    zenit_nes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+                }
+
+                zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
             }
 
             if (nes_symbol->element_size > source_symbol->element_size)
             {
-                // FIXME: Select startup or code based on the program current's block
-                zenit_nes_program_emit_imm(&program->startup, NES_OP_LDA, 0x0);
+                zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
                 for (size_t i = to_copy; i < nes_symbol->element_size; i++)
-                    zenit_nes_program_emit_zpg(&program->startup, NES_OP_STA, (uint8_t)(target_address + i));
+                    zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
             }
         }
     }
-    else if (nes_symbol->segment == ZENIT_NES_SEGMENT_CODE)
+    else if (nes_symbol->segment == ZENIT_NES_SEGMENT_DATA)
     {
-        // FIXME: Handle the CODE segment
-    }
-    else if (source_symbol->segment == ZENIT_NES_SEGMENT_ZP)
-    {
-        if (nes_symbol->segment == ZENIT_NES_SEGMENT_CODE)
+        struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+
+        if (source_symbol->segment == ZENIT_NES_SEGMENT_DATA)
         {
-            // FIXME: Handle the CODE segment
+            if (program->static_context)
+            {
+                // NOTE: In static context we can directly copy from one part of the DATA segment to another at compile time
+                uint8_t *source = program->data.bytes + source_symbol->address - program->data.base_address;
+                uint8_t *destination = program->data.bytes + (target_address - program->data.base_address);
+
+                // Process the copy, including checks for down casting or up casting
+                for (size_t i=0, j=0; j < source_symbol->elements; i++, j++)
+                {
+                    size_t to_copy = source_symbol->element_size > nes_symbol->element_size 
+                        ? nes_symbol->element_size 
+                        : source_symbol->element_size;
+
+                    memcpy(destination + nes_symbol->element_size * i, source + source_symbol->element_size * j, to_copy);
+                }
+            }
+            else
+            {
+                // NOTE: If we are not in static context, we need to copy from one part to the other of th DATA segment using
+                // instructions
+                // FIXME: fix this suboptimal implementation
+                size_t to_copy = source_symbol->element_size > nes_symbol->element_size 
+                        ? nes_symbol->element_size 
+                        : source_symbol->element_size;
+
+                for (size_t i=0; i < to_copy; i++)
+                {
+                    zenit_nes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+                    zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+                }
+
+                if (nes_symbol->element_size > source_symbol->element_size)
+                {
+                    zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+                    for (size_t i = to_copy; i < nes_symbol->element_size; i++)
+                        zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+                }
+            }
         }
-        else if (nes_symbol->segment == ZENIT_NES_SEGMENT_DATA)
+        else if (source_symbol->segment == ZENIT_NES_SEGMENT_ZP)
         {
             // FIXME: fix this suboptimal implementation
             size_t to_copy = source_symbol->element_size > nes_symbol->element_size 
@@ -146,39 +202,101 @@ void zenit_nes_emit_store_symbol(struct ZenitNesProgram *program, struct ZenitNe
 
             for (size_t i=0; i < to_copy; i++)
             {
-                // FIXME: Select startup or code based on the program current's block
-                zenit_nes_program_emit_zpg(&program->startup, NES_OP_LDA, (uint8_t)(source_symbol->address + i));
-                zenit_nes_program_emit_abs(&program->startup, NES_OP_STA, target_address + i);
+                zenit_nes_program_emit_zpg(target_segment, NES_OP_LDA, (uint8_t)(source_symbol->address + i));
+                zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
             }
 
             if (nes_symbol->element_size > source_symbol->element_size)
             {
-                // FIXME: Select startup or code based on the program current's block
-                zenit_nes_program_emit_imm(&program->startup, NES_OP_LDA, 0x0);
+                zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
                 for (size_t i = to_copy; i < nes_symbol->element_size; i++)
-                    zenit_nes_program_emit_abs(&program->startup, NES_OP_STA, target_address + i);
+                    zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            }
+        }
+        else if (source_symbol->segment == ZENIT_NES_SEGMENT_CODE)
+        {
+            // FIXME: fix this suboptimal implementation
+            size_t to_copy = source_symbol->element_size > nes_symbol->element_size 
+                    ? nes_symbol->element_size 
+                    : source_symbol->element_size;
+
+            for (size_t i=0; i < to_copy; i++)
+            {
+                zenit_nes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+                zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            }
+
+            if (nes_symbol->element_size > source_symbol->element_size)
+            {
+                zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+                for (size_t i = to_copy; i < nes_symbol->element_size; i++)
+                    zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
             }
         }
     }
-    else if (source_symbol->segment == ZENIT_NES_SEGMENT_CODE)
+    else if (nes_symbol->segment == ZENIT_NES_SEGMENT_CODE)
     {
-        // FIXME: Handle the CODE segment
-    }
-    else /* DATA SEGMENT for both */
-    {
-        // NOTE: At this point we are handling a store within the DATA segment or between the DATA segment and our TEMP segment
-        // We need to know from where we should get the source values and which is the destination slot
-        uint8_t *source = program->data.bytes + source_symbol->address - program->data.base_address;
-        uint8_t *destination = program->data.bytes + (target_address - program->data.base_address);
+        struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
 
-        // Process the copy, including checks for down casting or up casting
-        for (size_t i=0, j=0; j < source_symbol->elements; i++, j++)
+        if (source_symbol->segment == ZENIT_NES_SEGMENT_CODE)
         {
+            // FIXME: fix this suboptimal implementation
             size_t to_copy = source_symbol->element_size > nes_symbol->element_size 
-                ? nes_symbol->element_size 
-                : source_symbol->element_size;
+                    ? nes_symbol->element_size 
+                    : source_symbol->element_size;
 
-            memcpy(destination + nes_symbol->element_size * i, source + source_symbol->element_size * j, to_copy);
+            for (size_t i=0; i < to_copy; i++)
+            {
+                zenit_nes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+                zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            }
+
+            if (nes_symbol->element_size > source_symbol->element_size)
+            {
+                zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+                for (size_t i = to_copy; i < nes_symbol->element_size; i++)
+                    zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            }
+        }
+        else if (source_symbol->segment == ZENIT_NES_SEGMENT_ZP)
+        {
+            // FIXME: fix this suboptimal implementation
+            size_t to_copy = source_symbol->element_size > nes_symbol->element_size 
+                    ? nes_symbol->element_size 
+                    : source_symbol->element_size;
+
+            for (size_t i=0; i < to_copy; i++)
+            {
+                zenit_nes_program_emit_zpg(target_segment, NES_OP_LDA, (uint8_t)(source_symbol->address + i));
+                zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            }
+
+            if (nes_symbol->element_size > source_symbol->element_size)
+            {
+                zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+                for (size_t i = to_copy; i < nes_symbol->element_size; i++)
+                    zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            }
+        }
+        else if (source_symbol->segment == ZENIT_NES_SEGMENT_DATA)
+        {
+            // FIXME: fix this suboptimal implementation
+            size_t to_copy = source_symbol->element_size > nes_symbol->element_size 
+                    ? nes_symbol->element_size 
+                    : source_symbol->element_size;
+
+            for (size_t i=0; i < to_copy; i++)
+            {
+                zenit_nes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+                zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            }
+
+            if (nes_symbol->element_size > source_symbol->element_size)
+            {
+                zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+                for (size_t i = to_copy; i < nes_symbol->element_size; i++)
+                    zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            }
         }
     }
 }
@@ -195,23 +313,37 @@ void zenit_nes_emit_store_reference(struct ZenitNesProgram *program, struct Zeni
     uint16_t target_address = nes_symbol->address + offset;
     struct ZenitNesSymbol *ref_op_symbol = fl_hashtable_get(program->symbols, reference_operand->operand->symbol->name);
 
+    struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+
     if (nes_symbol->segment == ZENIT_NES_SEGMENT_ZP)
     {
-        // FIXME: Select startup or code based on the program current's block
-        zenit_nes_program_emit_imm(&program->startup, NES_OP_LDA, (uint8_t)(ref_op_symbol->address & 0xFF));
-        zenit_nes_program_emit_imm(&program->startup, NES_OP_LDX, (uint8_t)((ref_op_symbol->address >> 8) & 0xFF));
-        zenit_nes_program_emit_zpg(&program->startup, NES_OP_STA, (uint8_t)(target_address));
-        zenit_nes_program_emit_zpg(&program->startup, NES_OP_STX, (uint8_t)(target_address + 1));
+        zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, (uint8_t)(ref_op_symbol->address & 0xFF));
+        zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, (uint8_t)((ref_op_symbol->address >> 8) & 0xFF));
+        zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address));
+        zenit_nes_program_emit_zpg(target_segment, NES_OP_STX, (uint8_t)(target_address + 1));
     }
     else if (nes_symbol->segment == ZENIT_NES_SEGMENT_CODE)
     {
-        // FIXME: handle the CODE segment
+        zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, (uint8_t)(ref_op_symbol->address & 0xFF));
+        zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, (uint8_t)((ref_op_symbol->address >> 8) & 0xFF));
+        zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address);
+        zenit_nes_program_emit_abs(target_segment, NES_OP_STX, target_address + 1);
     }
     else if (nes_symbol->segment == ZENIT_NES_SEGMENT_DATA)
     {
-        uint8_t *slot = program->data.bytes + (target_address - program->data.base_address);
-        *slot       = ref_op_symbol->address & 0xFF;
-        *(slot+1)   = (ref_op_symbol->address >> 8) & 0xFF;
+        if (program->static_context)
+        {
+            uint8_t *slot = program->data.bytes + (target_address - program->data.base_address);
+            *slot       = ref_op_symbol->address & 0xFF;
+            *(slot+1)   = (ref_op_symbol->address >> 8) & 0xFF;
+        }
+        else
+        {
+            zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, (uint8_t)(ref_op_symbol->address & 0xFF));
+            zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, (uint8_t)((ref_op_symbol->address >> 8) & 0xFF));
+            zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address);
+            zenit_nes_program_emit_abs(target_segment, NES_OP_STX, target_address + 1);
+        }
     }
 }
 
@@ -225,6 +357,8 @@ void zenit_nes_emit_store_uint(struct ZenitNesProgram *program, struct ZenitNesS
     }
 
     uint16_t target_address = nes_symbol->address + offset;
+
+    struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
 
     // NOTE: We use a uint16_t because it can hold all the current uint values
     uint16_t uint_value = 0;
@@ -245,48 +379,90 @@ void zenit_nes_emit_store_uint(struct ZenitNesProgram *program, struct ZenitNesS
 
     if (nes_symbol->segment == ZENIT_NES_SEGMENT_ZP)
     {
-        // FIXME: Select startup or code based on the program current's block
-        zenit_nes_program_emit_imm(&program->startup, NES_OP_LDA, (uint8_t)(uint_value & 0xFF));
-        zenit_nes_program_emit_zpg(&program->startup, NES_OP_STA, (uint8_t)(target_address));
+        zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, (uint8_t)(uint_value & 0xFF));
+        zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address));
 
         // If the element size is greater than or equals to 2, we need to store the highest 8 bits of the
         // uint_value (if it is uint8_t they will be all 0)
         if (nes_symbol->element_size >= 2 /*bytes*/)
         {
-            zenit_nes_program_emit_imm(&program->startup, NES_OP_LDX, (uint8_t)((uint_value >> 8) & 0xFF));
-            zenit_nes_program_emit_zpg(&program->startup, NES_OP_STX, (uint8_t)(target_address + 1));
+            zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, (uint8_t)((uint_value >> 8) & 0xFF));
+            zenit_nes_program_emit_zpg(target_segment, NES_OP_STX, (uint8_t)(target_address + 1));
         }
 
         // If destination is greater than uint16, fill the destination with 0s
         if (nes_symbol->element_size > 2 /*bytes*/)
         {
-            zenit_nes_program_emit_imm(&program->startup, NES_OP_LDX, 0x0);
+            zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, 0x0);
             size_t to_fill = nes_symbol->element_size - 2;
             for (size_t i=0; i < to_fill; i++)
-                zenit_nes_program_emit_zpg(&program->startup, NES_OP_STX, (uint8_t)(target_address + i + 2));
+                zenit_nes_program_emit_zpg(target_segment, NES_OP_STX, (uint8_t)(target_address + i + 2));
         }
     }
     else if (nes_symbol->segment == ZENIT_NES_SEGMENT_CODE)
     {
-        // FIXME: handle the CODE segment
-    }
-    else if (nes_symbol->segment == ZENIT_NES_SEGMENT_DATA)
-    {
-        uint8_t *slot = program->data.bytes + (target_address - program->data.base_address);
-        *slot = uint_value & 0xFF;
-        
+        zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, (uint8_t)(uint_value & 0xFF));
+        zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address);
+
         // If the element size is greater than or equals to 2, we need to store the highest 8 bits of the
         // uint_value (if it is uint8_t they will be all 0)
         if (nes_symbol->element_size >= 2 /*bytes*/)
-            *(slot+1)   = (uint_value >> 8) & 0xFF;
+        {
+            zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, (uint8_t)((uint_value >> 8) & 0xFF));
+            zenit_nes_program_emit_abs(target_segment, NES_OP_STX, target_address + 1);
+        }
 
         // If destination is greater than uint16, fill the destination with 0s
-        if (nes_symbol->element_size > 2)
+        if (nes_symbol->element_size > 2 /*bytes*/)
         {
-            slot += 2;
+            zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, 0x0);
             size_t to_fill = nes_symbol->element_size - 2;
             for (size_t i=0; i < to_fill; i++)
-                *(slot + i) = 0;
+                zenit_nes_program_emit_abs(target_segment, NES_OP_STX, target_address + i + 2);
+        }
+    }
+    else if (nes_symbol->segment == ZENIT_NES_SEGMENT_DATA)
+    {
+        if (program->static_context)
+        {
+            uint8_t *slot = program->data.bytes + (target_address - program->data.base_address);
+            *slot = uint_value & 0xFF;
+            
+            // If the element size is greater than or equals to 2, we need to store the highest 8 bits of the
+            // uint_value (if it is uint8_t they will be all 0)
+            if (nes_symbol->element_size >= 2 /*bytes*/)
+                *(slot+1)   = (uint_value >> 8) & 0xFF;
+
+            // If destination is greater than uint16, fill the destination with 0s
+            if (nes_symbol->element_size > 2)
+            {
+                slot += 2;
+                size_t to_fill = nes_symbol->element_size - 2;
+                for (size_t i=0; i < to_fill; i++)
+                    *(slot + i) = 0;
+            }
+        }
+        else
+        {
+            zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, (uint8_t)(uint_value & 0xFF));
+            zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address);
+
+            // If the element size is greater than or equals to 2, we need to store the highest 8 bits of the
+            // uint_value (if it is uint8_t they will be all 0)
+            if (nes_symbol->element_size >= 2 /*bytes*/)
+            {
+                zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, (uint8_t)((uint_value >> 8) & 0xFF));
+                zenit_nes_program_emit_abs(target_segment, NES_OP_STX, target_address + 1);
+            }
+
+            // If destination is greater than uint16, fill the destination with 0s
+            if (nes_symbol->element_size > 2 /*bytes*/)
+            {
+                zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, 0x0);
+                size_t to_fill = nes_symbol->element_size - 2;
+                for (size_t i=0; i < to_fill; i++)
+                    zenit_nes_program_emit_abs(target_segment, NES_OP_STX, target_address + i + 2);
+            }
         }
     }
 }
