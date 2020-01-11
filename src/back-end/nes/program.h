@@ -13,7 +13,7 @@ enum ZenitNesSegment {
     ZENIT_NES_SEGMENT_ZP,
     ZENIT_NES_SEGMENT_DATA,
     ZENIT_NES_SEGMENT_CODE,
-    ZENIT_NES_SEGMENT_TMP,
+    ZENIT_NES_SEGMENT_TEMP,
 };
 
 struct ZenitNesSymbol {
@@ -23,6 +23,11 @@ struct ZenitNesSymbol {
     size_t element_size;
     uint16_t address;
     enum ZenitNesSegment segment;
+};
+
+struct ZenitNesTmpSymbol {
+    struct ZenitNesSymbol base;
+    struct ZirOperand *source;
 };
 
 struct ZenitNesDataSegment {
@@ -40,17 +45,12 @@ struct ZenitNesZeroPageSegment {
     uint8_t slots[255];
 };
 
-struct ZenitNesTmpSegment {
-    uint8_t *bytes;
-};
-
 struct ZenitNesProgram {
     FlHashtable symbols;
     struct ZenitNesZeroPageSegment zp;
     struct ZenitNesDataSegment data;
     struct ZenitNesCodeSegment startup;
     struct ZenitNesCodeSegment code;
-    struct ZenitNesTmpSegment tmp;
 };
 
 struct ZenitNesProgram* zenit_nes_program_new(void);

@@ -25,7 +25,7 @@ var reset = [
     0x4C, 0x13, 0x80,           // JMP $8013     Jump forever
 ];
 
-#[NES(address: 0x8017)]         // NMI handler
+#[NES(address: 0x8016)]         // NMI handler
 var nmi : [9]uint8 = [
     0xA6, cast(&bg_color),      // LDX $00       Load bg_color to X
     0xE8,                       // INX           Increment X

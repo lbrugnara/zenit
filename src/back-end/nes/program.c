@@ -47,11 +47,6 @@ struct ZenitNesProgram* zenit_nes_program_new()
         .bytes = fl_array_new(sizeof(uint8_t), 0x8000),
     };
 
-    // "Auto" expands
-    program->tmp = (struct ZenitNesTmpSegment){
-        .bytes = fl_array_new(sizeof(uint8_t), 0x0),
-    };
-
     return program;
 }
 
@@ -68,8 +63,6 @@ void zenit_nes_program_free(struct ZenitNesProgram *program)
 
     fl_array_free(program->data.slots);
     fl_array_free(program->data.bytes);
-
-    fl_array_free(program->tmp.bytes);
 
     fl_free(program);
 }
@@ -228,7 +221,7 @@ static inline bool reserve_data_symbol(struct ZenitNesProgram *program, struct Z
     return true;
 }
 
-static inline bool reserve_tmp_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol **nes_symbol, struct ZirSymbol *zir_symbol)
+static inline bool reserve_temp_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol **nes_symbol, struct ZirSymbol *zir_symbol)
 {
     if (!program || !nes_symbol || !zir_symbol)
         return false;
@@ -236,19 +229,17 @@ static inline bool reserve_tmp_symbol(struct ZenitNesProgram *program, struct Ze
     // We need to get the symbol size to make sure it fits
     size_t symbol_size = zir_symbol->typeinfo->type == ZIR_TYPE_REFERENCE ? 2 /*bytes*/ : zir_type_size(zir_symbol->typeinfo);
 
-    size_t slot = fl_array_length(program->tmp.bytes);
-    program->tmp.bytes = fl_array_resize(program->tmp.bytes, slot + symbol_size);
+    struct ZenitNesTmpSymbol *temp_symbol = fl_malloc(sizeof(struct ZenitNesTmpSymbol));
 
-    *nes_symbol = fl_malloc(sizeof(struct ZenitNesSymbol));
+    temp_symbol->base.name = fl_cstring_dup(zir_symbol->name);
+    temp_symbol->base.segment = ZENIT_NES_SEGMENT_TEMP;
+    temp_symbol->base.elements = zir_symbol->typeinfo->type == ZIR_TYPE_ARRAY ? ((struct ZirArrayTypeInfo*) zir_symbol->typeinfo)->length : 1;
+    temp_symbol->base.size = symbol_size;
+    temp_symbol->base.element_size = symbol_size / temp_symbol->base.elements;
+    temp_symbol->base.address = 0; // Mind that it being a temp symbol means we don't actually use the address
 
-    (*nes_symbol)->name = fl_cstring_dup(zir_symbol->name);
-    (*nes_symbol)->segment = ZENIT_NES_SEGMENT_TMP;
-    (*nes_symbol)->elements = zir_symbol->typeinfo->type == ZIR_TYPE_ARRAY ? ((struct ZirArrayTypeInfo*) zir_symbol->typeinfo)->length : 1;
-    (*nes_symbol)->size = symbol_size;
-    (*nes_symbol)->element_size = symbol_size / (*nes_symbol)->elements;
-    (*nes_symbol)->address = (uint16_t)slot; // Mind that it being a temp symbol means we don't actually use the address
-
-    fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
+    *nes_symbol = (struct ZenitNesSymbol*)temp_symbol;
+    fl_hashtable_add(program->symbols, temp_symbol->base.name, *nes_symbol);
 
     return true;
 }
@@ -276,7 +267,7 @@ struct ZenitNesSymbol* zenit_nes_program_reserve_symbol(struct ZenitNesProgram *
 
     if (zir_symbol->name[0] == '%')
     {
-        reserve_tmp_symbol(program, &nes_symbol, zir_symbol);
+        reserve_temp_symbol(program, &nes_symbol, zir_symbol);
         return nes_symbol;
     }
     

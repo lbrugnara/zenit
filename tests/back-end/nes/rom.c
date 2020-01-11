@@ -10,9 +10,10 @@
 #include "../../../src/front-end/passes/zirgen.h"
 #include "../../../src/back-end/nes/program.h"
 #include "../../../src/back-end/nes/generate.h"
+#include "../../../src/back-end/nes/rom.h"
 #include "tests.h"
 
-void zenit_test_nes_program(void)
+void zenit_test_nes_rom(void)
 {
     const char *zenit_source = 
         "/**"   "\n"
@@ -71,19 +72,24 @@ void zenit_test_nes_program(void)
 
     fl_expect("NES program must be valid", nes_program != NULL);
 
-    const uint8_t data[] = { 0x78, 0xd8, 0xa2, 0x00, 0x2c, 0x02, 0x20, 0x10, 0xfb, 0x2c, 0x02, 0x20, 0x10, 0xfb, 0xa9, 0x88, 0x8d, 0x00, 0x20, 0x4c, 0x13, 0x80, 0xa6, 0x00, 0xe8, 0x86, 0x00, 0x8e, 0x01, 0x20, 0x40 };
-    // For more context on the following NOTEs refer to the rom.c file
-    const uint8_t startup[] = { 0xa9, 0x20, 0x85, 0x00 /*, 0x4c, 0x00, 0x80 */ }; // NOTE: The commented instruction is the JMP to the RESET address
-    const uint8_t vectors[] = { 0x16, 0x80, 0x00, 0x80 /*0x1f, 0x80*/ }; // NOTE: The commented address is the RESET address after copying the startup routine
+    struct ZenitNesRom *nes_rom = zenit_nes_rom_new(nes_program);
 
-    bool data_equals = memcmp(data, nes_program->data.bytes, sizeof(data) / sizeof(data[0])) == 0;
-    bool startup_equals = memcmp(startup, nes_program->startup.bytes, sizeof(startup) / sizeof(startup[0])) == 0;
-    bool vectors_equals = memcmp(vectors, nes_program->data.bytes + (0xFFFA - nes_program->data.base_address), sizeof(vectors) / sizeof(vectors[0])) == 0;
+    fl_expect("NES ROM must be valid", nes_rom != NULL);
+
+    const uint8_t data[] = { 0x78, 0xd8, 0xa2, 0x00, 0x2c, 0x02, 0x20, 0x10, 0xfb, 0x2c, 0x02, 0x20, 0x10, 0xfb, 0xa9, 0x88, 0x8d, 0x00, 0x20, 0x4c, 0x13, 0x80, 0xa6, 0x00, 0xe8, 0x86, 0x00, 0x8e, 0x01, 0x20, 0x40 };
+    const uint8_t startup[] = { 0xa9, 0x20, 0x85, 0x00 , 0x4c, 0x00, 0x80 }; // NOTE: The startup routine contains as its last instruction a JMP to the -original- RESET vector
+    const uint8_t vectors[] = { 0x16, 0x80, 0x1f, 0x80, 0x00, 0x00 }; // NOTE: The RESET address points to the startup routine
+
+    bool data_equals = memcmp(data, nes_rom->prg_rom.bank, sizeof(data) / sizeof(data[0])) == 0;
+    bool startup_equals = memcmp(startup, nes_rom->prg_rom.bank + sizeof(data) / sizeof(data[0]), sizeof(startup) / sizeof(startup[0])) == 0;
+    // It's a "hack", we compare the 3 x uint16_t that are the nmi_addr, res_addr, and irq_addr that are placed at the end of the struct ZenitNesNrom256
+    bool vectors_equals = memcmp(vectors, nes_rom->prg_rom.bank + sizeof(nes_rom->prg_rom.bank), sizeof(vectors) / sizeof(vectors[0])) == 0;
 
     fl_expect("DATA segment must be equals to the precomputed value", data_equals);
     fl_expect("STARTUP segment must be equals to the precomputed value", startup_equals);
     fl_expect("Vectors must be equals to the precomputed value", vectors_equals);
 
+    zenit_nes_rom_free(nes_rom);
     zenit_nes_program_free(nes_program);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);

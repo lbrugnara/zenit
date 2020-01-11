@@ -68,8 +68,9 @@ int main(int argc, char **argv)
         ),
         fl_test_suite("nes",
             { "NES global variables",   &zenit_test_nes_literal_variables       },
-            { "Sample program",         &zenit_test_nes_program                 },
             { "Cast operations",        &zenit_test_nes_cast                    },
+            { "Sample program",         &zenit_test_nes_program                 },
+            { "Sample rom",             &zenit_test_nes_rom                     },
         ),
         NULL
     );
