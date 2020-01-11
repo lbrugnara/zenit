@@ -157,22 +157,28 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
     // to the specifc type. In case they are not equals (even though they could be "unified"), we
     // will need to wait for the inference pass to know the exact type of the array
     bool member_type_is_known = array_type->length > 0;
-    struct ZenitTypeInfo *first = NULL;
+    struct ZenitTypeInfo *last = NULL;
     for (size_t i=0; i < fl_array_length(array_node->elements); i++)
     {
         // On every array entry, we visit the node to get the symbol, and we use that
         // to track the type information of each element
         struct ZenitSymbol *element_symbol = visit_node(ctx, array_node->elements[i]);
 
-        struct ZenitTypeInfo *element_typeinfo = NULL;
-        if (element_symbol != NULL)
-            element_typeinfo = element_symbol->typeinfo;
+        // If any of these objects is NULL, the member type cannot be known in the resolve pass
+        if (element_symbol == NULL || element_symbol->typeinfo == NULL)
+            member_type_is_known = false;
 
-        if (i > 0 && member_type_is_known && (element_typeinfo == NULL || !zenit_type_equals(first, element_typeinfo)))
+        // If we already know it is unkown, just skip the checks
+        if (!member_type_is_known)
+            continue;
+
+        // Check if the types are still equals, in case they are not, just set the flag to false to
+        // skip the checks
+        if (last != NULL && !zenit_type_equals(last, element_symbol->typeinfo))
             member_type_is_known = false;
         
-        if (first == NULL && element_typeinfo != NULL)
-            first = element_typeinfo;
+        // Keep the last visited element's type
+        last = element_symbol->typeinfo;
     }
 
     // If the member type is known, we can free the memory of the NONE type assigned to member_type
@@ -180,7 +186,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
     if (member_type_is_known)
     {
         zenit_type_free(array_type->member_type);
-        array_type->member_type = zenit_type_copy(first);
+        array_type->member_type = zenit_type_copy(last);
     }
 
     return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) array_node, (struct ZenitTypeInfo*) array_type);

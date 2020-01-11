@@ -45,6 +45,21 @@ void zenit_test_nes_literal_variables(void)
         "var ppuctrl_ref = &ppuctrl;"                           "\n"
 
         "var aaarr = [ [ [ 3, 4 ] ], [ [ 5, 6 ] ], [ [ 7, 8 ] ] ];" "\n"
+
+        // FIXME: (Tests for) Emit from ZP to DATA
+        "var h = f;"                                            "\n"
+
+        // FIXME: (Tests for) Emit from DATA to ZP
+        "#[NES(address: 0x6)]"                                  "\n"
+        "var i = a;"                                            "\n"
+
+        // FIXME: (Tests for) Emit from ZP to ZP
+        "#[NES(address: 0x8)]"                                  "\n"
+        "var j = f;"                                            "\n"
+
+        // FIXME: (Tests for) Emit from TMP to ZP               "\n"
+        "#[NES(address: 0xA)]"                                  "\n"
+        "var k = cast(f : uint8);"                              "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
