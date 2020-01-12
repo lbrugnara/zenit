@@ -35,7 +35,7 @@ char* zenit_node_uint_uid(struct ZenitUintNode *uint)
             return NULL;
     }
 
-    return fl_cstring_vdup("%%L%u_C%u_uint[n:%zu]", uint->base.location.line, uint->base.location.col, value);
+    return fl_cstring_vdup("%%L%u:C%u_uint[n:%zu]", uint->base.location.line, uint->base.location.col, value);
 }
 
 /*

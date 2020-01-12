@@ -16,7 +16,7 @@ char* zenit_node_identifier_uid(struct ZenitIdentifierNode *identifier)
     if (!identifier)
         return NULL;
 
-    return fl_cstring_vdup("%%L%u_C%u_id[n:%s]", identifier->base.location.line, identifier->base.location.col, identifier->name);
+    return fl_cstring_vdup("%%L%u:C%u_id[n:%s]", identifier->base.location.line, identifier->base.location.col, identifier->name);
 }
 
 /*

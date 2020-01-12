@@ -33,7 +33,7 @@ static inline char* zenit_node_attribute_uid(struct ZenitAttributeNode *attribut
     if (!attribute)
         return NULL;
 
-    return fl_cstring_vdup("%%L%u_C%u_attribute[%s]", attribute->base.location.line, attribute->base.location.col, attribute->name);
+    return fl_cstring_vdup("%%L%u:C%u_attribute[%s]", attribute->base.location.line, attribute->base.location.col, attribute->name);
 }
 
 static inline void zenit_node_attribute_free(struct ZenitAttributeNode *attribute_node)
