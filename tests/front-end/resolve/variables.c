@@ -75,14 +75,22 @@ struct RefTest {
     const char *sym_type_hint;
     const char *sym_type;
 } ref_tests[] = {
-    { "a",      "<unknown>",        "uint8",          },
-    { "b",      "<unknown>",        "&uint8",         },
-    { "c",      "&uint8",           "&uint8",         },
-    { "d",      "uint16",           "uint16",         },
-    { "e",      "&uint16",          "&uint16",        },
-    { "f",      "[2]uint8",         "[2]uint8",       },
-    { "g",      "&[2]uint8",        "&[2]uint8",      },
-    { "h",      "[1]&[2]uint8",     "[1]&[2]uint8",   },
+    { "a",      "<unknown>",        "uint8",                },
+    { "b",      "<unknown>",        "&uint8",               },
+    { "c",      "&uint8",           "&uint8",               },
+    { "d",      "uint16",           "uint16",               },
+    { "e",      "&uint16",          "&uint16",              },
+    { "f",      "[2]uint8",         "[2]uint8",             },
+    { "g",      "&[2]uint8",        "&[2]uint8",            },
+    { "h",      "[1]&[2]uint8",     "[1]&[2]uint8",         },
+    { "i",      "[]&[2]uint8",      "[1]&[2]uint8",         },
+    { "j",      "[]&[]uint8",       "[1]&[2]uint8",         },
+
+    { "k",      "[]uint16",         "[2]uint16",            },
+    { "l",      "[]uint8",          "[2]uint8",             },
+    { "m",      "<unknown>",        "[2]&[2]uint8",         },
+    { "n",      "<unknown>",        "[1][2]&[2]uint8",      },
+    { "o",      "[][][]&[]uint8",   "[1][1][2]&[2]uint8",   },
 };
 
 void zenit_test_resolve_references(void)
@@ -96,6 +104,14 @@ void zenit_test_resolve_references(void)
         "var f : [2]uint8 = [ 0, 1 ];"  "\n"
         "var g : &[2]uint8 = &f;"       "\n"
         "var h : [1]&[2]uint8 = [ g ];" "\n"
+        "var i : []&[2]uint8 = [ g ];"  "\n"
+        "var j : []&[]uint8 = [ g ];"   "\n"
+
+        "var k : []uint16 = [ 0x1, 0x2 ];"      "\n"
+        "var l : []uint8 = [ 0x1FF, 0x2FF ];"   "\n"
+        "var m = [ cast(&k : &[2]uint8), &l ];" "\n"
+        "var n = [ m ];"                        "\n"
+        "var o : [][][]&[]uint8 = [ n ];"       "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
@@ -123,12 +139,11 @@ void zenit_test_resolve_references(void)
                 if (!flm_cstring_equals(test->sym_name, varnode->name))
                     continue;
 
-                struct ZenitTypeInfo *type_hint = build_type_info_from_declaration(varnode->type_decl);
+                char *type_node_str = zenit_node_type_to_string(varnode->type_decl);
+                bool equals = flm_cstring_equals(test->sym_type_hint, type_node_str);
+                fl_cstring_free(type_node_str);
 
-                fl_vexpect(flm_cstring_equals(test->sym_type_hint, zenit_type_to_string(type_hint)), 
-                    "Type information present in '%s' declaration must be '%s'", test->sym_name, test->sym_type_hint);
-
-                zenit_type_free(type_hint);
+                fl_vexpect(equals, "Type information present in '%s' declaration must be '%s'", test->sym_name, test->sym_type_hint);
             }
         }
     }

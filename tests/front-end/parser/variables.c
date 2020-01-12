@@ -35,7 +35,7 @@ void zenit_test_parser_variable_literal(void)
         struct ZenitNode *node = ctx.ast->decls[i];
         struct LiteralVariableTest *test = tests + i;
 
-        fl_vexpect(test->node_type == node->type, "Node type is %s", zenit_node_type_to_string(node));
+        fl_vexpect(test->node_type == node->type, "Node type is %s", zenit_node_to_string(node));
 
         struct ZenitVariableNode *var_decl = (struct ZenitVariableNode*) node;
 
@@ -217,9 +217,12 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
         "var num1 : [1]uint8 = [ 0 ];"
         "var num2 : [2]uint8 = [ 1, 2 ];"
         "var num3 : [3]uint8 = [ 3, 4, 5 ];"
-        "var num4 : [4]uint8 = [ 6, 7, 8, 9 ];";
+        "var num4 : [4]uint8 = [ 6, 7, 8, 9 ];"
+        "var num5 : []uint8 = [ 10, 11, 12, 13, 14 ];"
+    ;
 
-    const size_t elements[] = { 0, 1, 2, 3, 4 };
+    const size_t elements[] = { 0, 1, 2, 3, 4, 5 };
+    const bool auto_elements[] = { false, false, false, false, false, true };
 
     const char *var_types_names[] = {
         "[0]uint8",
@@ -227,6 +230,7 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
         "[2]uint8",
         "[3]uint8",
         "[4]uint8",
+        "[]uint8",
     };
 
     const enum ZenitNodeType nodes[10][10] = {
@@ -234,7 +238,8 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
         { ZENIT_NODE_UINT },
         { ZENIT_NODE_UINT, ZENIT_NODE_UINT },
         { ZENIT_NODE_UINT, ZENIT_NODE_UINT, ZENIT_NODE_UINT },
-        { ZENIT_NODE_UINT, ZENIT_NODE_UINT, ZENIT_NODE_UINT, ZENIT_NODE_UINT }
+        { ZENIT_NODE_UINT, ZENIT_NODE_UINT, ZENIT_NODE_UINT, ZENIT_NODE_UINT },
+        { ZENIT_NODE_UINT, ZENIT_NODE_UINT, ZENIT_NODE_UINT, ZENIT_NODE_UINT, ZENIT_NODE_UINT }
     };
 
     const enum ZenitUintTypeSize sizes[10][10] = { 
@@ -242,7 +247,8 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
         { ZENIT_UINT_8 }, 
         { ZENIT_UINT_8, ZENIT_UINT_8 }, 
         { ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8 }, 
-        { ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8 } 
+        { ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8 },
+        { ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8 } 
     };
 
     const char *literal_sizes_names[10][10] = { 
@@ -250,7 +256,8 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
         { "uint8" }, 
         { "uint8", "uint8" }, 
         { "uint8", "uint8", "uint8" }, 
-        { "uint8", "uint8", "uint8", "uint8" } 
+        { "uint8", "uint8", "uint8", "uint8" },
+        { "uint8", "uint8", "uint8", "uint8", "uint8" } 
     };
 
     const int values[10][10] = { 
@@ -258,7 +265,8 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
         { 0 }, 
         { 1, 2 }, 
         { 3, 4, 5 }, 
-        { 6, 7, 8, 9 }
+        { 6, 7, 8, 9 },
+        { 10, 11, 12, 13, 14 }
     };
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
@@ -275,19 +283,31 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
         
         fl_vexpect(flm_cstring_equals(name, var_decl->name), "Variable name must be equals to \"%s\"", name);
 
-        fl_vexpect(
-            var_decl->type_decl->type == ZENIT_TYPE_ARRAY
-            && ((struct ZenitArrayTypeNode*) var_decl->type_decl)->length == elements[i]
-            && ((struct ZenitArrayTypeNode*) var_decl->type_decl)->members_type->type == ZENIT_TYPE_UINT,
-            "Variable type is array of %zu uint8 (\"%s\") because the type is present in the declaration", 
-            elements[i],
-            var_types_names[i]);
+        if (auto_elements[i])
+        {
+            fl_vexpect(
+                var_decl->type_decl->type == ZENIT_TYPE_ARRAY
+                && ((struct ZenitArrayTypeNode*) var_decl->type_decl)->auto_length
+                && ((struct ZenitArrayTypeNode*) var_decl->type_decl)->member_type->type == ZENIT_TYPE_UINT,
+                "Variable type is array of uint8 with automatic length (\"%s\") because the type is present in the declaration, but the length is not", 
+                var_types_names[i]);
+        }
+        else
+        {
+            fl_vexpect(
+                var_decl->type_decl->type == ZENIT_TYPE_ARRAY
+                && ((struct ZenitArrayTypeNode*) var_decl->type_decl)->length == elements[i]
+                && ((struct ZenitArrayTypeNode*) var_decl->type_decl)->member_type->type == ZENIT_TYPE_UINT,
+                "Variable type is array of %zu uint8 (\"%s\") because the type is present in the declaration", 
+                elements[i],
+                var_types_names[i]);
+        }
 
         fl_expect("Right-hand side must be an array initializer", var_decl->rvalue && var_decl->rvalue->type == ZENIT_NODE_ARRAY);
 
         struct ZenitArrayNode *array_init = (struct ZenitArrayNode*)var_decl->rvalue;        
 
-        fl_vexpect(array_init->elements && fl_array_length(array_init->elements) == elements[i], "Number of elements in %s is %zu", name, elements[i]);
+        fl_vexpect(array_init->elements && fl_array_length(array_init->elements) == elements[i], "Number of elements in %s is %zu (obtained from the rhs initializer)", name, elements[i]);
 
         for (size_t j=0; j < fl_array_length(array_init->elements); j++)
         {

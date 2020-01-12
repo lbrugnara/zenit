@@ -95,27 +95,34 @@ static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *pa
     struct ZenitToken bracket_token;
     consume_or_return(ctx, parser, ZENIT_TOKEN_LBRACKET, &bracket_token);
 
-    // Size information must be an integer
-    struct ZenitToken integer_token;
-    consume_or_return(ctx, parser, ZENIT_TOKEN_INTEGER, &integer_token);    
-    
-    enum ZenitUintTypeSize size = ZENIT_UINT_UNK;
-    union ZenitUintValue value;
-    assert_or_return(ctx, parse_uint_value(ctx, &integer_token, &size, &value), ZENIT_ERROR_INTERNAL, NULL);
-
+    bool auto_length = true;
     size_t length = 0;
-    switch (size)
+    
+    if (zenit_parser_next_is(parser, ZENIT_TOKEN_INTEGER))
     {
-        case ZENIT_UINT_8:
-            length = (size_t) value.uint8;
-            break;
-
-        case ZENIT_UINT_16:
-            length = (size_t) value.uint16;
-            break;
+        // Size information must be an integer
+        struct ZenitToken integer_token;
+        consume_or_return(ctx, parser, ZENIT_TOKEN_INTEGER, &integer_token);    
         
-        default:
-            return false;
+        enum ZenitUintTypeSize size = ZENIT_UINT_UNK;
+        union ZenitUintValue value;
+        assert_or_return(ctx, parse_uint_value(ctx, &integer_token, &size, &value), ZENIT_ERROR_INTERNAL, NULL);
+
+        auto_length = false;
+        switch (size)
+        {
+            case ZENIT_UINT_8:
+                length = (size_t) value.uint8;
+                break;
+
+            case ZENIT_UINT_16:
+                length = (size_t) value.uint16;
+                break;
+            
+            default:
+                auto_length = true;
+                return false;
+        }
     }
 
     // The closing bracket is required
@@ -123,7 +130,12 @@ static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *pa
 
     struct ZenitTypeNode *member_type = parse_type_declaration(parser, ctx);
 
-    return (struct ZenitTypeNode*) zenit_node_type_array_new(bracket_token.location, member_type, length);
+    struct ZenitArrayTypeNode *array_type_decl = zenit_node_type_array_new(bracket_token.location, member_type);
+
+    array_type_decl->auto_length = auto_length;
+    array_type_decl->length = length;
+
+    return (struct ZenitTypeNode*) array_type_decl;
 }
 
 static struct ZenitTypeNode* parse_type_reference_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)

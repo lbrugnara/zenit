@@ -27,24 +27,28 @@ void zenit_test_check_types_variables(void)
 
         "var r = [ 0x1, 0x2 ];"                             "\n"
         "var s : [2]uint16 = r;"                            "\n"
+
+        "var t : []&[][]uint8 = [ &a, a_ref ];"             "\n"
     ;
 
     const char *tests[][2] = {
-        { "a",          "[3][2]uint8"   },
-        { "a_ref",      "&[3][2]uint8"  },
-        { "a_ref_ref",  "&&[3][2]uint8" },
-        { "sym_t",      "[1]uint8"      },
+        { "a",          "[3][2]uint8"       },
+        { "a_ref",      "&[3][2]uint8"      },
+        { "a_ref_ref",  "&&[3][2]uint8"     },
+        { "sym_t",      "[1]uint8"          },
 
-        { "l",          "[3]uint8"      },
-        { "m",          "&[3]uint16"    },
-        { "n",          "&[3]uint8"     },
+        { "l",          "[3]uint8"          },
+        { "m",          "&[3]uint16"        },
+        { "n",          "&[3]uint8"         },
 
-        { "o",          "[3]uint16"     },
-        { "p",          "&[3]uint8"     },
-        { "q",          "&[3]uint16"    },
+        { "o",          "[3]uint16"         },
+        { "p",          "&[3]uint8"         },
+        { "q",          "&[3]uint16"        },
 
-        { "r",          "[2]uint8"      },
-        { "s",          "[2]uint16"     },
+        { "r",          "[2]uint8"          },
+        { "s",          "[2]uint16"         },
+
+        { "t",          "[2]&[3][2]uint8"   },
     };
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);

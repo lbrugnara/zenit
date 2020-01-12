@@ -124,6 +124,9 @@ void zenit_test_infer_variable_array(void)
         "var sym_u = [ cast(sym_r : [2]uint8), sym_s ];"                "\n"
         "var sym_v = [ &sym_r, &sym_s ];"                               "\n"
         "var sym_w = [ cast(&sym_r : &[2]uint8), &sym_s ];"             "\n"
+        "var sym_x = [ sym_w ];"                                        "\n"
+        "var sym_y : [][][]&[]uint8 = [ sym_x ];"                       "\n"
+        "var sym_z : []uint8 = cast(sym_m : []uint8);"                  "\n"
     ;
 
     const char *tests[][2] = { 
@@ -142,6 +145,9 @@ void zenit_test_infer_variable_array(void)
         {   "sym_u",  "[2][2]uint8",        },
         {   "sym_v",  "[2]&[2]uint16",      },
         {   "sym_w",  "[2]&[2]uint8",       },
+        {   "sym_x",  "[1][2]&[2]uint8",    },
+        {   "sym_y",  "[1][1][2]&[2]uint8", },
+        {   "sym_z",  "[3]uint8",           },
     };
 
     const size_t count = sizeof(tests) / sizeof(tests[0]);

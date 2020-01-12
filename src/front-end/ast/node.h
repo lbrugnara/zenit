@@ -50,7 +50,7 @@ struct ZenitNode {
 char* zenit_node_uid(struct ZenitNode *node);
 
 /*
- * Function: zenit_node_type_to_string
+ * Function: zenit_node_to_string
  *  Returns a string representation of the node's type
  *
  * Parameters:
@@ -60,7 +60,7 @@ char* zenit_node_uid(struct ZenitNode *node);
  *  <char>*: String representation of the node's type
  * 
  */
-char* zenit_node_type_to_string(struct ZenitNode *node);
+char* zenit_node_to_string(struct ZenitNode *node);
 
 /*
  * Function: zenit_node_free

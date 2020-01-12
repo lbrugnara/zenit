@@ -26,7 +26,7 @@ static inline void free_node_array_entry(void *nodeptr)
     zenit_node_free(node);
 }
 
-char* zenit_node_type_to_string(struct ZenitNode *node)
+char* zenit_node_to_string(struct ZenitNode *node)
 {
     if (!node)
         return "null";

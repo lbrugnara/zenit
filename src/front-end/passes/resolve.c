@@ -69,13 +69,14 @@ static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct Zeni
  */
 static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast_node)
 {
-    visit_node(ctx, cast_node->expression);
+    struct ZenitSymbol *expr_symbol = visit_node(ctx, cast_node->expression);
 
     // If the type hint is NULL, the <build_type_info_from_declaration> function returns a NONE type, so we are ok.
     // We DON'T make assumptions of the type with the expression being casted, because it is not helpful as the cast's goal is to 
     // "forget" about the original expression's type. If the cast does not have a type hint, we will need information from the context
     // to infer the type.
-    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node, build_type_info_from_declaration(cast_node->type_decl));
+    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node, 
+        build_type_info_from_declaration(ctx, cast_node->type_decl, expr_symbol != NULL ? expr_symbol->typeinfo : NULL));
 }
 
 /*
@@ -273,7 +274,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     if (variable_node->type_decl)
     {
         // If the variable has a type hint, we should honor it
-        typeinfo = build_type_info_from_declaration(variable_node->type_decl);
+        typeinfo = build_type_info_from_declaration(ctx, variable_node->type_decl, rhs_symbol ? rhs_symbol->typeinfo : NULL);
     }
     else if (rhs_symbol)
     {

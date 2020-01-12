@@ -22,6 +22,14 @@ char* zenit_node_type_struct_uid(struct ZenitStructTypeNode *type_node)
     return fl_cstring_vdup("%%L%u_C%u_type_struct", type_node->base.base.location.line, type_node->base.base.location.col);
 }
 
+char* zenit_node_type_struct_to_string(struct ZenitStructTypeNode *type_node)
+{
+    if (type_node == NULL)
+        return NULL;
+
+    return fl_cstring_dup(type_node->name);
+}
+
 void zenit_node_type_struct_free(struct ZenitStructTypeNode *type_node)
 {
     if (!type_node)
