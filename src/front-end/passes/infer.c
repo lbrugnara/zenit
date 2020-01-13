@@ -20,6 +20,8 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node, struct ZenitTypeInfo *typehint);
 static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *reference_node, struct ZenitTypeInfo *typehint);
 static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast_node, struct ZenitTypeInfo *typehint);
+static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *field_node, struct ZenitTypeInfo *typehint);
+static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, struct ZenitTypeInfo *typehint);
 
 /*
  * Variable: inferrers
@@ -32,6 +34,8 @@ static const ZenitTypeInferrer inferrers[] = {
     [ZENIT_NODE_IDENTIFIER] = (ZenitTypeInferrer) &visit_identifier_node,
     [ZENIT_NODE_REFERENCE]  = (ZenitTypeInferrer) &visit_reference_node,
     [ZENIT_NODE_CAST]       = (ZenitTypeInferrer) &visit_cast_node,
+    [ZENIT_NODE_FIELD]      = (ZenitTypeInferrer) &visit_field_node,
+    [ZENIT_NODE_STRUCT]     = (ZenitTypeInferrer) &visit_struct_node,
 };
 
 enum ZenitTypeUnifyResult {
@@ -364,6 +368,16 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
     }
 
     fl_array_free(names);
+}
+
+static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *field_node, struct ZenitTypeInfo *typehint)
+{
+    return NULL;
+}
+
+static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, struct ZenitTypeInfo *typehint)
+{
+    return NULL;
 }
 
 /*

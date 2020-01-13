@@ -42,10 +42,12 @@ struct ZenitProgram* zenit_program_new(void);
  */
 void zenit_program_free(struct ZenitProgram *program);
 
+void zenit_program_add_scope(struct ZenitProgram *program, enum ZenitScopeType type, const char *name);
+void zenit_program_enter_scope(struct ZenitProgram *program, struct ZenitScope *scope);
 void zenit_program_push_scope(struct ZenitProgram *program, enum ZenitScopeType type, const char *name);
 void zenit_program_pop_scope(struct ZenitProgram *program);
-bool zenit_program_has_scope(struct ZenitProgram *program, const char *name, enum ZenitScopeType type);
-struct ZenitScope* zenit_program_get_scope(struct ZenitProgram *program, const char *name, enum ZenitScopeType type);
+bool zenit_program_has_scope(struct ZenitProgram *program, enum ZenitScopeType type, const char *name);
+struct ZenitScope* zenit_program_get_scope(struct ZenitProgram *program, enum ZenitScopeType type, const char *name);
 
 /*
  * Function: zenit_program_add_symbol

@@ -130,13 +130,21 @@ void zenit_test_check_types_errors(void)
         zenit_context_print_errors(&ctx);
 
     fl_vexpect(!run_success && run_errors == error_count, "Type check pass must fail with %zu error(s) (errors: %zu)", error_count, run_errors);
-    
-    for (size_t i=0; i < error_count; i++)
+
+    size_t i=0;
+    struct FlListNode *tmp = fl_list_head(ctx.errors);
+    while (tmp != NULL)
     {
-        fl_vexpect(ctx.errors[i].type == expected_errors[i].type, 
+        struct ZenitError *error = (struct ZenitError*) tmp->value;
+
+        fl_vexpect(error->type == expected_errors[i].type, 
             expected_errors[i].message, 
-            ctx.errors[i].location.line, ctx.errors[i].location.col, ctx.errors[i].message);
+            error->location.line, error->location.col, error->message);
+
+        tmp = tmp->next;
+        i++;
     }
+    
 
     zenit_context_free(&ctx);
 }

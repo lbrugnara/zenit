@@ -106,6 +106,8 @@ struct ZenitSymbol* zenit_symtable_get(struct ZenitSymtable *symtable, const cha
  */
 struct ZenitSymbol* zenit_symtable_remove(struct ZenitSymtable *symtable, const char *symbol_name);
 
+bool zenit_symtable_is_empty(struct ZenitSymtable *symtable);
+
 char* zenit_symtable_dump(struct ZenitSymtable *symtable, char *output);
 
 #endif /* ZENIT_SYMTABLE_H */

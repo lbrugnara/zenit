@@ -20,10 +20,24 @@ void zenit_program_free(struct ZenitProgram *program)
     fl_free(program);
 }
 
+void zenit_program_add_scope(struct ZenitProgram *program, enum ZenitScopeType type, const char *name)
+{
+    struct ZenitScope *scope = zenit_scope_new(name, type, program->current_scope);
+    program->current_scope->children = fl_array_append(program->current_scope->children, &scope);
+}
+
+void zenit_program_enter_scope(struct ZenitProgram *program, struct ZenitScope *scope)
+{
+    if (scope->parent != program->current_scope)
+        return;
+
+    program->current_scope = scope;
+}
+
 void zenit_program_push_scope(struct ZenitProgram *program, enum ZenitScopeType type, const char *name)
 {
     // First we search for an existent scope with the provided type and name    
-    struct ZenitScope *scope = zenit_program_get_scope(program, name, type);
+    struct ZenitScope *scope = zenit_program_get_scope(program, type, name);
 
     if (scope == NULL)
     {
@@ -40,7 +54,7 @@ void zenit_program_pop_scope(struct ZenitProgram *program)
     program->current_scope = program->current_scope->parent;
 }
 
-bool zenit_program_has_scope(struct ZenitProgram *program, const char *name, enum ZenitScopeType type)
+bool zenit_program_has_scope(struct ZenitProgram *program, enum ZenitScopeType type, const char *name)
 {
     // NOTE: For simplicity we use an array, we could replace this with a hashtable later
     for (size_t i=0; i < fl_array_length(program->current_scope->children); i++)
@@ -53,7 +67,7 @@ bool zenit_program_has_scope(struct ZenitProgram *program, const char *name, enu
     return false;
 }
 
-struct ZenitScope* zenit_program_get_scope(struct ZenitProgram *program, const char *name, enum ZenitScopeType type)
+struct ZenitScope* zenit_program_get_scope(struct ZenitProgram *program, enum ZenitScopeType type, const char *name)
 {
     // NOTE: For simplicity we use an array, we could replace this with a hashtable later
     for (size_t i=0; i < fl_array_length(program->current_scope->children); i++)

@@ -34,7 +34,7 @@ static bool is_type_defined(struct ZenitProgram *program, struct ZenitTypeInfo *
     if (typeinfo->type == ZENIT_TYPE_STRUCT)
     {
         // FIXME: Update this once struct members are implemented
-        return zenit_program_has_scope(program, ((struct ZenitStructTypeInfo*) typeinfo)->name, ZENIT_SCOPE_STRUCT);
+        return zenit_program_has_scope(program, ZENIT_SCOPE_STRUCT, ((struct ZenitStructTypeInfo*) typeinfo)->name);
     }
     
     if (typeinfo->type == ZENIT_TYPE_ARRAY)
@@ -120,6 +120,8 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node);
 static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *node);
 static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *node);
+static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *field_node);
+static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node);
 
 /*
  * Variable: checkers
@@ -132,6 +134,8 @@ static const ZenitTypeChecker checkers[] = {
     [ZENIT_NODE_IDENTIFIER] = (ZenitTypeChecker) &visit_identifier_node,
     [ZENIT_NODE_REFERENCE]  = (ZenitTypeChecker) &visit_reference_node,
     [ZENIT_NODE_CAST]       = (ZenitTypeChecker) &visit_cast_node,
+    [ZENIT_NODE_FIELD]      = (ZenitTypeChecker) &visit_field_node,
+    [ZENIT_NODE_STRUCT]     = (ZenitTypeChecker) &visit_struct_node,
 };
 
 /*
@@ -327,6 +331,15 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
     fl_array_free(names);
 }
 
+static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *field_node)
+{
+    return NULL;
+}
+
+static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node)
+{
+    return NULL;
+}
 
 /*
  * Function: visit_variable_node

@@ -12,7 +12,7 @@
  * Parameters:
  *  <struct ZenitContext> *ctxptr: A pointer to a <struct ZenitContext> object
  */
-#define zenit_context_error_count(ctxptr) ((size_t)((ctxptr)->errors ? fl_array_length((ctxptr)->errors) : 0))
+#define zenit_context_error_count(ctxptr) ((size_t)((ctxptr)->errors ? fl_list_length((ctxptr)->errors) : 0))
 
 
 /*
@@ -22,7 +22,7 @@
  * Parameters:
  *  <struct ZenitContext> *ctxptr: A pointer to a <struct ZenitContext> object
  */
-#define zenit_context_has_errors(ctxptr) (zenit_context_error_count((ctxptr)) > 0)
+#define zenit_context_has_errors(ctxptr) ((ctxptr)->errors && fl_list_head((ctxptr)->errors) != NULL)
 
 /*
  * Enum: enum ZenitErrorType 
@@ -84,7 +84,7 @@ struct ZenitError {
  *  <struct ZenitProgram> *program: The object that contains the program being compiled
  */
 struct ZenitContext {
-    struct ZenitError *errors;
+    FlList errors;
     struct ZenitAst *ast;
     struct ZenitSourceInfo *srcinfo;
     struct ZenitProgram *program;

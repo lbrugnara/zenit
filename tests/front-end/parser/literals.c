@@ -60,12 +60,20 @@ void zenit_test_parser_literal_integer_error(void)
     bool is_valid = zenit_parse_source(&ctx);
 
     size_t expected_errors = 1;
-    fl_vexpect(!is_valid && ctx.errors != NULL && fl_array_length(ctx.errors) == expected_errors, "The context object must contain %zu error(s)", expected_errors);
+    fl_vexpect(!is_valid && ctx.errors != NULL && fl_list_length(ctx.errors) == expected_errors, "The context object must contain %zu error(s)", expected_errors);
 
-    struct ZenitError *error = ctx.errors;
+    size_t i=1;
+    struct FlListNode *tmp = fl_list_head(ctx.errors);
+    while (tmp != NULL)
+    {
+        struct ZenitError *error = (struct ZenitError*) tmp->value;
 
-    fl_vexpect(error->location.line == 1 && error->type == ZENIT_ERROR_LARGE_INTEGER, 
-        "Expected semantic error: %s at line %u:%u", error->message, error->location.line, error->location.col);
+        fl_vexpect(error->location.line == 1 && error->type == ZENIT_ERROR_LARGE_INTEGER, 
+            "Expected semantic error: %s at line %u:%u", error->message, error->location.line, error->location.col);
+
+        tmp = tmp->next;
+        i++;
+    }
 
     zenit_context_free(&ctx);
 }

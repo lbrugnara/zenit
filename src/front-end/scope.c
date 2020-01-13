@@ -34,6 +34,11 @@ void zenit_scope_free(struct ZenitScope *scope)
     fl_free(scope);
 }
 
+bool zenit_scope_has_symbols(struct ZenitScope *scope)
+{
+    return !zenit_symtable_is_empty(&scope->symtable);
+}
+
 char* zenit_scope_dump(struct ZenitScope *scope, char *output)
 {
     fl_cstring_append(&output, "(scope ");

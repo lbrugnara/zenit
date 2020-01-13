@@ -43,10 +43,19 @@ void zenit_test_resolve_errors(void)
 
     fl_vexpect(!valid_resolve && zenit_context_error_count(&ctx) == error_count, "Resolve pass must fail with %zu errors", error_count);
 
-    for (size_t i=0; i < error_count; i++)
-        fl_vexpect(ctx.errors[i].type == tests[i].error, 
+    size_t i=0;
+    struct FlListNode *tmp = fl_list_head(ctx.errors);
+    while (tmp != NULL)
+    {
+        struct ZenitError *error = (struct ZenitError*) tmp->value;
+
+        fl_vexpect(error->type == tests[i].error, 
             "L%u:%u: %s (%s)",
-            ctx.errors[i].location.line, ctx.errors[i].location.col, ctx.errors[i].message, tests[i].message);
+            error->location.line, error->location.col, error->message, tests[i].message);
+
+        tmp = tmp->next;
+        i++;
+    }
 
     zenit_context_free(&ctx);
 }

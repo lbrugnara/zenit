@@ -48,6 +48,11 @@ struct ZenitSymbol* zenit_symtable_remove(struct ZenitSymtable *symtable, const 
     return symbol;
 }
 
+bool zenit_symtable_is_empty(struct ZenitSymtable *symtable)
+{
+    return fl_hashtable_length(symtable->symbols) == 0;
+}
+
 char* zenit_symtable_dump(struct ZenitSymtable *symtable, char *output)
 {
     struct ZenitSymbol **symbols = fl_hashtable_values(symtable->symbols);

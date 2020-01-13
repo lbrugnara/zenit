@@ -66,6 +66,8 @@ struct ZenitScope* zenit_scope_new(const char *id, enum ZenitScopeType type, str
  */
 void zenit_scope_free(struct ZenitScope *scope);
 
+bool zenit_scope_has_symbols(struct ZenitScope *scope);
+
 char* zenit_scope_dump(struct ZenitScope *scope, char *output);
 
 #endif /* ZENIT_SCOPE_H */

@@ -29,6 +29,9 @@ void zenit_test_check_types_variables(void)
         "var s : [2]uint16 = r;"                            "\n"
 
         "var t : []&[][]uint8 = [ &a, a_ref ];"             "\n"
+
+        "var u : [0]Astruct = [];"                          "\n"
+        "struct Astruct { a: uint8; }"                      "\n" // No need to forward declare the struct
     ;
 
     const char *tests[][2] = {
@@ -49,6 +52,8 @@ void zenit_test_check_types_variables(void)
         { "s",          "[2]uint16"         },
 
         { "t",          "[2]&[3][2]uint8"   },
+
+        { "u",          "[0]Astruct"        },
     };
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);

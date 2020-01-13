@@ -52,15 +52,20 @@ void zenit_test_parser_variable_errors(void)
     bool is_valid = zenit_parse_source(&ctx);
 
     size_t expected_errors = (sizeof(errors) / sizeof(errors[0])) - 1;
-    fl_vexpect(ctx.errors != NULL && fl_array_length(ctx.errors) == expected_errors, "The context object must contain %zu errors", expected_errors);
+    fl_vexpect(ctx.errors != NULL && fl_list_length(ctx.errors) == expected_errors, "The context object must contain %zu errors", expected_errors);
 
-    struct ZenitError *error = ctx.errors;
-
-    for (size_t i=1; i <= expected_errors; i++, error++)
+    size_t i=1;
+    struct FlListNode *tmp = fl_list_head(ctx.errors);
+    while (tmp != NULL)
     {
+        struct ZenitError *error = (struct ZenitError*) tmp->value;
+
         fl_vexpect(error->location.line == i && error->type == errors[i],
             "Expected %s error: %s at line %u:%u", errors[i] == error->type ? "syntax" : "large integer", 
             error->message, error->location.line, error->location.col);
+
+        tmp = tmp->next;
+        i++;
     }
 
     zenit_context_free(&ctx);

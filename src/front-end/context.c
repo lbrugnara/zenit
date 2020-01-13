@@ -25,8 +25,15 @@ static void error_free(void *errorptr)
 
     if (error->message)
         fl_cstring_free(error->message);
+
+    fl_free(error);
 }
 
+static void error_add(FlByte **dest, const FlByte *src)
+{
+    *dest = fl_malloc(sizeof(struct ZenitError));
+    memcpy(*dest, src, sizeof(struct ZenitError));
+}
 
 /*
  * Function: zenit_context_new
@@ -63,7 +70,7 @@ void zenit_context_free(struct ZenitContext *ctx)
         zenit_ast_free(ctx->ast);
 
     if (ctx->errors)
-        fl_array_free_each(ctx->errors, error_free);
+        fl_list_free(ctx->errors);
 }
 
 /*
@@ -77,7 +84,12 @@ void zenit_context_error(struct ZenitContext *ctx, struct ZenitSourceLocation lo
         return;
 
     if (ctx->errors == NULL)
-        ctx->errors = fl_array_new(sizeof(struct ZenitError), 0);
+    {
+        ctx->errors = fl_list_new_args((struct FlListArgs) {
+            .value_allocator = (FlContainerAllocatorFunction) error_add,
+            .value_cleaner = (FlContainerCleanupFunction) error_free
+        });
+    }
 
     va_list args;
     va_start(args, message);
@@ -90,7 +102,23 @@ void zenit_context_error(struct ZenitContext *ctx, struct ZenitSourceLocation lo
         .message = formatted_msg
     };
 
-    ctx->errors = fl_array_append(ctx->errors, &error);
+    struct FlListNode *tmp = fl_list_head(ctx->errors);
+
+    while (tmp != NULL)
+    {
+        struct ZenitError *err = (struct ZenitError*) tmp->value;
+
+        if (error.location.filename == err->location.filename 
+            && (error.location.line < err->location.line || (error.location.line == err->location.line && error.location.col < err->location.col)))
+        {
+            fl_list_insert_before(ctx->errors, tmp, &error);
+            return;
+        }
+
+        tmp = tmp->next;
+    }
+
+    fl_list_append(ctx->errors, &error);
 }
 
 void zenit_context_print_errors(struct ZenitContext *ctx)
@@ -98,13 +126,19 @@ void zenit_context_print_errors(struct ZenitContext *ctx)
     if (!zenit_context_has_errors(ctx))
         return;
 
-    for (size_t i=0; i < fl_array_length(ctx->errors); i++)
+    struct FlListNode *tmp = fl_list_head(ctx->errors);
+
+    while (tmp != NULL)
     {
+        struct ZenitError *error = (struct ZenitError*) tmp->value;
+
         fprintf(stderr, "%s:%d:%d: %s\n", 
-            ctx->srcinfo->location.filename, 
-            ctx->errors[i].location.line, 
-            ctx->errors[i].location.col, 
-            ctx->errors[i].message
+            error->location.filename, 
+            error->location.line, 
+            error->location.col, 
+            error->message
         );
+
+        tmp = tmp->next;
     }
 }
