@@ -34,64 +34,19 @@ void zenit_test_resolve_primitives(void)
         "var d = b;"                    "\n"
     ;
 
-    struct Test {
-        char *name;
-        enum ZenitType decl_type;
-        enum ZenitUintTypeSize decl_type_size;
-        char *decl_type_name;
-    } tests[] = {
-        { "a", ZENIT_TYPE_UINT, ZENIT_UINT_8,    "uint8"     },
-        { "b", ZENIT_TYPE_UINT, ZENIT_UINT_8,    "uint8"     },
-        { "c", ZENIT_TYPE_UINT, ZENIT_UINT_16,   "uint16"    },
-        { "d", ZENIT_TYPE_UINT, ZENIT_UINT_8,    "uint8"     },
-    };
+    const char *program_dump = 
+        "(program "
+            "(scope global"
+                " (symbol a uint8)"
+                " (symbol b uint8)"
+                " (symbol c uint16)"
+                " (symbol d uint8)"
+            ")"
+        ")"
+    ;
 
-    const size_t count = sizeof(tests) / sizeof(tests[0]);
-
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
-    bool is_valid = zenit_parse_source(&ctx);
-
-    zenit_resolve_symbols(&ctx);
-
-    for (size_t i=0; i < count; i++)
-    {
-        struct Test *test = tests + i;
-
-        bool symbol_exists = zenit_program_has_symbol(ctx.program, test->name);
-        fl_vexpect(symbol_exists, "Symbol table must contain symbol \"%s\"", test->name);
-
-        struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test->name);
-
-        fl_vexpect(symbol->typeinfo->type == test->decl_type
-            && ((struct ZenitUintTypeInfo*) symbol->typeinfo)->size == test->decl_type_size,
-            "Symbol type must be equals to '%s'", test->decl_type_name);
-    }
-
-    zenit_context_free(&ctx);
+    zenit_test_resolve_run(source, program_dump);
 }
-
-struct RefTest {
-    const char *sym_name;
-    const char *sym_type_hint;
-    const char *sym_type;
-} ref_tests[] = {
-    { "a",      "<unknown>",        "uint8",                },
-    { "b",      "<unknown>",        "&uint8",               },
-    { "c",      "&uint8",           "&uint8",               },
-    { "d",      "uint16",           "uint16",               },
-    { "e",      "&uint16",          "&uint16",              },
-    { "f",      "[2]uint8",         "[2]uint8",             },
-    { "g",      "&[2]uint8",        "&[2]uint8",            },
-    { "h",      "[1]&[2]uint8",     "[1]&[2]uint8",         },
-    { "i",      "[]&[2]uint8",      "[1]&[2]uint8",         },
-    { "j",      "[]&[]uint8",       "[1]&[2]uint8",         },
-
-    { "k",      "[]uint16",         "[2]uint16",            },
-    { "l",      "[]uint8",          "[2]uint8",             },
-    { "m",      "<unknown>",        "[2]&[2]uint8",         },
-    { "n",      "<unknown>",        "[1][2]&[2]uint8",      },
-    { "o",      "[][][]&[]uint8",   "[1][1][2]&[2]uint8",   },
-};
 
 void zenit_test_resolve_references(void)
 {
@@ -114,41 +69,29 @@ void zenit_test_resolve_references(void)
         "var o : [][][]&[]uint8 = [ n ];"       "\n"
     ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
-    bool is_valid = zenit_parse_source(&ctx);
+    const char *program_dump = 
+        "(program "
+            "(scope global"
+                " (symbol a uint8)"
+                " (symbol b &uint8)"
+                " (symbol c &uint8)"
+                " (symbol d uint16)"
+                " (symbol e &uint16)"
+                " (symbol f [2]uint8)"
+                " (symbol g &[2]uint8)"
+                " (symbol h [1]&[2]uint8)"
+                " (symbol i [1]&[2]uint8)"
+                " (symbol j [1]&[2]uint8)"
+                " (symbol k [2]uint16)"
+                " (symbol l [2]uint8)"
+                " (symbol m [2]&[2]uint8)"
+                " (symbol n [1][2]&[2]uint8)"
+                " (symbol o [1][1][2]&[2]uint8)"
+            ")"
+        ")"
+    ;
 
-    zenit_resolve_symbols(&ctx);
-
-    for (size_t i=0; i < sizeof(ref_tests) / sizeof(ref_tests[0]); i++)
-    {
-        struct RefTest *test = ref_tests + i;
-
-        fl_vexpect(zenit_program_has_symbol(ctx.program, test->sym_name), 
-            "Symbol '%s' must exist in the program", test->sym_name);
-
-        struct ZenitSymbol *sym = zenit_program_get_symbol(ctx.program, test->sym_name);
-
-        fl_vexpect(flm_cstring_equals(test->sym_type, zenit_type_to_string(sym->typeinfo)), 
-            "Type of '%s' must be '%s'", test->sym_name, test->sym_type);
-
-        for (size_t j=0; j < fl_array_length(ctx.ast->decls); j++)
-        {
-            if (ctx.ast->decls[j]->type == ZENIT_NODE_VARIABLE)
-            {
-                struct ZenitVariableNode *varnode = (struct ZenitVariableNode*) ctx.ast->decls[j];
-                if (!flm_cstring_equals(test->sym_name, varnode->name))
-                    continue;
-
-                char *type_node_str = zenit_node_type_to_string(varnode->type_decl);
-                bool equals = flm_cstring_equals(test->sym_type_hint, type_node_str);
-                fl_cstring_free(type_node_str);
-
-                fl_vexpect(equals, "Type information present in '%s' declaration must be '%s'", test->sym_name, test->sym_type_hint);
-            }
-        }
-    }
-
-    zenit_context_free(&ctx);
+    zenit_test_resolve_run(source, program_dump);
 }
 
 
@@ -162,55 +105,17 @@ void zenit_test_resolve_arrays(void)
         "var e : [1]uint16 = [ d ];"        "\n"
     ;
 
-    struct Test {
-        char *name;
-        enum ZenitType member_type;
-        enum ZenitUintTypeSize member_type_size;        
-        char *member_type_name;
-        size_t length;
-    } tests[] = {
-        { "a", ZENIT_TYPE_UINT,     ZENIT_UINT_8,   "uint8",        2   },
-        { "b", ZENIT_TYPE_NONE,     ZENIT_UINT_UNK, NULL,           3   },
-        { "c", ZENIT_TYPE_STRUCT,   ZENIT_UINT_UNK, "customType",   0   },
-        { "e", ZENIT_TYPE_UINT,     ZENIT_UINT_16,  "uint16",       1   },
-    };
+    const char *program_dump = 
+        "(program "
+            "(scope global"
+                " (symbol a [2]uint8)"
+                " (symbol b [3]uint8)"
+                " (symbol c [0]customType)"
+                " (symbol d uint16)"
+                " (symbol e [1]uint16)"
+            ")"
+        ")"
+    ;
 
-    const size_t count = sizeof(tests) / sizeof(tests[0]);
-
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
-    bool is_valid = zenit_parse_source(&ctx);
-
-    zenit_resolve_symbols(&ctx);
-
-    for (size_t i=0; i < count; i++)
-    {
-        struct Test *test = tests + i;
-
-        bool symbol_exists = zenit_program_has_symbol(ctx.program, test->name);
-        fl_vexpect(symbol_exists, "Symbol table must contain symbol \"%s\"", test->name);
-
-        struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test->name);
-
-        fl_vexpect(symbol->typeinfo->type == ZENIT_TYPE_ARRAY, "Symbol '%s' type must be equals to '%s'", symbol->name, zenit_type_to_string(symbol->typeinfo));
-
-        if (test->member_type != ZENIT_TYPE_NONE)
-        {
-            struct ZenitArrayTypeInfo *array_typeinfo = (struct ZenitArrayTypeInfo*) symbol->typeinfo;
-
-            fl_vexpect(array_typeinfo->length == test->length, "Number of elements in the array must be equals to %zu", test->length);
-            
-            if (array_typeinfo->member_type->type == ZENIT_TYPE_UINT)
-            {
-                fl_vexpect(array_typeinfo->member_type->type == test->member_type
-                    && ((struct ZenitUintTypeInfo*) array_typeinfo->member_type)->size == test->member_type_size,
-                    "Type of the array's member type must be equals to '%s'", test->member_type_name);
-            }
-            else
-            {
-                fl_vexpect(array_typeinfo->member_type->type == test->member_type, "Type of the array's member type must be equals to '%s'", test->member_type_name);
-            }
-        }
-    }
-
-    zenit_context_free(&ctx);
+    zenit_test_resolve_run(source, program_dump);
 }

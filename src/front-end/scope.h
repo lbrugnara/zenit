@@ -4,6 +4,18 @@
 #include "symtable.h"
 
 /*
+ * Enum: enum ZenitScopeType
+ *  Represents the different type of scopes
+ * 
+ */
+enum ZenitScopeType {
+    ZENIT_SCOPE_GLOBAL,
+    ZENIT_SCOPE_STRUCT,
+    ZENIT_SCOPE_FUNCTION,
+};
+
+
+/*
  * Struct: zenit_scope_new
  *  Represents a scope in the program
  * 
@@ -15,10 +27,12 @@
  * 
  */
 struct ZenitScope {
+    const char *id;
     struct ZenitScope *parent;
     struct ZenitScope **children;
-    struct ZenitSymtable symtable;
     unsigned long long temp_counter;
+    struct ZenitSymtable symtable;
+    enum ZenitScopeType type;
 };
 
 /*
@@ -27,7 +41,7 @@ struct ZenitScope {
  *
  * Parameters:
  *  <const char> *id: Id of the scope object
- *  <enum ZenitSymtableType> type: Type of symbol table for this scope
+ *  <enum ZenitScopeType> type: Type of symbol table for this scope
  *  <struct ZenitScope> *parent: Pointer to a parent scope
  *
  * Returns:
@@ -37,7 +51,7 @@ struct ZenitScope {
  *  The object returned by this function must be freed using the
  *  <zenit_scope_free> function
  */
-struct ZenitScope* zenit_scope_new(const char *id, enum ZenitSymtableType type, struct ZenitScope *parent);
+struct ZenitScope* zenit_scope_new(const char *id, enum ZenitScopeType type, struct ZenitScope *parent);
 
 /*
  * Function: zenit_scope_free

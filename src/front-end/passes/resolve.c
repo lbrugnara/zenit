@@ -20,6 +20,8 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node);
 static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *node);
 static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *node);
+static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *node);
+static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *node);
 
 /*
  * Variable: symbol_resolvers
@@ -32,6 +34,8 @@ static const ZenitSymbolResolver symbol_resolvers[] = {
     [ZENIT_NODE_REFERENCE]  = (ZenitSymbolResolver) &visit_reference_node,
     [ZENIT_NODE_CAST]       = (ZenitSymbolResolver) &visit_cast_node,
     [ZENIT_NODE_UINT]       = (ZenitSymbolResolver) &visit_uint_node,
+    [ZENIT_NODE_FIELD]      = (ZenitSymbolResolver) &visit_field_node,
+    [ZENIT_NODE_STRUCT]     = (ZenitSymbolResolver) &visit_struct_node,
 };
 
 /*
@@ -241,6 +245,45 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
     fl_array_free(names);
 }
 
+static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *field_node)
+{
+    // If the symbol already exists add an error
+    if (zenit_program_has_symbol(ctx->program, field_node->name))
+    {
+        zenit_context_error(ctx, field_node->base.location, ZENIT_ERROR_DUPLICATED_SYMBOL, 
+            "Field '%s' already exists in struct %s and cannot be redefined", field_node->name, ((struct ZenitStructNode*) field_node->owner)->name);
+        return NULL;
+    }
+
+    // We need a type for our symbol
+    struct ZenitTypeInfo *typeinfo = build_type_info_from_declaration(ctx, field_node->type_decl, NULL);
+
+    // Create and insert the symbol in the table
+    return zenit_program_add_symbol(ctx->program, zenit_symbol_new(field_node->name, typeinfo));
+}
+
+static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node)
+{
+    // If the symbol already exists add an error
+    if (zenit_program_has_scope(ctx->program, struct_node->name, ZENIT_SCOPE_STRUCT))
+    {
+        zenit_context_error(ctx, struct_node->base.location, ZENIT_ERROR_DUPLICATED_SYMBOL, "struct %s cannot be redefined", struct_node->name);
+        return NULL;
+    }
+
+    // Visit the attributes and its properties
+    visit_attribute_node_map(ctx, &struct_node->attributes);
+
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_STRUCT, struct_node->name);
+
+    for (size_t i=0; i < fl_array_length(struct_node->members); i++)
+        visit_node(ctx, struct_node->members[i]);
+
+    zenit_program_pop_scope(ctx->program);
+
+    return NULL;
+}
+
 /*
  * Function: visit_variable_node
  *  In this function we need to insert a new <struct ZenitSymbol> object in the symbol table. In case the
@@ -264,7 +307,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     {
         zenit_context_error(ctx, variable_node->base.location, ZENIT_ERROR_DUPLICATED_SYMBOL, "Cannot redefine symbol '%s'", variable_node->name);
         return NULL;
-    }    
+    }
 
     // Visit the attributes and its properties
     visit_attribute_node_map(ctx, &variable_node->attributes);

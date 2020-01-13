@@ -34,7 +34,7 @@ static bool is_type_defined(struct ZenitProgram *program, struct ZenitTypeInfo *
     if (typeinfo->type == ZENIT_TYPE_STRUCT)
     {
         // FIXME: Update this once struct members are implemented
-        return zenit_program_has_symbol(program, ((struct ZenitStructTypeInfo*) typeinfo)->name);
+        return zenit_program_has_scope(program, ((struct ZenitStructTypeInfo*) typeinfo)->name, ZENIT_SCOPE_STRUCT);
     }
     
     if (typeinfo->type == ZENIT_TYPE_ARRAY)

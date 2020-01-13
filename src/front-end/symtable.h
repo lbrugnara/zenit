@@ -5,29 +5,17 @@
 #include "symbol.h"
 
 /*
- * Enum: enum ZenitSymtableType
- *  Represents the different type of symbol tables
- * 
- */
-enum ZenitSymtableType {
-    ZENIT_SYMTABLE_GLOBAL,
-    ZENIT_SYMTABLE_FUNCTION,
-};
-
-/*
  * Struct: struct ZenitSymtable
  *  A symbol table object that keeps track of the program's symbols
  * 
  * Members:
  *  <const char> *id: Symbol table identifier
  *  <FlHashtable> symbols: Hashtable of symbols using the name (string) as key
- *  <enum ZenitSymtableType> type: The type of symbol table
+ *  <enum ZenitScopeType> type: The type of symbol table
  * 
  */
 struct ZenitSymtable {
-    const char *id;
     FlHashtable symbols;
-    enum ZenitSymtableType type;
 };
 
 /*
@@ -35,7 +23,7 @@ struct ZenitSymtable {
  *  Creates a new symbol table
  *
  * Parameters:
- *  <enum ZenitSymtableType> type: The type of symbol table
+ *  <enum ZenitScopeType> type: The type of symbol table
  *  <const char> *id: An identifier for the symbol table
  *
  * Returns:
@@ -45,7 +33,7 @@ struct ZenitSymtable {
  *  The object returned by this function must be freed using the
  *  <zenit_symtable_free> function
  */
-struct ZenitSymtable zenit_symtable_new(enum ZenitSymtableType, const char *id);
+struct ZenitSymtable zenit_symtable_new(void);
 
 /*
  * Function: zenit_symtable_free

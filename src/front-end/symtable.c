@@ -1,13 +1,9 @@
 #include "symtable.h"
 #include "symbol.h"
 
-struct ZenitSymtable zenit_symtable_new(enum ZenitSymtableType type, const char *id)
+struct ZenitSymtable zenit_symtable_new(void)
 {
-    flm_assert(id != NULL, "Symbol table ID cannot be NULL");
-
     return (struct ZenitSymtable) {
-        .id = fl_cstring_dup(id),
-        .type = type,
         .symbols = fl_hashtable_new_args((struct FlHashtableArgs) {
             .hash_function = fl_hashtable_hash_string,
             .key_allocator = fl_container_allocator_string,
@@ -23,9 +19,6 @@ void zenit_symtable_free(struct ZenitSymtable *symtable)
 {
     if (!symtable)
         return;
-
-    if (symtable->id)
-        fl_cstring_free(symtable->id);
 
     if (symtable->symbols)
         fl_hashtable_free(symtable->symbols);
@@ -57,18 +50,24 @@ struct ZenitSymbol* zenit_symtable_remove(struct ZenitSymtable *symtable, const 
 
 char* zenit_symtable_dump(struct ZenitSymtable *symtable, char *output)
 {
-    if (symtable->type == ZENIT_SYMTABLE_GLOBAL)
-        fl_cstring_append(&output, "GLOBAL\n");
-    else
-        fl_cstring_vappend(&output, "FUNCTION: %s\n", symtable->id);
-
     struct ZenitSymbol **symbols = fl_hashtable_values(symtable->symbols);
 
-    for (size_t i=0; i < fl_array_length(symbols); i++)
+    size_t length = fl_array_length(symbols);
+    if (length > 0)
     {
-        //if (symbols[i]->name[0] == '%')
-        //    continue;
-        output = zenit_symbol_dump(symbols[i], output);
+        bool started = false;
+        for (size_t i=0; i < length; i++)
+        {
+            if (symbols[i]->name[0] == '%')
+                continue;
+
+            if (started)
+                fl_cstring_append(&output, " ");
+
+            started = true;
+
+            output = zenit_symbol_dump(symbols[i], output);            
+        }
     }
 
     fl_array_free(symbols);

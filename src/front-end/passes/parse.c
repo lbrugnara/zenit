@@ -760,6 +760,7 @@ static struct ZenitNode* parse_struct_declaration(struct ZenitParser *parser, st
         // Something happened while parsing the element, we need to leave
         assert_or_goto(ctx, struct_field != NULL, ZENIT_ERROR_INTERNAL, NULL, on_error);
 
+        ((struct ZenitFieldNode*) struct_field)->owner = (struct ZenitNode*) struct_node;
         struct_node->members = fl_array_append(struct_node->members, &struct_field);
     }
 

@@ -18,6 +18,7 @@ struct ZenitFieldNode {
     struct ZenitNode base;
     char *name;
     struct ZenitTypeNode *type_decl;
+    struct ZenitNode *owner;
 };
 
 struct ZenitFieldNode* zenit_node_field_new(struct ZenitSourceLocation location, char *name);
