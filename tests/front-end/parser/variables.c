@@ -7,20 +7,6 @@
 
 void zenit_test_parser_variable_literal(void)
 {
-    struct LiteralVariableTest {
-        enum ZenitNodeType node_type;
-        char *lhs_name;
-        enum ZenitType type_declaration;
-        enum ZenitNodeType rhs_node_type;
-        enum ZenitUintTypeSize rhs_type_size;
-        unsigned int rhs_value;
-    } tests[] = {
-        { ZENIT_NODE_VARIABLE, "num0", ZENIT_TYPE_NONE, ZENIT_NODE_UINT, ZENIT_UINT_8, 0 },
-        { ZENIT_NODE_VARIABLE, "num1", ZENIT_TYPE_NONE, ZENIT_NODE_UINT, ZENIT_UINT_8, 1 },
-        { ZENIT_NODE_VARIABLE, "num2", ZENIT_TYPE_NONE, ZENIT_NODE_UINT, ZENIT_UINT_8, 2 },
-        { ZENIT_NODE_VARIABLE, "num3", ZENIT_TYPE_NONE, ZENIT_NODE_UINT, ZENIT_UINT_8, 3 },
-    };
-
     const char *source = 
         "var num0 = 0;"
         "var num1 = 1;"

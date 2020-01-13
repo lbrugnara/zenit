@@ -5,7 +5,7 @@
 #include "../../../src/front-end/passes/parse.h"
 #include "tests.h"
 
-void zenit_test_parser_structs(void)
+void zenit_test_parser_struct_decl(void)
 {
     const char *source = 
         "struct A { a: uint8; }"                        "\n"
