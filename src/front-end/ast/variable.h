@@ -26,6 +26,7 @@ struct ZenitVariableNode {
 
 struct ZenitVariableNode* zenit_node_variable_new(struct ZenitSourceLocation location, char *name);
 char* zenit_node_variable_uid(struct ZenitVariableNode *variable);
+char* zenit_node_variable_dump(struct ZenitVariableNode *variable, char *output);
 void zenit_node_variable_free(struct ZenitVariableNode *var_node);
 
 #endif /* ZENIT_AST_VARIABLE_H */

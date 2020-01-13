@@ -2,10 +2,10 @@
 #include "attribute.h"
 #include "cast.h"
 #include "identifier.h"
-#include "uint.h"
 #include "property.h"
 #include "reference.h"
 #include "types/type.h"
+#include "uint.h"
 #include "variable.h"
 
 /*
@@ -121,6 +121,54 @@ char* zenit_node_uid(struct ZenitNode *node)
     }
 
     return NULL;
+}
+
+char* zenit_node_dump(struct ZenitNode *node, char *output)
+{
+    if (!node)
+        return NULL;
+
+    switch (node->type)
+    {
+        case ZENIT_NODE_UINT:
+            return zenit_node_uint_dump((struct ZenitUintNode*)node, output);
+
+        case ZENIT_NODE_VARIABLE:
+            return zenit_node_variable_dump((struct ZenitVariableNode*)node, output);
+
+
+        case ZENIT_NODE_ARRAY:
+            return zenit_node_array_dump((struct ZenitArrayNode*)node, output);
+
+        case ZENIT_NODE_REFERENCE:
+            return zenit_node_reference_dump((struct ZenitReferenceNode*)node, output);
+
+        case ZENIT_NODE_IDENTIFIER:
+            return zenit_node_identifier_dump((struct ZenitIdentifierNode*)node, output);
+
+        case ZENIT_NODE_ATTRIBUTE:
+            return zenit_node_attribute_dump((struct ZenitAttributeNode*)node, output);
+
+        case ZENIT_NODE_PROPERTY:
+            return zenit_node_property_dump((struct ZenitPropertyNode*)node, output);
+
+        case ZENIT_NODE_CAST:
+            return zenit_node_cast_dump((struct ZenitCastNode*)node, output);
+
+        case ZENIT_NODE_TYPE_ARRAY:
+            return zenit_node_type_array_dump((struct ZenitArrayTypeNode*)node, output);
+
+        case ZENIT_NODE_TYPE_UINT:
+            return zenit_node_type_uint_dump((struct ZenitUintTypeNode*)node, output);
+
+        case ZENIT_NODE_TYPE_REFERENCE:
+            return zenit_node_type_reference_dump((struct ZenitReferenceTypeNode*)node, output);
+
+        case ZENIT_NODE_TYPE_STRUCT:
+            return zenit_node_type_struct_dump((struct ZenitStructTypeNode*)node, output);
+    }
+
+    return output;
 }
 
 

@@ -34,6 +34,17 @@ static inline char* zenit_node_property_uid(struct ZenitPropertyNode *property)
     return fl_cstring_vdup("%%L%u:C%u_property[%s]", property->base.location.line, property->base.location.col, property->name);
 }
 
+static inline char* zenit_node_property_dump(struct ZenitPropertyNode *property, char *output)
+{
+    fl_cstring_vappend(&output, "(prop %s ", property->name);
+    
+    output = zenit_node_dump(property->value, output);    
+    
+    fl_cstring_append(&output, ")");
+
+    return output;
+}
+
 static inline void zenit_node_property_free(struct ZenitPropertyNode *node)
 {
     if (!node)

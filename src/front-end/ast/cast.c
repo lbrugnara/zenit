@@ -20,6 +20,20 @@ char* zenit_node_cast_uid(struct ZenitCastNode *cast)
     return fl_cstring_vdup("%%L%u:C%u_cast[i:%d]", cast->base.location.line, cast->base.location.col, cast->implicit);
 }
 
+char* zenit_node_cast_dump(struct ZenitCastNode *cast, char *output)
+{
+    fl_cstring_append(&output, "(cast ");
+
+    output = zenit_node_dump(cast->expression, output);
+
+    if (cast->type_decl != NULL)
+        output = zenit_node_dump((struct ZenitNode*) cast->type_decl, output);
+
+    fl_cstring_append(&output, ")");
+
+    return output;
+}
+
 void zenit_node_cast_free(struct ZenitCastNode *cast_node)
 {
     if (!cast_node)

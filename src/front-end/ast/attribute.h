@@ -36,6 +36,31 @@ static inline char* zenit_node_attribute_uid(struct ZenitAttributeNode *attribut
     return fl_cstring_vdup("%%L%u:C%u_attribute[%s]", attribute->base.location.line, attribute->base.location.col, attribute->name);
 }
 
+static inline char* zenit_node_attribute_dump(struct ZenitAttributeNode *attribute, char *output)
+{
+    fl_cstring_vappend(&output, "(attr %s", attribute->name);
+
+    struct ZenitPropertyNode **properties = zenit_property_node_map_values(&attribute->properties);
+    
+    size_t length = fl_array_length(properties);
+    if (length > 0)
+    {
+        fl_cstring_append(&output, " ");
+        for (size_t i=0; i < length; i++)
+        {
+            output = zenit_node_property_dump(properties[i], output);
+            if (i != length - 1)
+                fl_cstring_append(&output, " ");
+        }
+    }
+
+    fl_array_free(properties);
+
+    fl_cstring_append(&output, ")");
+
+    return output;
+}
+
 static inline void zenit_node_attribute_free(struct ZenitAttributeNode *attribute_node)
 {
     if (!attribute_node)

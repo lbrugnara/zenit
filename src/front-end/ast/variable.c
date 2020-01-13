@@ -27,6 +27,39 @@ char* zenit_node_variable_uid(struct ZenitVariableNode *variable)
     return id;
 }
 
+char* zenit_node_variable_dump(struct ZenitVariableNode *variable, char *output)
+{
+    fl_cstring_vappend(&output, "(var %s ", variable->name);
+
+    if (variable->type_decl != NULL)
+    {
+        output = zenit_node_dump((struct ZenitNode*) variable->type_decl, output);
+        fl_cstring_append(&output, " ");
+    }
+
+    output = zenit_node_dump((struct ZenitNode*) variable->rvalue, output);
+
+    struct ZenitAttributeNode **attrs = zenit_attribute_node_map_values(&variable->attributes);
+    size_t length = fl_array_length(attrs);
+    if (length > 0)
+    {
+        fl_cstring_append(&output, " ");
+
+        for (size_t i=0; i < length; i++)
+        {
+            output = zenit_node_attribute_dump(attrs[i], output);
+
+            if (i != length - 1)
+                fl_cstring_append(&output, " ");
+        }
+    }
+    fl_array_free(attrs);
+
+    fl_cstring_append(&output, ")");
+
+    return output;
+}
+
 /*
  * Function: zenit_node_variable_free
  *  Frees the memory of a <struct ZenitVariableNode> object

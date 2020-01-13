@@ -27,6 +27,17 @@ char* zenit_node_type_uint_uid(struct ZenitUintTypeNode *uint_type_node)
     return fl_cstring_vdup("%%L%u:C%u_type_uint[%zu]", uint_type_node->base.base.location.line, uint_type_node->base.base.location.col, size);
 }
 
+char* zenit_node_type_uint_dump(struct ZenitUintTypeNode *type_node, char *output)
+{
+    char *type_str = zenit_node_type_uint_to_string(type_node);
+
+    fl_cstring_vappend(&output, "(type %s)", type_str);
+
+    fl_cstring_free(type_str);
+
+    return output;
+}
+
 char* zenit_node_type_uint_to_string(struct ZenitUintTypeNode *uint_type_node)
 {
     if (!uint_type_node)

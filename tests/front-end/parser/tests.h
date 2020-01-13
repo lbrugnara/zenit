@@ -1,6 +1,8 @@
 #ifndef ZENIT_TESTS_PARSER_H
 #define ZENIT_TESTS_PARSER_H
 
+void zenit_test_parser_run(const char *source, const char *ast_dump);
+
 void zenit_test_parser_attributes_variables(void);
 void zenit_test_parser_variable_literal(void);
 void zenit_test_parser_array_variable_literal(void);

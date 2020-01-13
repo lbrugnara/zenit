@@ -19,6 +19,12 @@ char* zenit_node_identifier_uid(struct ZenitIdentifierNode *identifier)
     return fl_cstring_vdup("%%L%u:C%u_id[n:%s]", identifier->base.location.line, identifier->base.location.col, identifier->name);
 }
 
+char* zenit_node_identifier_dump(struct ZenitIdentifierNode *identifier, char *output)
+{
+    fl_cstring_vappend(&output, "(id %s)", identifier->name);
+    return output;
+}
+
 /*
  * Function: zenit_node_identifier_free
  *  Releases the memory of the identifier node

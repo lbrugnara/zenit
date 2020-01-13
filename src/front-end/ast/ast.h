@@ -8,12 +8,14 @@
 #include "array.h"
 #include "attribute.h"
 #include "cast.h"
+#include "field.h"
 #include "identifier.h"
-#include "uint.h"
 #include "node.h"
 #include "property.h"
 #include "reference.h"
+#include "struct.h"
 #include "types/type.h"
+#include "uint.h"
 #include "variable.h"
 
 /*
@@ -27,6 +29,8 @@
 struct ZenitAst {
     struct ZenitNode **decls;
 };
+
+char* zenit_ast_dump(struct ZenitAst *ast);
 
 /*
  * Function: zenit_ast_free

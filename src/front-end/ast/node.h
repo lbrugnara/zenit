@@ -62,6 +62,8 @@ char* zenit_node_uid(struct ZenitNode *node);
  */
 char* zenit_node_to_string(struct ZenitNode *node);
 
+char* zenit_node_dump(struct ZenitNode *node, char *output);
+
 /*
  * Function: zenit_node_free
  *  This function releases the memory allocated in the *node* object

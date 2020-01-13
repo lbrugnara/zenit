@@ -21,6 +21,17 @@ char* zenit_node_type_reference_uid(struct ZenitReferenceTypeNode *type_node)
     return fl_cstring_vdup("%%L%u:C%u_type_reference", type_node->base.base.location.line, type_node->base.base.location.col);
 }
 
+char* zenit_node_type_reference_dump(struct ZenitReferenceTypeNode *type_node, char *output)
+{
+    char *type_str = zenit_node_type_reference_to_string(type_node);
+
+    fl_cstring_vappend(&output, "(type %s)", type_str);
+
+    fl_cstring_free(type_str);
+
+    return output;
+}
+
 char* zenit_node_type_reference_to_string(struct ZenitReferenceTypeNode *type_node)
 {
     if (type_node == NULL)

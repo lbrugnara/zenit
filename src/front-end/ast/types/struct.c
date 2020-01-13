@@ -22,6 +22,17 @@ char* zenit_node_type_struct_uid(struct ZenitStructTypeNode *type_node)
     return fl_cstring_vdup("%%L%u:C%u_type_struct", type_node->base.base.location.line, type_node->base.base.location.col);
 }
 
+char* zenit_node_type_struct_dump(struct ZenitStructTypeNode *type_node, char *output)
+{
+    char *type_str = zenit_node_type_struct_to_string(type_node);
+
+    fl_cstring_vappend(&output, "(type %s)", type_str);
+
+    fl_cstring_free(type_str);
+
+    return output;
+}
+
 char* zenit_node_type_struct_to_string(struct ZenitStructTypeNode *type_node)
 {
     if (type_node == NULL)
@@ -39,7 +50,7 @@ void zenit_node_type_struct_free(struct ZenitStructTypeNode *type_node)
         fl_cstring_free(type_node->name);
 
     if (type_node->members)
-        fl_array_free_each_pointer(type_node->members, (FlArrayFreeElementFunc)zenit_node_free);
+        fl_array_free_each_pointer(type_node->members, (FlArrayFreeElementFunc) zenit_node_free);
 
     fl_free(type_node);
 }

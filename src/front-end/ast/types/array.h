@@ -12,6 +12,7 @@ struct ZenitArrayTypeNode {
 
 struct ZenitArrayTypeNode* zenit_node_type_array_new(struct ZenitSourceLocation location, struct ZenitTypeNode *member_type);
 char* zenit_node_type_array_uid(struct ZenitArrayTypeNode *type_node);
+char* zenit_node_type_array_dump(struct ZenitArrayTypeNode *type_node, char *output);
 char* zenit_node_type_array_to_string(struct ZenitArrayTypeNode *type_node);
 void zenit_node_type_array_free(struct ZenitArrayTypeNode *type_node);
 

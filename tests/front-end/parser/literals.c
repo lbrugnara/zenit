@@ -18,37 +18,17 @@ void zenit_test_parser_literal_integer(void)
             //"/* uint64 */ 1844674407370955161;  \n"
     ;
 
-    const size_t results[] = { 1, 2, 3, 255, 8192 };
-    const char *names[] = { "uint8", "uint8", "uint8", "uint8", "uint16" };
-    const enum ZenitUintTypeSize sizes[] = { ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_8, ZENIT_UINT_16 };
+    const char *ast_dump =
+        "(ast"
+            " (uint8 1)"
+            " (uint8 2)"
+            " (uint8 3)"
+            " (uint8 255)"
+            " (uint16 8192)"
+        ")"
+    ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
-
-    bool is_valid = zenit_parse_source(&ctx);
-
-    fl_expect("Parser object should not contain errors", is_valid);
-
-    for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
-    {
-        struct ZenitNode *node = ctx.ast->decls[i];
-        fl_expect("Node must be a uint node", node->type == ZENIT_NODE_UINT);
-
-        struct ZenitUintNode *literal = (struct ZenitUintNode*)node;
-
-        switch (sizes[i])
-        {
-            case ZENIT_UINT_8:
-                fl_vexpect((size_t)literal->value.uint8 == results[i], "Literal value must be equals to %zu", results[i]);
-                break;
-            case ZENIT_UINT_16:
-                fl_vexpect((size_t)literal->value.uint16 == results[i], "Literal value must be equals to %zu", results[i]);
-                break;
-            default:
-                fl_expect("Unmanaged type", false);
-        }        
-    }    
-
-    zenit_context_free(&ctx);
+    zenit_test_parser_run(source, ast_dump);
 }
 
 void zenit_test_parser_literal_array_initializer(void)
@@ -59,32 +39,14 @@ void zenit_test_parser_literal_array_initializer(void)
             "[ ];"              "\n"
     ;
 
-    const size_t elements[] = { 3, 0 };
-    const size_t values[99][99] = { { 1, 2, 3 }, { 0 } };
+    const char *ast_dump = 
+        "(ast"
+        " (array (uint8 1) (uint8 2) (uint8 3))"
+        " (array)"
+        ")"
+    ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
-    bool is_valid = zenit_parse_source(&ctx);
-
-    fl_expect("Parser object should not contain errors", is_valid);
-
-    for (size_t i=0; i < fl_array_length(ctx.ast->decls); i++)
-    {
-        struct ZenitNode *node = ctx.ast->decls[i];
-        fl_expect("Node must be a literal node", node->type == ZENIT_NODE_ARRAY);
-
-        struct ZenitArrayNode *array = (struct ZenitArrayNode*)node;
-
-        fl_vexpect(array->elements && fl_array_length(array->elements) == elements[i], "Array must contain %zu elements", elements[i]);
-
-        for (size_t j=0; j < fl_array_length(array->elements); j++)
-        {
-            struct ZenitUintNode *literal = (struct ZenitUintNode*)array->elements[j];
-            //fl_vexpect(literal->type == ZENIT_TYPE_UINT8, "Literal type must be \"%s\"", zenit_type_to_string(&literal->base.typeinfo));
-            fl_vexpect((size_t)literal->value.uint8 == values[i][j], "Literal value must be equals to %zu", values[i][j]);
-        }
-    }    
-
-    zenit_context_free(&ctx);
+    zenit_test_parser_run(source, ast_dump);
 }
 
 void zenit_test_parser_literal_integer_error(void)

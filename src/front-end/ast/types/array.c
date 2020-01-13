@@ -21,6 +21,17 @@ char* zenit_node_type_array_uid(struct ZenitArrayTypeNode *type_node)
     return fl_cstring_vdup("%%L%u:C%u_type_array", type_node->base.base.location.line, type_node->base.base.location.col);
 }
 
+char* zenit_node_type_array_dump(struct ZenitArrayTypeNode *type_node, char *output)
+{
+    char *type_str = zenit_node_type_array_to_string(type_node);
+
+    fl_cstring_vappend(&output, "(type %s)", type_str);
+
+    fl_cstring_free(type_str);
+
+    return output;
+}
+
 char* zenit_node_type_array_to_string(struct ZenitArrayTypeNode *type_node)
 {
     if (type_node == NULL)

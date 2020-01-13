@@ -18,6 +18,7 @@ struct ZenitReferenceNode {
 
 struct ZenitReferenceNode* zenit_node_reference_new(struct ZenitSourceLocation location, struct ZenitNode *expression);
 char* zenit_node_reference_uid(struct ZenitReferenceNode *reference);
+char* zenit_node_reference_dump(struct ZenitReferenceNode *reference, char *output);
 void zenit_node_reference_free(struct ZenitReferenceNode *ref_node);
 
 #endif /* ZENIT_AST_REFERENCE_H */

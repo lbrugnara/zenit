@@ -27,6 +27,17 @@ char* zenit_node_reference_uid(struct ZenitReferenceNode *reference)
     return id;
 }
 
+char* zenit_node_reference_dump(struct ZenitReferenceNode *reference, char *output)
+{
+    fl_cstring_append(&output, "(ref ");
+
+    output = zenit_node_dump(reference->expression, output);
+
+    fl_cstring_append(&output, ")");
+
+    return output;
+}
+
 /*
  * Function: zenit_node_reference_free
  *  Releases the memory of the <struct ZenitReferenceNode> object

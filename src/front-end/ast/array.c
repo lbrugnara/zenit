@@ -30,6 +30,28 @@ char* zenit_node_array_uid(struct ZenitArrayNode *array)
     );
 }
 
+char* zenit_node_array_dump(struct ZenitArrayNode *array, char *output)
+{
+    fl_cstring_append(&output, "(array");
+
+    size_t length = fl_array_length(array->elements);
+
+    if (length > 0)
+    {
+        fl_cstring_append(&output, " ");
+        for (size_t i=0; i < length; i++)
+        {
+            output = zenit_node_dump(array->elements[i], output);
+            if (i != length - 1)
+                fl_cstring_append(&output, " ");
+        }
+    }
+
+    fl_cstring_append(&output, ")");
+
+    return output;
+}
+
 /*
  f Function: zenit_node_array_free
  *  Releases the memory of an array node object

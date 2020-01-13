@@ -14,6 +14,7 @@ struct ZenitIdentifierNode {
 
 struct ZenitIdentifierNode* zenit_node_identifier_new(struct ZenitSourceLocation location, char *name);
 char* zenit_node_identifier_uid(struct ZenitIdentifierNode *identifier);
+char* zenit_node_identifier_dump(struct ZenitIdentifierNode *identifier, char *output);
 void zenit_node_identifier_free(struct ZenitIdentifierNode *identifier_node);
 
 #endif /* ZENIT_AST_IDENTIFIER_H */

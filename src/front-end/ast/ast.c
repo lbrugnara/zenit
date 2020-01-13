@@ -1,5 +1,27 @@
 #include "ast.h"
 
+char* zenit_ast_dump(struct ZenitAst *ast)
+{
+    char *output = fl_cstring_dup("(ast");
+
+    if (ast->decls)
+    {
+        fl_cstring_append(&output, " ");
+        size_t length = fl_array_length(ast->decls);
+        for (size_t i=0; i < length; i++)
+        {
+            output = zenit_node_dump(ast->decls[i], output);
+
+            if (i != length - 1)
+                fl_cstring_append(&output, " ");
+        }
+    }
+
+    fl_cstring_append(&output, ")");
+
+    return output;
+}
+
 /*
  * Function: zenit_ast_free
  *  Frees the memory of all the declarations and the AST

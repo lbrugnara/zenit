@@ -11,6 +11,7 @@ struct ZenitUintTypeNode {
 
 struct ZenitUintTypeNode* zenit_node_type_uint_new(struct ZenitSourceLocation location, enum ZenitUintTypeSize size);
 char* zenit_node_type_uint_uid(struct ZenitUintTypeNode *uint_type_node);
+char* zenit_node_type_uint_dump(struct ZenitUintTypeNode *type_node, char *output);
 char* zenit_node_type_uint_to_string(struct ZenitUintTypeNode *uint_type_node);
 void zenit_node_type_uint_free(struct ZenitUintTypeNode *uint_type_node);
 

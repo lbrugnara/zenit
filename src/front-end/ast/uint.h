@@ -17,6 +17,7 @@ struct ZenitUintNode {
 
 struct ZenitUintNode* zenit_node_uint_new(struct ZenitSourceLocation location, enum ZenitUintTypeSize size, union ZenitUintValue value);
 char* zenit_node_uint_uid(struct ZenitUintNode *uint_node);
+char* zenit_node_uint_dump(struct ZenitUintNode *uint, char *output);
 void zenit_node_uint_free(struct ZenitUintNode *uint_node);
 
 #endif /* ZENIT_AST_UINT_H */
