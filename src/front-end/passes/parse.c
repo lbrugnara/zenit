@@ -82,15 +82,16 @@ static struct ZenitNode* parse_literal_expression(struct ZenitParser *parser, st
 static struct ZenitNode* parse_array_initializer(struct ZenitParser *parser, struct ZenitContext *ctx);
 static struct ZenitNode* parse_expression(struct ZenitParser *parser, struct ZenitContext *ctx);
 static struct ZenitNode* parse_variable_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
+static struct ZenitNode* parse_struct_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
 static struct ZenitNode* parse_expression_statement(struct ZenitParser *parser, struct ZenitContext *ctx);
 static struct ZenitNode* parse_statement(struct ZenitParser *parser, struct ZenitContext *ctx);
 static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
-static struct ZenitTypeNode* parse_type_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
-static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
-static struct ZenitTypeNode* parse_type_reference_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
+static struct ZenitTypeNode* parse_type_declaration(struct ZenitParser *parser, struct ZenitContext *ctx, bool allow_partial_types);
+static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *parser, struct ZenitContext *ctx, bool allow_partial_types);
+static struct ZenitTypeNode* parse_type_reference_declaration(struct ZenitParser *parser, struct ZenitContext *ctx, bool allow_partial_types);
 static bool parse_uint_value(struct ZenitContext *ctx, struct ZenitToken *primitive_token, enum ZenitUintTypeSize *size, union ZenitUintValue *value);
 
-static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
+static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *parser, struct ZenitContext *ctx, bool allow_partial_types)
 {
     struct ZenitToken bracket_token;
     consume_or_return(ctx, parser, ZENIT_TOKEN_LBRACKET, &bracket_token);
@@ -124,11 +125,16 @@ static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *pa
                 return false;
         }
     }
+    else if (!allow_partial_types)
+    {
+        zenit_context_error(ctx, ctx->srcinfo->location, ZENIT_ERROR_SYNTAX,
+            "The length of the array is required in this context.");
+    }
 
     // The closing bracket is required
     consume_or_return(ctx, parser, ZENIT_TOKEN_RBRACKET, NULL);
 
-    struct ZenitTypeNode *member_type = parse_type_declaration(parser, ctx);
+    struct ZenitTypeNode *member_type = parse_type_declaration(parser, ctx, allow_partial_types);
 
     struct ZenitArrayTypeNode *array_type_decl = zenit_node_type_array_new(bracket_token.location, member_type);
 
@@ -138,12 +144,12 @@ static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *pa
     return (struct ZenitTypeNode*) array_type_decl;
 }
 
-static struct ZenitTypeNode* parse_type_reference_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
+static struct ZenitTypeNode* parse_type_reference_declaration(struct ZenitParser *parser, struct ZenitContext *ctx, bool allow_partial_types)
 {
     struct ZenitToken amp_token;
     consume_or_return(ctx, parser, ZENIT_TOKEN_AMPERSAND, &amp_token);
 
-    struct ZenitTypeNode *element_type = parse_type_declaration(parser, ctx);
+    struct ZenitTypeNode *element_type = parse_type_declaration(parser, ctx, allow_partial_types);
 
     return (struct ZenitTypeNode*) zenit_node_type_reference_new(amp_token.location, element_type);
 }
@@ -162,19 +168,19 @@ static struct ZenitTypeNode* parse_type_reference_declaration(struct ZenitParser
  * Grammar:
  *  type_information = ( '[' integer_literal ']' )? '&'? ID
  */
-static struct ZenitTypeNode* parse_type_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
+static struct ZenitTypeNode* parse_type_declaration(struct ZenitParser *parser, struct ZenitContext *ctx, bool allow_partial_types)
 {
     // Check for a reference
     if (zenit_parser_next_is(parser, ZENIT_TOKEN_AMPERSAND))    
-        return parse_type_reference_declaration(parser, ctx);
+        return parse_type_reference_declaration(parser, ctx, allow_partial_types);
 
     // Check if it is an array
     if (zenit_parser_next_is(parser, ZENIT_TOKEN_LBRACKET))
-        return parse_type_array_declaration(parser, ctx);
+        return parse_type_array_declaration(parser, ctx, allow_partial_types);
 
     // Check for a reference
     if (zenit_parser_next_is(parser, ZENIT_TOKEN_AMPERSAND))    
-        return parse_type_reference_declaration(parser, ctx);
+        return parse_type_reference_declaration(parser, ctx, allow_partial_types);
 
     // The type name is required, so let's get it
     struct ZenitToken type_token;
@@ -472,7 +478,7 @@ static struct ZenitNode* parse_cast_expression(struct ZenitParser *parser, struc
 
     if (zenit_parser_consume_if(parser, ZENIT_TOKEN_COLON))
     {
-        cast_node->type_decl = parse_type_declaration(parser, ctx);
+        cast_node->type_decl = parse_type_declaration(parser, ctx, true);
         assert_or_goto(ctx, cast_node->type_decl != NULL, ZENIT_ERROR_SYNTAX, NULL, on_error);
     }
 
@@ -586,7 +592,7 @@ static struct ZenitNode* parse_variable_declaration(struct ZenitParser *parser, 
     
     consume_or_return(ctx, parser, ZENIT_TOKEN_VAR, &var_token);
     
-    // The variable name is required to be present and be valid
+    // The variable name is required to be present and to be valid
     if (!zenit_parser_expects(parser, ZENIT_TOKEN_ID, &name_token))
     {
         if (zenit_parser_next_is(parser, ZENIT_TOKEN_UNKNOWN))
@@ -613,7 +619,7 @@ static struct ZenitNode* parse_variable_declaration(struct ZenitParser *parser, 
     // If the COLON token is present, we need to parse the type information
     if (zenit_parser_consume_if(parser, ZENIT_TOKEN_COLON))
     {
-        var_node->type_decl = parse_type_declaration(parser, ctx);
+        var_node->type_decl = parse_type_declaration(parser, ctx, true);
         assert_or_goto(ctx, var_node->type_decl != NULL, ZENIT_ERROR_SYNTAX, NULL, on_error);
     }
 
@@ -634,6 +640,138 @@ static struct ZenitNode* parse_variable_declaration(struct ZenitParser *parser, 
 
     // Cleanup code for error conditions
     on_error: zenit_node_variable_free(var_node);
+
+    return NULL;
+}
+
+/*
+ * Function: parse_field_declaration
+ *  Parses a struct member declaration
+ *
+ * Parameters:
+ *  parser - Parser object
+ *  ctx - <struct ZenitContext> object
+ *
+ * Returns:
+ *  struct ZenitNode* - Struct member declaration node
+ * 
+ * Grammar:
+ *  field_declaration = ID ':' type_information ';' ;
+ *
+ */
+static struct ZenitNode* parse_field_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
+{
+    struct ZenitToken name_token;
+    
+    // The field name is required to be present and to be valid
+    if (!zenit_parser_expects(parser, ZENIT_TOKEN_ID, &name_token))
+    {
+        if (zenit_parser_next_is(parser, ZENIT_TOKEN_UNKNOWN))
+        {
+            struct ZenitToken tmp;
+            zenit_parser_peek(parser, &tmp);
+            struct FlSlice slice = tmp.value;
+            size_t length = slice.length;
+            const char *str = (const char*)slice.sequence;
+            zenit_context_error(ctx, ctx->srcinfo->location, ZENIT_ERROR_SYNTAX, "'%.*s' is not a valid identifier", length, str);
+        }
+        else
+        {
+            zenit_context_error(ctx, ctx->srcinfo->location, ZENIT_ERROR_SYNTAX, "Expecting field name but received %s", zenit_token_print(name_token.type));
+        }
+        return NULL;
+    }
+    
+    // Allocate the memory and the base information
+    struct ZenitFieldNode *field_node = zenit_node_field_new(name_token.location, token_to_string(&name_token));
+
+    assert_or_return(ctx, field_node != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize a field node");
+
+    // Type info is mandatory
+    consume_or_goto(ctx, parser, ZENIT_TOKEN_COLON, NULL, on_error);
+    
+    field_node->type_decl = parse_type_declaration(parser, ctx, false);
+    assert_or_goto(ctx, field_node->type_decl != NULL, ZENIT_ERROR_SYNTAX, NULL, on_error);
+
+    // The field declaration ends with a semicolon
+    consume_or_goto(ctx, parser, ZENIT_TOKEN_SEMICOLON, NULL, on_error);
+
+    // Success
+    return (struct ZenitNode*) field_node;
+
+    // Cleanup code for error conditions
+    on_error: zenit_node_field_free(field_node);
+
+    return NULL;
+}
+
+/*
+ * Function: parse_struct_declaration
+ *  Parses a struct declaration
+ *
+ * Parameters:
+ *  parser - Parser object
+ *  ctx - <struct ZenitContext> object
+ *
+ * Returns:
+ *  struct ZenitNode* - Struct declaration node
+ * 
+ * Grammar:
+ *  struct_declaration = 'struct' ID '{' field_declaration+ '}';
+ *
+ */
+static struct ZenitNode* parse_struct_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
+{
+    struct ZenitToken struct_token;
+    struct ZenitToken name_token;
+    consume_or_return(ctx, parser, ZENIT_TOKEN_STRUCT, &struct_token);
+    
+    // The struct name is required to be present and to be valid
+    if (!zenit_parser_expects(parser, ZENIT_TOKEN_ID, &name_token))
+    {
+        if (zenit_parser_next_is(parser, ZENIT_TOKEN_UNKNOWN))
+        {
+            struct ZenitToken tmp;
+            zenit_parser_peek(parser, &tmp);
+            struct FlSlice slice = tmp.value;
+            size_t length = slice.length;
+            const char *str = (const char*)slice.sequence;
+            zenit_context_error(ctx, ctx->srcinfo->location, ZENIT_ERROR_SYNTAX, "'%.*s' is not a valid struct name", length, str);
+        }
+        else
+        {
+            zenit_context_error(ctx, ctx->srcinfo->location, ZENIT_ERROR_SYNTAX, "Missing struct name");
+        }
+        return NULL;
+    }
+
+    // Allocate the memory and the base information
+    struct ZenitStructNode *struct_node = zenit_node_struct_new(struct_token.location, token_to_string(&name_token));
+
+    assert_or_return(ctx, struct_node != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize a struct node");
+
+    consume_or_goto(ctx, parser, ZENIT_TOKEN_LBRACE, NULL, on_error);
+
+    while (zenit_parser_has_input(parser) && !zenit_parser_next_is(parser, ZENIT_TOKEN_RBRACE))
+    {
+        // Get the struct member
+        struct ZenitNode *struct_field = parse_field_declaration(parser, ctx);
+
+        // Something happened while parsing the element, we need to leave
+        assert_or_goto(ctx, struct_field != NULL, ZENIT_ERROR_INTERNAL, NULL, on_error);
+
+        struct_node->members = fl_array_append(struct_node->members, &struct_field);
+    }
+
+    if (fl_array_length(struct_node->members) == 0)
+        zenit_context_error(ctx, ctx->srcinfo->location, ZENIT_ERROR_SYNTAX, "A struct needs at least one member, none found.");
+
+    consume_or_goto(ctx, parser, ZENIT_TOKEN_RBRACE, NULL, on_error);    
+    
+    return (struct ZenitNode*) struct_node;
+
+    // Cleanup code for error conditions
+    on_error: zenit_node_struct_free(struct_node);
 
     return NULL;
 }
@@ -759,7 +897,7 @@ static struct ZenitAttributeNodeMap parse_attribute_declaration_list(struct Zeni
  * struct ZenitNode* - Parsed declaration node
  * 
  * Grammar:
- *  declaration = attribute_declaration* variable_declaration | statement ;
+ *  declaration = attribute_declaration* ( variable_declaration | struct_declaration ) | statement ;
  *
  */
 static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct ZenitContext *ctx)
@@ -781,6 +919,18 @@ static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct Ze
         vardecl->attributes = attributes;
 
         return (struct ZenitNode*) vardecl;
+    }
+    else if (zenit_parser_next_is(parser, ZENIT_TOKEN_STRUCT))
+    {
+        struct ZenitStructNode *struct_decl = (struct ZenitStructNode*) parse_struct_declaration(parser, ctx);
+
+        // Something happened if struct_decl is NULL, we need to free the memory for the attribute map and leave
+        assert_or_goto(ctx, struct_decl != NULL, ZENIT_ERROR_INTERNAL, NULL, on_parsing_error);
+
+        // Assign the attribute map (could be empty)
+        struct_decl->attributes = attributes;
+
+        return (struct ZenitNode*) struct_decl;
     }
 
     // If the attribute map is not empty at this point, it means their usage is invalid

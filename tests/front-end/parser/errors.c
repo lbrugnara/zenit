@@ -9,23 +9,25 @@ void zenit_test_parser_variable_errors(void)
 {
     const char *source = 
         /* The missing semicolon after the 0 makes the parser ignore everything up to finding the semicolon */
-        "/* Line 1 */ var n : uint8 = 0   ignored by synch ;"                                              "\n"
+        "/* Line 1 */ var n : uint8 = 0   ignored by synch ;"                                               "\n"
         /* Missing variable name                                                                            */
-        "/* Line 2 */ var : uint8 = 1;"                                                                    "\n"
+        "/* Line 2 */ var : uint8 = 1;"                                                                     "\n"
         /* The missing semicolon after the 2 makes the parser ignore everything up to finding the semicolon */
-        "/* Line 3 */ var n2 : uint8 = 2  ignored by synch ;"                                              "\n"
+        "/* Line 3 */ var n2 : uint8 = 2  ignored by synch ;"                                               "\n"
         /* Missing type name after the colon                                                                */
-        "/* Line 4 */ var n3 : = 3;"                                                                       "\n"
+        "/* Line 4 */ var n3 : = 3;"                                                                        "\n"
         /* Missing assignment operator                                                                      */
-        "/* Line 5 */ var n4 4;"                                                                           "\n"
+        "/* Line 5 */ var n4 4;"                                                                            "\n"
         /* Missing variable initializer                                                                     */
-        "/* Line 6 */ var n5 = ;"                                                                          "\n"
+        "/* Line 6 */ var n5 = ;"                                                                           "\n"
         /* ULLONG_MAX + 1: Too large integral type                                                          */
-        "/* Line 7 */ var n6 = 18446744073709551616;"                                                      "\n"
+        "/* Line 7 */ var n6 = 18446744073709551616;"                                                       "\n"
         /* Array without initializer                                                                        */
-        "/* Line 8 */ var n7 : [2]uint8 = ;"                                                               "\n"
+        "/* Line 8 */ var n7 : [2]uint8 = ;"                                                                "\n"
         /* Invalid variable name                                                                            */
-        "/* Line 9 */ var $invalid = 2;"                                                                   "\n"
+        "/* Line 9 */ var $invalid = 2;"                                                                    "\n"
+        /* Partial types are not allowed in struct definition                                               */
+        "/* Line 10 */ struct A { arr: []uint16; }"                                                         "\n"
     ;
 
     const enum ZenitErrorType errors[] = {
@@ -39,6 +41,7 @@ void zenit_test_parser_variable_errors(void)
         /* Line */ [7] = ZENIT_ERROR_LARGE_INTEGER,
         /* Line */ [8] = ZENIT_ERROR_SYNTAX,
         /* Line */ [9] = ZENIT_ERROR_SYNTAX,
+        /* Line */[10] = ZENIT_ERROR_SYNTAX,
     };
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);

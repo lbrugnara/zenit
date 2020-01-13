@@ -41,6 +41,7 @@ int main(int argc, char **argv)
             { "Integer literal errors",             &zenit_test_parser_literal_integer_error            },
             { "Array initializers",                 &zenit_test_parser_literal_array_initializer        },
             { "Variable attributes",                &zenit_test_parser_attributes_variables             },
+            { "Struct definition",                  &zenit_test_parser_structs                          },
         ),
         fl_test_suite("Symtable",
             { "Symbol creation",    &zenit_test_symtable_api },

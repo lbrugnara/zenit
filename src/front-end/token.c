@@ -7,6 +7,8 @@ static const char *TokenTypeString[] = {
 
     [ZENIT_TOKEN_ID]            = "IDENTIFIER",
     [ZENIT_TOKEN_VAR]           = "VAR \"var\"",
+    [ZENIT_TOKEN_CAST]          = "CAST \"cast\"",
+    [ZENIT_TOKEN_STRUCT]        = "STRUCT \"struct\"",
 
     [ZENIT_TOKEN_AMPERSAND]     = "AMPERSAND \"&\"",
     [ZENIT_TOKEN_ASSIGN]        = "ASSIGN \"=\"",

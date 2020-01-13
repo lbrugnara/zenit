@@ -1,9 +1,11 @@
 #include "array.h"
 #include "attribute.h"
 #include "cast.h"
+#include "field.h"
 #include "identifier.h"
 #include "property.h"
 #include "reference.h"
+#include "struct.h"
 #include "types/type.h"
 #include "uint.h"
 #include "variable.h"
@@ -38,6 +40,12 @@ char* zenit_node_to_string(struct ZenitNode *node)
 
         case ZENIT_NODE_VARIABLE:
             return "var";
+
+        case ZENIT_NODE_STRUCT:
+            return "struct";
+
+        case ZENIT_NODE_FIELD:
+            return "field";
 
         case ZENIT_NODE_ATTRIBUTE:
             return "attr";
@@ -89,6 +97,12 @@ char* zenit_node_uid(struct ZenitNode *node)
         case ZENIT_NODE_VARIABLE:
             return zenit_node_variable_uid((struct ZenitVariableNode*)node);
 
+        case ZENIT_NODE_STRUCT:
+            return zenit_node_struct_uid((struct ZenitStructNode*)node);
+
+        case ZENIT_NODE_FIELD:
+            return zenit_node_field_uid((struct ZenitFieldNode*)node);
+
         case ZENIT_NODE_ARRAY:
             return zenit_node_array_uid((struct ZenitArrayNode*)node);
 
@@ -136,6 +150,11 @@ char* zenit_node_dump(struct ZenitNode *node, char *output)
         case ZENIT_NODE_VARIABLE:
             return zenit_node_variable_dump((struct ZenitVariableNode*)node, output);
 
+        case ZENIT_NODE_STRUCT:
+            return zenit_node_struct_dump((struct ZenitStructNode*)node, output);
+
+        case ZENIT_NODE_FIELD:
+            return zenit_node_field_dump((struct ZenitFieldNode*)node, output);
 
         case ZENIT_NODE_ARRAY:
             return zenit_node_array_dump((struct ZenitArrayNode*)node, output);
@@ -190,6 +209,14 @@ void zenit_node_free(struct ZenitNode *node)
 
         case ZENIT_NODE_VARIABLE:
             zenit_node_variable_free((struct ZenitVariableNode*)node);
+            break;
+
+        case ZENIT_NODE_STRUCT:
+            zenit_node_struct_free((struct ZenitStructNode*)node);
+            break;
+
+        case ZENIT_NODE_FIELD:
+            zenit_node_field_free((struct ZenitFieldNode*)node);
             break;
 
         case ZENIT_NODE_ARRAY:
