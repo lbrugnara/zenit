@@ -28,6 +28,8 @@ void zenit_test_parser_variable_errors(void)
         "/* Line 9 */ var $invalid = 2;"                                                                    "\n"
         /* Partial types are not allowed in struct definition                                               */
         "/* Line 10 */ struct A { arr: []uint16; }"                                                         "\n"
+        /* Empty structs are not valid                                                                      */
+        "/* Line 11 */ struct B { }"                                                                        "\n"
     ;
 
     const enum ZenitErrorType errors[] = {
@@ -42,6 +44,7 @@ void zenit_test_parser_variable_errors(void)
         /* Line */ [8] = ZENIT_ERROR_SYNTAX,
         /* Line */ [9] = ZENIT_ERROR_SYNTAX,
         /* Line */[10] = ZENIT_ERROR_SYNTAX,
+        /* Line */[11] = ZENIT_ERROR_SYNTAX,
     };
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
