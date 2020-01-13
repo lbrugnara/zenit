@@ -39,6 +39,8 @@ static struct ZirOperand* visit_array_node(struct ZenitContext *ctx, struct ZirP
 static struct ZirOperand* visit_identifier_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitIdentifierNode *id_node);
 static struct ZirOperand* visit_reference_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitReferenceNode *ref_node);
 static struct ZirOperand* visit_cast_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitCastNode *cast_node);
+static struct ZirOperand* visit_field_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitFieldNode *field_node);
+static struct ZirOperand* visit_struct_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitStructNode *struct_node);
 
 /*
  * Variable: generators
@@ -51,6 +53,8 @@ static const ZirGenerator generators[] = {
     [ZENIT_NODE_IDENTIFIER] = (ZirGenerator) &visit_identifier_node,
     [ZENIT_NODE_REFERENCE]  = (ZirGenerator) &visit_reference_node,
     [ZENIT_NODE_CAST]       = (ZirGenerator) &visit_cast_node,
+    [ZENIT_NODE_FIELD]      = (ZirGenerator) &visit_field_node,
+    [ZENIT_NODE_STRUCT]     = (ZirGenerator) &visit_struct_node,
 };
 
 static void import_zir_symbol_from_zenit_symbol(struct ZenitContext *ctx, struct ZenitSymbol *symbol, struct ZirProgram *program, bool global_symbol)
@@ -322,6 +326,33 @@ static struct ZirOperand* visit_array_node(struct ZenitContext *ctx, struct ZirP
     return zir_program_emit(program, (struct ZirInstruction*) load_instr)->destination;
 }
 
+static struct ZirOperand* visit_field_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitFieldNode *zenit_field)
+{
+    struct ZenitSymbol *zenit_symbol = zenit_program_get_symbol(ctx->program, zenit_field->name);
+    
+    struct ZirSymbol *zir_symbol = zir_symbol_new(zenit_field->name, new_zir_type_from_zenit_type(program, zenit_symbol->typeinfo));
+    
+    zir_symbol = zir_program_add_symbol(program, zir_symbol);
+
+    assert_or_return(ctx, zir_symbol != NULL, zenit_field->base.location, "Could not create ZIR symbol");
+
+    return NULL;
+}
+
+static struct ZirOperand* visit_struct_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitStructNode *struct_node)
+{
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_STRUCT, struct_node->name);
+    zir_program_push_block(program, ZIR_BLOCK_STRUCT, struct_node->name);
+
+    for (size_t i=0; i < fl_array_length(struct_node->members); i++)
+        visit_node(ctx, program, struct_node->members[i]);
+
+    zir_program_pop_block(program);
+    zenit_program_pop_scope(ctx->program);
+
+    return NULL;
+}
+
 /*
  * Function: visit_variable_node
  *  This function creates a new instruction that declares a named variable in the current
@@ -342,7 +373,7 @@ static struct ZirOperand* visit_variable_node(struct ZenitContext *ctx, struct Z
     
     struct ZirSymbol *zir_symbol = zir_symbol_new(zenit_variable->name, new_zir_type_from_zenit_type(program, zenit_symbol->typeinfo));
     
-    zir_symbol = zir_symtable_add(&program->current->symtable, zir_symbol);
+    zir_symbol = zir_program_add_symbol(program, zir_symbol);
 
     assert_or_return(ctx, zir_symbol != NULL, zenit_variable->base.location, "Could not create ZIR symbol");
 
@@ -376,6 +407,34 @@ static struct ZirOperand* visit_node(struct ZenitContext *ctx, struct ZirProgram
     return generators[node->type](ctx, program, node);
 }
 
+static void convert_zenit_scopes_to_zir_blocks(struct ZenitScope *scope, struct ZirBlock *block)
+{
+    for (size_t i=0; i < fl_array_length(scope->children); i++)
+    {
+        struct ZenitScope *zenit_child = scope->children[i];
+
+        enum ZirBlockType block_type;
+
+        switch (zenit_child->type)
+        {
+            case ZENIT_SCOPE_STRUCT:
+                block_type = ZIR_BLOCK_STRUCT;
+                break;
+            case ZENIT_SCOPE_FUNCTION:
+                block_type = ZIR_BLOCK_FUNCTION;
+                break;
+            case ZENIT_SCOPE_GLOBAL:
+                block_type = ZIR_BLOCK_GLOBAL;
+                break;
+        }
+
+        struct ZirBlock *zir_child = zir_block_new(zenit_child->id, block_type, block);
+        block->children = fl_array_append(block->children, &zir_child);
+
+        convert_zenit_scopes_to_zir_blocks(zenit_child, zir_child);
+    }
+}
+
 /*
  * Function: zenit_generate_zir
  *  We just iterate over the declarations visiting each node to populate the <struct ZirProgram>
@@ -389,6 +448,9 @@ struct ZirProgram* zenit_generate_zir(struct ZenitContext *ctx)
     struct ZirProgram *program = zir_program_new();
 
     size_t errors = zenit_context_error_count(ctx);
+
+    // We make sure all the functions, structs, etc are "declared" in ZIR
+    convert_zenit_scopes_to_zir_blocks(ctx->program->global_scope, program->global);
 
     for (size_t i=0; i < fl_array_length(ctx->ast->decls); i++)
         visit_node(ctx, program, ctx->ast->decls[i]);

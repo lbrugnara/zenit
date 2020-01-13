@@ -1,13 +1,9 @@
 #include "symtable.h"
 #include "symbol.h"
 
-struct ZirSymbolTable zir_symtable_new(enum ZirSymbolTableType type, const char *id)
+struct ZirSymbolTable zir_symtable_new(void)
 {
-    flm_assert(id != NULL, "Symbol table ID cannot be NULL");
-
     return (struct ZirSymbolTable) {
-        .id = fl_cstring_dup(id),
-        .type = type,
         .symbols = fl_hashtable_new_args((struct FlHashtableArgs) {
             .hash_function = fl_hashtable_hash_string,
             .key_allocator = fl_container_allocator_string,
@@ -23,9 +19,6 @@ void zir_symtable_free(struct ZirSymbolTable *symtable)
 {
     if (!symtable)
         return;
-
-    if (symtable->id)
-        fl_cstring_free(symtable->id);
 
     if (symtable->symbols)
         fl_hashtable_free(symtable->symbols);
@@ -50,4 +43,28 @@ struct ZirSymbol* zir_symtable_get(struct ZirSymbolTable *symtable, const char *
 struct ZirSymbol** zir_symtable_get_all(struct ZirSymbolTable *symtable)
 {
     return (struct ZirSymbol**)fl_hashtable_values(symtable->symbols);
+}
+
+char* zir_symtable_dump(struct ZirSymbolTable *symtable, char *output)
+{
+    struct ZirSymbol **symbols = fl_hashtable_values(symtable->symbols);
+
+    size_t length = fl_array_length(symbols);
+    if (length > 0)
+    {
+        bool started = false;
+        for (size_t i=0; i < length; i++)
+        {
+            if (started)
+                fl_cstring_append(&output, ", ");
+
+            started = true;
+
+            output = zir_symbol_dump(symbols[i], output);            
+        }
+    }
+
+    fl_array_free(symbols);
+
+    return output;
 }

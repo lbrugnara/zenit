@@ -25,3 +25,9 @@ void zir_symbol_free(struct ZirSymbol *symbol)
 
     fl_free(symbol);
 }
+
+char* zir_symbol_dump(struct ZirSymbol *symbol, char *output)
+{
+    fl_cstring_vappend(&output, "%s : %s", symbol->name, symbol->typeinfo != NULL ? zir_type_to_string(symbol->typeinfo) : "<unknown>");
+    return output;
+}

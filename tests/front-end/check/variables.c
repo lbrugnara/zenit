@@ -31,6 +31,8 @@ void zenit_test_check_types_variables(void)
         "var t : []&[][]uint8 = [ &a, a_ref ];"             "\n"
 
         "var u : [0]Astruct = [];"                          "\n"
+        "var v : [0]Astruct = u;"                           "\n"
+        "var w = u;"                                        "\n"
         "struct Astruct { a: uint8; }"                      "\n" // No need to forward declare the struct
     ;
 
@@ -54,6 +56,8 @@ void zenit_test_check_types_variables(void)
         { "t",          "[2]&[3][2]uint8"   },
 
         { "u",          "[0]Astruct"        },
+        { "v",          "[0]Astruct"        },
+        { "w",          "[0]Astruct"        },
     };
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);

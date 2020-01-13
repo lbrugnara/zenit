@@ -22,18 +22,22 @@ void zenit_test_generate_ir_variables(void)
         "var g : &uint8 = f;"               "\n"
         "#[Attr(k:1, k2:2)]"                "\n"
         "var h = [ &a, f ];"                "\n"
+        "var i : [0]Astruct = [];"          "\n"
+        "struct Astruct { a: uint8; }"      "\n"
     ;
 
     const char *zir_src = 
-        "@a : uint8 = 1"                                         "\n"
-        "@b : uint8 = 2"                                         "\n"
-        "@c : [2]uint8 = [ 0, 1 ]"                               "\n"
-        "@d : [3]uint8 = [ 0, 1, 2 ]"                            "\n"
-        "@e : uint8 = @a"                                        "\n"
-        "@f : &uint8 = ref @a"                                   "\n"
-        "@g : &uint8 = @f"                                       "\n"
+        "struct Astruct { a : uint8 }"                          "\n"
+        "@a : uint8 = 1"                                        "\n"
+        "@b : uint8 = 2"                                        "\n"
+        "@c : [2]uint8 = [ 0, 1 ]"                              "\n"
+        "@d : [3]uint8 = [ 0, 1, 2 ]"                           "\n"
+        "@e : uint8 = @a"                                       "\n"
+        "@f : &uint8 = ref @a"                                  "\n"
+        "@g : &uint8 = @f"                                      "\n"
         // FIXME: The order of the properties is unspecified because of the hashtable
-        "@h : [2]&uint8 = [ ref @a, @f ] ; #Attr(k2:2, k:1)"     "\n"
+        "@h : [2]&uint8 = [ ref @a, @f ] ; #Attr(k2:2, k:1)"    "\n"
+        "@i : [0]Astruct = [ ]"                                 "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);

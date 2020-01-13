@@ -5,29 +5,17 @@
 #include "symbol.h"
 
 /*
- * Enum: enum ZirSymbolTableType
- *  Represents the different type of symbol tables
- * 
- */
-enum ZirSymbolTableType {
-    ZIR_SYMTABLE_GLOBAL,
-    ZIR_SYMTABLE_FUNCTION,
-};
-
-/*
  * Struct: struct ZirSymbolTable
  *  A symbol table object that keeps track of the program's symbols
  * 
  * Members:
  *  <const char> *id: Symbol table identifier
  *  <FlHashtable> symbols: Hashtable of symbols using the name (string) as key
- *  <enum ZirSymbolTableType> type: The type of symbol table
+ *  <enum ZirBlockType> type: The type of symbol table
  * 
  */
 struct ZirSymbolTable {
-    const char *id;
     FlHashtable symbols;
-    enum ZirSymbolTableType type;
 };
 
 /*
@@ -35,7 +23,7 @@ struct ZirSymbolTable {
  *  Creates a new symbol table
  *
  * Parameters:
- *  <enum ZirSymbolTableType> type - The type of symbol table
+ *  <enum ZirBlockType> type - The type of symbol table
  *  <const char> *id: An identifier for the symbol table
  *
  * Returns:
@@ -45,7 +33,7 @@ struct ZirSymbolTable {
  *  The object returned by this function must be freed using the
  *  <zir_symtable_free> function
  */
-struct ZirSymbolTable zir_symtable_new(enum ZirSymbolTableType, const char *id);
+struct ZirSymbolTable zir_symtable_new(void);
 
 /*
  * Function: zir_symtable_free
@@ -104,5 +92,7 @@ bool zir_symtable_has(struct ZirSymbolTable *symtable, const char *symbol_name);
 struct ZirSymbol* zir_symtable_get(struct ZirSymbolTable *symtable, const char *symbol_name);
 
 struct ZirSymbol** zir_symtable_get_all(struct ZirSymbolTable *symtable);
+
+char* zir_symtable_dump(struct ZirSymbolTable *symtable, char *output);
 
 #endif /* ZIR_SYMTABLE_H */

@@ -45,4 +45,6 @@ struct ZirSymbol* zir_symbol_new(const char *name, struct ZirTypeInfo *typeinfo)
  */
 void zir_symbol_free(struct ZirSymbol *symbol);
 
+char* zir_symbol_dump(struct ZirSymbol *symbol, char *output);
+
 #endif /* ZIR_SYMBOL_H */

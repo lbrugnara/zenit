@@ -28,9 +28,11 @@ void zir_operand_array_free(struct ZirArrayOperand *operand)
 char* zir_operand_array_dump(struct ZirArrayOperand *array, char *output)
 {
     fl_cstring_append(&output, "[ ");
-    if (array->elements)
+    
+    size_t length = array->elements ? fl_array_length(array->elements) : 0;
+    if (length > 0)
     {
-        for (size_t i=0; i < fl_array_length(array->elements); i++)
+        for (size_t i=0; i < length; i++)
         {
             if (i > 0)
                 fl_cstring_append(&output, ", ");
@@ -38,8 +40,10 @@ char* zir_operand_array_dump(struct ZirArrayOperand *array, char *output)
             struct ZirOperand *operand = array->elements[i];
             output = zir_operand_dump(operand, output);
         }
+        fl_cstring_append(&output, " ");
     }
-    fl_cstring_append(&output, " ]");
+
+    fl_cstring_append(&output, "]");
 
     return output;
 }

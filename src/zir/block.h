@@ -8,6 +8,17 @@
 #include "instructions/variable.h"
 
 /*
+ * Enum: enum ZirBlockType
+ *  Represents the different type of symbol tables
+ * 
+ */
+enum ZirBlockType {
+    ZIR_BLOCK_GLOBAL,
+    ZIR_BLOCK_STRUCT,
+    ZIR_BLOCK_FUNCTION,
+};
+
+/*
  * Struct: zir_block_new
  *  A ZIR block represents a scope in the program that contains a symbol table and a set
  *  of instructions
@@ -20,11 +31,13 @@
  * 
  */
 struct ZirBlock {
+    const char *id;
     struct ZirBlock *parent;
     struct ZirBlock **children;
     struct ZirInstruction **instructions;
     struct ZirSymbolTable symtable;
     unsigned long long temp_counter;
+    enum ZirBlockType type;
 };
 
 /*
@@ -41,7 +54,7 @@ struct ZirBlock {
  *  The object returned by this function must be freed using the
  *  <zir_block_free> function
  */
-struct ZirBlock* zir_block_new(const char *id, enum ZirSymbolTableType type, struct ZirBlock *parent);
+struct ZirBlock* zir_block_new(const char *id, enum ZirBlockType type, struct ZirBlock *parent);
 
 /*
  * Function: zir_block_free

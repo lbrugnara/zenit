@@ -274,7 +274,7 @@ struct ZenitNesSymbol* zenit_nes_program_reserve_symbol(struct ZenitNesProgram *
         return nes_symbol;
     }
     
-    bool is_global = block->symtable.type == ZIR_SYMTABLE_GLOBAL;
+    bool is_global = block->type == ZIR_BLOCK_GLOBAL;
 
     if (attributes != NULL && zir_attribute_map_has_key(attributes, "NES"))
     {

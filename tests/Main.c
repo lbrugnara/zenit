@@ -65,8 +65,9 @@ int main(int argc, char **argv)
             { "Type check errors",  &zenit_test_check_types_errors      }
         ),
         fl_test_suite("zirgen",
-            { "Generate ZIR variables", &zenit_test_generate_ir_variables   },
-            { "Generate ZIR casts",     &zenit_test_generate_ir_casts       }
+            { "Generate ZIR variables",     &zenit_test_generate_ir_variables   },
+            { "Generate ZIR casts",         &zenit_test_generate_ir_casts       },
+            { "Generate ZIR struct decl",   &zenit_test_generate_ir_struct_decl },
         ),
         fl_test_suite("nes",
             { "NES global variables",           &zenit_test_nes_global_vars         },

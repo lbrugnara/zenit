@@ -372,11 +372,17 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
 
 static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *field_node, struct ZenitTypeInfo *typehint)
 {
-    return NULL;
+    return zenit_program_get_symbol(ctx->program, field_node->name);
 }
 
 static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, struct ZenitTypeInfo *typehint)
 {
+    // Visit the attributes and its properties
+    visit_attribute_node_map(ctx, &struct_node->attributes);
+
+    for (size_t i=0; i < fl_array_length(struct_node->members); i++)
+        visit_node(ctx, struct_node->members[i], NULL);
+
     return NULL;
 }
 
@@ -398,6 +404,9 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
  */
 static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *variable_node, struct ZenitTypeInfo *typehint)
 {
+    // Visit the attributes and its properties
+    visit_attribute_node_map(ctx, &variable_node->attributes);
+
     // We need the symbol we introduced in the <zenit_resolve_symbols> pass
     struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx->program, variable_node->name);
 
@@ -427,9 +436,6 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     }
 
     symbol->typeinfo->sealed = true;
-
-    // Visit the attributes and its properties
-    visit_attribute_node_map(ctx, &variable_node->attributes);
 
     // We always return the variable symbol
     return symbol;
