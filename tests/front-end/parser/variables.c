@@ -133,3 +133,20 @@ void zenit_test_parser_variable_typeinfo(void)
 
     zenit_test_parser_run(source, ast_dump);
 }
+
+void zenit_test_parser_variable_struct_decl(void)
+{
+    const char *source = 
+        "struct Point { x: uint8; y: uint8; }"              "\n"
+        "var p : Point = { x: 0, y: 0 };"                   "\n"
+        "var p2 = Point { x: 0, y: 0 };"                    "\n"
+    ;
+
+    const char *ast_dump =
+        "(ast"
+        " (var num0 (type uint8) (id some_extern_id))"
+        ")"
+    ;
+
+    zenit_test_parser_run(source, ast_dump);
+}

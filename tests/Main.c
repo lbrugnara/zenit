@@ -39,7 +39,7 @@ int main(int argc, char **argv)
             { "Variable decl. errors",              &zenit_test_parser_variable_errors                  },
             { "Integer literals",                   &zenit_test_parser_literal_integer                  },
             { "Integer literal errors",             &zenit_test_parser_literal_integer_error            },
-            { "Array initializers",                 &zenit_test_parser_literal_array_initializer        },
+            { "Array initializers",                 &zenit_test_parser_literal_array_literal        },
             { "Variable attributes",                &zenit_test_parser_attributes_variables             },
             { "Struct definition",                  &zenit_test_parser_struct_decl                      },
         ),

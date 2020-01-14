@@ -79,7 +79,7 @@
 /* Private API */
 static struct ZenitNode* parse_integer_literal(struct ZenitParser *parser, struct ZenitContext *ctx);
 static struct ZenitNode* parse_literal_expression(struct ZenitParser *parser, struct ZenitContext *ctx);
-static struct ZenitNode* parse_array_initializer(struct ZenitParser *parser, struct ZenitContext *ctx);
+static struct ZenitNode* parse_array_literal(struct ZenitParser *parser, struct ZenitContext *ctx);
 static struct ZenitNode* parse_expression(struct ZenitParser *parser, struct ZenitContext *ctx);
 static struct ZenitNode* parse_variable_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
 static struct ZenitNode* parse_struct_declaration(struct ZenitParser *parser, struct ZenitContext *ctx);
@@ -300,7 +300,7 @@ static struct ZenitNode* parse_literal_expression(struct ZenitParser *parser, st
 }
 
 /*
- * Function: parse_array_initializer
+ * Function: parse_array_literal
  *  Parses an array initializer
  *
  * Parameters:
@@ -311,9 +311,9 @@ static struct ZenitNode* parse_literal_expression(struct ZenitParser *parser, st
  *  struct ZenitNode* - The <struct ZenitArrayNode> object
  *
  * Grammar:
- *  array_initializer = '[' ( expression ( ',' expression )* ','? )? ']' ;
+ *  array_literal = '[' ( expression ( ',' expression )* ','? )? ']' ;
  */
-static struct ZenitNode* parse_array_initializer(struct ZenitParser *parser, struct ZenitContext *ctx)
+static struct ZenitNode* parse_array_literal(struct ZenitParser *parser, struct ZenitContext *ctx)
 {
     struct ZenitToken lbracket_token;
     consume_or_return(ctx, parser, ZENIT_TOKEN_LBRACKET, &lbracket_token);
@@ -504,7 +504,7 @@ static struct ZenitNode* parse_cast_expression(struct ZenitParser *parser, struc
  *  struct ZenitNode* - Parsed expression node
  * 
  * Grammar:
- *  expression = cast_expression | array_initializer | unary_expression ;
+ *  expression = cast_expression | array_literal | unary_expression ;
  *
  */
 static struct ZenitNode* parse_expression(struct ZenitParser *parser, struct ZenitContext *ctx)
@@ -513,7 +513,7 @@ static struct ZenitNode* parse_expression(struct ZenitParser *parser, struct Zen
         return parse_cast_expression(parser, ctx);
 
     if (zenit_parser_next_is(parser, ZENIT_TOKEN_LBRACKET))
-        return parse_array_initializer(parser, ctx);
+        return parse_array_literal(parser, ctx);
 
     return parse_unary_expression(parser, ctx);
 }

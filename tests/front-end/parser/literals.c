@@ -31,7 +31,7 @@ void zenit_test_parser_literal_integer(void)
     zenit_test_parser_run(source, ast_dump);
 }
 
-void zenit_test_parser_literal_array_initializer(void)
+void zenit_test_parser_literal_array_literal(void)
 {
     const char *source = 
             /* [3]uint8 */
