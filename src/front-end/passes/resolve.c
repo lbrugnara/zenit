@@ -39,8 +39,8 @@ static const ZenitSymbolResolver symbol_resolvers[] = {
     [ZENIT_NODE_REFERENCE]  = (ZenitSymbolResolver) &visit_reference_node,
     [ZENIT_NODE_CAST]       = (ZenitSymbolResolver) &visit_cast_node,
     [ZENIT_NODE_UINT]       = (ZenitSymbolResolver) &visit_uint_node,
-    [ZENIT_NODE_FIELD]      = (ZenitSymbolResolver) &visit_field_decl_node,
-    [ZENIT_NODE_STRUCT]     = (ZenitSymbolResolver) &visit_struct_decl_node,
+    [ZENIT_NODE_FIELD_DECL]      = (ZenitSymbolResolver) &visit_field_decl_node,
+    [ZENIT_NODE_STRUCT_DECL]     = (ZenitSymbolResolver) &visit_struct_decl_node,
 };
 
 /*

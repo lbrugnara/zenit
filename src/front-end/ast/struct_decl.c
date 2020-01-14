@@ -4,7 +4,7 @@
 struct ZenitStructDeclNode* zenit_node_struct_decl_new(struct ZenitSourceLocation location, char *name)
 {
     struct ZenitStructDeclNode *struct_node = fl_malloc(sizeof(struct ZenitStructDeclNode));
-    struct_node->base.type = ZENIT_NODE_STRUCT;
+    struct_node->base.type = ZENIT_NODE_STRUCT_DECL;
     struct_node->base.location = location;
     struct_node->name = name;
     struct_node->members = fl_array_new(sizeof(struct ZenitNode*), 0);
@@ -17,7 +17,7 @@ char* zenit_node_struct_decl_uid(struct ZenitStructDeclNode *struct_node)
     if (!struct_node)
         return NULL;
 
-    char *id = fl_cstring_vdup("%%L%u:C%u_struct[n:%s]", struct_node->base.location.line, struct_node->base.location.col, struct_node->name);
+    char *id = fl_cstring_vdup("%%L%u:C%u_struct_decl[n:%s]", struct_node->base.location.line, struct_node->base.location.col, struct_node->name);
 
     return id;
 }

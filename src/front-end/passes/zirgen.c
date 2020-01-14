@@ -53,8 +53,8 @@ static const ZirGenerator generators[] = {
     [ZENIT_NODE_IDENTIFIER] = (ZirGenerator) &visit_identifier_node,
     [ZENIT_NODE_REFERENCE]  = (ZirGenerator) &visit_reference_node,
     [ZENIT_NODE_CAST]       = (ZirGenerator) &visit_cast_node,
-    [ZENIT_NODE_FIELD]      = (ZirGenerator) &visit_field_decl_node,
-    [ZENIT_NODE_STRUCT]     = (ZirGenerator) &visit_struct_decl_node,
+    [ZENIT_NODE_FIELD_DECL]      = (ZirGenerator) &visit_field_decl_node,
+    [ZENIT_NODE_STRUCT_DECL]     = (ZirGenerator) &visit_struct_decl_node,
 };
 
 static void import_zir_symbol_from_zenit_symbol(struct ZenitContext *ctx, struct ZenitSymbol *symbol, struct ZirProgram *program, bool global_symbol)

@@ -4,7 +4,7 @@
 struct ZenitFieldDeclNode* zenit_node_field_decl_new(struct ZenitSourceLocation location, char *name)
 {
     struct ZenitFieldDeclNode *field_node = fl_malloc(sizeof(struct ZenitFieldDeclNode));
-    field_node->base.type = ZENIT_NODE_FIELD;
+    field_node->base.type = ZENIT_NODE_FIELD_DECL;
     field_node->base.location = location;
     field_node->name = name;
 
@@ -16,7 +16,7 @@ char* zenit_node_field_decl_uid(struct ZenitFieldDeclNode *field)
     if (!field)
         return NULL;
 
-    return fl_cstring_vdup("%%L%u:C%u_field[n:%s]", field->base.location.line, field->base.location.col, field->name);
+    return fl_cstring_vdup("%%L%u:C%u_field_decl[n:%s]", field->base.location.line, field->base.location.col, field->name);
 }
 
 char* zenit_node_field_decl_dump(struct ZenitFieldDeclNode *field, char *output)

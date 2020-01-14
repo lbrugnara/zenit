@@ -134,8 +134,8 @@ static const ZenitTypeChecker checkers[] = {
     [ZENIT_NODE_IDENTIFIER] = (ZenitTypeChecker) &visit_identifier_node,
     [ZENIT_NODE_REFERENCE]  = (ZenitTypeChecker) &visit_reference_node,
     [ZENIT_NODE_CAST]       = (ZenitTypeChecker) &visit_cast_node,
-    [ZENIT_NODE_FIELD]      = (ZenitTypeChecker) &visit_field_decl_node,
-    [ZENIT_NODE_STRUCT]     = (ZenitTypeChecker) &visit_struct_decl_node,
+    [ZENIT_NODE_FIELD_DECL]      = (ZenitTypeChecker) &visit_field_decl_node,
+    [ZENIT_NODE_STRUCT_DECL]     = (ZenitTypeChecker) &visit_struct_decl_node,
 };
 
 /*

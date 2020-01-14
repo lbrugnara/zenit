@@ -2,7 +2,6 @@
 #define ZENIT_AST_FIELD_DECL_H
 
 #include "node.h"
-#include "attribute.h"
 
 /*
  * Struct: struct ZenitFieldDeclNode
@@ -12,6 +11,7 @@
  *  <struct ZenitNode> base: Basic information of the node object
  *  <char> *name: The field name
  *  <struct ZenitTypeNode> *type_decl: The field's type information
+ *  <struct ZenitNode> *owner: The field's parent node
  * 
  */
 struct ZenitFieldDeclNode {

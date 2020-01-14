@@ -34,8 +34,8 @@ static const ZenitTypeInferrer inferrers[] = {
     [ZENIT_NODE_IDENTIFIER] = (ZenitTypeInferrer) &visit_identifier_node,
     [ZENIT_NODE_REFERENCE]  = (ZenitTypeInferrer) &visit_reference_node,
     [ZENIT_NODE_CAST]       = (ZenitTypeInferrer) &visit_cast_node,
-    [ZENIT_NODE_FIELD]      = (ZenitTypeInferrer) &visit_field_decl_node,
-    [ZENIT_NODE_STRUCT]     = (ZenitTypeInferrer) &visit_struct_decl_node,
+    [ZENIT_NODE_FIELD_DECL]      = (ZenitTypeInferrer) &visit_field_decl_node,
+    [ZENIT_NODE_STRUCT_DECL]     = (ZenitTypeInferrer) &visit_struct_decl_node,
 };
 
 enum ZenitTypeUnifyResult {
