@@ -96,7 +96,7 @@ void zenit_test_parser_array_variable_literal_typeinfo(void)
     zenit_test_parser_run(source, ast_dump);
 }
 
-void zenit_test_parser_variable_complex(void)
+void zenit_test_parser_variable_(void)
 {
     const char *source = 
         "var num0 = some_extern_id;"
@@ -115,7 +115,7 @@ void zenit_test_parser_variable_complex(void)
     zenit_test_parser_run(source, ast_dump);
 }
 
-void zenit_test_parser_variable_complex_typeinfo(void)
+void zenit_test_parser_variable_typeinfo(void)
 {
     const char *source = 
         "var num0 : uint8 = some_extern_id;"

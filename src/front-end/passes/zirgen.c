@@ -39,8 +39,8 @@ static struct ZirOperand* visit_array_node(struct ZenitContext *ctx, struct ZirP
 static struct ZirOperand* visit_identifier_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitIdentifierNode *id_node);
 static struct ZirOperand* visit_reference_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitReferenceNode *ref_node);
 static struct ZirOperand* visit_cast_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitCastNode *cast_node);
-static struct ZirOperand* visit_field_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitFieldNode *field_node);
-static struct ZirOperand* visit_struct_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitStructNode *struct_node);
+static struct ZirOperand* visit_field_decl_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitFieldDeclNode *field_node);
+static struct ZirOperand* visit_struct_decl_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitStructDeclNode *struct_node);
 
 /*
  * Variable: generators
@@ -53,8 +53,8 @@ static const ZirGenerator generators[] = {
     [ZENIT_NODE_IDENTIFIER] = (ZirGenerator) &visit_identifier_node,
     [ZENIT_NODE_REFERENCE]  = (ZirGenerator) &visit_reference_node,
     [ZENIT_NODE_CAST]       = (ZirGenerator) &visit_cast_node,
-    [ZENIT_NODE_FIELD]      = (ZirGenerator) &visit_field_node,
-    [ZENIT_NODE_STRUCT]     = (ZirGenerator) &visit_struct_node,
+    [ZENIT_NODE_FIELD]      = (ZirGenerator) &visit_field_decl_node,
+    [ZENIT_NODE_STRUCT]     = (ZirGenerator) &visit_struct_decl_node,
 };
 
 static void import_zir_symbol_from_zenit_symbol(struct ZenitContext *ctx, struct ZenitSymbol *symbol, struct ZirProgram *program, bool global_symbol)
@@ -326,7 +326,7 @@ static struct ZirOperand* visit_array_node(struct ZenitContext *ctx, struct ZirP
     return zir_program_emit(program, (struct ZirInstruction*) load_instr)->destination;
 }
 
-static struct ZirOperand* visit_field_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitFieldNode *zenit_field)
+static struct ZirOperand* visit_field_decl_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitFieldDeclNode *zenit_field)
 {
     struct ZenitSymbol *zenit_symbol = zenit_program_get_symbol(ctx->program, zenit_field->name);
     
@@ -339,7 +339,7 @@ static struct ZirOperand* visit_field_node(struct ZenitContext *ctx, struct ZirP
     return NULL;
 }
 
-static struct ZirOperand* visit_struct_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitStructNode *struct_node)
+static struct ZirOperand* visit_struct_decl_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitStructDeclNode *struct_node)
 {
     zenit_program_push_scope(ctx->program, ZENIT_SCOPE_STRUCT, struct_node->name);
     zir_program_push_block(program, ZIR_BLOCK_STRUCT, struct_node->name);

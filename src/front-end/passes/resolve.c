@@ -25,8 +25,8 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node, enum ResolvePass pass);
 static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *node, enum ResolvePass pass);
 static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *node, enum ResolvePass pass);
 
 /*
  * Variable: symbol_resolvers
@@ -39,8 +39,8 @@ static const ZenitSymbolResolver symbol_resolvers[] = {
     [ZENIT_NODE_REFERENCE]  = (ZenitSymbolResolver) &visit_reference_node,
     [ZENIT_NODE_CAST]       = (ZenitSymbolResolver) &visit_cast_node,
     [ZENIT_NODE_UINT]       = (ZenitSymbolResolver) &visit_uint_node,
-    [ZENIT_NODE_FIELD]      = (ZenitSymbolResolver) &visit_field_node,
-    [ZENIT_NODE_STRUCT]     = (ZenitSymbolResolver) &visit_struct_node,
+    [ZENIT_NODE_FIELD]      = (ZenitSymbolResolver) &visit_field_decl_node,
+    [ZENIT_NODE_STRUCT]     = (ZenitSymbolResolver) &visit_struct_decl_node,
 };
 
 /*
@@ -268,7 +268,7 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
     fl_array_free(names);
 }
 
-static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *field_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return NULL;
@@ -277,7 +277,7 @@ static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct Zen
     if (zenit_program_has_symbol(ctx->program, field_node->name))
     {
         zenit_context_error(ctx, field_node->base.location, ZENIT_ERROR_DUPLICATED_SYMBOL, 
-            "Field '%s' already exists in struct %s and cannot be redefined", field_node->name, ((struct ZenitStructNode*) field_node->owner)->name);
+            "Field '%s' already exists in struct %s and cannot be redefined", field_node->name, ((struct ZenitStructDeclNode*) field_node->owner)->name);
         return NULL;
     }
 
@@ -288,7 +288,7 @@ static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct Zen
     return zenit_program_add_symbol(ctx->program, zenit_symbol_new(field_node->name, typeinfo));
 }
 
-static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node, enum ResolvePass pass)
 {
     if (pass == RESOLVE_STRUCT)
     {

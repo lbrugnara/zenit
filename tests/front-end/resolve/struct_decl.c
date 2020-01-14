@@ -9,7 +9,7 @@
 #include "../../../src/front-end/types/system.h"
 #include "tests.h"
 
-void zenit_test_resolve_struct_declaration(void)
+void zenit_test_resolve_struct_decl(void)
 {
     const char *source = 
         "var v = 1;"                                    "\n"

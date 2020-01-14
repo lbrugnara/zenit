@@ -683,7 +683,7 @@ static struct ZenitNode* parse_field_declaration(struct ZenitParser *parser, str
     }
     
     // Allocate the memory and the base information
-    struct ZenitFieldNode *field_node = zenit_node_field_new(name_token.location, token_to_string(&name_token));
+    struct ZenitFieldDeclNode *field_node = zenit_node_field_decl_new(name_token.location, token_to_string(&name_token));
 
     assert_or_return(ctx, field_node != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize a field node");
 
@@ -700,7 +700,7 @@ static struct ZenitNode* parse_field_declaration(struct ZenitParser *parser, str
     return (struct ZenitNode*) field_node;
 
     // Cleanup code for error conditions
-    on_error: zenit_node_field_free(field_node);
+    on_error: zenit_node_field_decl_free(field_node);
 
     return NULL;
 }
@@ -746,7 +746,7 @@ static struct ZenitNode* parse_struct_declaration(struct ZenitParser *parser, st
     }
 
     // Allocate the memory and the base information
-    struct ZenitStructNode *struct_node = zenit_node_struct_new(struct_token.location, token_to_string(&name_token));
+    struct ZenitStructDeclNode *struct_node = zenit_node_struct_decl_new(struct_token.location, token_to_string(&name_token));
 
     assert_or_return(ctx, struct_node != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize a struct node");
 
@@ -760,7 +760,7 @@ static struct ZenitNode* parse_struct_declaration(struct ZenitParser *parser, st
         // Something happened while parsing the element, we need to leave
         assert_or_goto(ctx, struct_field != NULL, ZENIT_ERROR_INTERNAL, NULL, on_error);
 
-        ((struct ZenitFieldNode*) struct_field)->owner = (struct ZenitNode*) struct_node;
+        ((struct ZenitFieldDeclNode*) struct_field)->owner = (struct ZenitNode*) struct_node;
         struct_node->members = fl_array_append(struct_node->members, &struct_field);
     }
 
@@ -772,7 +772,7 @@ static struct ZenitNode* parse_struct_declaration(struct ZenitParser *parser, st
     return (struct ZenitNode*) struct_node;
 
     // Cleanup code for error conditions
-    on_error: zenit_node_struct_free(struct_node);
+    on_error: zenit_node_struct_decl_free(struct_node);
 
     return NULL;
 }
@@ -923,7 +923,7 @@ static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct Ze
     }
     else if (zenit_parser_next_is(parser, ZENIT_TOKEN_STRUCT))
     {
-        struct ZenitStructNode *struct_decl = (struct ZenitStructNode*) parse_struct_declaration(parser, ctx);
+        struct ZenitStructDeclNode *struct_decl = (struct ZenitStructDeclNode*) parse_struct_declaration(parser, ctx);
 
         // Something happened if struct_decl is NULL, we need to free the memory for the attribute map and leave
         assert_or_goto(ctx, struct_decl != NULL, ZENIT_ERROR_INTERNAL, NULL, on_parsing_error);

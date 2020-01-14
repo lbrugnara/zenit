@@ -1,11 +1,11 @@
 #include "array.h"
 #include "attribute.h"
 #include "cast.h"
-#include "field.h"
+#include "field_decl.h"
 #include "identifier.h"
 #include "property.h"
 #include "reference.h"
-#include "struct.h"
+#include "struct_decl.h"
 #include "types/type.h"
 #include "uint.h"
 #include "variable.h"
@@ -98,10 +98,10 @@ char* zenit_node_uid(struct ZenitNode *node)
             return zenit_node_variable_uid((struct ZenitVariableNode*)node);
 
         case ZENIT_NODE_STRUCT:
-            return zenit_node_struct_uid((struct ZenitStructNode*)node);
+            return zenit_node_struct_decl_uid((struct ZenitStructDeclNode*)node);
 
         case ZENIT_NODE_FIELD:
-            return zenit_node_field_uid((struct ZenitFieldNode*)node);
+            return zenit_node_field_decl_uid((struct ZenitFieldDeclNode*)node);
 
         case ZENIT_NODE_ARRAY:
             return zenit_node_array_uid((struct ZenitArrayNode*)node);
@@ -151,10 +151,10 @@ char* zenit_node_dump(struct ZenitNode *node, char *output)
             return zenit_node_variable_dump((struct ZenitVariableNode*)node, output);
 
         case ZENIT_NODE_STRUCT:
-            return zenit_node_struct_dump((struct ZenitStructNode*)node, output);
+            return zenit_node_struct_decl_dump((struct ZenitStructDeclNode*)node, output);
 
         case ZENIT_NODE_FIELD:
-            return zenit_node_field_dump((struct ZenitFieldNode*)node, output);
+            return zenit_node_field_decl_dump((struct ZenitFieldDeclNode*)node, output);
 
         case ZENIT_NODE_ARRAY:
             return zenit_node_array_dump((struct ZenitArrayNode*)node, output);
@@ -212,11 +212,11 @@ void zenit_node_free(struct ZenitNode *node)
             break;
 
         case ZENIT_NODE_STRUCT:
-            zenit_node_struct_free((struct ZenitStructNode*)node);
+            zenit_node_struct_decl_free((struct ZenitStructDeclNode*)node);
             break;
 
         case ZENIT_NODE_FIELD:
-            zenit_node_field_free((struct ZenitFieldNode*)node);
+            zenit_node_field_decl_free((struct ZenitFieldDeclNode*)node);
             break;
 
         case ZENIT_NODE_ARRAY:

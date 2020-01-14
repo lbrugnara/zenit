@@ -25,7 +25,7 @@ void zenit_test_resolve_too_many_symbols(void)
     zenit_context_free(&ctx);
 }
 
-void zenit_test_resolve_primitives(void)
+void zenit_test_resolve_variables_primitives(void)
 {
     const char *source = 
         "var a : uint8 = 2;"                "\n"
@@ -48,7 +48,7 @@ void zenit_test_resolve_primitives(void)
     zenit_test_resolve_run(source, program_dump);
 }
 
-void zenit_test_resolve_references(void)
+void zenit_test_resolve_variables_references(void)
 {
     const char *source = 
         "var a = 2;"                    "\n"
@@ -94,8 +94,7 @@ void zenit_test_resolve_references(void)
     zenit_test_resolve_run(source, program_dump);
 }
 
-
-void zenit_test_resolve_arrays(void)
+void zenit_test_resolve_variables_arrays(void)
 {
     const char *source = 
         "var a : [2]uint8 = [ 1, 2 ];"      "\n"

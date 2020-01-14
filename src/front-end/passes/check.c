@@ -120,8 +120,8 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node);
 static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *node);
 static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *node);
-static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *field_node);
-static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node);
+static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node);
+static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node);
 
 /*
  * Variable: checkers
@@ -134,8 +134,8 @@ static const ZenitTypeChecker checkers[] = {
     [ZENIT_NODE_IDENTIFIER] = (ZenitTypeChecker) &visit_identifier_node,
     [ZENIT_NODE_REFERENCE]  = (ZenitTypeChecker) &visit_reference_node,
     [ZENIT_NODE_CAST]       = (ZenitTypeChecker) &visit_cast_node,
-    [ZENIT_NODE_FIELD]      = (ZenitTypeChecker) &visit_field_node,
-    [ZENIT_NODE_STRUCT]     = (ZenitTypeChecker) &visit_struct_node,
+    [ZENIT_NODE_FIELD]      = (ZenitTypeChecker) &visit_field_decl_node,
+    [ZENIT_NODE_STRUCT]     = (ZenitTypeChecker) &visit_struct_decl_node,
 };
 
 /*
@@ -331,12 +331,12 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
     fl_array_free(names);
 }
 
-static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *field_node)
+static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node)
 {
     return zenit_program_get_symbol(ctx->program, field_node->name);
 }
 
-static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node)
+static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node)
 {
     // Visit the attributes and its properties
     visit_attribute_node_map(ctx, &struct_node->attributes);
