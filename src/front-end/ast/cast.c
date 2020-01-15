@@ -17,7 +17,9 @@ char* zenit_node_cast_uid(struct ZenitCastNode *cast)
     if (!cast)
         return NULL;
 
-    return fl_cstring_vdup("%%L%u:C%u_cast[i:%d]", cast->base.location.line, cast->base.location.col, cast->implicit);
+    if (cast->implicit)
+        return fl_cstring_vdup("%%L%u:C%u_cast_impl", cast->base.location.line, cast->base.location.col);
+    return fl_cstring_vdup("%%L%u:C%u_cast", cast->base.location.line, cast->base.location.col);
 }
 
 char* zenit_node_cast_dump(struct ZenitCastNode *cast, char *output)

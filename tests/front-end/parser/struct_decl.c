@@ -28,14 +28,14 @@ void zenit_test_parser_struct_decl(void)
 
     const char *ast_dump = 
         "(ast"
-        " (struct A (field a (type uint8)))"
-        " (struct B (field b (type uint16)))"
-        " (struct C (field c (type &uint8)))"
-        " (struct D (field d (type [2]uint8)))"
-        " (struct E (field e (type &[2]uint8)) (field e2 (type uint8)))"
-        " (struct F (field f (type [10]E)))"
-        " (struct G (field a (type A)) (field b (type B)) (field c (type C)) (field d (type D)) (field e (type E)) (field f (type F)))"
-        " (struct H (field h (type uint16)) (attr Attr (prop k (id v))))"
+        " (struct-decl A (field a (type uint8)))"
+        " (struct-decl B (field b (type uint16)))"
+        " (struct-decl C (field c (type &uint8)))"
+        " (struct-decl D (field d (type [2]uint8)))"
+        " (struct-decl E (field e (type &[2]uint8)) (field e2 (type uint8)))"
+        " (struct-decl F (field f (type [10]E)))"
+        " (struct-decl G (field a (type A)) (field b (type B)) (field c (type C)) (field d (type D)) (field e (type E)) (field f (type F)))"
+        " (struct-decl H (field h (type uint16)) (attr Attr (prop k (id v))))"
         ")"
     ;
 

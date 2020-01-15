@@ -172,3 +172,30 @@ void zenit_test_infer_variable_array(void)
 
     zenit_context_free(&ctx);
 }
+
+void zenit_test_infer_variables_structs(void)
+{
+    const char *source = 
+        "struct Point { x: uint8; y: uint8; }"              "\n"
+        "var p = Point { x: 0, y: 0 };"                     "\n"
+        "var p2 : Point = { x: 1, y: 1 };"                  "\n"
+    ;
+
+    const char *program_dump = 
+        "(program"
+            " (scope global"
+                " (symbol %L2:C20_uint uint8)"
+                " (symbol %L2:C26_uint uint8)"
+                " (symbol %L2:C9_struct Point)"
+                " (symbol p Point)"
+                " (symbol %L3:C23_uint uint8)"
+                " (symbol %L3:C29_uint uint8)"
+                " (symbol %L3:C18_struct Point)" // <- This is what we are looking: The temporal symbol for the struct assigned to p2 must be inferred as a Point
+                " (symbol p2 Point)"
+            " (scope struct Point"
+                " (symbol x uint8)"
+                " (symbol y uint8))))"
+    ;
+
+    zenit_test_infer_run(source, program_dump, true);
+}

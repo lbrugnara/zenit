@@ -16,15 +16,7 @@ char* zenit_node_variable_uid(struct ZenitVariableNode *variable)
     if (!variable)
         return NULL;
 
-    char *rhs_id = zenit_node_uid(variable->rvalue);
-
-    char *id = fl_cstring_vdup("%%L%u:C%u_variable[lhs:%s][rhs:%s]", 
-        variable->base.location.line, variable->base.location.col, variable->name, rhs_id != NULL ? rhs_id : "<missing>");
-
-    if (rhs_id != NULL)
-        fl_cstring_free(rhs_id);
-
-    return id;
+    return fl_cstring_vdup("%%L%u:C%u_var{%s}", variable->base.location.line, variable->base.location.col, variable->name);
 }
 
 char* zenit_node_variable_dump(struct ZenitVariableNode *variable, char *output)

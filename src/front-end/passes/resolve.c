@@ -27,20 +27,22 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
 static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *node, enum ResolvePass pass);
 static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *node, enum ResolvePass pass);
 static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *node, enum ResolvePass pass);
 
 /*
  * Variable: symbol_resolvers
  *  An array indexed with a <enum ZenitNodeType> to get a <ZenitSymbolResolver> function
  */
 static const ZenitSymbolResolver symbol_resolvers[] = {
-    [ZENIT_NODE_VARIABLE]   = (ZenitSymbolResolver) &visit_variable_node,
-    [ZENIT_NODE_IDENTIFIER] = (ZenitSymbolResolver) &visit_identifier_node,
-    [ZENIT_NODE_ARRAY]      = (ZenitSymbolResolver) &visit_array_node,
-    [ZENIT_NODE_REFERENCE]  = (ZenitSymbolResolver) &visit_reference_node,
-    [ZENIT_NODE_CAST]       = (ZenitSymbolResolver) &visit_cast_node,
-    [ZENIT_NODE_UINT]       = (ZenitSymbolResolver) &visit_uint_node,
-    [ZENIT_NODE_FIELD_DECL]      = (ZenitSymbolResolver) &visit_field_decl_node,
-    [ZENIT_NODE_STRUCT_DECL]     = (ZenitSymbolResolver) &visit_struct_decl_node,
+    [ZENIT_NODE_VARIABLE]       = (ZenitSymbolResolver) &visit_variable_node,
+    [ZENIT_NODE_IDENTIFIER]     = (ZenitSymbolResolver) &visit_identifier_node,
+    [ZENIT_NODE_ARRAY]          = (ZenitSymbolResolver) &visit_array_node,
+    [ZENIT_NODE_REFERENCE]      = (ZenitSymbolResolver) &visit_reference_node,
+    [ZENIT_NODE_CAST]           = (ZenitSymbolResolver) &visit_cast_node,
+    [ZENIT_NODE_UINT]           = (ZenitSymbolResolver) &visit_uint_node,
+    [ZENIT_NODE_FIELD_DECL]     = (ZenitSymbolResolver) &visit_field_decl_node,
+    [ZENIT_NODE_STRUCT_DECL]    = (ZenitSymbolResolver) &visit_struct_decl_node,
+    [ZENIT_NODE_STRUCT]         = (ZenitSymbolResolver) &visit_struct_node,
 };
 
 /*
@@ -266,6 +268,48 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
         fl_array_free(properties);
     }
     fl_array_free(names);
+}
+
+static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, enum ResolvePass pass)
+{
+    if (pass != RESOLVE_ALL)
+        return NULL;
+
+    enum ZenitTypeSource source = ZENIT_TYPE_SRC_INFERRED;
+
+    if (struct_node->name != NULL)
+        source = ZENIT_TYPE_SRC_HINT;
+
+    struct ZenitStructTypeInfo *struct_type = zenit_type_struct_new(source, struct_node->name);
+
+    for (size_t i=0; i < fl_array_length(struct_node->members); i++)
+    {
+        if (struct_node->members[i]->type == ZENIT_NODE_FIELD)
+        {
+            struct ZenitFieldNode *field_node = (struct ZenitFieldNode*) struct_node->members[i];
+            struct ZenitSymbol *value_symbol = visit_node(ctx, field_node->value, pass);
+    
+            struct ZenitTypeInfo *typeinfo = NULL;
+            if (value_symbol)
+            {
+                typeinfo = zenit_type_copy(value_symbol->typeinfo);
+                typeinfo->sealed = value_symbol->typeinfo->sealed;
+            }
+            else
+            {
+                // This means there are errors, but we need to continue somehow
+                typeinfo = zenit_type_none_new();
+            }
+
+            zenit_type_struct_add_member(struct_type, field_node->name, typeinfo);
+        }
+        else
+        {
+            zenit_context_error(ctx, struct_node->members[i]->location, ZENIT_ERROR_INTERNAL, "Unhandled struct member cannot be resolved.");
+        }
+    }
+
+    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) struct_node, (struct ZenitTypeInfo*) struct_type);
 }
 
 static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node, enum ResolvePass pass)

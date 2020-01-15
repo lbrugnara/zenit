@@ -2,15 +2,49 @@
 #include <stdlib.h>
 #include "struct.h"
 
+struct StructMember {
+    const char *name;
+    struct ZenitTypeInfo *type;
+};
+
+void member_free(void *ptr)
+{
+    if (!ptr)
+        return;
+
+    struct StructMember *member = (struct StructMember*) ptr;
+    
+    if (member->name)
+        fl_cstring_free(member->name);
+        
+    if (member->type)
+        zenit_type_free(member->type);
+
+    fl_free(member);
+}
+
 struct ZenitStructTypeInfo* zenit_type_struct_new(enum ZenitTypeSource source, char *name)
 {
     struct ZenitStructTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitStructTypeInfo));
     typeinfo->base.type = ZENIT_TYPE_STRUCT;
     typeinfo->base.source = source;
     typeinfo->base.sealed = false;
-    typeinfo->name = fl_cstring_dup(name);
-    // FIXME: Allocate members array
+    typeinfo->name = name != NULL ? fl_cstring_dup(name) : NULL; // If NULL is an anonymous struct
+    typeinfo->members = fl_list_new_args((struct FlListArgs) {
+        .value_cleaner = member_free
+    });
+
     return typeinfo;
+}
+
+void zenit_type_struct_add_member(struct ZenitStructTypeInfo *typeinfo, const char *name, struct ZenitTypeInfo *type)
+{
+    struct StructMember *member = fl_malloc(sizeof(struct StructMember));
+
+    member->name = fl_cstring_dup(name);
+    member->type = type;
+
+    fl_list_append(typeinfo->members, member);
 }
 
 unsigned long zenit_type_struct_hash(struct ZenitStructTypeInfo *typeinfo)
@@ -65,7 +99,7 @@ char* zenit_type_struct_to_string(struct ZenitStructTypeInfo *typeinfo)
         return typeinfo->base.to_string.value;
     }
 
-    char *string_value = fl_cstring_dup(typeinfo->name);
+    char *string_value = fl_cstring_dup(typeinfo->name != NULL ? typeinfo->name : "'a" );
     
     // Update the string representation
     typeinfo->base.to_string.version = type_hash;
@@ -187,7 +221,8 @@ void zenit_type_struct_free(struct ZenitStructTypeInfo *typeinfo)
     if (typeinfo->name)
         fl_cstring_free(typeinfo->name);
 
-    // FIXME: Clean members' memory once they are implemented
+    if (typeinfo->members)
+        fl_list_free(typeinfo->members);
 
     fl_free(typeinfo);
 }

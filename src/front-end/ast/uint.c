@@ -18,23 +18,7 @@ char* zenit_node_uint_uid(struct ZenitUintNode *uint)
     if (!uint)
         return NULL;
 
-    size_t value = 0;
-
-    switch (uint->size)
-    {
-        case ZENIT_UINT_8:
-            value = (size_t) uint->value.uint8;
-            break;
-
-        case ZENIT_UINT_16:
-            value = (size_t) uint->value.uint16;
-            break;
-
-        default:
-            return NULL;
-    }
-
-    return fl_cstring_vdup("%%L%u:C%u_uint[n:%zu]", uint->base.location.line, uint->base.location.col, value);
+    return fl_cstring_vdup("%%L%u:C%u_uint", uint->base.location.line, uint->base.location.col);
 }
 
 char* zenit_node_uint_dump(struct ZenitUintNode *uint, char *output)

@@ -22,20 +22,24 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
 static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast_node, struct ZenitTypeInfo *typehint);
 static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node, struct ZenitTypeInfo *typehint);
 static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node, struct ZenitTypeInfo *typehint);
+static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *field_node, struct ZenitTypeInfo *typehint);
+static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, struct ZenitTypeInfo *typehint);
 
 /*
  * Variable: inferrers
  *  An array indexed with a <enum ZenitNodeType> to get a <ZenitTypeInferrer> function
  */
 static const ZenitTypeInferrer inferrers[] = {
-    [ZENIT_NODE_UINT]       = (ZenitTypeInferrer) &visit_primitive_node,
-    [ZENIT_NODE_VARIABLE]   = (ZenitTypeInferrer) &visit_variable_node,
-    [ZENIT_NODE_ARRAY]      = (ZenitTypeInferrer) &visit_array_node,
-    [ZENIT_NODE_IDENTIFIER] = (ZenitTypeInferrer) &visit_identifier_node,
-    [ZENIT_NODE_REFERENCE]  = (ZenitTypeInferrer) &visit_reference_node,
-    [ZENIT_NODE_CAST]       = (ZenitTypeInferrer) &visit_cast_node,
-    [ZENIT_NODE_FIELD_DECL]      = (ZenitTypeInferrer) &visit_field_decl_node,
-    [ZENIT_NODE_STRUCT_DECL]     = (ZenitTypeInferrer) &visit_struct_decl_node,
+    [ZENIT_NODE_UINT]           = (ZenitTypeInferrer) &visit_primitive_node,
+    [ZENIT_NODE_VARIABLE]       = (ZenitTypeInferrer) &visit_variable_node,
+    [ZENIT_NODE_ARRAY]          = (ZenitTypeInferrer) &visit_array_node,
+    [ZENIT_NODE_IDENTIFIER]     = (ZenitTypeInferrer) &visit_identifier_node,
+    [ZENIT_NODE_REFERENCE]      = (ZenitTypeInferrer) &visit_reference_node,
+    [ZENIT_NODE_CAST]           = (ZenitTypeInferrer) &visit_cast_node,
+    [ZENIT_NODE_FIELD_DECL]     = (ZenitTypeInferrer) &visit_field_decl_node,
+    [ZENIT_NODE_STRUCT_DECL]    = (ZenitTypeInferrer) &visit_struct_decl_node,
+    [ZENIT_NODE_FIELD]          = (ZenitTypeInferrer) &visit_field_node,
+    [ZENIT_NODE_STRUCT]         = (ZenitTypeInferrer) &visit_struct_node,
 };
 
 enum ZenitTypeUnifyResult {
@@ -370,6 +374,34 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
     fl_array_free(names);
 }
 
+static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *field_node, struct ZenitTypeInfo *typehint)
+{
+    visit_node(ctx, field_node->value, NULL);
+    return NULL;
+}
+
+static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, struct ZenitTypeInfo *typehint)
+{
+    struct ZenitSymbol *struct_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) struct_node);
+
+    if (struct_symbol->typeinfo->source == ZENIT_TYPE_SRC_INFERRED && typehint != NULL && typehint->type == ZENIT_TYPE_STRUCT)
+    {
+        struct ZenitStructTypeInfo *hint_struct = (struct ZenitStructTypeInfo*) typehint;
+        if (hint_struct->name != NULL)
+        {
+            zenit_symbol_set_type(struct_symbol, (struct ZenitTypeInfo*) hint_struct);
+            struct_symbol->typeinfo->source = ZENIT_TYPE_SRC_HINT;
+        }
+
+        struct_symbol->typeinfo->sealed = true;
+    }
+
+    for (size_t i=0; i < fl_array_length(struct_node->members); i++)
+        visit_node(ctx, struct_node->members[i], NULL);
+
+    return struct_symbol;
+}
+
 static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node, struct ZenitTypeInfo *typehint)
 {
     return zenit_program_get_symbol(ctx->program, field_node->name);
@@ -380,8 +412,12 @@ static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, stru
     // Visit the attributes and its properties
     visit_attribute_node_map(ctx, &struct_node->attributes);
 
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_STRUCT, struct_node->name);
+
     for (size_t i=0; i < fl_array_length(struct_node->members); i++)
         visit_node(ctx, struct_node->members[i], NULL);
+
+    zenit_program_pop_scope(ctx->program);
 
     return NULL;
 }

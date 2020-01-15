@@ -39,7 +39,7 @@ bool zenit_scope_has_symbols(struct ZenitScope *scope)
     return !zenit_symtable_is_empty(&scope->symtable);
 }
 
-char* zenit_scope_dump(struct ZenitScope *scope, char *output)
+char* zenit_scope_dump(struct ZenitScope *scope, char *output, bool verbose)
 {
     fl_cstring_append(&output, "(scope ");
 
@@ -52,7 +52,7 @@ char* zenit_scope_dump(struct ZenitScope *scope, char *output)
     else
         fl_cstring_vappend(&output, "unknown %s ", scope->id);
 
-    output = zenit_symtable_dump(&scope->symtable, output);
+    output = zenit_symtable_dump(&scope->symtable, output, verbose);
 
     size_t length = fl_array_length(scope->children);
     if (length > 0)
@@ -60,7 +60,7 @@ char* zenit_scope_dump(struct ZenitScope *scope, char *output)
         fl_cstring_append(&output, " ");
         for (size_t i=0; i < length; i++)
         {
-            output = zenit_scope_dump(scope->children[i], output);
+            output = zenit_scope_dump(scope->children[i], output, verbose);
             if (i != length - 1)
                 fl_cstring_append(&output, " ");
         }

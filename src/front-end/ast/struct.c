@@ -17,14 +17,15 @@ char* zenit_node_struct_uid(struct ZenitStructNode *struct_node)
     if (!struct_node)
         return NULL;
 
-    char *id = fl_cstring_vdup("%%L%u:C%u_struct[n:%s]", struct_node->base.location.line, struct_node->base.location.col, struct_node->name);
-
-    return id;
+    return fl_cstring_vdup("%%L%u:C%u_struct", struct_node->base.location.line, struct_node->base.location.col);
 }
 
 char* zenit_node_struct_dump(struct ZenitStructNode *struct_node, char *output)
 {
-    fl_cstring_vappend(&output, "(%s ", struct_node->name != NULL ? struct_node->name : "'a");
+    if (struct_node->name != NULL)
+        fl_cstring_vappend(&output, "(struct %s ", struct_node->name);
+    else
+        fl_cstring_append(&output, "(struct ");
 
     size_t length = fl_array_length(struct_node->members);
     for (size_t i=0; i < length; i++)

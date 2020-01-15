@@ -31,7 +31,7 @@ static inline char* zenit_node_property_uid(struct ZenitPropertyNode *property)
     if (!property)
         return NULL;
 
-    return fl_cstring_vdup("%%L%u:C%u_property[%s]", property->base.location.line, property->base.location.col, property->name);
+    return fl_cstring_vdup("%%L%u:C%u_property{%s}", property->base.location.line, property->base.location.col, property->name);
 }
 
 static inline char* zenit_node_property_dump(struct ZenitPropertyNode *property, char *output)

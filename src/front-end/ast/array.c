@@ -22,12 +22,7 @@ char* zenit_node_array_uid(struct ZenitArrayNode *array)
     if (!array)
         return NULL;
 
-    return fl_cstring_vdup(
-        "%%L%u:C%u_array[e:%zu]", 
-        array->base.location.line, 
-        array->base.location.col, 
-        fl_array_length(array->elements)
-    );
+    return fl_cstring_vdup("%%L%u:C%u_array", array->base.location.line, array->base.location.col);
 }
 
 char* zenit_node_array_dump(struct ZenitArrayNode *array, char *output)

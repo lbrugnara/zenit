@@ -45,7 +45,7 @@ void zenit_test_resolve_variables_primitives(void)
         ")"
     ;
 
-    zenit_test_resolve_run(source, program_dump);
+    zenit_test_resolve_run(source, program_dump, false);
 }
 
 void zenit_test_resolve_variables_references(void)
@@ -91,7 +91,7 @@ void zenit_test_resolve_variables_references(void)
         ")"
     ;
 
-    zenit_test_resolve_run(source, program_dump);
+    zenit_test_resolve_run(source, program_dump, false);
 }
 
 void zenit_test_resolve_variables_arrays(void)
@@ -116,5 +116,32 @@ void zenit_test_resolve_variables_arrays(void)
         ")"
     ;
 
-    zenit_test_resolve_run(source, program_dump);
+    zenit_test_resolve_run(source, program_dump, false);
+}
+
+void zenit_test_resolve_variables_structs(void)
+{
+    const char *source = 
+        "struct Point { x: uint8; y: uint8; }"              "\n"
+        "var p = Point { x: 0, y: 0 };"                     "\n"
+        "var p2 : Point = { x: 1, y: 1 };"                  "\n"
+    ;
+
+    const char *program_dump = 
+        "(program"
+            " (scope global"
+                " (symbol %L2:C20_uint uint8)"
+                " (symbol %L2:C26_uint uint8)"
+                " (symbol %L2:C9_struct Point)"
+                " (symbol p Point)"
+                " (symbol %L3:C23_uint uint8)"
+                " (symbol %L3:C29_uint uint8)"
+                " (symbol %L3:C18_struct 'a)" // <- The struct to be assigned to p2 is an unnamed struct after running the resolve pass
+                " (symbol p2 Point)"
+            " (scope struct Point"
+                " (symbol x uint8)"
+                " (symbol y uint8))))"
+    ;
+
+    zenit_test_resolve_run(source, program_dump, true);
 }

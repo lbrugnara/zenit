@@ -144,9 +144,9 @@ void zenit_test_parser_variable_struct(void)
 
     const char *ast_dump =
         "(ast"
-        " (struct Point (field x (type uint8)) (field y (type uint8)))"
-        " (var p (Point (x (uint8 0)) (y (uint8 0))))"
-        " (var p2 (type Point) ('a (x (uint8 1)) (y (uint8 1))))"
+        " (struct-decl Point (field x (type uint8)) (field y (type uint8)))"
+        " (var p (struct Point (x (uint8 0)) (y (uint8 0))))"
+        " (var p2 (type Point) (struct (x (uint8 1)) (y (uint8 1))))"
         ")"
     ;
 

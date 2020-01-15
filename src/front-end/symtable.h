@@ -16,6 +16,7 @@
  */
 struct ZenitSymtable {
     FlHashtable symbols;
+    FlList names;
 };
 
 /*
@@ -108,6 +109,6 @@ struct ZenitSymbol* zenit_symtable_remove(struct ZenitSymtable *symtable, const 
 
 bool zenit_symtable_is_empty(struct ZenitSymtable *symtable);
 
-char* zenit_symtable_dump(struct ZenitSymtable *symtable, char *output);
+char* zenit_symtable_dump(struct ZenitSymtable *symtable, char *output, bool verbose);
 
 #endif /* ZENIT_SYMTABLE_H */

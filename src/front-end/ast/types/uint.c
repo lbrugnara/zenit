@@ -24,7 +24,7 @@ char* zenit_node_type_uint_uid(struct ZenitUintTypeNode *uint_type_node)
     else if (uint_type_node->size == ZENIT_UINT_16)
         size = 16;
 
-    return fl_cstring_vdup("%%L%u:C%u_type_uint[%zu]", uint_type_node->base.base.location.line, uint_type_node->base.base.location.col, size);
+    return fl_cstring_vdup("%%L%u:C%u_type_uint", uint_type_node->base.base.location.line, uint_type_node->base.base.location.col);
 }
 
 char* zenit_node_type_uint_dump(struct ZenitUintTypeNode *type_node, char *output)

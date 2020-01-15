@@ -39,7 +39,7 @@ void zenit_test_resolve_struct_decl(void)
                 "(scope struct B (symbol b uint16)) "
                 "(scope struct C (symbol c &uint8)) "
                 "(scope struct D (symbol d [2]uint8)) "
-                "(scope struct E (symbol e2 uint8) (symbol e &[2]uint8)) "
+                "(scope struct E (symbol e &[2]uint8) (symbol e2 uint8)) "
                 "(scope struct F (symbol f [10]E)) "
                 "(scope struct G"
                     " (symbol a A)"
@@ -54,5 +54,5 @@ void zenit_test_resolve_struct_decl(void)
         ")"
     ;
 
-    zenit_test_resolve_run(source, program_dump);
+    zenit_test_resolve_run(source, program_dump, false);
 }

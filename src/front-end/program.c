@@ -104,11 +104,11 @@ struct ZenitSymbol* zenit_program_remove_symbol(struct ZenitProgram *program, co
     return zenit_symtable_remove(&program->current_scope->symtable, symbol_name);
 }
 
-char* zenit_program_dump(struct ZenitProgram *program)
+char* zenit_program_dump(struct ZenitProgram *program, bool verbose)
 {
     char *output = fl_cstring_dup("(program ");
     
-    output = zenit_scope_dump(program->global_scope, output);
+    output = zenit_scope_dump(program->global_scope, output, verbose);
     
     fl_cstring_append(&output, ")");
 
