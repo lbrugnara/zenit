@@ -136,7 +136,7 @@ void zenit_test_resolve_variables_structs(void)
                 " (symbol p Point)"
                 " (symbol %L3:C23_uint uint8)"
                 " (symbol %L3:C29_uint uint8)"
-                " (symbol %L3:C18_struct 'a)" // <- The struct to be assigned to p2 is an unnamed struct after running the resolve pass
+                " (symbol %L3:C18_struct { x: uint8, y: uint8 })" // <- The struct to be assigned to p2 is an unnamed struct after running the resolve pass
                 " (symbol p2 Point)"
             " (scope struct Point"
                 " (symbol x uint8)"

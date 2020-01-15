@@ -99,7 +99,30 @@ char* zenit_type_struct_to_string(struct ZenitStructTypeInfo *typeinfo)
         return typeinfo->base.to_string.value;
     }
 
-    char *string_value = fl_cstring_dup(typeinfo->name != NULL ? typeinfo->name : "'a" );
+    char *string_value = NULL;
+    
+    if (typeinfo->name != NULL)
+    {
+        string_value = fl_cstring_dup(typeinfo->name);
+    }
+    else
+    {
+        string_value = fl_cstring_dup("{ ");
+
+        struct FlListNode *tmp = fl_list_head(typeinfo->members);
+        while (tmp != NULL)
+        {
+            struct StructMember *member = (struct StructMember*) tmp->value;
+            fl_cstring_vappend(&string_value, "%s: %s", member->name, member->type ? zenit_type_to_string(member->type) : "<unknown>");
+
+            tmp = tmp->next;
+
+            if (tmp)
+                fl_cstring_append(&string_value, ", ");
+        }
+
+        fl_cstring_append(&string_value, " }");
+    }
     
     // Update the string representation
     typeinfo->base.to_string.version = type_hash;
