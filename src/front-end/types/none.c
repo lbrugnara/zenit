@@ -2,17 +2,15 @@
 #include <stdlib.h>
 #include "none.h"
 
-struct ZenitTypeInfo* zenit_type_none_new(void)
+struct ZenitType* zenit_type_none_new(void)
 {
-    struct ZenitTypeInfo *typeinfo = fl_malloc(sizeof(struct ZenitTypeInfo));
-    typeinfo->type = ZENIT_TYPE_NONE;
-    typeinfo->source = ZENIT_TYPE_SRC_INFERRED;
-    typeinfo->sealed = false;
+    struct ZenitType *type = fl_malloc(sizeof(struct ZenitType));
+    type->typekind = ZENIT_TYPE_NONE;
 
-    return typeinfo;
+    return type;
 }
 
-unsigned long zenit_type_none_hash(struct ZenitTypeInfo *typeinfo)
+unsigned long zenit_type_none_hash(struct ZenitType *type)
 {
     unsigned long hash = 5381;
     FlByte c;
@@ -24,13 +22,13 @@ unsigned long zenit_type_none_hash(struct ZenitTypeInfo *typeinfo)
     return hash;
 }
 
-void zenit_type_none_free(struct ZenitTypeInfo *typeinfo)
+void zenit_type_none_free(struct ZenitType *type)
 {
-    if (!typeinfo)
+    if (!type)
         return;
 
-    if (typeinfo->to_string.value != NULL)
-        fl_cstring_free(typeinfo->to_string.value);
+    if (type->to_string.value != NULL)
+        fl_cstring_free(type->to_string.value);
 
-    fl_free(typeinfo);
+    fl_free(type);
 }

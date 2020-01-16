@@ -1,4 +1,5 @@
 #include "symbol.h"
+#include "types/typeinfo.h"
 
 struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitTypeInfo *typeinfo)
 {
@@ -16,8 +17,8 @@ struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitTypeInfo *typ
 
 void zenit_symbol_set_type(struct ZenitSymbol *symbol, struct ZenitTypeInfo *typeinfo)
 {
-    zenit_type_free(symbol->typeinfo);
-    symbol->typeinfo = zenit_type_copy(typeinfo);
+    zenit_typeinfo_free(symbol->typeinfo);
+    symbol->typeinfo = zenit_typeinfo_copy(typeinfo);
 }
 
 void zenit_symbol_free(struct ZenitSymbol *symbol)
@@ -29,13 +30,13 @@ void zenit_symbol_free(struct ZenitSymbol *symbol)
         fl_cstring_free(symbol->name);
 
     if (symbol->typeinfo)
-        zenit_type_free(symbol->typeinfo);
+        zenit_typeinfo_free(symbol->typeinfo);
 
     fl_free(symbol);
 }
 
 char* zenit_symbol_dump(struct ZenitSymbol *symbol, char *output)
 {
-    fl_cstring_vappend(&output, "(symbol %s %s)", symbol->name, symbol->typeinfo != NULL ? zenit_type_to_string(symbol->typeinfo) : "<unknown>");
+    fl_cstring_vappend(&output, "(symbol %s %s)", symbol->name, symbol->typeinfo != NULL ? zenit_type_to_string(symbol->typeinfo->type) : "<unknown>");
     return output;
 }

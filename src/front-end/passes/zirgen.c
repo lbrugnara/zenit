@@ -47,14 +47,14 @@ static struct ZirOperand* visit_struct_decl_node(struct ZenitContext *ctx, struc
  *  An array indexed with a <enum ZenitNodeType> to get a <ZirGenerator> function
  */
 static const ZirGenerator generators[] = {
-    [ZENIT_NODE_UINT]       = (ZirGenerator) &visit_uint_node,
-    [ZENIT_NODE_VARIABLE]   = (ZirGenerator) &visit_variable_node,
-    [ZENIT_NODE_ARRAY]      = (ZirGenerator) &visit_array_node,
-    [ZENIT_NODE_IDENTIFIER] = (ZirGenerator) &visit_identifier_node,
-    [ZENIT_NODE_REFERENCE]  = (ZirGenerator) &visit_reference_node,
-    [ZENIT_NODE_CAST]       = (ZirGenerator) &visit_cast_node,
-    [ZENIT_NODE_FIELD_DECL]      = (ZirGenerator) &visit_field_decl_node,
-    [ZENIT_NODE_STRUCT_DECL]     = (ZirGenerator) &visit_struct_decl_node,
+    [ZENIT_NODE_UINT]           = (ZirGenerator) &visit_uint_node,
+    [ZENIT_NODE_VARIABLE]       = (ZirGenerator) &visit_variable_node,
+    [ZENIT_NODE_ARRAY]          = (ZirGenerator) &visit_array_node,
+    [ZENIT_NODE_IDENTIFIER]     = (ZirGenerator) &visit_identifier_node,
+    [ZENIT_NODE_REFERENCE]      = (ZirGenerator) &visit_reference_node,
+    [ZENIT_NODE_CAST]           = (ZirGenerator) &visit_cast_node,
+    [ZENIT_NODE_FIELD_DECL]     = (ZirGenerator) &visit_field_decl_node,
+    [ZENIT_NODE_STRUCT_DECL]    = (ZirGenerator) &visit_struct_decl_node,
 };
 
 static void import_zir_symbol_from_zenit_symbol(struct ZenitContext *ctx, struct ZenitSymbol *symbol, struct ZirProgram *program, bool global_symbol)
@@ -81,9 +81,9 @@ static inline struct ZirTypeInfo* new_zir_type_from_zenit_type(struct ZirProgram
     if (zenit_type == NULL)
         return NULL;
 
-    if (zenit_type->type == ZENIT_TYPE_UINT)
+    if (zenit_type->type->typekind == ZENIT_TYPE_UINT)
     {
-        struct ZenitUintTypeInfo *zenit_uint = (struct ZenitUintTypeInfo*) zenit_type;
+        struct ZenitUintType *zenit_uint = (struct ZenitUintType*) zenit_type->type;
 
         enum ZirUintTypeSize size;
         switch (zenit_uint->size)
@@ -104,22 +104,22 @@ static inline struct ZirTypeInfo* new_zir_type_from_zenit_type(struct ZirProgram
         return (struct ZirTypeInfo*) zir_type_uint_new(size);
     }
 
-    if (zenit_type->type == ZENIT_TYPE_REFERENCE)
+    if (zenit_type->type->typekind == ZENIT_TYPE_REFERENCE)
     {
-        struct ZenitReferenceTypeInfo *zenit_ref = (struct ZenitReferenceTypeInfo*) zenit_type;
+        struct ZenitReferenceType *zenit_ref = (struct ZenitReferenceType*) zenit_type->type;
         struct ZirTypeInfo *zir_element_type = new_zir_type_from_zenit_type(program, zenit_ref->element);
         return (struct ZirTypeInfo*) zir_type_reference_new(zir_element_type);
     }
 
-    if (zenit_type->type == ZENIT_TYPE_STRUCT)
+    if (zenit_type->type->typekind == ZENIT_TYPE_STRUCT)
     {
-        struct ZenitStructTypeInfo *zenit_struct = (struct ZenitStructTypeInfo*) zenit_type;
+        struct ZenitStructType *zenit_struct = (struct ZenitStructType*) zenit_type->type;
         return (struct ZirTypeInfo*) zir_type_struct_new(zenit_struct->name);
     }
 
-    if (zenit_type->type == ZENIT_TYPE_ARRAY)
+    if (zenit_type->type->typekind == ZENIT_TYPE_ARRAY)
     {
-        struct ZenitArrayTypeInfo *zenit_array = (struct ZenitArrayTypeInfo*) zenit_type;
+        struct ZenitArrayType *zenit_array = (struct ZenitArrayType*) zenit_type->type;
         
         struct ZirArrayTypeInfo *zir_array = zir_type_array_new();
 
@@ -129,7 +129,7 @@ static inline struct ZirTypeInfo* new_zir_type_from_zenit_type(struct ZirProgram
         return (struct ZirTypeInfo*) zir_array;
     }
 
-    if (zenit_type->type == ZENIT_TYPE_NONE)
+    if (zenit_type->type->typekind == ZENIT_TYPE_NONE)
         return zir_type_none_new();
 
     return NULL;
@@ -221,7 +221,7 @@ static struct ZirOperand* visit_uint_node(struct ZenitContext *ctx, struct ZirPr
     // First, we need to map the types and values between Zenit and ZIR
     union ZirUintValue zir_value;
 
-    switch (((struct ZenitUintTypeInfo*) zenit_uint_symbol->typeinfo)->size)
+    switch (((struct ZenitUintType*) zenit_uint_symbol->typeinfo->type)->size)
     {
         case ZENIT_UINT_8:
             zir_value.uint8 = zenit_uint->value.uint8;

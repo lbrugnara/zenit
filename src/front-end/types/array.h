@@ -4,21 +4,21 @@
 #include <stdlib.h>
 #include "type.h"
 
-struct ZenitArrayTypeInfo {
-    struct ZenitTypeInfo base;
+struct ZenitArrayType {
+    struct ZenitType base;
     struct ZenitTypeInfo *member_type;
     size_t length;
 };
 
-struct ZenitArrayTypeInfo* zenit_type_array_new(enum ZenitTypeSource source, struct ZenitTypeInfo *member_type);
-unsigned long zenit_type_array_hash(struct ZenitArrayTypeInfo *typeinfo);
-struct ZenitArrayTypeInfo* zenit_type_array_copy(struct ZenitArrayTypeInfo *source);
-char* zenit_type_array_to_string(struct ZenitArrayTypeInfo *typeinfo);
-bool zenit_type_array_equals(struct ZenitArrayTypeInfo *type_a, struct ZenitTypeInfo *type_b);
-bool zenit_type_array_is_assignable_from(struct ZenitArrayTypeInfo *target_type, struct ZenitTypeInfo *value_type);
-bool zenit_type_array_is_castable_to(struct ZenitArrayTypeInfo *array_type, struct ZenitTypeInfo *target_type);
-struct ZenitTypeInfo* zenit_type_array_unify(struct ZenitArrayTypeInfo *array_type, struct ZenitTypeInfo *type_b);
-bool zenit_type_array_can_unify(struct ZenitArrayTypeInfo *array_type, struct ZenitTypeInfo *type_b);
-void zenit_type_array_free(struct ZenitArrayTypeInfo *typeinfo);
+struct ZenitArrayType* zenit_type_array_new(struct ZenitTypeInfo *member_type);
+unsigned long zenit_type_array_hash(struct ZenitArrayType *typeinfo);
+struct ZenitArrayType* zenit_type_array_copy(struct ZenitArrayType *source);
+char* zenit_type_array_to_string(struct ZenitArrayType *typeinfo);
+bool zenit_type_array_equals(struct ZenitArrayType *type_a, struct ZenitType *type_b);
+bool zenit_type_array_is_assignable_from(struct ZenitArrayType *target_type, struct ZenitType *value_type);
+bool zenit_type_array_is_castable_to(struct ZenitArrayType *array_type, struct ZenitType *target_type);
+struct ZenitTypeInfo* zenit_type_array_unify(struct ZenitArrayType *array_type, struct ZenitType *type_b);
+bool zenit_type_array_can_unify(struct ZenitArrayType *array_type, struct ZenitType *type_b);
+void zenit_type_array_free(struct ZenitArrayType *typeinfo);
 
 #endif /* ZENIT_TYPE_ARRAY_H */

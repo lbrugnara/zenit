@@ -7,7 +7,7 @@ struct ZenitArrayTypeNode* zenit_node_type_array_new(struct ZenitSourceLocation 
     struct ZenitArrayTypeNode *type_node = fl_malloc(sizeof(struct ZenitArrayTypeNode));
     type_node->base.base.type = ZENIT_NODE_TYPE_ARRAY;
     type_node->base.base.location = location;
-    type_node->base.type = ZENIT_TYPE_ARRAY;
+    type_node->base.typekind = ZENIT_TYPE_ARRAY;
     type_node->member_type = member_type;
 
     return type_node;

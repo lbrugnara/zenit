@@ -7,5 +7,7 @@
 #include "uint.h"
 #include "reference.h"
 #include "struct.h"
+#include "typeinfo.h"
+
 
 #endif /* ZENIT_TYPE_SYSTEM_H */

@@ -2,13 +2,13 @@
 #define ZENIT_TYPE_H
 
 /*
- * Enum: enum ZenitType
+ * Enum: enum ZenitTypeKind
  *  Enumerates all the native type supported by Zenit
  *  including some special values that the compiler
  *  uses internally
  *
  */
-enum ZenitType {
+enum ZenitTypeKind {
     ZENIT_TYPE_NONE,
 
     ZENIT_TYPE_REFERENCE,
@@ -36,6 +36,11 @@ struct ZenitTypeString {
     char *value;
 };
 
+struct ZenitType {
+    enum ZenitTypeKind typekind;
+    struct ZenitTypeString to_string;
+};
+
 /*
  * Enum: enum ZenitTypeSource
  *  Identifies the source of the type information
@@ -57,15 +62,14 @@ enum ZenitTypeSource {
  *  Represents the information of a type. 
  * 
  * Members:
- *  <enum ZenitType> type: The raw type.
+ *  <enum ZenitTypeKind> type: The raw type.
  *  <enum ZenitTypeSource> source: The source of the information present in the type object
  *  <struct ZenitTypeString> to_string: Keeps track of the string representation of the type object
  *  
  */
 struct ZenitTypeInfo {
-    enum ZenitType type;
+    struct ZenitType *type;
     enum ZenitTypeSource source;
-    struct ZenitTypeString to_string;
     bool sealed;
 };
 
@@ -74,13 +78,13 @@ struct ZenitTypeInfo {
  *  Return a hash number for the current version of the type information object
  *
  * Parameters:
- *  <struct ZenitTypeInfo> *typeinfo: Type object
+ *  <struct ZenitType> *typeinfo: Type object
  *
  * Returns:
  *  <unsigned long>: Hash of the type object
  * 
  */
-unsigned long zenit_type_hash(struct ZenitTypeInfo *typeinfo);
+unsigned long zenit_type_hash(struct ZenitType *type);
 
 /*
  * Function: zenit_type_from_slice
@@ -90,59 +94,59 @@ unsigned long zenit_type_hash(struct ZenitTypeInfo *typeinfo);
  *  <struct FlSlice> *slice: Sequence of bytes to match against the different system types
  *
  * Returns:
- *  <enum ZenitType>: The type that matches the sequence of bytes
+ *  <enum ZenitTypeKind>: The type that matches the sequence of bytes
  *
  */
-enum ZenitType zenit_type_from_slice(struct FlSlice *slice);
+enum ZenitTypeKind zenit_type_from_slice(struct FlSlice *slice);
 
 /*
  * Function: zenit_type_to_string
  *  Returns a string representation of the type.
  *
  * Parameters:
- *  <struct ZenitTypeInfo> *typeinfo: Type object.
+ *  <struct ZenitType> *type: Type object.
  *
  * Returns:
- *  <char>*: String representation of the *typeinfo* object
+ *  <char>*: String representation of the *type* object
  *
  */
-char* zenit_type_to_string(struct ZenitTypeInfo *typeinfo);
+char* zenit_type_to_string(struct ZenitType *type);
 
 /*
  * Function: zenit_type_equals
  *  Compares *type_a* and *type_b* to know if they are equals
  *
  * Parameters:
- *  <struct ZenitTypeInfo> *type_a: Object to compare
- *  <struct ZenitTypeInfo> *type_b: Object to compare
+ *  <struct ZenitType> *type_a: Object to compare
+ *  <struct ZenitType> *type_b: Object to compare
  *
  * Returns:
  *  <bool>: *true* if the objects are equals, otherwise *false*.
  *
  */
-bool zenit_type_equals(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
+bool zenit_type_equals(struct ZenitType *type_a, struct ZenitType *type_b);
 
 /*
  * Function: zenit_type_copy
  *  Returns a new object that is a copy of the source object
  *
  * Parameters:
- *  <struct ZenitTypeInfo> *src_type: Type object to be copied
+ *  <struct ZenitType> *src_type: Type object to be copied
  *
  * Returns:
- *  <struct ZenitTypeInfo>*: New object copied from the source object
+ *  <struct ZenitType>*: New object copied from the source object
  * 
  */
-struct ZenitTypeInfo* zenit_type_copy(struct ZenitTypeInfo *src_type);
+struct ZenitType* zenit_type_copy(struct ZenitType *src_type);
 
 /*
  * Function: zenit_type_unify
  *  Searches for a common ancestor between *type_a* and *type_b*.
  *
  * Parameters:
- *  <struct ZenitTypeInfo> *type_a: Type object
- *  <struct ZenitTypeInfo> *type_b: Type object
- *  <struct ZenitTypeInfo> **unified: If a common ancestor between A and B exists, and *unified* is not NULL, a
+ *  <struct ZenitType> *type_a: Type object
+ *  <struct ZenitType> *type_b: Type object
+ *  <struct ZenitType> **unified: If a common ancestor between A and B exists, and *unified* is not NULL, a
  *   copy of the common ancestor will be allocated in the pointer pointed by this parameter.
  * 
  * Returns:
@@ -151,9 +155,9 @@ struct ZenitTypeInfo* zenit_type_copy(struct ZenitTypeInfo *src_type);
  * Notes:
  *  If *unified* is NULL, this function does not allocate memory and it just returns *true* or *false*.
  */
-struct ZenitTypeInfo* zenit_type_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
+struct ZenitTypeInfo* zenit_type_unify(struct ZenitType *type_a, struct ZenitType *type_b);
 
-bool zenit_type_can_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *type_b);
+bool zenit_type_can_unify(struct ZenitType *type_a, struct ZenitType *type_b);
 
 /*
  * Function: zenit_type_is_assignable_from
@@ -161,14 +165,14 @@ bool zenit_type_can_unify(struct ZenitTypeInfo *type_a, struct ZenitTypeInfo *ty
  *  by the *value_type* object
  *
  * Parameters:
- *  <struct ZenitTypeInfo> *target_type: Target type of the assignment
- *  <struct ZenitTypeInfo> *value_type: Source type of the assignment
+ *  <struct ZenitType> *target_type: Target type of the assignment
+ *  <struct ZenitType> *value_type: Source type of the assignment
  *
  * Returns:
  *  <bool>: *true* if *target_type* accepts the *value_type*, otherwise, *false*.
  *
  */
-bool zenit_type_is_assignable_from(struct ZenitTypeInfo *target_type, struct ZenitTypeInfo *value_type);
+bool zenit_type_is_assignable_from(struct ZenitType *target_type, struct ZenitType *value_type);
 
 /*
  * Function: zenit_type_is_castable_to
@@ -176,21 +180,21 @@ bool zenit_type_is_assignable_from(struct ZenitTypeInfo *target_type, struct Zen
  *  the *target_cast_type*
  *
  * Parameters:
- *  <struct ZenitTypeInfo> *source_type: Original type object
- *  <struct ZenitTypeInfo> *target_cast_type: Destination type object
+ *  <struct ZenitType> *source_type: Original type object
+ *  <struct ZenitType> *target_cast_type: Destination type object
  *
  * Returns:
  *  <bool>: *true* if the source type can be casted to the target type, otherwise, *false*.
  * 
  */
-bool zenit_type_is_castable_to(struct ZenitTypeInfo *source_type, struct ZenitTypeInfo *target_cast_type);
+bool zenit_type_is_castable_to(struct ZenitType *source_type, struct ZenitType *target_cast_type);
 
 /*
  * Function: zenit_type_fre
  *  Frees the memory allocated in the type object
  *
  * Parameters:
- *  <struct ZenitTypeInfo> *typeinfo: Type object to be freed
+ *  <struct ZenitType> *type: Type object to be freed
  *
  * Returns:
  *  void: This function does not return a value
@@ -198,6 +202,6 @@ bool zenit_type_is_castable_to(struct ZenitTypeInfo *source_type, struct ZenitTy
  * Notes:
  *  This function accepts any "descendant" of the "base" type information struct
  */
-void zenit_type_free(struct ZenitTypeInfo *typeinfo);
+void zenit_type_free(struct ZenitType *type);
 
 #endif /* ZENIT_TYPE_H */

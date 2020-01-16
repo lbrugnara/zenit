@@ -7,7 +7,7 @@ struct ZenitReferenceTypeNode* zenit_node_type_reference_new(struct ZenitSourceL
     struct ZenitReferenceTypeNode *type_node = fl_malloc(sizeof(struct ZenitReferenceTypeNode));
     type_node->base.base.type = ZENIT_NODE_TYPE_REFERENCE;
     type_node->base.base.location = location;
-    type_node->base.type = ZENIT_TYPE_REFERENCE;
+    type_node->base.typekind = ZENIT_TYPE_REFERENCE;
     type_node->element = element_type;
 
     return type_node;

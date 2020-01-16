@@ -196,7 +196,7 @@ static struct ZenitTypeNode* parse_type_declaration(struct ZenitParser *parser, 
     struct ZenitToken type_token;
     consume_or_return_val(ctx, parser, ZENIT_TOKEN_ID, &type_token, false);
 
-    enum ZenitType zenit_type = zenit_type_from_slice(&type_token.value);
+    enum ZenitTypeKind zenit_type = zenit_type_from_slice(&type_token.value);
 
     if (zenit_type == ZENIT_TYPE_UINT)
     {

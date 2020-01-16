@@ -4,22 +4,22 @@
 #include <fllib.h>
 #include "type.h"
 
-struct ZenitStructTypeInfo {
-    struct ZenitTypeInfo base;
+struct ZenitStructType {
+    struct ZenitType base;
     char *name;
     FlList members;
 };
 
-struct ZenitStructTypeInfo* zenit_type_struct_new(enum ZenitTypeSource source, char *name);
-void zenit_type_struct_add_member(struct ZenitStructTypeInfo *typeinfo, const char *name, struct ZenitTypeInfo *type);
-unsigned long zenit_type_struct_hash(struct ZenitStructTypeInfo *typeinfo);
-struct ZenitStructTypeInfo* zenit_type_struct_copy(struct ZenitStructTypeInfo *src_type);
-char* zenit_type_struct_to_string(struct ZenitStructTypeInfo *typeinfo);
-bool zenit_type_struct_equals(struct ZenitStructTypeInfo *type_a, struct ZenitTypeInfo *type_b);
-bool zenit_type_struct_is_assignable_from(struct ZenitStructTypeInfo *target_type, struct ZenitTypeInfo *value_type);
-bool zenit_type_struct_is_castable_to(struct ZenitStructTypeInfo *struct_type, struct ZenitTypeInfo *target_type);
-struct ZenitTypeInfo* zenit_type_struct_unify(struct ZenitStructTypeInfo *struct_type, struct ZenitTypeInfo *type_b);
-bool zenit_type_struct_can_unify(struct ZenitStructTypeInfo *struct_type, struct ZenitTypeInfo *type_b);
-void zenit_type_struct_free(struct ZenitStructTypeInfo *typeinfo);
+struct ZenitStructType* zenit_type_struct_new(char *name);
+void zenit_type_struct_add_member(struct ZenitStructType *type, const char *name, struct ZenitTypeInfo *typeifno);
+unsigned long zenit_type_struct_hash(struct ZenitStructType *type);
+struct ZenitStructType* zenit_type_struct_copy(struct ZenitStructType *src_type);
+char* zenit_type_struct_to_string(struct ZenitStructType *type);
+bool zenit_type_struct_equals(struct ZenitStructType *type_a, struct ZenitType *type_b);
+bool zenit_type_struct_is_assignable_from(struct ZenitStructType *target_type, struct ZenitType *value_type);
+bool zenit_type_struct_is_castable_to(struct ZenitStructType *struct_type, struct ZenitType *target_type);
+struct ZenitTypeInfo* zenit_type_struct_unify(struct ZenitStructType *struct_type, struct ZenitType *type_b);
+bool zenit_type_struct_can_unify(struct ZenitStructType *struct_type, struct ZenitType *type_b);
+void zenit_type_struct_free(struct ZenitStructType *type);
 
 #endif /* ZENIT_TYPE_STRUCT_H */

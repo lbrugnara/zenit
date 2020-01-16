@@ -10,21 +10,21 @@ enum ZenitUintTypeSize {
     ZENIT_UINT_16
 };
 
-struct ZenitUintTypeInfo {
-    struct ZenitTypeInfo base;
+struct ZenitUintType {
+    struct ZenitType base;
     enum ZenitUintTypeSize size;
 };
 
-struct ZenitUintTypeInfo* zenit_type_uint_new(enum ZenitTypeSource source, enum ZenitUintTypeSize size);
+struct ZenitUintType* zenit_type_uint_new(enum ZenitUintTypeSize size);
 enum ZenitUintTypeSize zenit_type_uint_size_from_slice(struct FlSlice *slice);
-unsigned long zenit_type_uint_hash(struct ZenitUintTypeInfo *typeinfo);
-struct ZenitUintTypeInfo* zenit_type_uint_copy(struct ZenitUintTypeInfo *src_type);
-char* zenit_type_uint_to_string(struct ZenitUintTypeInfo *typeinfo);
-bool zenit_type_uint_equals(struct ZenitUintTypeInfo *type_a, struct ZenitTypeInfo *type_b);
-bool zenit_type_uint_is_assignable_from(struct ZenitUintTypeInfo *target_type, struct ZenitTypeInfo *value_type);
-bool zenit_type_uint_is_castable_to(struct ZenitUintTypeInfo *primitive_type, struct ZenitTypeInfo *target_type);
-struct ZenitTypeInfo* zenit_type_uint_unify(struct ZenitUintTypeInfo *primitive_type, struct ZenitTypeInfo *type_b);
-bool zenit_type_uint_can_unify(struct ZenitUintTypeInfo *primitive_type, struct ZenitTypeInfo *type_b);
-void zenit_type_uint_free(struct ZenitUintTypeInfo *typeinfo);
+unsigned long zenit_type_uint_hash(struct ZenitUintType *typeinfo);
+struct ZenitUintType* zenit_type_uint_copy(struct ZenitUintType *src_type);
+char* zenit_type_uint_to_string(struct ZenitUintType *typeinfo);
+bool zenit_type_uint_equals(struct ZenitUintType *type_a, struct ZenitType *type_b);
+bool zenit_type_uint_is_assignable_from(struct ZenitUintType *target_type, struct ZenitType *value_type);
+bool zenit_type_uint_is_castable_to(struct ZenitUintType *primitive_type, struct ZenitType *target_type);
+struct ZenitTypeInfo* zenit_type_uint_unify(struct ZenitUintType *primitive_type, struct ZenitType *type_b);
+bool zenit_type_uint_can_unify(struct ZenitUintType *primitive_type, struct ZenitType *type_b);
+void zenit_type_uint_free(struct ZenitUintType *typeinfo);
 
 #endif /* ZENIT_TYPE_UINT_H */

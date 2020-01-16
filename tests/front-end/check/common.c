@@ -27,7 +27,7 @@ void zenit_test_check_types(const char *source, const char *cases[][2], size_t l
 
         struct ZenitSymbol *sym = zenit_program_get_symbol(ctx.program, test[0]);
 
-        fl_vexpect(flm_cstring_equals(test[1], zenit_type_to_string(sym->typeinfo)), 
+        fl_vexpect(flm_cstring_equals(test[1], zenit_type_to_string(sym->typeinfo->type)), 
             "Type of '%s' must be '%s'", test[0], test[1]);
     }
     

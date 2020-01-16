@@ -5,7 +5,7 @@
 
 struct ZenitTypeNode {
     struct ZenitNode base;
-    enum ZenitType type;
+    enum ZenitTypeKind typekind;
 };
 
 #include "array.h"

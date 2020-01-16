@@ -13,30 +13,28 @@ static struct ZenitTypeInfo* build_type_info_from_declaration(struct ZenitContex
 
     if (type_decl == NULL)
     {
-        typeinfo = zenit_type_none_new();
+        typeinfo = zenit_typeinfo_new(ZENIT_TYPE_SRC_INFERRED, false, zenit_type_none_new());
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_UINT)
     {
         struct ZenitUintTypeNode *uint_type_decl = (struct ZenitUintTypeNode*) type_decl;
-        typeinfo = (struct ZenitTypeInfo*) zenit_type_uint_new(ZENIT_TYPE_SRC_HINT, uint_type_decl->size);
-        typeinfo->sealed = true;
+        typeinfo = zenit_typeinfo_new_uint(ZENIT_TYPE_SRC_HINT, true, zenit_type_uint_new(uint_type_decl->size));
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_STRUCT)
     {
         struct ZenitStructTypeNode *struct_type_decl = (struct ZenitStructTypeNode*) type_decl;
-        typeinfo = (struct ZenitTypeInfo*) zenit_type_struct_new(ZENIT_TYPE_SRC_HINT, struct_type_decl->name);
-        typeinfo->sealed = true;
+        typeinfo = zenit_typeinfo_new_struct(ZENIT_TYPE_SRC_HINT, true, zenit_type_struct_new(struct_type_decl->name));
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_REFERENCE)
     {
         struct ZenitReferenceTypeNode *ref_type_decl = (struct ZenitReferenceTypeNode*) type_decl;
 
         struct ZenitTypeInfo *rhs_element = NULL;
-        if (rhs != NULL && rhs->type == ZENIT_TYPE_REFERENCE)
-            rhs_element = ((struct ZenitReferenceTypeInfo*) rhs)->element;
+        if (rhs != NULL && rhs->type->typekind == ZENIT_TYPE_REFERENCE)
+            rhs_element = ((struct ZenitReferenceType*) rhs->type)->element;
 
-        typeinfo = (struct ZenitTypeInfo*) zenit_type_reference_new(ZENIT_TYPE_SRC_HINT, build_type_info_from_declaration(ctx, ref_type_decl->element, rhs_element));
-        typeinfo->sealed = true;
+        struct ZenitTypeInfo *element_typeinfo = build_type_info_from_declaration(ctx, ref_type_decl->element, rhs_element);
+        typeinfo = zenit_typeinfo_new_reference(ZENIT_TYPE_SRC_HINT, true, zenit_type_reference_new(element_typeinfo));
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_ARRAY)
     {
@@ -44,10 +42,10 @@ static struct ZenitTypeInfo* build_type_info_from_declaration(struct ZenitContex
 
         size_t length = 0;
         struct ZenitTypeInfo *rhs_element = NULL;
-        if (rhs != NULL && rhs->type == ZENIT_TYPE_ARRAY)
+        if (rhs != NULL && rhs->type->typekind == ZENIT_TYPE_ARRAY)
         {
-            rhs_element = ((struct ZenitArrayTypeInfo*) rhs)->member_type;
-            length = ((struct ZenitArrayTypeInfo*) rhs)->length;
+            rhs_element = ((struct ZenitArrayType*) rhs->type)->member_type;
+            length = ((struct ZenitArrayType*) rhs->type)->length;
         }
         else if (array_type_decl->auto_length)
         {
@@ -55,15 +53,14 @@ static struct ZenitTypeInfo* build_type_info_from_declaration(struct ZenitContex
                 "Cannot infer the length of the array type from the context. Try adding the array length a hint into the variable's type information.");
         }
 
-        struct ZenitArrayTypeInfo *array_type = zenit_type_array_new(ZENIT_TYPE_SRC_HINT, build_type_info_from_declaration(ctx, array_type_decl->member_type, rhs_element));
+        struct ZenitArrayType *array_type = zenit_type_array_new(build_type_info_from_declaration(ctx, array_type_decl->member_type, rhs_element));
         array_type->length = array_type_decl->auto_length ? length : array_type_decl->length;
 
-        typeinfo = (struct ZenitTypeInfo*) array_type;
-        typeinfo->sealed = true;
+        typeinfo = zenit_typeinfo_new_array(ZENIT_TYPE_SRC_HINT, true, array_type);
     }
     else
     {
-        typeinfo = zenit_type_none_new();
+        typeinfo = zenit_typeinfo_new(ZENIT_TYPE_SRC_INFERRED, false, zenit_type_none_new());
     }
 
     // We track the type with the program object because the program will take care of freeing the memory
