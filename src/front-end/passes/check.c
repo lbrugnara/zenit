@@ -122,20 +122,22 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
 static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *node);
 static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node);
 static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node);
+static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node);
 
 /*
  * Variable: checkers
  *  An array indexed with a <enum ZenitNodeType> to get a <ZenitTypeChecker> function
  */
 static const ZenitTypeChecker checkers[] = {
-    [ZENIT_NODE_UINT]       = (ZenitTypeChecker) &visit_primitive_node,
-    [ZENIT_NODE_VARIABLE]   = (ZenitTypeChecker) &visit_variable_node,
-    [ZENIT_NODE_ARRAY]      = (ZenitTypeChecker) &visit_array_node,
-    [ZENIT_NODE_IDENTIFIER] = (ZenitTypeChecker) &visit_identifier_node,
-    [ZENIT_NODE_REFERENCE]  = (ZenitTypeChecker) &visit_reference_node,
-    [ZENIT_NODE_CAST]       = (ZenitTypeChecker) &visit_cast_node,
-    [ZENIT_NODE_FIELD_DECL]      = (ZenitTypeChecker) &visit_field_decl_node,
-    [ZENIT_NODE_STRUCT_DECL]     = (ZenitTypeChecker) &visit_struct_decl_node,
+    [ZENIT_NODE_UINT]           = (ZenitTypeChecker) &visit_primitive_node,
+    [ZENIT_NODE_VARIABLE]       = (ZenitTypeChecker) &visit_variable_node,
+    [ZENIT_NODE_ARRAY]          = (ZenitTypeChecker) &visit_array_node,
+    [ZENIT_NODE_IDENTIFIER]     = (ZenitTypeChecker) &visit_identifier_node,
+    [ZENIT_NODE_REFERENCE]      = (ZenitTypeChecker) &visit_reference_node,
+    [ZENIT_NODE_CAST]           = (ZenitTypeChecker) &visit_cast_node,
+    [ZENIT_NODE_FIELD_DECL]     = (ZenitTypeChecker) &visit_field_decl_node,
+    [ZENIT_NODE_STRUCT_DECL]    = (ZenitTypeChecker) &visit_struct_decl_node,
+    [ZENIT_NODE_STRUCT]         = (ZenitTypeChecker) &visit_struct_node,
 };
 
 /*
@@ -331,6 +333,47 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
     fl_array_free(names);
 }
 
+static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node)
+{
+    struct ZenitScope *struct_scope = NULL;
+    
+    if (struct_node->name != NULL)
+        struct_scope = zenit_program_get_scope(ctx->program, ZENIT_SCOPE_STRUCT, struct_node->name);
+
+    for (size_t i=0; i < fl_array_length(struct_node->members); i++)
+    {
+        if (struct_node->members[i]->type == ZENIT_NODE_FIELD)
+        {
+            struct ZenitFieldNode *field_node = (struct ZenitFieldNode*) struct_node->members[i];
+            struct ZenitSymbol *value_symbol = visit_node(ctx, field_node->value);
+
+            if (struct_scope == NULL)
+                continue;
+
+            struct ZenitSymbol *field_decl_symbol = zenit_scope_get_symbol(struct_scope, field_node->name);
+
+            if (field_decl_symbol == NULL)
+                continue; // The resolve pass should have added an error in this case
+
+            bool is_var_type_defined = is_type_defined(ctx->program, field_decl_symbol->typeinfo);
+
+            // We check types to make sure the assignment is valid, but we do it only if
+            // the variable type is valid, because if not, we might be targeting a false-positive
+            // error
+            if (is_var_type_defined && !zenit_type_is_assignable_from(field_decl_symbol->typeinfo, value_symbol->typeinfo))
+            {
+                zenit_context_error(ctx, field_node->base.location, ZENIT_ERROR_TYPE_MISSMATCH, 
+                    "Cannot assign from type '%s' to '%s'", 
+                    zenit_type_to_string(value_symbol->typeinfo), 
+                    zenit_type_to_string(field_decl_symbol->typeinfo)
+                );
+            }
+        }
+    }
+
+    return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) struct_node);
+}
+
 static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node)
 {
     return zenit_program_get_symbol(ctx->program, field_node->name);
@@ -341,8 +384,12 @@ static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, stru
     // Visit the attributes and its properties
     visit_attribute_node_map(ctx, &struct_node->attributes);
 
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_STRUCT, struct_node->name);
+
     for (size_t i=0; i < fl_array_length(struct_node->members); i++)
         visit_node(ctx, struct_node->members[i]);
+
+    zenit_program_pop_scope(ctx->program);
 
     return NULL;
 }

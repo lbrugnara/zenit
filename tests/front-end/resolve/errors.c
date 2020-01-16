@@ -19,19 +19,25 @@ void zenit_test_resolve_errors(void)
         "struct A { a: uint8; a: uint16; }"     "\n"
         "struct B { b: uint8; }"                "\n"
         "struct B { b: uint8; }"                "\n"
+        "var b1 = B { b: 1, c: 2 };"            "\n"
+        "struct Point { x: uint8; y: uint8; }"  "\n"
+        "var p = Point { x: 1 };"               "\n"
+        "var p2 : Point = { y: 1 };"            "\n" // Here '{ y: 1 }' is resolved as an unnamed struct, it will fail later in the type check
     ;
 
     struct TestCase {
         enum ZenitErrorType error;
         const char *message;
     } tests[] = {
-        { ZENIT_ERROR_DUPLICATED_SYMBOL,    "sym_a already exists"                 },
-        { ZENIT_ERROR_MISSING_SYMBOL,       "sym_not_defined does not exist"       },
-        { ZENIT_ERROR_MISSING_SYMBOL,       "sym_not_defined2 does not exist"      },
-        { ZENIT_ERROR_MISSING_SYMBOL,       "unknown does not exist"               },
-        { ZENIT_ERROR_MISSING_SYMBOL,       "missing_symbol does not exist"        },
-        { ZENIT_ERROR_DUPLICATED_SYMBOL,    "struct A already has an 'a' field"    },
-        { ZENIT_ERROR_DUPLICATED_SYMBOL,    "struct B already exists"              },
+        { ZENIT_ERROR_DUPLICATED_SYMBOL,    "sym_a already exists"                      },
+        { ZENIT_ERROR_MISSING_SYMBOL,       "sym_not_defined does not exist"            },
+        { ZENIT_ERROR_MISSING_SYMBOL,       "sym_not_defined2 does not exist"           },
+        { ZENIT_ERROR_MISSING_SYMBOL,       "unknown does not exist"                    },
+        { ZENIT_ERROR_MISSING_SYMBOL,       "missing_symbol does not exist"             },
+        { ZENIT_ERROR_DUPLICATED_SYMBOL,    "struct A already has an 'a' field"         },
+        { ZENIT_ERROR_DUPLICATED_SYMBOL,    "struct B already exists"                   },
+        { ZENIT_ERROR_UNKNOWN_MEMBER,       "struct B does not contain a 'c' field"     },
+        { ZENIT_ERROR_UNINITIALIZED_MEMBER, "Member 'y' must be initialized"            },
     };
 
     size_t error_count = sizeof(tests) / sizeof(tests[0]);

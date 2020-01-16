@@ -47,6 +47,31 @@ struct ZenitSymbol* zenit_symtable_get(struct ZenitSymtable *symtable, const cha
     return (struct ZenitSymbol*) fl_hashtable_get(symtable->symbols, symbol_name);
 }
 
+struct ZenitSymbol** zenit_symtable_get_all(struct ZenitSymtable *symtable, bool include_temporals)
+{
+    struct FlListNode *tmp = fl_list_head(symtable->names);
+
+    if (tmp == NULL)
+        return NULL;
+
+    struct ZenitSymbol **symbols = fl_array_new(sizeof(struct ZenitSymbol*), 0);
+
+    while (tmp)
+    {
+        char *name = (char*) tmp->value;
+
+        if (name[0] != '%' || include_temporals)
+        {
+            struct ZenitSymbol *symbol = zenit_symtable_get(symtable, name);
+            symbols = fl_array_append(symbols, &symbol);
+        }
+
+        tmp = tmp->next;
+    }
+
+    return symbols;
+}
+
 struct ZenitSymbol* zenit_symtable_remove(struct ZenitSymtable *symtable, const char *symbol_name)
 {
     struct ZenitSymbol *symbol = fl_hashtable_get(symtable->symbols, symbol_name);

@@ -17,7 +17,7 @@ char* zenit_node_struct_decl_uid(struct ZenitStructDeclNode *struct_node)
     if (!struct_node)
         return NULL;
 
-    return fl_cstring_vdup("%%L%u:C%u_struct_decl{%s}", struct_node->base.location.line, struct_node->base.location.col, struct_node->name);
+    return fl_cstring_vdup("%%L%u:C%u_struct_decl_%s", struct_node->base.location.line, struct_node->base.location.col, struct_node->name);
 }
 
 char* zenit_node_struct_decl_dump(struct ZenitStructDeclNode *struct_node, char *output)

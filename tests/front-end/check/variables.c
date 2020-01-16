@@ -9,31 +9,32 @@
 #include "../../../src/front-end/program.h"
 #include "tests.h"
 
-void zenit_test_check_types_variables(void)
+void zenit_test_check_types_array(void)
 {
-    const char *zenit_source = 
-        "var a = [ [ 3, 4 ], [ 5, 6 ], [ 7, 8 ] ];"         "\n"
-        "var a_ref = &a;"                                   "\n"
-        "var a_ref_ref = &a_ref;"                           "\n"
-        "var sym_t : [1]uint8 = [ cast(0x1FF) ];"           "\n"
+    const char *source = 
+        "var a = [ [ 3, 4 ], [ 5, 6 ], [ 7, 8 ] ];"                     "\n"
+        "var a_ref = &a;"                                               "\n"
+        "var a_ref_ref = &a_ref;"                                       "\n"
+        "var sym_t : [1]uint8 = [ cast(0x1FF) ];"                       "\n"
         
-        "var l = [ 1, 2, 3];"                               "\n"
-        "var m : &[3]uint16 = &l;"                          "\n"
-        "var n : &[3]uint8 = &l;"                           "\n"
+        "var l = [ 1, 2, 3];"                                           "\n"
+        "var m : &[3]uint16 = &l;"                                      "\n"
+        "var n : &[3]uint8 = &l;"                                       "\n"
 
-        "var o = [ 0x1FF, 0x2FF, 0x3FF];"                   "\n"
-        "var p : &[3]uint8 = cast(&o);"                     "\n"
-        "var q : &[3]uint16 = &o;"                          "\n"
+        "var o = [ 0x1FF, 0x2FF, 0x3FF];"                               "\n"
+        "var p : &[3]uint8 = cast(&o);"                                 "\n"
+        "var q : &[3]uint16 = &o;"                                      "\n"
 
-        "var r = [ 0x1, 0x2 ];"                             "\n"
-        "var s : [2]uint16 = r;"                            "\n"
+        "var r = [ 0x1, 0x2 ];"                                         "\n"
+        "var s : [2]uint16 = r;"                                        "\n"
 
-        "var t : []&[][]uint8 = [ &a, a_ref ];"             "\n"
+        "var t : []&[][]uint8 = [ &a, a_ref ];"                         "\n"
 
-        "var u : [0]Astruct = [];"                          "\n"
-        "var v : [0]Astruct = u;"                           "\n"
-        "var w = u;"                                        "\n"
-        "struct Astruct { a: uint8; }"                      "\n" // No need to forward declare the struct
+        "var u : [0]Astruct = [];"                                      "\n"
+        "var v : [0]Astruct = u;"                                       "\n"
+        "var w = u;"                                                    "\n"
+
+        "struct Astruct { a: uint8; }"                                  "\n" // No need to forward declare the struct
     ;
 
     const char *tests[][2] = {
@@ -60,25 +61,42 @@ void zenit_test_check_types_variables(void)
         { "w",          "[0]Astruct"        },
     };
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
+    zenit_test_check_types(source, tests, sizeof(tests) / sizeof(tests[0]));
+}
 
-    fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
-    fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
-    fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
-    fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
-    
-    for (size_t i=0; i < sizeof(tests) / sizeof(tests[0]); i++)
-    {
-        const char **test = tests[i];
+void zenit_test_check_types_struct(void)
+{
+    const char *source = 
+        "struct Astruct { a: uint8; }"                                  "\n" // No need to forward declare the struct
 
-        fl_vexpect(zenit_program_has_symbol(ctx.program, test[0]), 
-            "Symbol '%s' must exist in the program", test[0]);
+        "var a1 = Astruct { a: 2 };"                                    "\n"
+        "var a2 : Astruct = { a: 2 };"                                  "\n"
+        "var a3 = a1;"                                                  "\n"
+        "var a4 = a2;"                                                  "\n"
 
-        struct ZenitSymbol *sym = zenit_program_get_symbol(ctx.program, test[0]);
+        "struct Bstruct { a: Astruct; }"                                "\n"
+        "var b1 = Bstruct { a: { a: 2 } };"                             "\n"
+        "var b2 : Bstruct = { a: { a: 2 } };"                           "\n"
+        "var b3 = Bstruct { a: Astruct { a: 2 } };"                     "\n"
+        "var b4 : Bstruct = { a: Astruct { a: 2 } };"                   "\n"
 
-        fl_vexpect(flm_cstring_equals(test[1], zenit_type_to_string(sym->typeinfo)), 
-            "Type of '%s' must be '%s'", test[0], test[1]);
-    }
-    
-    zenit_context_free(&ctx);
+        "struct Cstruct { a: Astruct; b: Bstruct; c: uint8; }"          "\n"
+        "var c1 = Cstruct { a: { a: 2 }, b: { a: { a: 3} }, c: 1 };"    "\n"
+    ;
+
+    const char *tests[][2] = {
+        { "a1",          "Astruct"          },
+        { "a2",          "Astruct"          },
+        { "a3",          "Astruct"          },
+        { "a4",          "Astruct"          },
+
+        { "b1",          "Bstruct"          },
+        { "b2",          "Bstruct"          },
+        { "b3",          "Bstruct"          },
+        { "b4",          "Bstruct"          },
+
+        { "c1",          "Cstruct"          },
+    };
+
+    zenit_test_check_types(source, tests, sizeof(tests) / sizeof(tests[0]));
 }

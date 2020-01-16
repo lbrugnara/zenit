@@ -190,8 +190,9 @@ void zenit_test_infer_variables_structs(void)
                 " (symbol p Point)"
                 " (symbol %L3:C23_uint uint8)"
                 " (symbol %L3:C29_uint uint8)"
-                " (symbol %L3:C18_struct Point)" // <- This is what we are looking: The temporal symbol for the struct assigned to p2 must be inferred as a Point
+                " (symbol %L3:C18_struct { x: uint8, y: uint8 })"   // <- At the inference pass, an unnamed struct remains unnamed...
                 " (symbol p2 Point)"
+                " (symbol %L3:C18_cast_impl Point)"                 // <- This symbols is the implicit cast from { x: uint8, y: uint8 } to Point
             " (scope struct Point"
                 " (symbol x uint8)"
                 " (symbol y uint8))))"

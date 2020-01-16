@@ -64,8 +64,10 @@ int main(int argc, char **argv)
             { "Inference errors",                           &zenit_test_infer_errors                },
         ),
         fl_test_suite("Check",
-            { "Type check success", &zenit_test_check_types_variables   },
-            { "Type check errors",  &zenit_test_check_types_errors      }
+            { "Type check arrays",          &zenit_test_check_types_array               },
+            { "Type check structs",         &zenit_test_check_types_struct              },
+            { "Type check variable errors", &zenit_test_check_types_variable_errors     },
+            { "Type check struct errors",   &zenit_test_check_types_struct_errors       },
         ),
         fl_test_suite("zirgen",
             { "Generate ZIR variables",     &zenit_test_generate_ir_variables   },

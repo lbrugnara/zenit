@@ -16,7 +16,7 @@ char* zenit_node_field_uid(struct ZenitFieldNode *field)
     if (!field)
         return NULL;
 
-    return fl_cstring_vdup("%%L%u:C%u_field{%s}", field->base.location.line, field->base.location.col, field->name);
+    return fl_cstring_vdup("%%L%u:C%u_field_%s", field->base.location.line, field->base.location.col, field->name);
 }
 
 char* zenit_node_field_dump(struct ZenitFieldNode *field, char *output)

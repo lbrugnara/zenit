@@ -57,12 +57,21 @@ void zenit_program_pop_scope(struct ZenitProgram *program)
 bool zenit_program_has_scope(struct ZenitProgram *program, enum ZenitScopeType type, const char *name)
 {
     // NOTE: For simplicity we use an array, we could replace this with a hashtable later
-    for (size_t i=0; i < fl_array_length(program->current_scope->children); i++)
+    struct ZenitScope *tmp_scope = program->current_scope;
+    do
     {
-        struct ZenitScope *scope = program->current_scope->children[i];
-        if (flm_cstring_equals(scope->id, name) && scope->type == type)
-            return true;
-    }
+        for (size_t i=0; i < fl_array_length(tmp_scope->children); i++)
+        {
+            struct ZenitScope *scope = tmp_scope->children[i];
+            if (flm_cstring_equals(scope->id, name) && scope->type == type)
+                return true;
+        }
+    
+        if (type == ZENIT_SCOPE_STRUCT)
+            tmp_scope = tmp_scope->parent;
+        else break;
+
+    } while (tmp_scope);
 
     return false;
 }
@@ -70,12 +79,21 @@ bool zenit_program_has_scope(struct ZenitProgram *program, enum ZenitScopeType t
 struct ZenitScope* zenit_program_get_scope(struct ZenitProgram *program, enum ZenitScopeType type, const char *name)
 {
     // NOTE: For simplicity we use an array, we could replace this with a hashtable later
-    for (size_t i=0; i < fl_array_length(program->current_scope->children); i++)
+    struct ZenitScope *tmp_scope = program->current_scope;
+    do
     {
-        struct ZenitScope *scope = program->current_scope->children[i];
-        if (flm_cstring_equals(scope->id, name) && scope->type == type)
-            return scope;
-    }
+        for (size_t i=0; i < fl_array_length(tmp_scope->children); i++)
+        {
+            struct ZenitScope *scope = tmp_scope->children[i];
+            if (flm_cstring_equals(scope->id, name) && scope->type == type)
+                return scope;
+        }
+
+        if (type == ZENIT_SCOPE_STRUCT)
+            tmp_scope = tmp_scope->parent;
+        else break;
+
+    } while (tmp_scope);    
 
     return NULL;
 }

@@ -19,7 +19,7 @@ char* zenit_node_reference_uid(struct ZenitReferenceNode *reference)
 
     char *expr_id = zenit_node_uid(reference->expression);
 
-    char *id = fl_cstring_vdup("%%L%u:C%u_ref{%s}", reference->base.location.line, reference->base.location.col, expr_id != NULL ? expr_id : "<missing>");
+    char *id = fl_cstring_vdup("%%L%u:C%u_ref_%s", reference->base.location.line, reference->base.location.col, expr_id != NULL ? expr_id : "<missing>");
 
     if (expr_id != NULL)
         fl_cstring_free(expr_id);

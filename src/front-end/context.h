@@ -54,6 +54,12 @@ enum ZenitErrorType {
 
     // Error taking a reference from an expression
     ZENIT_ERROR_INVALID_REFERENCE,
+
+    // A member of a compound type does not exist
+    ZENIT_ERROR_UNKNOWN_MEMBER,
+
+    // A member of a compound type is not initialized on type instance creation
+    ZENIT_ERROR_UNINITIALIZED_MEMBER,
 };
 
 /*

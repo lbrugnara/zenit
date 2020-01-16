@@ -23,7 +23,6 @@ static struct ZenitTypeInfo* build_type_info_from_declaration(struct ZenitContex
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_STRUCT)
     {
-        // FIXME: Add members once they are implemented
         struct ZenitStructTypeNode *struct_type_decl = (struct ZenitStructTypeNode*) type_decl;
         typeinfo = (struct ZenitTypeInfo*) zenit_type_struct_new(ZENIT_TYPE_SRC_HINT, struct_type_decl->name);
         typeinfo->sealed = true;

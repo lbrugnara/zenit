@@ -8,51 +8,7 @@
 #include "../../../src/front-end/symtable.h"
 #include "tests.h"
 
-struct ExpectedError {
-    enum ZenitErrorType type;
-    const char *message;
-} expected_errors[] = {
-    { ZENIT_ERROR_MISSING_SYMBOL, "'custom' type is not defined (<source>:%u:%u: %s)" },
-    
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign [2]uint8 to uint8 (<source>:%u:%u: %s)" },
-    
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign uint8 to [2]uint8 (<source>:%u:%u: %s)" },
-    
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign uint16 to uint8 (<source>:%u:%u: %s)" },
-    
-    { ZENIT_ERROR_INVALID_REFERENCE, "Cannot take a reference to a reference (<source>:%u:%u: %s)" },
-    
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from [2]uint16 to [2]uint8 (<source>:%u:%u: %s)" },
-    
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from uint8 to &uint8 (<source>:%u:%u: %s)" },
-
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from [0]custom to uint8 (<source>:%u:%u: %s)" },
-
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from &uint8 to uint8 (<source>:%u:%u: %s)" },
-    
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from [2]uint8 to [1]uint8 (<source>:%u:%u: %s)" },
-    
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from [2]uint8 to [1]uint8 (<source>:%u:%u: %s)" },
-    
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from uint8 to &uint8 (<source>:%u:%u: %s)" },
-    
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from uint8 to &uint8 (<source>:%u:%u: %s)" },
-    
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from uint16 to &uint8 (<source>:%u:%u: %s)" },
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign from [1]&uint8 to [2]&uint8 (<source>:%u:%u: %s)" },
-
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign from [1]&uint8 to [2]&uint8 (<source>:%u:%u: %s)" },
-    
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign from &uint8 to &[1]uint8 (<source>:%u:%u: %s)" },
-
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign from &[3]uint16 to &[3]uint8 (<source>:%u:%u: %s)" },
-
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from &uint8 to &uint16 (<source>:%u:%u: %s)" },
-
-    { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from &[2]uint8 to &[2]uint16 (<source>:%u:%u: %s)" },
-};
-
-void zenit_test_check_types_errors(void)
+void zenit_test_check_types_variable_errors(void)
 {
     const char *source = 
         "var sym_a : [0]custom = [];"                           "\n"
@@ -106,45 +62,63 @@ void zenit_test_check_types_errors(void)
         "var o = [ &m, &n ];"                                   "\n"
     ;
 
-    size_t error_count = sizeof(expected_errors) / sizeof(expected_errors[0]);
-    size_t run_errors = 0;
-    bool run_success = false;
+    struct ExpectedError expected_errors[] = {
+        { ZENIT_ERROR_MISSING_SYMBOL, "'custom' type is not defined (<source>:%u:%u: %s)" },
+        
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign [2]uint8 to uint8 (<source>:%u:%u: %s)" },
+        
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign uint8 to [2]uint8 (<source>:%u:%u: %s)" },
+        
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign uint16 to uint8 (<source>:%u:%u: %s)" },
+        
+        { ZENIT_ERROR_INVALID_REFERENCE, "Cannot take a reference to a reference (<source>:%u:%u: %s)" },
+        
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from [2]uint16 to [2]uint8 (<source>:%u:%u: %s)" },
+        
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from uint8 to &uint8 (<source>:%u:%u: %s)" },
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from [0]custom to uint8 (<source>:%u:%u: %s)" },
 
-    fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
-    fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
-    
-    run_success = zenit_infer_types(&ctx);
-    run_errors = zenit_context_error_count(&ctx);
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from &uint8 to uint8 (<source>:%u:%u: %s)" },
+        
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from [2]uint8 to [1]uint8 (<source>:%u:%u: %s)" },
+        
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from [2]uint8 to [1]uint8 (<source>:%u:%u: %s)" },
+        
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from uint8 to &uint8 (<source>:%u:%u: %s)" },
+        
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from uint8 to &uint8 (<source>:%u:%u: %s)" },
+        
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from uint16 to &uint8 (<source>:%u:%u: %s)" },
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign from [1]&uint8 to [2]&uint8 (<source>:%u:%u: %s)" },
 
-    if (run_errors != error_count)
-        zenit_context_print_errors(&ctx);
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign from [1]&uint8 to [2]&uint8 (<source>:%u:%u: %s)" },
+        
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign from &uint8 to &[1]uint8 (<source>:%u:%u: %s)" },
 
-    fl_expect("Type inference pass should not contain errors", run_success);
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign from &[3]uint16 to &[3]uint8 (<source>:%u:%u: %s)" },
 
-    run_success = zenit_check_types(&ctx);
-    run_errors = zenit_context_error_count(&ctx);
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from &uint8 to &uint16 (<source>:%u:%u: %s)" },
 
-    if (run_errors != error_count)
-        zenit_context_print_errors(&ctx);
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from &[2]uint8 to &[2]uint16 (<source>:%u:%u: %s)" },
+    };
 
-    fl_vexpect(!run_success && run_errors == error_count, "Type check pass must fail with %zu error(s) (errors: %zu)", error_count, run_errors);
+    zenit_test_check_type_errors(source, expected_errors, sizeof(expected_errors) / sizeof(expected_errors[0]));
+}
 
-    size_t i=0;
-    struct FlListNode *tmp = fl_list_head(ctx.errors);
-    while (tmp != NULL)
-    {
-        struct ZenitError *error = (struct ZenitError*) tmp->value;
+void zenit_test_check_types_struct_errors(void)
+{
+    const char *source =
+        "struct A { x: uint8; y: uint8; }"                  "\n"
+        "struct B { x: uint8; y: uint8; z: uint8; }"        "\n"
+        "var a = A { x: 0x1FF, y: [ 0x2FF ] };"             "\n"
+        "var b : B = A { x: 0, y: 0 };"                     "\n"
+    ;
+    struct ExpectedError expected_errors[] = {
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from uint16 to uint8"     },
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from [1]uint16 to uint8"  },
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from A to B"              },
+    };
 
-        fl_vexpect(error->type == expected_errors[i].type, 
-            expected_errors[i].message, 
-            error->location.line, error->location.col, error->message);
-
-        tmp = tmp->next;
-        i++;
-    }
-    
-
-    zenit_context_free(&ctx);
+    zenit_test_check_type_errors(source, expected_errors, sizeof(expected_errors) / sizeof(expected_errors[0]));
 }

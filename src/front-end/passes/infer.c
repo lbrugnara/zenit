@@ -22,7 +22,6 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
 static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast_node, struct ZenitTypeInfo *typehint);
 static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node, struct ZenitTypeInfo *typehint);
 static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node, struct ZenitTypeInfo *typehint);
-static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *field_node, struct ZenitTypeInfo *typehint);
 static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, struct ZenitTypeInfo *typehint);
 
 /*
@@ -38,7 +37,6 @@ static const ZenitTypeInferrer inferrers[] = {
     [ZENIT_NODE_CAST]           = (ZenitTypeInferrer) &visit_cast_node,
     [ZENIT_NODE_FIELD_DECL]     = (ZenitTypeInferrer) &visit_field_decl_node,
     [ZENIT_NODE_STRUCT_DECL]    = (ZenitTypeInferrer) &visit_struct_decl_node,
-    [ZENIT_NODE_FIELD]          = (ZenitTypeInferrer) &visit_field_node,
     [ZENIT_NODE_STRUCT]         = (ZenitTypeInferrer) &visit_struct_node,
 };
 
@@ -374,30 +372,39 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
     fl_array_free(names);
 }
 
-static struct ZenitSymbol* visit_field_node(struct ZenitContext *ctx, struct ZenitFieldNode *field_node, struct ZenitTypeInfo *typehint)
-{
-    visit_node(ctx, field_node->value, NULL);
-    return NULL;
-}
 
 static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, struct ZenitTypeInfo *typehint)
 {
     struct ZenitSymbol *struct_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) struct_node);
 
+    const char *struct_name = struct_node->name;
+
     if (struct_symbol->typeinfo->source == ZENIT_TYPE_SRC_INFERRED && typehint != NULL && typehint->type == ZENIT_TYPE_STRUCT)
     {
+        // NOTE: We are using the hint just to be able to pass type hints to the struct's members, we DON'T use it to
+        // infer the struct as whole
         struct ZenitStructTypeInfo *hint_struct = (struct ZenitStructTypeInfo*) typehint;
-        if (hint_struct->name != NULL)
-        {
-            zenit_symbol_set_type(struct_symbol, (struct ZenitTypeInfo*) hint_struct);
-            struct_symbol->typeinfo->source = ZENIT_TYPE_SRC_HINT;
-        }
-
-        struct_symbol->typeinfo->sealed = true;
+        struct_name = hint_struct->name;
     }
 
+    struct ZenitScope *struct_scope = NULL;
+    
+    if (struct_name != NULL)
+        struct_scope = zenit_program_get_scope(ctx->program, ZENIT_SCOPE_STRUCT, struct_name);
+
     for (size_t i=0; i < fl_array_length(struct_node->members); i++)
-        visit_node(ctx, struct_node->members[i], NULL);
+    {
+        if (struct_node->members[i]->type == ZENIT_NODE_FIELD)
+        {
+            struct ZenitFieldNode *field_node = (struct ZenitFieldNode*) struct_node->members[i];
+
+            struct ZenitSymbol *field_decl_symbol = struct_scope != NULL? zenit_scope_get_symbol(struct_scope, field_node->name) : NULL;
+
+            struct ZenitSymbol *value_symbol = visit_node(ctx, field_node->value, field_decl_symbol != NULL ? field_decl_symbol->typeinfo : NULL);
+        }
+    }
+
+    struct_symbol->typeinfo->sealed = true;
 
     return struct_symbol;
 }

@@ -276,17 +276,59 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
         return NULL;
 
     enum ZenitTypeSource source = ZENIT_TYPE_SRC_INFERRED;
+    struct ZenitScope *struct_scope = NULL;
+    struct ZenitSymbol **declared_fields = NULL;
 
     if (struct_node->name != NULL)
+    {
         source = ZENIT_TYPE_SRC_HINT;
+        struct_scope = zenit_program_get_scope(ctx->program, ZENIT_SCOPE_STRUCT, struct_node->name);
+
+        if (struct_scope == NULL)
+        {
+            zenit_context_error(ctx, struct_node->base.location, ZENIT_ERROR_MISSING_SYMBOL,
+                    "struct type '%s' is not defined", struct_node->name);
+        }
+        else
+        {
+            declared_fields = zenit_scope_get_symbols(struct_scope, false);
+        }
+    }
 
     struct ZenitStructTypeInfo *struct_type = zenit_type_struct_new(source, struct_node->name);
 
-    for (size_t i=0; i < fl_array_length(struct_node->members); i++)
+    size_t members_length = fl_array_length(struct_node->members);
+    
+    for (size_t i=0; i < members_length; i++)
     {
         if (struct_node->members[i]->type == ZENIT_NODE_FIELD)
         {
             struct ZenitFieldNode *field_node = (struct ZenitFieldNode*) struct_node->members[i];
+
+            if (struct_scope != NULL)
+            {
+                if (!zenit_scope_has_symbol(struct_scope, field_node->name))
+                {
+                    zenit_context_error(ctx, field_node->base.location, ZENIT_ERROR_UNKNOWN_MEMBER,
+                        "Member '%s' does not exist in struct %s", field_node->name, struct_node->name);
+                }
+                else
+                {
+                    // TODO: We can avoid the nested loop, but for now it is ok
+                    for (size_t i=0; i < fl_array_length(declared_fields); i++)
+                    {
+                        if (declared_fields[i] == NULL)
+                            continue;
+
+                        if (flm_cstring_equals(field_node->name, declared_fields[i]->name))
+                        {
+                            declared_fields[i] = NULL;
+                            break;
+                        }
+                    }
+                }
+            }
+
             struct ZenitSymbol *value_symbol = visit_node(ctx, field_node->value, pass);
     
             struct ZenitTypeInfo *typeinfo = NULL;
@@ -307,6 +349,32 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
         {
             zenit_context_error(ctx, struct_node->members[i]->location, ZENIT_ERROR_INTERNAL, "Unhandled struct member cannot be resolved.");
         }
+    }
+
+    if (declared_fields)
+    {
+        char *uninitialized_members = NULL;
+        
+        for (size_t i=0; i < fl_array_length(declared_fields); i++)
+        {
+            if (declared_fields[i] == NULL)
+                continue;
+
+            if (uninitialized_members == NULL)
+                uninitialized_members = fl_cstring_dup(declared_fields[i]->name);
+            else
+                fl_cstring_vappend(&uninitialized_members, ", %s", declared_fields[i]->name);
+        }
+
+        if (uninitialized_members != NULL)
+        {
+            zenit_context_error(ctx, struct_node->base.location, ZENIT_ERROR_UNINITIALIZED_MEMBER, 
+                    "Instance of struct %s has uninitialized members (%s)", struct_node->name, uninitialized_members);
+
+            fl_cstring_free(uninitialized_members);
+        }
+
+        fl_array_free(declared_fields);
     }
 
     return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) struct_node, (struct ZenitTypeInfo*) struct_type);
@@ -452,7 +520,6 @@ static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode
 {
     return symbol_resolvers[node->type](ctx, node, pass);
 }
-
 
 /*
  * Function: zenit_resolve_symbols
