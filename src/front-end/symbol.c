@@ -18,7 +18,7 @@ struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitTypeInfo *typ
 void zenit_symbol_set_type(struct ZenitSymbol *symbol, struct ZenitTypeInfo *typeinfo)
 {
     zenit_typeinfo_free(symbol->typeinfo);
-    symbol->typeinfo = zenit_typeinfo_copy(typeinfo);
+    symbol->typeinfo = typeinfo;
 }
 
 void zenit_symbol_free(struct ZenitSymbol *symbol)

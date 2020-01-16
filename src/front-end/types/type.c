@@ -67,29 +67,6 @@ char* zenit_type_to_string(struct ZenitType *type)
     return NULL;
 }
 
-struct ZenitType* zenit_type_copy(struct ZenitType *src_type)
-{
-    if (!src_type)
-        return NULL;
-
-    if (src_type->typekind == ZENIT_TYPE_STRUCT)
-        return (struct ZenitType*) zenit_type_struct_copy((struct ZenitStructType*) src_type);
-    
-    if (src_type->typekind == ZENIT_TYPE_REFERENCE)
-        return (struct ZenitType*) zenit_type_reference_copy((struct ZenitReferenceType*) src_type);
-    
-    if (src_type->typekind == ZENIT_TYPE_ARRAY)
-        return (struct ZenitType*) zenit_type_array_copy((struct ZenitArrayType*) src_type);
-    
-    if (src_type->typekind == ZENIT_TYPE_UINT)
-        return (struct ZenitType*) zenit_type_uint_copy((struct ZenitUintType*) src_type);
-    
-    if (src_type->typekind == ZENIT_TYPE_NONE)
-        return zenit_type_none_new();
-
-    return NULL;
-}
-
 bool zenit_type_equals(struct ZenitType *type_a, struct ZenitType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
@@ -111,34 +88,6 @@ bool zenit_type_equals(struct ZenitType *type_a, struct ZenitType *type_b)
         return type_b->typekind == ZENIT_TYPE_NONE;
     
     return false;
-}
-
-struct ZenitTypeInfo* zenit_type_unify(struct ZenitType *type_a, struct ZenitType *type_b)
-{
-    if (type_a == NULL || type_b == NULL)
-        return NULL;
-
-    if (type_a->typekind == ZENIT_TYPE_NONE)
-    {
-        if (type_b->typekind == ZENIT_TYPE_NONE)
-            return NULL;
-
-        return zenit_typeinfo_new(ZENIT_TYPE_SRC_INFERRED, false, zenit_type_copy(type_b));
-    }
-
-    if (type_a->typekind == ZENIT_TYPE_STRUCT)
-        return zenit_type_struct_unify((struct ZenitStructType*) type_a, type_b);
-    
-    if (type_a->typekind == ZENIT_TYPE_REFERENCE)
-        return zenit_type_reference_unify((struct ZenitReferenceType*) type_a, type_b);
-    
-    if (type_a->typekind == ZENIT_TYPE_ARRAY)
-        return zenit_type_array_unify((struct ZenitArrayType*) type_a, type_b);
-    
-    if (type_a->typekind == ZENIT_TYPE_UINT)
-        return zenit_type_uint_unify((struct ZenitUintType*) type_a, type_b);
-    
-    return NULL;
 }
 
 bool zenit_type_can_unify(struct ZenitType *type_a, struct ZenitType *type_b)

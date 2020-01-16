@@ -49,14 +49,6 @@ unsigned long zenit_type_uint_hash(struct ZenitUintType *typeinfo)
     return hash;
 }
 
-struct ZenitUintType* zenit_type_uint_copy(struct ZenitUintType *src_type)
-{
-    if (!src_type)
-        return NULL;
-
-    return zenit_type_uint_new(src_type->size);
-}
-
 char* zenit_type_uint_to_string(struct ZenitUintType *typeinfo)
 {
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
@@ -101,26 +93,6 @@ bool zenit_type_uint_is_castable_to(struct ZenitUintType *uint_type, struct Zeni
 
     // It is safe to cast between uints
     return target_type->typekind == ZENIT_TYPE_UINT;
-}
-
-struct ZenitTypeInfo* zenit_type_uint_unify(struct ZenitUintType *uint_type, struct ZenitType *type_b)
-{
-    if (uint_type == NULL || type_b == NULL)
-        return NULL;
-
-    if (type_b->typekind != ZENIT_TYPE_NONE && type_b->typekind != ZENIT_TYPE_UINT)
-        return NULL;
-
-    if (type_b->typekind == ZENIT_TYPE_NONE || zenit_type_uint_equals(uint_type, type_b))
-    {
-        struct ZenitTypeInfo *unified = zenit_typeinfo_new_uint(ZENIT_TYPE_SRC_INFERRED, false, zenit_type_uint_copy(uint_type));
-        return unified;
-    }
-
-    // At this point, type_b must be a uint
-    struct ZenitUintType *uint_b = (struct ZenitUintType*) type_b;
-    struct ZenitTypeInfo *unified = zenit_typeinfo_new_uint(ZENIT_TYPE_SRC_INFERRED, false, zenit_type_uint_copy(uint_type->size > uint_b->size ? uint_type : uint_b));
-    return unified;
 }
 
 bool zenit_type_uint_can_unify(struct ZenitUintType *uint_type, struct ZenitType *type_b)

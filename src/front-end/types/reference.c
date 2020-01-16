@@ -28,14 +28,6 @@ unsigned long zenit_type_reference_hash(struct ZenitReferenceType *type)
     return hash;
 }
 
-struct ZenitReferenceType* zenit_type_reference_copy(struct ZenitReferenceType *src_type)
-{
-    if (!src_type)
-        return NULL;
-
-    return zenit_type_reference_new(zenit_typeinfo_copy(src_type->element));
-}
-
 char* zenit_type_reference_to_string(struct ZenitReferenceType *type)
 {
     if (type == NULL)
@@ -110,31 +102,6 @@ bool zenit_type_reference_is_castable_to(struct ZenitReferenceType *reference, s
         return true;
 
     return false;
-}
-
-struct ZenitTypeInfo* zenit_type_reference_unify(struct ZenitReferenceType *ref_type, struct ZenitType *type_b)
-{
-    if (ref_type == NULL || type_b == NULL)
-        return NULL;
-
-    if (type_b->typekind == ZENIT_TYPE_NONE)
-        return zenit_typeinfo_new_reference(ZENIT_TYPE_SRC_INFERRED, false, zenit_type_reference_copy(ref_type));
-
-    if (type_b->typekind != ZENIT_TYPE_REFERENCE)
-        return NULL;
-
-    if (zenit_type_reference_equals(ref_type, type_b))
-        return zenit_typeinfo_new_reference(ZENIT_TYPE_SRC_INFERRED, false, zenit_type_reference_copy(ref_type));
-
-    struct ZenitReferenceType *ref_type_b = (struct ZenitReferenceType*) type_b;
-
-    if (!zenit_type_can_unify(ref_type->element->type, ref_type_b->element->type))
-        return NULL;
-
-    struct ZenitTypeInfo *unified_element_type = zenit_type_unify(ref_type->element->type, ref_type_b->element->type);
-    struct ZenitTypeInfo *unified = zenit_typeinfo_new_reference(ZENIT_TYPE_SRC_INFERRED, false, zenit_type_reference_new(unified_element_type));
-
-    return unified;
 }
 
 bool zenit_type_reference_can_unify(struct ZenitReferenceType *ref_type, struct ZenitType *type_b)

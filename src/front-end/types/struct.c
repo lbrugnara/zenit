@@ -3,17 +3,12 @@
 #include "struct.h"
 #include "typeinfo.h"
 
-struct StructMember {
-    const char *name;
-    struct ZenitTypeInfo *typeinfo;
-};
-
 void member_free(void *ptr)
 {
     if (!ptr)
         return;
 
-    struct StructMember *member = (struct StructMember*) ptr;
+    struct ZenitStructTypeMember *member = (struct ZenitStructTypeMember*) ptr;
     
     if (member->name)
         fl_cstring_free(member->name);
@@ -38,7 +33,7 @@ struct ZenitStructType* zenit_type_struct_new(char *name)
 
 void zenit_type_struct_add_member(struct ZenitStructType *type, const char *name, struct ZenitTypeInfo *typeinfo)
 {
-    struct StructMember *member = fl_malloc(sizeof(struct StructMember));
+    struct ZenitStructTypeMember *member = fl_malloc(sizeof(struct ZenitStructTypeMember));
 
     member->name = fl_cstring_dup(name);
     member->typeinfo = typeinfo;
@@ -61,28 +56,6 @@ unsigned long zenit_type_struct_hash(struct ZenitStructType *type)
 
     return hash;
 }
-
-struct ZenitStructType* zenit_type_struct_copy(struct ZenitStructType *src_type)
-{
-    if (!src_type)
-        return NULL;
-
-    struct ZenitStructType *copy = zenit_type_struct_new(src_type->name);
-
-    struct FlListNode *src_node = fl_list_head(src_type->members);
-
-    while (src_node)
-    {
-        struct StructMember *src_member = (struct StructMember*) src_node->value;
-
-        zenit_type_struct_add_member(copy, src_member->name, zenit_typeinfo_copy(src_member->typeinfo));
-
-        src_node = src_node->next;
-    }
-
-    return copy;
-}
-
 
 /*
  * Function: zenit_type_to_string
@@ -123,7 +96,7 @@ char* zenit_type_struct_to_string(struct ZenitStructType *type)
         struct FlListNode *tmp = fl_list_head(type->members);
         while (tmp != NULL)
         {
-            struct StructMember *member = (struct StructMember*) tmp->value;
+            struct ZenitStructTypeMember *member = (struct ZenitStructTypeMember*) tmp->value;
             fl_cstring_vappend(&string_value, "%s: %s", member->name, member->typeinfo ? zenit_type_to_string(member->typeinfo->type) : "<unknown>");
 
             tmp = tmp->next;
@@ -144,7 +117,7 @@ char* zenit_type_struct_to_string(struct ZenitStructType *type)
     return type->base.to_string.value;
 }
 
-static inline bool structurally_equals(struct ZenitStructType *type_a, struct ZenitStructType *type_b)
+bool zenit_type_struct_structurally_equals(struct ZenitStructType *type_a, struct ZenitStructType *type_b)
 {
     if (fl_list_length(type_a->members) != fl_list_length(type_b->members))
         return false;
@@ -153,13 +126,13 @@ static inline bool structurally_equals(struct ZenitStructType *type_a, struct Ze
 
     while (a_node)
     {
-        struct StructMember *a_member = (struct StructMember*) a_node->value;
+        struct ZenitStructTypeMember *a_member = (struct ZenitStructTypeMember*) a_node->value;
 
         struct FlListNode *b_node = fl_list_head(type_b->members);
         bool a_exists_in_b = false;
         while (b_node)
         {
-            struct StructMember *b_member = (struct StructMember*) b_node->value;
+            struct ZenitStructTypeMember *b_member = (struct ZenitStructTypeMember*) b_node->value;
 
             if (flm_cstring_equals(a_member->name, b_member->name))
             {
@@ -167,7 +140,7 @@ static inline bool structurally_equals(struct ZenitStructType *type_a, struct Ze
                 if (a_member->typeinfo->type->typekind != ZENIT_TYPE_STRUCT || b_member->typeinfo->type->typekind != ZENIT_TYPE_STRUCT)
                     equals = zenit_type_equals(a_member->typeinfo->type, b_member->typeinfo->type);
                 else
-                    equals = structurally_equals((struct ZenitStructType*) a_member->typeinfo->type, (struct ZenitStructType*) b_member->typeinfo->type);
+                    equals = zenit_type_struct_structurally_equals((struct ZenitStructType*) a_member->typeinfo->type, (struct ZenitStructType*) b_member->typeinfo->type);
                 
                 if (equals)
                 {
@@ -204,7 +177,7 @@ bool zenit_type_struct_equals(struct ZenitStructType *type_a, struct ZenitType *
         return false;
 
     // Structural equality
-    return structurally_equals(type_a, type_b_struct);
+    return zenit_type_struct_structurally_equals(type_a, type_b_struct);
 }
 
 bool zenit_type_struct_is_assignable_from(struct ZenitStructType *target_type, struct ZenitType *from_type)
@@ -221,7 +194,7 @@ bool zenit_type_struct_is_assignable_from(struct ZenitStructType *target_type, s
         return flm_cstring_equals(target_type->name, struct_from_type->name);
 
     // Structural equality (we can safely convert between struturally equals objects)
-    return structurally_equals(target_type, struct_from_type);
+    return zenit_type_struct_structurally_equals(target_type, struct_from_type);
 }
 
 bool zenit_type_struct_is_castable_to(struct ZenitStructType *struct_type, struct ZenitType *target_type)
@@ -234,32 +207,6 @@ bool zenit_type_struct_is_castable_to(struct ZenitStructType *struct_type, struc
 
     // If we can assign the struct to a target type instance, we can cast to it too
     return zenit_type_is_assignable_from(target_type, (struct ZenitType*) struct_type);
-}
-
-struct ZenitTypeInfo* zenit_type_struct_unify(struct ZenitStructType *struct_type, struct ZenitType *type_b)
-{
-    if (struct_type == NULL || type_b == NULL)
-        return NULL;
-
-    if (type_b->typekind == ZENIT_TYPE_NONE)
-        return zenit_typeinfo_new_struct(ZENIT_TYPE_SRC_INFERRED, false, zenit_type_struct_copy(struct_type));
-
-    if (type_b->typekind != ZENIT_TYPE_STRUCT)
-        return NULL;
-
-    if (zenit_type_struct_equals(struct_type, type_b))
-        return zenit_typeinfo_new_struct(ZENIT_TYPE_SRC_INFERRED, false, zenit_type_struct_copy(struct_type));
-
-    struct ZenitStructType *struct_type_b = (struct ZenitStructType*) type_b;
-
-    // If they are structurally equals, we just copy one of them and return an unnamed struct
-    // (an unnamed struct can be casted or assigned to a named struct as long as they are structurally
-    // equals and the other way around)
-    if (structurally_equals(struct_type, struct_type_b))
-        return zenit_typeinfo_new_struct(ZENIT_TYPE_SRC_INFERRED, false, zenit_type_struct_new(NULL));
-
-    // FIXME: Let's assume we can't unify structurally inequal structs
-    return NULL;
 }
 
 bool zenit_type_struct_can_unify(struct ZenitStructType *struct_type, struct ZenitType *type_b)

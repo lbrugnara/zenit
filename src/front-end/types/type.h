@@ -126,37 +126,6 @@ char* zenit_type_to_string(struct ZenitType *type);
  */
 bool zenit_type_equals(struct ZenitType *type_a, struct ZenitType *type_b);
 
-/*
- * Function: zenit_type_copy
- *  Returns a new object that is a copy of the source object
- *
- * Parameters:
- *  <struct ZenitType> *src_type: Type object to be copied
- *
- * Returns:
- *  <struct ZenitType>*: New object copied from the source object
- * 
- */
-struct ZenitType* zenit_type_copy(struct ZenitType *src_type);
-
-/*
- * Function: zenit_type_unify
- *  Searches for a common ancestor between *type_a* and *type_b*.
- *
- * Parameters:
- *  <struct ZenitType> *type_a: Type object
- *  <struct ZenitType> *type_b: Type object
- *  <struct ZenitType> **unified: If a common ancestor between A and B exists, and *unified* is not NULL, a
- *   copy of the common ancestor will be allocated in the pointer pointed by this parameter.
- * 
- * Returns:
- *  <bool>: *true* if a common ancestor between types A and B exists, otherwise, this function returns *false*.
- *
- * Notes:
- *  If *unified* is NULL, this function does not allocate memory and it just returns *true* or *false*.
- */
-struct ZenitTypeInfo* zenit_type_unify(struct ZenitType *type_a, struct ZenitType *type_b);
-
 bool zenit_type_can_unify(struct ZenitType *type_a, struct ZenitType *type_b);
 
 /*

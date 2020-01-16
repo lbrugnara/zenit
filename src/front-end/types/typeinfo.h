@@ -3,7 +3,12 @@
 
 #include <stdbool.h>
 #include "type.h"
-#include "system.h"
+#include "type.h"
+#include "array.h"
+#include "none.h"
+#include "uint.h"
+#include "reference.h"
+#include "struct.h"
 
 static struct ZenitTypeInfo* zenit_typeinfo_new(enum ZenitTypeSource source, bool sealed, struct ZenitType *type)
 {
@@ -35,18 +40,13 @@ static inline struct ZenitTypeInfo* zenit_typeinfo_new_struct(enum ZenitTypeSour
     return zenit_typeinfo_new(source, sealed, (struct ZenitType*) struct_type);
 }
 
-static inline struct ZenitTypeInfo* zenit_typeinfo_copy(struct ZenitTypeInfo *typeinfo)
-{
-    return zenit_typeinfo_new(typeinfo->source, typeinfo->sealed, zenit_type_copy(typeinfo->type));
-}
-
 static inline void zenit_typeinfo_free(struct ZenitTypeInfo *typeinfo)
 {
     if (!typeinfo)
         return;
 
-    if (typeinfo->type)
-        zenit_type_free(typeinfo->type);
+    //if (typeinfo->type)
+    //    zenit_type_free(typeinfo->type);
 
     fl_free(typeinfo);
 }

@@ -27,17 +27,6 @@ unsigned long zenit_type_array_hash(struct ZenitArrayType *type)
     return hash;
 }
 
-struct ZenitArrayType* zenit_type_array_copy(struct ZenitArrayType *source)
-{
-    if (!source)
-        return NULL;
-
-    struct ZenitArrayType *dest = zenit_type_array_new(zenit_typeinfo_copy(source->member_type));
-    dest->length = source->length;
-
-    return dest;
-}
-
 char* zenit_type_array_to_string(struct ZenitArrayType *type)
 {
     if (type == NULL)
@@ -128,35 +117,6 @@ bool zenit_type_array_is_castable_to(struct ZenitArrayType *array_type, struct Z
         return false;
 
     return zenit_type_is_castable_to(array_type->member_type->type, target_array_type->member_type->type);
-}
-
-struct ZenitTypeInfo* zenit_type_array_unify(struct ZenitArrayType *array_type, struct ZenitType *type_b)
-{
-    if (array_type == NULL || type_b == NULL)
-        return NULL;
-
-    if (type_b->typekind == ZENIT_TYPE_NONE)
-        return zenit_typeinfo_new_array(ZENIT_TYPE_SRC_INFERRED, false, zenit_type_array_copy(array_type));
-
-    if (type_b->typekind != ZENIT_TYPE_ARRAY)
-        return NULL;
-
-    if (zenit_type_array_equals(array_type, type_b))
-        return zenit_typeinfo_new_array(ZENIT_TYPE_SRC_INFERRED, false, zenit_type_array_copy(array_type));
-
-    struct ZenitArrayType *arr_type_b = (struct ZenitArrayType*) type_b;
-
-    if (array_type->length != arr_type_b->length)
-        return NULL;
-
-    if (!zenit_type_can_unify(array_type->member_type->type, arr_type_b->member_type->type))
-        return NULL;
-    
-    struct ZenitTypeInfo *unified_member_type = zenit_type_unify(array_type->member_type->type, arr_type_b->member_type->type);
-    struct ZenitArrayType *unified_array = zenit_type_array_new(unified_member_type);
-    unified_array->length = array_type->length;
-
-    return zenit_typeinfo_new_array(ZENIT_TYPE_SRC_INFERRED, false, unified_array);
 }
 
 bool zenit_type_array_can_unify(struct ZenitArrayType *array_type, struct ZenitType *type_b)

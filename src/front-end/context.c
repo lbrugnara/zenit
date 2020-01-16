@@ -44,6 +44,7 @@ struct ZenitContext zenit_context_new(enum ZenitSourceType type, const char *inp
     struct ZenitContext ctx = { 
         .program = zenit_program_new(),
         .srcinfo = zenit_source_new(type, input),
+        .types = zenit_typesys_new(),
         .errors = NULL
     };
 
@@ -71,6 +72,9 @@ void zenit_context_free(struct ZenitContext *ctx)
 
     if (ctx->errors)
         fl_list_free(ctx->errors);
+
+    if (ctx->types)
+        zenit_typesys_free(ctx->types);
 }
 
 /*
