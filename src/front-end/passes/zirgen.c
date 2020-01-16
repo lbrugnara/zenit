@@ -19,7 +19,7 @@
         }
 
 static void import_zir_symbol_from_zenit_symbol(struct ZenitContext *ctx, struct ZenitSymbol *symbol, struct ZirProgram *program, bool global_symbol);
-static inline struct ZirTypeInfo* new_zir_type_from_zenit_type(struct ZirProgram *program, struct ZenitTypeInfo *zenit_type);
+static inline struct ZirTypeInfo* new_zir_type_from_zenit_type(struct ZirProgram *program, struct ZenitType *zenit_type);
 static struct ZirAttributeMap zenit_attr_to_zir_attr(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitAttributeNodeMap zenit_attrs);
 
 /*
@@ -59,7 +59,7 @@ static const ZirGenerator generators[] = {
 
 static void import_zir_symbol_from_zenit_symbol(struct ZenitContext *ctx, struct ZenitSymbol *symbol, struct ZirProgram *program, bool global_symbol)
 {
-    struct ZirSymbol *zir_symbol = zir_symbol_new(symbol->name, new_zir_type_from_zenit_type(program, symbol->typeinfo));
+    struct ZirSymbol *zir_symbol = zir_symbol_new(symbol->name, new_zir_type_from_zenit_type(program, symbol->typeinfo.type));
 
     zir_program_add_symbol(program, zir_symbol);
 }
@@ -76,14 +76,11 @@ static struct ZirSymbol* new_temp_symbol(struct ZirProgram *program, struct ZirT
     return zir_symbol;
 }
 
-static inline struct ZirTypeInfo* new_zir_type_from_zenit_type(struct ZirProgram *program, struct ZenitTypeInfo *zenit_type)
+static inline struct ZirTypeInfo* new_zir_type_from_zenit_type(struct ZirProgram *program, struct ZenitType *zenit_type)
 {
-    if (zenit_type == NULL)
-        return NULL;
-
-    if (zenit_type->type->typekind == ZENIT_TYPE_UINT)
+    if (zenit_type->typekind == ZENIT_TYPE_UINT)
     {
-        struct ZenitUintType *zenit_uint = (struct ZenitUintType*) zenit_type->type;
+        struct ZenitUintType *zenit_uint = (struct ZenitUintType*) zenit_type;
 
         enum ZirUintTypeSize size;
         switch (zenit_uint->size)
@@ -104,22 +101,22 @@ static inline struct ZirTypeInfo* new_zir_type_from_zenit_type(struct ZirProgram
         return (struct ZirTypeInfo*) zir_type_uint_new(size);
     }
 
-    if (zenit_type->type->typekind == ZENIT_TYPE_REFERENCE)
+    if (zenit_type->typekind == ZENIT_TYPE_REFERENCE)
     {
-        struct ZenitReferenceType *zenit_ref = (struct ZenitReferenceType*) zenit_type->type;
+        struct ZenitReferenceType *zenit_ref = (struct ZenitReferenceType*) zenit_type;
         struct ZirTypeInfo *zir_element_type = new_zir_type_from_zenit_type(program, zenit_ref->element);
         return (struct ZirTypeInfo*) zir_type_reference_new(zir_element_type);
     }
 
-    if (zenit_type->type->typekind == ZENIT_TYPE_STRUCT)
+    if (zenit_type->typekind == ZENIT_TYPE_STRUCT)
     {
-        struct ZenitStructType *zenit_struct = (struct ZenitStructType*) zenit_type->type;
+        struct ZenitStructType *zenit_struct = (struct ZenitStructType*) zenit_type;
         return (struct ZirTypeInfo*) zir_type_struct_new(zenit_struct->name);
     }
 
-    if (zenit_type->type->typekind == ZENIT_TYPE_ARRAY)
+    if (zenit_type->typekind == ZENIT_TYPE_ARRAY)
     {
-        struct ZenitArrayType *zenit_array = (struct ZenitArrayType*) zenit_type->type;
+        struct ZenitArrayType *zenit_array = (struct ZenitArrayType*) zenit_type;
         
         struct ZirArrayTypeInfo *zir_array = zir_type_array_new();
 
@@ -129,7 +126,7 @@ static inline struct ZirTypeInfo* new_zir_type_from_zenit_type(struct ZirProgram
         return (struct ZirTypeInfo*) zir_array;
     }
 
-    if (zenit_type->type->typekind == ZENIT_TYPE_NONE)
+    if (zenit_type->typekind == ZENIT_TYPE_NONE)
         return zir_type_none_new();
 
     return NULL;
@@ -189,7 +186,7 @@ static struct ZirOperand* visit_cast_node(struct ZenitContext *ctx, struct ZirPr
     struct ZenitSymbol *zenit_cast_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) zenit_cast);
     
     // We use a temporal symbol for the cast's destination. We copy the type informaton from the Zenit cast's object type information
-    struct ZirSymbol *temp_symbol = new_temp_symbol(program, new_zir_type_from_zenit_type(program, zenit_cast_symbol->typeinfo));
+    struct ZirSymbol *temp_symbol = new_temp_symbol(program, new_zir_type_from_zenit_type(program, zenit_cast_symbol->typeinfo.type));
 
     // We create the cast instruction with the temporal symbol as the destination operand
     struct ZirCastInstruction *cast_instr = zir_instruction_cast_new((struct ZirOperand*) zir_operand_symbol_new(temp_symbol));
@@ -221,7 +218,7 @@ static struct ZirOperand* visit_uint_node(struct ZenitContext *ctx, struct ZirPr
     // First, we need to map the types and values between Zenit and ZIR
     union ZirUintValue zir_value;
 
-    switch (((struct ZenitUintType*) zenit_uint_symbol->typeinfo->type)->size)
+    switch (((struct ZenitUintType*) zenit_uint_symbol->typeinfo.type)->size)
     {
         case ZENIT_UINT_8:
             zir_value.uint8 = zenit_uint->value.uint8;
@@ -235,7 +232,7 @@ static struct ZirOperand* visit_uint_node(struct ZenitContext *ctx, struct ZirPr
     }
 
     // Then, we create a primitive operand, and we copy the type information from the Zenit node
-    struct ZirUintOperand *zir_uint = zir_operand_uint_new((struct ZirUintTypeInfo*) new_zir_type_from_zenit_type(program, zenit_uint_symbol->typeinfo), zir_value);
+    struct ZirUintOperand *zir_uint = zir_operand_uint_new((struct ZirUintTypeInfo*) new_zir_type_from_zenit_type(program, zenit_uint_symbol->typeinfo.type), zir_value);
 
     // Now, we can create the load instruction
     struct ZirLoadInstruction *load_instr = zir_instruction_load_new((struct ZirOperand*) zir_uint);
@@ -257,7 +254,7 @@ static struct ZirOperand* visit_reference_node(struct ZenitContext *ctx, struct 
 
     // We use the load instruction
     struct ZenitSymbol *zenit_ref_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) zenit_ref);
-    struct ZirReferenceTypeInfo *ref_zir_typeinfo = (struct ZirReferenceTypeInfo*) new_zir_type_from_zenit_type(program, zenit_ref_symbol->typeinfo);
+    struct ZirReferenceTypeInfo *ref_zir_typeinfo = (struct ZirReferenceTypeInfo*) new_zir_type_from_zenit_type(program, zenit_ref_symbol->typeinfo.type);
     struct ZirReferenceOperand *ref_operand = zir_operand_reference_new(ref_zir_typeinfo, (struct ZirSymbolOperand*) operand);
     struct ZirLoadInstruction *load_instr = zir_instruction_load_new((struct ZirOperand*) ref_operand);
 
@@ -310,7 +307,7 @@ static struct ZirOperand* visit_array_node(struct ZenitContext *ctx, struct ZirP
 {
     struct ZenitSymbol *zenit_array_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) zenit_array);
 
-    struct ZirArrayOperand *zir_array = zir_operand_array_new((struct ZirArrayTypeInfo*) new_zir_type_from_zenit_type(program, zenit_array_symbol->typeinfo));
+    struct ZirArrayOperand *zir_array = zir_operand_array_new((struct ZirArrayTypeInfo*) new_zir_type_from_zenit_type(program, zenit_array_symbol->typeinfo.type));
 
     // Visit the array's elements to get the operands
     for (size_t i=0; i < fl_array_length(zenit_array->elements); i++)
@@ -330,7 +327,7 @@ static struct ZirOperand* visit_field_decl_node(struct ZenitContext *ctx, struct
 {
     struct ZenitSymbol *zenit_symbol = zenit_program_get_symbol(ctx->program, zenit_field->name);
     
-    struct ZirSymbol *zir_symbol = zir_symbol_new(zenit_field->name, new_zir_type_from_zenit_type(program, zenit_symbol->typeinfo));
+    struct ZirSymbol *zir_symbol = zir_symbol_new(zenit_field->name, new_zir_type_from_zenit_type(program, zenit_symbol->typeinfo.type));
     
     zir_symbol = zir_program_add_symbol(program, zir_symbol);
 
@@ -371,7 +368,7 @@ static struct ZirOperand* visit_variable_node(struct ZenitContext *ctx, struct Z
 {
     struct ZenitSymbol *zenit_symbol = zenit_program_get_symbol(ctx->program, zenit_variable->name);
     
-    struct ZirSymbol *zir_symbol = zir_symbol_new(zenit_variable->name, new_zir_type_from_zenit_type(program, zenit_symbol->typeinfo));
+    struct ZirSymbol *zir_symbol = zir_symbol_new(zenit_variable->name, new_zir_type_from_zenit_type(program, zenit_symbol->typeinfo.type));
     
     zir_symbol = zir_program_add_symbol(program, zir_symbol);
 

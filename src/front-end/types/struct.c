@@ -1,7 +1,6 @@
 #include <fllib.h>
 #include <stdlib.h>
 #include "struct.h"
-#include "typeinfo.h"
 
 void member_free(void *ptr)
 {
@@ -12,9 +11,6 @@ void member_free(void *ptr)
     
     if (member->name)
         fl_cstring_free(member->name);
-        
-    if (member->typeinfo)
-        zenit_typeinfo_free(member->typeinfo);
 
     fl_free(member);
 }
@@ -31,14 +27,14 @@ struct ZenitStructType* zenit_type_struct_new(char *name)
     return type;
 }
 
-void zenit_type_struct_add_member(struct ZenitStructType *type, const char *name, struct ZenitTypeInfo *typeinfo)
+void zenit_type_struct_add_member(struct ZenitStructType *struct_type, const char *name, struct ZenitType *member_type)
 {
     struct ZenitStructTypeMember *member = fl_malloc(sizeof(struct ZenitStructTypeMember));
 
     member->name = fl_cstring_dup(name);
-    member->typeinfo = typeinfo;
+    member->type = member_type;
 
-    fl_list_append(type->members, member);
+    fl_list_append(struct_type->members, member);
 }
 
 unsigned long zenit_type_struct_hash(struct ZenitStructType *type)
@@ -97,7 +93,7 @@ char* zenit_type_struct_to_string(struct ZenitStructType *type)
         while (tmp != NULL)
         {
             struct ZenitStructTypeMember *member = (struct ZenitStructTypeMember*) tmp->value;
-            fl_cstring_vappend(&string_value, "%s: %s", member->name, member->typeinfo ? zenit_type_to_string(member->typeinfo->type) : "<unknown>");
+            fl_cstring_vappend(&string_value, "%s: %s", member->name, member->type ? zenit_type_to_string(member->type) : "<unknown>");
 
             tmp = tmp->next;
 
@@ -137,10 +133,10 @@ bool zenit_type_struct_structurally_equals(struct ZenitStructType *type_a, struc
             if (flm_cstring_equals(a_member->name, b_member->name))
             {
                 bool equals = false;
-                if (a_member->typeinfo->type->typekind != ZENIT_TYPE_STRUCT || b_member->typeinfo->type->typekind != ZENIT_TYPE_STRUCT)
-                    equals = zenit_type_equals(a_member->typeinfo->type, b_member->typeinfo->type);
+                if (a_member->type->typekind != ZENIT_TYPE_STRUCT || b_member->type->typekind != ZENIT_TYPE_STRUCT)
+                    equals = zenit_type_equals(a_member->type, b_member->type);
                 else
-                    equals = zenit_type_struct_structurally_equals((struct ZenitStructType*) a_member->typeinfo->type, (struct ZenitStructType*) b_member->typeinfo->type);
+                    equals = zenit_type_struct_structurally_equals((struct ZenitStructType*) a_member->type, (struct ZenitStructType*) b_member->type);
                 
                 if (equals)
                 {

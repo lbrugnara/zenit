@@ -1,8 +1,7 @@
 #include <fllib.h>
 #include "array.h"
-#include "typeinfo.h"
 
-struct ZenitArrayType* zenit_type_array_new(struct ZenitTypeInfo *member_type)
+struct ZenitArrayType* zenit_type_array_new(struct ZenitType *member_type)
 {
     struct ZenitArrayType *type = fl_malloc(sizeof(struct ZenitArrayType));
     type->base.typekind = ZENIT_TYPE_ARRAY;
@@ -16,7 +15,7 @@ unsigned long zenit_type_array_hash(struct ZenitArrayType *type)
     static const char *format = "[array][e:%lu]";
 
     char type_key[256] = { 0 };
-    snprintf(type_key, 256, format, type->length, zenit_type_hash(type->member_type->type));
+    snprintf(type_key, 256, format, type->length, zenit_type_hash(type->member_type));
 
     unsigned long hash = 5381;
     FlByte c;
@@ -53,7 +52,7 @@ char* zenit_type_array_to_string(struct ZenitArrayType *type)
     fl_cstring_vappend(&string_value, "%zu", type->length);
     fl_cstring_append(&string_value, "]");
 
-    fl_cstring_append(&string_value, zenit_type_to_string(type->member_type->type));
+    fl_cstring_append(&string_value, zenit_type_to_string(type->member_type));
 
     // Update the string representation
     type->base.to_string.version = type_hash;
@@ -74,7 +73,7 @@ bool zenit_type_array_equals(struct ZenitArrayType *type_a, struct ZenitType *ty
 
     struct ZenitArrayType *type_b_array = (struct ZenitArrayType*) type_b;
 
-    return type_a->length == type_b_array->length && zenit_type_equals(type_a->member_type->type, type_b_array->member_type->type);
+    return type_a->length == type_b_array->length && zenit_type_equals(type_a->member_type, type_b_array->member_type);
 }
 
 bool zenit_type_array_is_assignable_from(struct ZenitArrayType *target_type, struct ZenitType *from_type)
@@ -88,10 +87,10 @@ bool zenit_type_array_is_assignable_from(struct ZenitArrayType *target_type, str
         return false;
 
     // If rhs is an empty array, as long as the target type is not NONE, it is safe to assign
-    if (target_type->length == 0 && array_from_type->member_type->type->typekind == ZENIT_TYPE_NONE)
-        return target_type->member_type->type->typekind != ZENIT_TYPE_NONE;
+    if (target_type->length == 0 && array_from_type->member_type->typekind == ZENIT_TYPE_NONE)
+        return target_type->member_type->typekind != ZENIT_TYPE_NONE;
 
-    return zenit_type_is_assignable_from(target_type->member_type->type, array_from_type->member_type->type);
+    return zenit_type_is_assignable_from(target_type->member_type, array_from_type->member_type);
 }
 
 bool zenit_type_array_is_castable_to(struct ZenitArrayType *array_type, struct ZenitType *target_type)
@@ -116,7 +115,7 @@ bool zenit_type_array_is_castable_to(struct ZenitArrayType *array_type, struct Z
     if (array_type->length != target_array_type->length)
         return false;
 
-    return zenit_type_is_castable_to(array_type->member_type->type, target_array_type->member_type->type);
+    return zenit_type_is_castable_to(array_type->member_type, target_array_type->member_type);
 }
 
 bool zenit_type_array_can_unify(struct ZenitArrayType *array_type, struct ZenitType *type_b)
@@ -138,7 +137,7 @@ bool zenit_type_array_can_unify(struct ZenitArrayType *array_type, struct ZenitT
     if (array_type->length != arr_type_b->length)
         return false;
 
-    if (!zenit_type_can_unify(array_type->member_type->type, arr_type_b->member_type->type))
+    if (!zenit_type_can_unify(array_type->member_type, arr_type_b->member_type))
         return false;
 
     return true;
@@ -151,8 +150,6 @@ void zenit_type_array_free(struct ZenitArrayType *type)
 
     if (type->base.to_string.value != NULL)
         fl_cstring_free(type->base.to_string.value);
-
-    zenit_typeinfo_free(type->member_type);
 
     fl_free(type);
 }

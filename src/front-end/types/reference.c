@@ -1,9 +1,8 @@
 #include <fllib.h>
 #include <stdlib.h>
 #include "reference.h"
-#include "typeinfo.h"
 
-struct ZenitReferenceType* zenit_type_reference_new(struct ZenitTypeInfo *element)
+struct ZenitReferenceType* zenit_type_reference_new(struct ZenitType *element)
 {
     struct ZenitReferenceType *type = fl_malloc(sizeof(struct ZenitReferenceType));
     type->base.typekind = ZENIT_TYPE_REFERENCE;
@@ -17,7 +16,7 @@ unsigned long zenit_type_reference_hash(struct ZenitReferenceType *type)
     static const char *format = "[ref][e:%lu]";
 
     char type_key[256] = { 0 };
-    snprintf(type_key, 256, format, zenit_type_hash(type->element->type));
+    snprintf(type_key, 256, format, zenit_type_hash(type->element));
 
     unsigned long hash = 5381;
     FlByte c;
@@ -48,7 +47,7 @@ char* zenit_type_reference_to_string(struct ZenitReferenceType *type)
     }
 
     // We allocate memory for the string representation of this <struct ZenitTypeInfo> object
-    char *string_value = fl_cstring_vdup("&%s", zenit_type_to_string(type->element->type));
+    char *string_value = fl_cstring_vdup("&%s", zenit_type_to_string(type->element));
 
     // Update the string representation
     type->base.to_string.version = type_hash;
@@ -69,7 +68,7 @@ bool zenit_type_reference_equals(struct ZenitReferenceType *type_a, struct Zenit
 
     struct ZenitReferenceType *type_b_ref = (struct ZenitReferenceType*) type_b;
 
-    return zenit_type_equals(type_a->element->type, type_b_ref->element->type);
+    return zenit_type_equals(type_a->element, type_b_ref->element);
 }
 
 bool zenit_type_reference_is_assignable_from(struct ZenitReferenceType *target_type, struct ZenitType *from_type)
@@ -82,7 +81,7 @@ bool zenit_type_reference_is_assignable_from(struct ZenitReferenceType *target_t
 
     struct ZenitReferenceType *ref_from_type = (struct ZenitReferenceType*) from_type;
 
-    return zenit_type_is_assignable_from(target_type->element->type, ref_from_type->element->type);
+    return zenit_type_is_assignable_from(target_type->element, ref_from_type->element);
 }
 
 bool zenit_type_reference_is_castable_to(struct ZenitReferenceType *reference, struct ZenitType *target_type)
@@ -95,7 +94,7 @@ bool zenit_type_reference_is_castable_to(struct ZenitReferenceType *reference, s
         return true;
 
     if (target_type->typekind == ZENIT_TYPE_REFERENCE)
-        return zenit_type_is_assignable_from(reference->element->type, ((struct ZenitReferenceType*) target_type)->element->type);
+        return zenit_type_is_assignable_from(reference->element, ((struct ZenitReferenceType*) target_type)->element);
 
     // We can cast a reference to an unsigned integer
     if (target_type->typekind == ZENIT_TYPE_UINT)
@@ -120,7 +119,7 @@ bool zenit_type_reference_can_unify(struct ZenitReferenceType *ref_type, struct 
 
     struct ZenitReferenceType *ref_type_b = (struct ZenitReferenceType*) type_b;
 
-    return zenit_type_can_unify(ref_type->element->type, ref_type_b->element->type);
+    return zenit_type_can_unify(ref_type->element, ref_type_b->element);
 }
 
 void zenit_type_reference_free(struct ZenitReferenceType *type)
@@ -130,9 +129,6 @@ void zenit_type_reference_free(struct ZenitReferenceType *type)
 
     if (type->base.to_string.value != NULL)
         fl_cstring_free(type->base.to_string.value);
-
-    if (type->element)
-        zenit_typeinfo_free(type->element);
 
     fl_free(type);
 }

@@ -1,7 +1,6 @@
 #include <fllib.h>
 #include <stdlib.h>
 #include "uint.h"
-#include "typeinfo.h"
 
 static struct TypeMapping {
     char *string;

@@ -9,7 +9,6 @@
 #include "uint.h"
 #include "reference.h"
 #include "struct.h"
-#include "typeinfo.h"
 
 struct ZenitTypeSystem {
     FlHashtable pool;
@@ -18,9 +17,9 @@ struct ZenitTypeSystem {
 
 struct ZenitTypeSystem* zenit_typesys_new(void);
 
-struct ZenitArrayType* zenit_typesys_new_array(struct ZenitTypeSystem *typesys, struct ZenitTypeInfo *member_type);
+struct ZenitArrayType* zenit_typesys_new_array(struct ZenitTypeSystem *typesys, struct ZenitType *member_type);
 struct ZenitType* zenit_typesys_new_none(struct ZenitTypeSystem *typesys);
-struct ZenitReferenceType* zenit_typesys_new_reference(struct ZenitTypeSystem *typesys, struct ZenitTypeInfo *element);
+struct ZenitReferenceType* zenit_typesys_new_reference(struct ZenitTypeSystem *typesys, struct ZenitType *element);
 struct ZenitStructType* zenit_typesys_new_struct(struct ZenitTypeSystem *typesys, char *name);
 struct ZenitUintType* zenit_typesys_new_uint(struct ZenitTypeSystem *typesys, enum ZenitUintTypeSize size);
 
@@ -30,9 +29,7 @@ struct ZenitReferenceType* zenit_typesys_copy_reference(struct ZenitTypeSystem *
 struct ZenitStructType* zenit_typesys_copy_struct(struct ZenitTypeSystem *typesys, struct ZenitStructType *src_struct_type);
 struct ZenitUintType* zenit_typesys_copy_uint(struct ZenitTypeSystem *typesys, struct ZenitUintType *src_uint_type);
 
-struct ZenitTypeInfo* zenit_typesys_unify_type(struct ZenitTypeSystem *typesys, struct ZenitType *type_a, struct ZenitType *type_b);
-
-struct ZenitTypeInfo* zenit_typesys_copy_typeinfo(struct ZenitTypeSystem *typesys, struct ZenitTypeInfo *typeinfo);
+bool zenit_typesys_unify_types(struct ZenitTypeSystem *typesys, struct ZenitType *type_a, struct ZenitType *type_b, struct ZenitTypeInfo *dest);
 
 void zenit_typesys_free(struct ZenitTypeSystem *system);
 

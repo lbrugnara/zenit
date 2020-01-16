@@ -6,11 +6,11 @@
 
 struct ZenitArrayType {
     struct ZenitType base;
-    struct ZenitTypeInfo *member_type;
+    struct ZenitType *member_type;
     size_t length;
 };
 
-struct ZenitArrayType* zenit_type_array_new(struct ZenitTypeInfo *member_type);
+struct ZenitArrayType* zenit_type_array_new(struct ZenitType *member_type);
 unsigned long zenit_type_array_hash(struct ZenitArrayType *typeinfo);
 char* zenit_type_array_to_string(struct ZenitArrayType *typeinfo);
 bool zenit_type_array_equals(struct ZenitArrayType *type_a, struct ZenitType *type_b);

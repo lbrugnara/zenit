@@ -5,10 +5,10 @@
 
 struct ZenitReferenceType {
     struct ZenitType base;
-    struct ZenitTypeInfo *element;
+    struct ZenitType *element;
 };
 
-struct ZenitReferenceType* zenit_type_reference_new(struct ZenitTypeInfo *element);
+struct ZenitReferenceType* zenit_type_reference_new(struct ZenitType *element);
 unsigned long zenit_type_reference_hash(struct ZenitReferenceType *typeinfo);
 char* zenit_type_reference_to_string(struct ZenitReferenceType *typeinfo);
 bool zenit_type_reference_equals(struct ZenitReferenceType *type_a, struct ZenitType *type_b);

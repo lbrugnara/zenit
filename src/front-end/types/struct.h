@@ -6,7 +6,7 @@
 
 struct ZenitStructTypeMember {
     const char *name;
-    struct ZenitTypeInfo *typeinfo;
+    struct ZenitType *type;
 };
 
 struct ZenitStructType {
@@ -16,7 +16,7 @@ struct ZenitStructType {
 };
 
 struct ZenitStructType* zenit_type_struct_new(char *name);
-void zenit_type_struct_add_member(struct ZenitStructType *type, const char *name, struct ZenitTypeInfo *typeifno);
+void zenit_type_struct_add_member(struct ZenitStructType *struct_type, const char *name, struct ZenitType *member_type);
 unsigned long zenit_type_struct_hash(struct ZenitStructType *type);
 char* zenit_type_struct_to_string(struct ZenitStructType *type);
 bool zenit_type_struct_equals(struct ZenitStructType *type_a, struct ZenitType *type_b);

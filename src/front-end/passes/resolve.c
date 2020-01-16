@@ -63,8 +63,11 @@ static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct Zeni
         return NULL;
 
     // A uint has an intrinsic type, which means it can't be changed by the inference pass
-    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) node,         
-            zenit_typeinfo_new_uint(ZENIT_TYPE_SRC_INTRINSIC, true, zenit_typesys_new_uint(ctx->types, node->size)));
+    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) node, &(struct ZenitTypeInfo) {
+        .source = ZENIT_TYPE_SRC_INTRINSIC,
+        .sealed = true,
+        .type = (struct ZenitType*) zenit_typesys_new_uint(ctx->types, node->size)
+    });
 }
 
 /*
@@ -87,12 +90,14 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
 
     struct ZenitSymbol *expr_symbol = visit_node(ctx, cast_node->expression, pass);
 
+    struct ZenitTypeInfo cast_decl = { 0 };
+    build_type_info_from_declaration(ctx, cast_node->type_decl, expr_symbol != NULL ? &expr_symbol->typeinfo : NULL, &cast_decl);
+
     // If the type hint is NULL, the <build_type_info_from_declaration> function returns a NONE type, so we are ok.
     // We DON'T make assumptions of the type with the expression being casted, because it is not helpful as the cast's goal is to 
     // "forget" about the original expression's type. If the cast does not have a type hint, we will need information from the context
     // to infer the type.
-    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node, 
-        build_type_info_from_declaration(ctx, cast_node->type_decl, expr_symbol != NULL ? expr_symbol->typeinfo : NULL));
+    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node, &cast_decl);
 }
 
 /*
@@ -148,13 +153,11 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
     if (expr_symbol == NULL)
         return NULL;
 
-    struct ZenitTypeInfo *expr_typeinfo = zenit_typesys_copy_typeinfo(ctx->types, expr_symbol->typeinfo);
-
-    // The source of the reference type comes from the source of the referenced expression
-    struct ZenitTypeInfo *typeinfo = zenit_typeinfo_new_reference(expr_symbol->typeinfo->source, false, 
-        zenit_typesys_new_reference(ctx->types, expr_typeinfo));
-
-    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) reference_node, typeinfo);
+    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) reference_node, &(struct ZenitTypeInfo) {
+        .source = expr_symbol->typeinfo.source,
+        .sealed = false,
+        .type = (struct ZenitType*) zenit_typesys_new_reference(ctx->types, zenit_typesys_copy_type(ctx->types, expr_symbol->typeinfo.type))
+    });
 }
 
 /*
@@ -176,7 +179,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 
     // We start creating an array type, we flag it as INFERRED because the truth is, at this point we can't make
     // sure of its type, so we will need help/confirmation from the inference and type check passes.
-    struct ZenitArrayType *array_type = zenit_typesys_new_array(ctx->types, zenit_typeinfo_new(ZENIT_TYPE_SRC_INFERRED, false, zenit_typesys_new_none(ctx->types)));
+    struct ZenitArrayType *array_type = zenit_typesys_new_array(ctx->types, zenit_typesys_new_none(ctx->types));
     
     // The length is the number of elements within the array initializer, that's something we know
     array_type->length = fl_array_length(array_node->elements);
@@ -194,7 +197,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
         struct ZenitSymbol *element_symbol = visit_node(ctx, array_node->elements[i], pass);
 
         // If any of these objects is NULL, the member type cannot be known in the resolve pass
-        if (element_symbol == NULL || element_symbol->typeinfo == NULL)
+        if (element_symbol == NULL || element_symbol->typeinfo.type == NULL)
             member_type_is_known = false;
 
         // If we already know it is unkown, just skip the checks
@@ -203,20 +206,23 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 
         // Check if the types are still equals, in case they are not, just set the flag to false to
         // skip the checks
-        if (last != NULL && !zenit_type_equals(last, element_symbol->typeinfo->type))
+        if (last != NULL && !zenit_type_equals(last, element_symbol->typeinfo.type))
             member_type_is_known = false;
         
         // Keep the last visited element's type
-        last = element_symbol->typeinfo->type;
+        last = element_symbol->typeinfo.type;
     }
 
     // If the member type is known, we can free the memory of the NONE type assigned to member_type
     // and copy the new member_type from one of the array elements
     if (member_type_is_known)
-        array_type->member_type->type = zenit_typesys_copy_type(ctx->types, last);
+        array_type->member_type = zenit_typesys_copy_type(ctx->types, last);
 
-    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) array_node, 
-            zenit_typeinfo_new_array(ZENIT_TYPE_SRC_INFERRED, false, array_type));
+    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) array_node, &(struct ZenitTypeInfo) {
+        .source = ZENIT_TYPE_SRC_INFERRED,
+        .sealed = false,
+        .type = (struct ZenitType*) array_type
+    });
 }
 
 /*
@@ -252,18 +258,12 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
             // Similar to the variable declaration, we take the property's type from 
             // its assignment (by now, properties do not have type hints, that's because
             // we are using "textual" attributes)
-            struct ZenitTypeInfo *typeinfo = NULL;
-            if (value_symbol != NULL)
-            {
-                typeinfo = zenit_typesys_copy_typeinfo(ctx->types, value_symbol->typeinfo);
-            }
-            else
-            {
-                typeinfo = zenit_typeinfo_new(ZENIT_TYPE_SRC_INFERRED, false, zenit_typesys_new_none(ctx->types));
-            }
-
             // Add a temporal symbol for the property
-            zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) prop, typeinfo);
+            zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) prop, &(struct ZenitTypeInfo) {
+                .source = value_symbol != NULL ? value_symbol->typeinfo.source : ZENIT_TYPE_SRC_INFERRED,
+                .sealed = value_symbol != NULL ? value_symbol->typeinfo.sealed : false,
+                .type = value_symbol != NULL ? zenit_typesys_copy_type(ctx->types, value_symbol->typeinfo.type) : zenit_typesys_new_none(ctx->types),
+            });
         }
         fl_array_free(properties);
     }
@@ -330,19 +330,16 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
             }
 
             struct ZenitSymbol *value_symbol = visit_node(ctx, field_node->value, pass);
-    
-            struct ZenitTypeInfo *typeinfo = NULL;
-            if (value_symbol)
-            {
-                typeinfo = zenit_typesys_copy_typeinfo(ctx->types, value_symbol->typeinfo);
-            }
-            else
-            {
-                // This means there are errors, but we need to continue somehow
-                typeinfo = zenit_typeinfo_new(ZENIT_TYPE_SRC_INFERRED, false, zenit_typesys_new_none(ctx->types));
-            }
 
-            zenit_type_struct_add_member(struct_type, field_node->name, typeinfo);
+            // We add the type members only if it is an unnamed struct, named structs
+            // are populated in the struct_decl visitor
+            if (struct_type->name == NULL)
+            {
+                zenit_type_struct_add_member(struct_type, field_node->name, 
+                    value_symbol != NULL 
+                        ? zenit_typesys_copy_type(ctx->types, value_symbol->typeinfo.type) 
+                        : zenit_typesys_new_none(ctx->types));
+            }
         }
         else
         {
@@ -376,8 +373,11 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
         fl_array_free(declared_fields);
     }
 
-    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) struct_node, 
-            zenit_typeinfo_new_struct(source, false, struct_type));
+    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) struct_node, &(struct ZenitTypeInfo) {
+        .source = source,
+        .sealed = false,
+        .type = (struct ZenitType*) struct_type
+    });
 }
 
 static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node, enum ResolvePass pass)
@@ -394,10 +394,11 @@ static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struc
     }
 
     // We need a type for our symbol
-    struct ZenitTypeInfo *typeinfo = build_type_info_from_declaration(ctx, field_node->type_decl, NULL);
+    struct ZenitTypeInfo typeinfo = { 0 };
+    build_type_info_from_declaration(ctx, field_node->type_decl, NULL, &typeinfo);
 
     // Create and insert the symbol in the table
-    return zenit_program_add_symbol(ctx->program, zenit_symbol_new(field_node->name, typeinfo));
+    return zenit_program_add_symbol(ctx->program, zenit_symbol_new(field_node->name, &typeinfo));
 }
 
 static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node, enum ResolvePass pass)
@@ -438,8 +439,13 @@ static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, stru
     // Now it's time to enter to the scope of the struct to visit its members
     zenit_program_enter_scope(ctx->program, scope);
 
+    struct ZenitStructType *struct_type = zenit_typesys_new_struct(ctx->types, struct_node->name);
+
     for (size_t i=0; i < fl_array_length(struct_node->members); i++)
-        visit_node(ctx, struct_node->members[i], pass);
+    {
+        struct ZenitSymbol *field_symbol = visit_node(ctx, struct_node->members[i], pass);
+        zenit_type_struct_add_member(struct_type, field_symbol->name, field_symbol->typeinfo.type);
+    }
 
     // We pop the scope and continue
     zenit_program_pop_scope(ctx->program);
@@ -479,27 +485,37 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     visit_attribute_node_map(ctx, &variable_node->attributes, pass);
 
     // We need a type for our symbol
-    struct ZenitTypeInfo *typeinfo = NULL;
+    struct ZenitSymbol *symbol = NULL;
     if (variable_node->type_decl)
     {
         // If the variable has a type hint, we should honor it
-        typeinfo = build_type_info_from_declaration(ctx, variable_node->type_decl, rhs_symbol ? rhs_symbol->typeinfo : NULL);
+        struct ZenitTypeInfo typeinfo = { 0 };
+        build_type_info_from_declaration(ctx, variable_node->type_decl, rhs_symbol ? &rhs_symbol->typeinfo : NULL, &typeinfo);
+        symbol = zenit_symbol_new(variable_node->name, &typeinfo);
     }
     else if (rhs_symbol)
     {
         // If the variable does not contain a type hint, we take the type from the 
         // right-hand side
-        typeinfo = zenit_typesys_copy_typeinfo(ctx->types, rhs_symbol->typeinfo);
+        symbol = zenit_symbol_new(variable_node->name, &(struct ZenitTypeInfo) {
+            .source = rhs_symbol->typeinfo.source,
+            .sealed = rhs_symbol->typeinfo.sealed,
+            .type = zenit_typesys_copy_type(ctx->types, rhs_symbol->typeinfo.type)
+        });
     }
     else
     {
         // This means the variable does not contain a type hint and the rhs does not
         // exist, which means there are errors, but we need to continue somehow
-        typeinfo = zenit_typeinfo_new(ZENIT_TYPE_SRC_INFERRED, false, zenit_typesys_new_none(ctx->types));
+        symbol = zenit_symbol_new(variable_node->name, &(struct ZenitTypeInfo) {
+            .source = ZENIT_TYPE_SRC_INFERRED,
+            .sealed = false,
+            .type = zenit_typesys_new_none(ctx->types)
+        });
     }
 
     // Create and insert the symbol in the table
-    return zenit_program_add_symbol(ctx->program, zenit_symbol_new(variable_node->name, typeinfo));
+    return zenit_program_add_symbol(ctx->program, symbol);
 }
 
 /*
@@ -531,7 +547,7 @@ void resolve_struct_type_members(struct ZenitContext *ctx, struct ZenitScope *sc
     {
         for (size_t i=0; i < fl_array_length(symbols); i++)
         {
-            if (symbols[i]->typeinfo->typekind != ZENIT_TYPE_STRUCT)
+            if (symbols[i]->typeinfo.typekind != ZENIT_TYPE_STRUCT)
                 continue;
 
             struct ZenitStructType *struct_type = (struct ZenitStructType*) symbols[i]->typeinfo;

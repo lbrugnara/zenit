@@ -11,7 +11,7 @@
  */
 struct ZenitSymbol {
     const char *name;
-    struct ZenitTypeInfo *typeinfo;
+    struct ZenitTypeInfo typeinfo;
 };
 
 /*
