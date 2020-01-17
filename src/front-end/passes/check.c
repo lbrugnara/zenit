@@ -103,7 +103,7 @@ typedef struct ZenitSymbol*(*ZenitTypeChecker)(struct ZenitContext *ctx, struct 
 
 // Visitor functions
 static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node);
-static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitUintNode *node);
+static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *node);
 static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *node);
 static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *node);
 static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node);
@@ -118,7 +118,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
  *  An array indexed with a <enum ZenitNodeType> to get a <ZenitTypeChecker> function
  */
 static const ZenitTypeChecker checkers[] = {
-    [ZENIT_NODE_UINT]           = (ZenitTypeChecker) &visit_primitive_node,
+    [ZENIT_NODE_UINT]           = (ZenitTypeChecker) &visit_uint_node,
     [ZENIT_NODE_VARIABLE]       = (ZenitTypeChecker) &visit_variable_node,
     [ZENIT_NODE_ARRAY]          = (ZenitTypeChecker) &visit_array_node,
     [ZENIT_NODE_IDENTIFIER]     = (ZenitTypeChecker) &visit_identifier_node,
@@ -164,7 +164,7 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
 }
 
 /*
- * Function: visit_primitive_node
+ * Function: visit_uint_node
  *  The primitive node doesn't need to check anything, it just
  *  returns its type information
  *
@@ -175,7 +175,7 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
  * Returns:
  *  struct ZenitSymbol* - The primitive's type information
  */
-static struct ZenitSymbol* visit_primitive_node(struct ZenitContext *ctx, struct ZenitUintNode *primitive)
+static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *primitive)
 {
     return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) primitive);
 }

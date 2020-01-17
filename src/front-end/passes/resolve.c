@@ -539,53 +539,7 @@ static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode
 {
     return symbol_resolvers[node->type](ctx, node, pass);
 }
-/*
-void resolve_struct_type_members(struct ZenitContext *ctx, struct ZenitScope *scope)
-{
-    struct ZenitSymbol **symbols = zenit_scope_get_symbols(scope, true);
 
-    if (scope->type != ZENIT_SCOPE_GLOBAL)
-        zenit_program_enter_scope(ctx->program, scope);
-
-    if (symbols != NULL)
-    {
-        for (size_t i=0; i < fl_array_length(symbols); i++)
-        {
-            if (symbols[i]->typeinfo.typekind != ZENIT_TYPE_STRUCT)
-                continue;
-
-            struct ZenitStructType *struct_type = (struct ZenitStructType*) symbols[i]->typeinfo;
-
-            // No need to work with the unnamed structs nor the structs that already contain members
-            if (struct_type->name == NULL || fl_list_head(struct_type->members) != NULL)
-                continue;
-
-            struct ZenitScope *struct_scope = zenit_program_get_scope(ctx->program, ZENIT_SCOPE_STRUCT, struct_type->name);
-
-            // Missing scope, maybe there is an error about it...
-            if (struct_scope == NULL)
-                continue;
-
-            struct ZenitSymbol **fields = zenit_scope_get_symbols(struct_scope, false);
-
-            for (size_t j=0; j < fl_array_length(fields); j++)
-                zenit_type_struct_add_member(struct_type, fields[j]->name, zenit_type_copy(fields[j]->typeinfo));
-
-            fl_array_free(fields);
-        }
-
-        fl_array_free(symbols);
-    }
-
-    for (size_t i=0; i < fl_array_length(scope->children); i++)
-    {
-        resolve_struct_type_members(ctx, scope->children[i]);
-    }
-
-    if (scope->type != ZENIT_SCOPE_GLOBAL)
-        zenit_program_pop_scope(ctx->program);
-}
-*/
 /*
  * Function: zenit_resolve_symbols
  *  We just iterate over the declarations visiting each node
@@ -602,12 +556,6 @@ bool zenit_resolve_symbols(struct ZenitContext *ctx)
 
     for (size_t i=0; i < fl_array_length(ctx->ast->decls); i++)
         visit_node(ctx, ctx->ast->decls[i], RESOLVE_ALL);
-
-    // FIXME: This is a hack to fill all the ZenitStructType* objects
-    // with the members declared in the struct definition. It would be ideal to use a pool
-    // of types for "sealed" types (primitives and named structs so far) because they don't 
-    // change after this pass (or ideally shouldn't)
-    //resolve_struct_type_members(ctx, ctx->program->global_scope);
 
     return errors == zenit_context_error_count(ctx);
 }
