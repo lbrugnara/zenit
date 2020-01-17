@@ -444,6 +444,10 @@ static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, stru
     for (size_t i=0; i < fl_array_length(struct_node->members); i++)
     {
         struct ZenitSymbol *field_symbol = visit_node(ctx, struct_node->members[i], pass);
+
+        if (field_symbol == NULL)
+            continue; // An error ocurred on the field decl node
+
         zenit_type_struct_add_member(struct_type, field_symbol->name, field_symbol->typeinfo.type);
     }
 
