@@ -94,7 +94,6 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
         {
             if (!zenit_type_equals(cast_symbol->typeinfo.type, unified.type))
             {
-                cast_symbol->typeinfo.source = ZENIT_TYPE_SRC_INFERRED;
                 cast_symbol->typeinfo.type = zenit_typesys_copy_type(ctx->types, unified.type);
             }
 
@@ -236,7 +235,6 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
                     {
                         if (!zenit_type_equals(array_symbol->typeinfo.type, unified.type))
                         {
-                            array_symbol->typeinfo.source = ZENIT_TYPE_SRC_INFERRED;
                             array_symbol->typeinfo.type = zenit_typesys_copy_type(ctx->types, unified.type);
                         }
 
@@ -261,7 +259,6 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
                         {
                             if (!zenit_type_equals(array_type->member_type, unified.type))
                             {
-                                array_symbol->typeinfo.source = ZENIT_TYPE_SRC_INFERRED;
                                 array_type->member_type = zenit_typesys_copy_type(ctx->types, unified.type);
                             }
 
@@ -306,7 +303,6 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
         {
             if (!zenit_type_equals(array_symbol->typeinfo.type, unified.type))
             {
-                array_symbol->typeinfo.source = ZENIT_TYPE_SRC_INFERRED;
                 array_symbol->typeinfo.type = zenit_typesys_copy_type(ctx->types, unified.type);
             }
 
@@ -407,7 +403,6 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
         {
             if (!zenit_type_equals(struct_symbol->typeinfo.type, unified.type))
             {
-                struct_symbol->typeinfo.source = ZENIT_TYPE_SRC_INFERRED;
                 struct_symbol->typeinfo.type = zenit_typesys_copy_type(ctx->types, unified.type);
             }
 
@@ -476,7 +471,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
                                                 variable_node->rvalue, 
                                                 &symbol->typeinfo.type, 
                                                 // If the variable has a declared type, we don't allow inference on the variable
-                                                symbol->typeinfo.source == ZENIT_TYPE_SRC_HINT
+                                                variable_node->type_decl != NULL
                                                     ? INFER_UNIDIRECTIONAL 
                                                     : INFER_BIDIRECTIONAL);
 
@@ -490,7 +485,6 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
         variable_node->rvalue = (struct ZenitNode*) cast_node;
 
         zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node, &(struct ZenitTypeInfo) {
-            .source = symbol->typeinfo.source,
             .type = zenit_typesys_copy_type(ctx->types, symbol->typeinfo.type),
         });
     }

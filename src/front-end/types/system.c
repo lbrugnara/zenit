@@ -207,7 +207,6 @@ bool zenit_typesys_unify_array(struct ZenitTypeSystem *typesys, struct ZenitArra
 
     if (type_b->typekind == ZENIT_TYPE_NONE)
     {
-        dest->source = ZENIT_TYPE_SRC_INFERRED;
         dest->type = (struct ZenitType*) zenit_typesys_copy_array(typesys, array_type);
         return true;
     }
@@ -217,7 +216,6 @@ bool zenit_typesys_unify_array(struct ZenitTypeSystem *typesys, struct ZenitArra
 
     if (zenit_type_array_equals(array_type, type_b))
     {
-        dest->source = ZENIT_TYPE_SRC_INFERRED;
         dest->type = (struct ZenitType*) zenit_typesys_copy_array(typesys, array_type);
         return true;
     }
@@ -238,7 +236,6 @@ bool zenit_typesys_unify_array(struct ZenitTypeSystem *typesys, struct ZenitArra
     struct ZenitArrayType *unified_array = zenit_typesys_new_array(typesys, unified_member_type.type);
     unified_array->length = array_type->length;
 
-    dest->source = ZENIT_TYPE_SRC_INFERRED;
     dest->type = (struct ZenitType*) unified_array;
 
     return true;
@@ -251,7 +248,6 @@ bool zenit_typesys_unify_reference(struct ZenitTypeSystem *typesys, struct Zenit
 
     if (type_b->typekind == ZENIT_TYPE_NONE)
     {
-        dest->source = ZENIT_TYPE_SRC_INFERRED;
         dest->type = (struct ZenitType*) zenit_typesys_copy_reference(typesys, ref_type);
         return true;
     }
@@ -261,7 +257,6 @@ bool zenit_typesys_unify_reference(struct ZenitTypeSystem *typesys, struct Zenit
 
     if (zenit_type_reference_equals(ref_type, type_b))
     {
-        dest->source = ZENIT_TYPE_SRC_INFERRED;
         dest->type = (struct ZenitType*) zenit_typesys_copy_reference(typesys, ref_type);
         return true;
     }
@@ -276,7 +271,6 @@ bool zenit_typesys_unify_reference(struct ZenitTypeSystem *typesys, struct Zenit
     if (!zenit_typesys_unify_types(typesys, ref_type->element, ref_type_b->element, &unified_element_type))
         return false;
 
-    dest->source = ZENIT_TYPE_SRC_INFERRED;
     dest->type = (struct ZenitType*) zenit_typesys_new_reference(typesys, unified_element_type.type);
 
     return true;
@@ -289,7 +283,6 @@ bool zenit_typesys_unify_struct(struct ZenitTypeSystem *typesys, struct ZenitStr
 
     if (type_b->typekind == ZENIT_TYPE_NONE)
     {
-        dest->source = ZENIT_TYPE_SRC_INFERRED;
         dest->type = (struct ZenitType*) zenit_typesys_copy_struct(typesys, struct_type);
         return true;
     }
@@ -299,7 +292,6 @@ bool zenit_typesys_unify_struct(struct ZenitTypeSystem *typesys, struct ZenitStr
 
     if (zenit_type_struct_equals(struct_type, type_b))
     {
-        dest->source = ZENIT_TYPE_SRC_INFERRED;
         dest->type = (struct ZenitType*) zenit_typesys_copy_struct(typesys, struct_type);
         return true;
     }
@@ -323,7 +315,6 @@ bool zenit_typesys_unify_struct(struct ZenitTypeSystem *typesys, struct ZenitStr
             struct_node = struct_node->next;
         }
 
-        dest->source = ZENIT_TYPE_SRC_INFERRED;
         dest->type = (struct ZenitType*) unified_struct;
         return true;
     }
@@ -342,14 +333,12 @@ bool zenit_typesys_unify_uint(struct ZenitTypeSystem *typesys, struct ZenitUintT
 
     if (type_b->typekind == ZENIT_TYPE_NONE || zenit_type_uint_equals(uint_type, type_b))
     {
-        dest->source = ZENIT_TYPE_SRC_INFERRED;
         dest->type = (struct ZenitType*) zenit_typesys_copy_uint(typesys, uint_type);
         return true;
     }
 
     // At this point, type_b must be a uint
     struct ZenitUintType *uint_b = (struct ZenitUintType*) type_b;
-    dest->source = ZENIT_TYPE_SRC_INFERRED;
     dest->type = (struct ZenitType*) zenit_typesys_copy_uint(typesys, uint_type->size > uint_b->size ? uint_type : uint_b);
     return true;
 }
@@ -364,7 +353,6 @@ bool zenit_typesys_unify_types(struct ZenitTypeSystem *typesys, struct ZenitType
         if (type_b->typekind == ZENIT_TYPE_NONE)
             return false;
 
-        dest->source = ZENIT_TYPE_SRC_INFERRED;
         dest->type = zenit_typesys_copy_type(typesys, type_b);
         return true;
     }

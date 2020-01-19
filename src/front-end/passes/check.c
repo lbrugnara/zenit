@@ -407,7 +407,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     bool is_var_type_defined = is_type_defined(ctx->program, symbol->typeinfo.type);
 
     // If the variable type is missing, we add an error
-    if (!is_var_type_defined && symbol->typeinfo.source == ZENIT_TYPE_SRC_HINT)
+    if (!is_var_type_defined && variable_node->type_decl != NULL)
     {
         struct ZenitType *type = get_undefined_type(ctx->program, symbol->typeinfo.type);
         

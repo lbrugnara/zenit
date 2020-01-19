@@ -106,19 +106,6 @@ bool zenit_type_uint_can_unify(struct ZenitUintType *uint_type, struct ZenitType
         return true;
 
     return true;
-    /*struct ZenitUintType *uint_type_b = (struct ZenitUintType*) type_b;
-
-    if (uint_type->size == uint_type_b->size)
-        return true;*/
-
-    /*// If B is smaller than A, the only way to "unify" them is by promoting B to
-    // the size of A, which means the type of B must have been inferred or must be intrinsic
-    // to the object holding the type, because a "user hinted" type cannot be changed.
-    if (uint_type->size > uint_type_b->size)
-        return uint_type_b->base.source != ZENIT_TYPE_SRC_HINT;
-
-    // This is the same as above but in the case A is smaller than B
-    return uint_type->base.source != ZENIT_TYPE_SRC_HINT;*/
 }
 
 void zenit_type_uint_free(struct ZenitUintType *typeinfo)

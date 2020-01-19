@@ -42,22 +42,6 @@ struct ZenitType {
 };
 
 /*
- * Enum: enum ZenitTypeSource
- *  Identifies the source of the type information
- *  present in a <struct ZenitTypeInfo> object
- *
- * Members:
- *  <ZENIT_TYPE_SRC_INTRINSIC> means the type information is intrinsic to the language construction being used, ex: an integer
- *  <ZENIT_TYPE_SRC_HINT> is used to inform to the user that the type information is being obtained from the type hint present in the expression ex: var a : uint8 = 0;
- *  <ZENIT_TYPE_SRC_INFERRED> this is used when the type information is inferred from its usage ex: var a = 0; // a is a uint8
- */
-enum ZenitTypeSource {
-    ZENIT_TYPE_SRC_INTRINSIC,
-    ZENIT_TYPE_SRC_HINT,
-    ZENIT_TYPE_SRC_INFERRED,
-};
-
-/*
  * Struct: struct ZenitTypeInfo
  *  Represents the information of a type. 
  * 
@@ -69,7 +53,6 @@ enum ZenitTypeSource {
  */
 struct ZenitTypeInfo {
     struct ZenitType *type;
-    enum ZenitTypeSource source;
 };
 
 /*
