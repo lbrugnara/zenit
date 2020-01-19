@@ -42,7 +42,7 @@ void zenit_test_symtable_api(void)
     //         fl_expect("Symbol must be an array", symbol->typeinfo.is_array);
     //     else
     //         fl_expect("Symbol must not be an array", !symbol->typeinfo.is_array);
-    //     fl_vexpect(symbol->typeinfo.type == types[i].type, "Symbol type must match (%s)", zenit_type_to_string(types + i));
+    //     fl_vexpect(symbol->type == types[i].type, "Symbol type must match (%s)", zenit_type_to_string(types + i));
     //     fl_vexpect(((symbol->typeinfo.name == NULL && types[i].name == NULL) 
     //         || (flm_cstring_equals(symbol->typeinfo.name, types[i].name))), "Symbol type name must match (%s)", types[i].name ? types[i].name : "null");
     // }

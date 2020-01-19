@@ -37,7 +37,7 @@ char* zenit_node_type_array_to_string(struct ZenitArrayTypeNode *type_node)
     if (type_node == NULL)
         return NULL;
 
-    // We allocate memory for the string representation of this <struct ZenitTypeInfo> object
+    // We allocate memory for the string representation of this object
     char *string_value = fl_cstring_new(0);
     
     fl_cstring_append(&string_value, "[");

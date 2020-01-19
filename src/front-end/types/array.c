@@ -45,7 +45,7 @@ char* zenit_type_array_to_string(struct ZenitArrayType *type)
         return type->base.to_string.value;
     }
 
-    // We allocate memory for the string representation of this <struct ZenitTypeInfo> object
+    // We allocate memory for the string representation of this object
     char *string_value = fl_cstring_new(0);
 
     fl_cstring_append(&string_value, "[");

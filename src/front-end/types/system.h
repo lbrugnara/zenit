@@ -29,7 +29,7 @@ struct ZenitReferenceType* zenit_typesys_copy_reference(struct ZenitTypeSystem *
 struct ZenitStructType* zenit_typesys_copy_struct(struct ZenitTypeSystem *typesys, struct ZenitStructType *src_struct_type);
 struct ZenitUintType* zenit_typesys_copy_uint(struct ZenitTypeSystem *typesys, struct ZenitUintType *src_uint_type);
 
-bool zenit_typesys_unify_types(struct ZenitTypeSystem *typesys, struct ZenitType *type_a, struct ZenitType *type_b, struct ZenitTypeInfo *dest);
+bool zenit_typesys_unify_types(struct ZenitTypeSystem *typesys, struct ZenitType *type_a, struct ZenitType *type_b, struct ZenitType **dest);
 
 void zenit_typesys_free(struct ZenitTypeSystem *system);
 

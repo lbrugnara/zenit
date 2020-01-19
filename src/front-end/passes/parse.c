@@ -166,7 +166,7 @@ static struct ZenitTypeNode* parse_type_reference_declaration(struct ZenitParser
 
 /*
  * Function: parse_type_declaration
- *  Helper function that parses the type information and populates the provided <struct ZenitTypeInfo> object
+ *  Helper function that parses the type information and returns a <struct ZenitTypeNode> pointer
  *
  * Parameters:
  *  parser - Parser object

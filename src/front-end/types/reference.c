@@ -46,7 +46,7 @@ char* zenit_type_reference_to_string(struct ZenitReferenceType *type)
         return type->base.to_string.value;
     }
 
-    // We allocate memory for the string representation of this <struct ZenitTypeInfo> object
+    // We allocate memory for the string representation of this object
     char *string_value = fl_cstring_vdup("&%s", zenit_type_to_string(type->element));
 
     // Update the string representation

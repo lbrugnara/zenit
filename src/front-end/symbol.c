@@ -1,23 +1,17 @@
 #include "symbol.h"
 
-struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitTypeInfo *typeinfo)
+struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitType *type)
 {
     flm_assert(name != NULL, "Symbol name cannot be NULL");
-    flm_assert(typeinfo != NULL, "Type information cannot be NULL");
+    flm_assert(type != NULL, "Type information cannot be NULL");
 
 
     struct ZenitSymbol *symbol = fl_malloc(sizeof(struct ZenitSymbol));
 
     symbol->name = fl_cstring_dup(name);
-    
-    memcpy(&symbol->typeinfo, typeinfo, sizeof(symbol->typeinfo));
+    symbol->type = type;
 
     return symbol;
-}
-
-void zenit_symbol_set_type(struct ZenitSymbol *symbol, struct ZenitTypeInfo *typeinfo)
-{
-    memcpy(&symbol->typeinfo, typeinfo, sizeof(symbol->typeinfo));
 }
 
 void zenit_symbol_free(struct ZenitSymbol *symbol)
@@ -33,6 +27,6 @@ void zenit_symbol_free(struct ZenitSymbol *symbol)
 
 char* zenit_symbol_dump(struct ZenitSymbol *symbol, char *output)
 {
-    fl_cstring_vappend(&output, "(symbol %s %s)", symbol->name, zenit_type_to_string(symbol->typeinfo.type));
+    fl_cstring_vappend(&output, "(symbol %s %s)", symbol->name, zenit_type_to_string(symbol->type));
     return output;
 }

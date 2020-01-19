@@ -42,20 +42,6 @@ struct ZenitType {
 };
 
 /*
- * Struct: struct ZenitTypeInfo
- *  Represents the information of a type. 
- * 
- * Members:
- *  <enum ZenitTypeKind> type: The raw type.
- *  <enum ZenitTypeSource> source: The source of the information present in the type object
- *  <struct ZenitTypeString> to_string: Keeps track of the string representation of the type object
- *  
- */
-struct ZenitTypeInfo {
-    struct ZenitType *type;
-};
-
-/*
  * Function: zenit_type_hash
  *  Return a hash number for the current version of the type information object
  *
