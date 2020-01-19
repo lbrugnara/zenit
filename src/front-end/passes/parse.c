@@ -5,7 +5,7 @@
 #include "../lexer.h"
 #include "../parser.h"
 #include "../ast/ast.h"
-#include "../types/system.h"
+#include "../types/context.h"
 
 #define consume_or_return(ctx, parser, token_type, tokenptr)                    \
     if (!zenit_parser_expects(parser, token_type, tokenptr))                    \

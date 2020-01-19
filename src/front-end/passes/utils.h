@@ -5,7 +5,7 @@
 #include "../symbol.h"
 #include "../context.h"
 #include "../ast/ast.h"
-#include "../types/system.h"
+#include "../types/context.h"
 
 static struct ZenitType* get_type_from_type_declaration(struct ZenitContext *ctx, struct ZenitTypeNode *type_decl, struct ZenitType *rhs_type)
 {
@@ -13,17 +13,17 @@ static struct ZenitType* get_type_from_type_declaration(struct ZenitContext *ctx
 
     if (type_decl == NULL)
     {
-        type = zenit_typesys_new_none(ctx->types);
+        type = zenit_type_ctx_new_none(ctx->types);
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_UINT)
     {
         struct ZenitUintTypeNode *uint_type_decl = (struct ZenitUintTypeNode*) type_decl;
-        type = (struct ZenitType*) zenit_typesys_new_uint(ctx->types, uint_type_decl->size);
+        type = (struct ZenitType*) zenit_type_ctx_new_uint(ctx->types, uint_type_decl->size);
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_STRUCT)
     {
         struct ZenitStructTypeNode *struct_type_decl = (struct ZenitStructTypeNode*) type_decl;
-        type = (struct ZenitType*) zenit_typesys_new_struct(ctx->types, struct_type_decl->name);
+        type = (struct ZenitType*) zenit_type_ctx_new_struct(ctx->types, struct_type_decl->name);
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_REFERENCE)
     {
@@ -36,7 +36,7 @@ static struct ZenitType* get_type_from_type_declaration(struct ZenitContext *ctx
         }
 
         struct ZenitType *element_type = get_type_from_type_declaration(ctx, ref_type_decl->element, rhs_element_type != NULL ? rhs_element_type : NULL);
-        type = (struct ZenitType*) zenit_typesys_new_reference(ctx->types, element_type);
+        type = (struct ZenitType*) zenit_type_ctx_new_reference(ctx->types, element_type);
     }
     else if (type_decl->base.type == ZENIT_NODE_TYPE_ARRAY)
     {
@@ -57,14 +57,14 @@ static struct ZenitType* get_type_from_type_declaration(struct ZenitContext *ctx
 
         struct ZenitType *member_type = get_type_from_type_declaration(ctx, array_type_decl->member_type, rhs_element_type != NULL ? rhs_element_type : NULL);
 
-        struct ZenitArrayType *array_type = zenit_typesys_new_array(ctx->types, member_type);
+        struct ZenitArrayType *array_type = zenit_type_ctx_new_array(ctx->types, member_type);
         array_type->length = array_type_decl->auto_length ? length : array_type_decl->length;
 
         type = (struct ZenitType*) array_type;
     }
     else
     {
-        type = zenit_typesys_new_none(ctx->types);
+        type = zenit_type_ctx_new_none(ctx->types);
     }
 
     return type;

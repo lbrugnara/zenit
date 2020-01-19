@@ -6,7 +6,7 @@
 #include "../../../src/front-end/program.h"
 #include "../../../src/front-end/passes/resolve.h"
 #include "../../../src/front-end/symtable.h"
-#include "../../../src/front-end/types/system.h"
+#include "../../../src/front-end/types/context.h"
 #include "tests.h"
 
 #include "symbols.h"

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include "type.h"
-#include "system.h"
+#include "context.h"
 
 enum ZenitTypeKind zenit_type_from_slice(struct FlSlice *slice)
 {

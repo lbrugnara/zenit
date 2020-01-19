@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "../program.h"
 #include "../symbol.h"
-#include "../types/system.h"
+#include "../types/context.h"
 
 enum InferenceKind {
     INFER_NONE,
@@ -82,15 +82,15 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
     else if (ctx_type != NULL && infer_kind != INFER_NONE && zenit_type_can_unify(cast_symbol->type, *ctx_type) && !zenit_type_equals(cast_symbol->type, *ctx_type))
     {
         struct ZenitType *unified_type = NULL;
-        if (zenit_typesys_unify_types(ctx->types, cast_symbol->type, *ctx_type, &unified_type))
+        if (zenit_type_ctx_unify_types(ctx->types, cast_symbol->type, *ctx_type, &unified_type))
         {
             if (!zenit_type_equals(cast_symbol->type, unified_type))
             {
-                cast_symbol->type = zenit_typesys_copy_type(ctx->types, unified_type);
+                cast_symbol->type = zenit_type_ctx_copy_type(ctx->types, unified_type);
             }
 
             if (infer_kind == INFER_BIDIRECTIONAL)
-                *ctx_type = zenit_typesys_copy_type(ctx->types, unified_type);
+                *ctx_type = zenit_type_ctx_copy_type(ctx->types, unified_type);
         }
     }
 
@@ -117,8 +117,8 @@ static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct Zeni
         && !zenit_type_equals(uint_symbol->type, *ctx_type))
     {
         struct ZenitType *unified_type = NULL;
-        if (zenit_typesys_unify_types(ctx->types, uint_symbol->type, *ctx_type, &unified_type) && !zenit_type_equals(*ctx_type, unified_type))
-            *ctx_type = zenit_typesys_copy_type(ctx->types, unified_type);
+        if (zenit_type_ctx_unify_types(ctx->types, uint_symbol->type, *ctx_type, &unified_type) && !zenit_type_equals(*ctx_type, unified_type))
+            *ctx_type = zenit_type_ctx_copy_type(ctx->types, unified_type);
     }
 
     return uint_symbol;
@@ -146,8 +146,8 @@ static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struc
         && !zenit_type_equals(id_symbol->type, *ctx_type))
     {
         struct ZenitType *unified_type = NULL;
-        if (zenit_typesys_unify_types(ctx->types, id_symbol->type, *ctx_type, &unified_type) && !zenit_type_equals(*ctx_type, unified_type))
-            *ctx_type = zenit_typesys_copy_type(ctx->types, unified_type);
+        if (zenit_type_ctx_unify_types(ctx->types, id_symbol->type, *ctx_type, &unified_type) && !zenit_type_equals(*ctx_type, unified_type))
+            *ctx_type = zenit_type_ctx_copy_type(ctx->types, unified_type);
     }
 
     return id_symbol;
@@ -177,8 +177,8 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
         && !zenit_type_equals(ref_symbol->type, *ctx_type))
     {
         struct ZenitType *unified_type = NULL;
-        if (zenit_typesys_unify_types(ctx->types, ref_symbol->type, *ctx_type, &unified_type) && !zenit_type_equals(*ctx_type, unified_type))
-            *ctx_type = zenit_typesys_copy_type(ctx->types, unified_type);
+        if (zenit_type_ctx_unify_types(ctx->types, ref_symbol->type, *ctx_type, &unified_type) && !zenit_type_equals(*ctx_type, unified_type))
+            *ctx_type = zenit_type_ctx_copy_type(ctx->types, unified_type);
     }
 
     return ref_symbol;
@@ -219,15 +219,15 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
                 if (!zenit_type_equals(array_symbol->type, *ctx_type))
                 {
                     struct ZenitType *unified_type = NULL;
-                    if (zenit_typesys_unify_types(ctx->types, array_symbol->type, *ctx_type, &unified_type))
+                    if (zenit_type_ctx_unify_types(ctx->types, array_symbol->type, *ctx_type, &unified_type))
                     {
                         if (!zenit_type_equals(array_symbol->type, unified_type))
                         {
-                            array_symbol->type = zenit_typesys_copy_type(ctx->types, unified_type);
+                            array_symbol->type = zenit_type_ctx_copy_type(ctx->types, unified_type);
                         }
 
                         if (infer_kind == INFER_BIDIRECTIONAL && !zenit_type_equals(*ctx_type, unified_type))
-                            *ctx_type = zenit_typesys_copy_type(ctx->types, unified_type);
+                            *ctx_type = zenit_type_ctx_copy_type(ctx->types, unified_type);
                     }
                 }
             }
@@ -243,15 +243,15 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
                     if (!zenit_type_equals(array_type->member_type, ctx_array_type->member_type))
                     {
                         struct ZenitType *unified_type = NULL;
-                        if (zenit_typesys_unify_types(ctx->types, array_type->member_type, ctx_array_type->member_type, &unified_type))
+                        if (zenit_type_ctx_unify_types(ctx->types, array_type->member_type, ctx_array_type->member_type, &unified_type))
                         {
                             if (!zenit_type_equals(array_type->member_type, unified_type))
                             {
-                                array_type->member_type = zenit_typesys_copy_type(ctx->types, unified_type);
+                                array_type->member_type = zenit_type_ctx_copy_type(ctx->types, unified_type);
                             }
 
                             if (infer_kind == INFER_BIDIRECTIONAL && !zenit_type_equals(ctx_array_type->member_type, unified_type))
-                                ctx_array_type->member_type = zenit_typesys_copy_type(ctx->types, unified_type);
+                                ctx_array_type->member_type = zenit_type_ctx_copy_type(ctx->types, unified_type);
                         }
                     }
                 }
@@ -287,15 +287,15 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
         && !zenit_type_equals(array_symbol->type, *ctx_type))
     {
         struct ZenitType *unified_type = NULL;
-        if (zenit_typesys_unify_types(ctx->types, array_symbol->type, *ctx_type, &unified_type))
+        if (zenit_type_ctx_unify_types(ctx->types, array_symbol->type, *ctx_type, &unified_type))
         {
             if (!zenit_type_equals(array_symbol->type, unified_type))
             {
-                array_symbol->type = zenit_typesys_copy_type(ctx->types, unified_type);
+                array_symbol->type = zenit_type_ctx_copy_type(ctx->types, unified_type);
             }
 
             if (!zenit_type_equals(*ctx_type, unified_type))
-                *ctx_type = zenit_typesys_copy_type(ctx->types, unified_type);
+                *ctx_type = zenit_type_ctx_copy_type(ctx->types, unified_type);
         }
     }
 
@@ -387,15 +387,15 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
         && !zenit_type_equals(struct_symbol->type, *ctx_type))
     {
         struct ZenitType *unified_type = NULL;
-        if (zenit_typesys_unify_types(ctx->types, struct_symbol->type, *ctx_type, &unified_type))
+        if (zenit_type_ctx_unify_types(ctx->types, struct_symbol->type, *ctx_type, &unified_type))
         {
             if (!zenit_type_equals(struct_symbol->type, unified_type))
             {
-                struct_symbol->type = zenit_typesys_copy_type(ctx->types, unified_type);
+                struct_symbol->type = zenit_type_ctx_copy_type(ctx->types, unified_type);
             }
 
             if (!zenit_type_equals(*ctx_type, unified_type))
-                *ctx_type = zenit_typesys_copy_type(ctx->types, unified_type);
+                *ctx_type = zenit_type_ctx_copy_type(ctx->types, unified_type);
         }
     }
 
@@ -471,7 +471,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
         struct ZenitCastNode *cast_node = zenit_node_cast_new(variable_node->rvalue->location, variable_node->rvalue, true);
         variable_node->rvalue = (struct ZenitNode*) cast_node;
 
-        zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node, zenit_typesys_copy_type(ctx->types, symbol->type));
+        zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node, zenit_type_ctx_copy_type(ctx->types, symbol->type));
     }
 
     // We always return the variable symbol

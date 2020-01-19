@@ -4,7 +4,7 @@
 #include "ast/ast.h"
 #include "symtable.h"
 #include "source.h"
-#include "types/system.h"
+#include "types/context.h"
 
 /*
  * Macro: zenit_context_error_count
@@ -95,7 +95,7 @@ struct ZenitContext {
     struct ZenitAst *ast;
     struct ZenitSourceInfo *srcinfo;
     struct ZenitProgram *program;
-    struct ZenitTypeSystem *types;
+    struct ZenitTypeContext *types;
 };
 
 /*
