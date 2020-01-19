@@ -103,8 +103,6 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
         }
     }
 
-    cast_symbol->typeinfo.sealed = true;
-
     return cast_symbol;
 }
 
@@ -194,8 +192,6 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
         if (zenit_typesys_unify_types(ctx->types, ref_symbol->typeinfo.type, *ctx_type, &unified) && !zenit_type_equals(*ctx_type, unified.type))
             *ctx_type = zenit_typesys_copy_type(ctx->types, unified.type);
     }
-
-    ref_symbol->typeinfo.sealed = true;
 
     return ref_symbol;
 }
@@ -319,8 +315,6 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
         }
     }
 
-    array_symbol->typeinfo.sealed = true;
-    
     return array_symbol;
 }
 
@@ -422,8 +416,6 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
         }
     }
 
-    struct_symbol->typeinfo.sealed = true;
-
     return struct_symbol;
 }
 
@@ -499,12 +491,9 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
 
         zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node, &(struct ZenitTypeInfo) {
             .source = symbol->typeinfo.source,
-            .sealed = symbol->typeinfo.sealed,
             .type = zenit_typesys_copy_type(ctx->types, symbol->typeinfo.type),
         });
     }
-
-    symbol->typeinfo.sealed = true;
 
     // We always return the variable symbol
     return symbol;

@@ -65,7 +65,6 @@ static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct Zeni
     // A uint has an intrinsic type, which means it can't be changed by the inference pass
     return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) node, &(struct ZenitTypeInfo) {
         .source = ZENIT_TYPE_SRC_INTRINSIC,
-        .sealed = true,
         .type = (struct ZenitType*) zenit_typesys_new_uint(ctx->types, node->size)
     });
 }
@@ -155,7 +154,6 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
 
     return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) reference_node, &(struct ZenitTypeInfo) {
         .source = expr_symbol->typeinfo.source,
-        .sealed = false,
         .type = (struct ZenitType*) zenit_typesys_new_reference(ctx->types, zenit_typesys_copy_type(ctx->types, expr_symbol->typeinfo.type))
     });
 }
@@ -220,7 +218,6 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 
     return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) array_node, &(struct ZenitTypeInfo) {
         .source = ZENIT_TYPE_SRC_INFERRED,
-        .sealed = false,
         .type = (struct ZenitType*) array_type
     });
 }
@@ -261,7 +258,6 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
             // Add a temporal symbol for the property
             zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) prop, &(struct ZenitTypeInfo) {
                 .source = value_symbol != NULL ? value_symbol->typeinfo.source : ZENIT_TYPE_SRC_INFERRED,
-                .sealed = value_symbol != NULL ? value_symbol->typeinfo.sealed : false,
                 .type = value_symbol != NULL ? zenit_typesys_copy_type(ctx->types, value_symbol->typeinfo.type) : zenit_typesys_new_none(ctx->types),
             });
         }
@@ -375,7 +371,6 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
 
     return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) struct_node, &(struct ZenitTypeInfo) {
         .source = source,
-        .sealed = false,
         .type = (struct ZenitType*) struct_type
     });
 }
@@ -503,7 +498,6 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
         // right-hand side
         symbol = zenit_symbol_new(variable_node->name, &(struct ZenitTypeInfo) {
             .source = rhs_symbol->typeinfo.source,
-            .sealed = rhs_symbol->typeinfo.sealed,
             .type = zenit_typesys_copy_type(ctx->types, rhs_symbol->typeinfo.type)
         });
     }
@@ -513,7 +507,6 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
         // exist, which means there are errors, but we need to continue somehow
         symbol = zenit_symbol_new(variable_node->name, &(struct ZenitTypeInfo) {
             .source = ZENIT_TYPE_SRC_INFERRED,
-            .sealed = false,
             .type = zenit_typesys_new_none(ctx->types)
         });
     }

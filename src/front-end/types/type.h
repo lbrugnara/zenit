@@ -70,7 +70,6 @@ enum ZenitTypeSource {
 struct ZenitTypeInfo {
     struct ZenitType *type;
     enum ZenitTypeSource source;
-    bool sealed;
 };
 
 /*
