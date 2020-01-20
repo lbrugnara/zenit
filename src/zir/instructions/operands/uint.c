@@ -2,12 +2,12 @@
 #include "uint.h"
 #include "../../types/uint.h"
 
-struct ZirUintOperand* zir_operand_uint_new(struct ZirUintTypeInfo *typeinfo, union ZirUintValue value)
+struct ZirUintOperand* zir_operand_uint_new(struct ZirUintType *type, union ZirUintValue value)
 {
     struct ZirUintOperand *uint = fl_malloc(sizeof(struct ZirUintOperand));
     uint->base.type = ZIR_OPERAND_UINT;
     uint->value = value;
-    uint->typeinfo = typeinfo;
+    uint->type = type;
 
     return uint;
 }
@@ -17,15 +17,15 @@ void zir_operand_uint_free(struct ZirUintOperand *uint)
     if (!uint)
         return;
 
-    if (uint->typeinfo)
-        zir_type_uint_free(uint->typeinfo);
+    if (uint->type)
+        zir_type_uint_free(uint->type);
 
     fl_free(uint);
 }
 
 char* zir_operand_uint_dump(struct ZirUintOperand *uint, char *output)
 {
-    switch (uint->typeinfo->size)
+    switch (uint->type->size)
     {
         case ZIR_UINT_8:
             fl_cstring_vappend(&output, "%u", uint->value.uint8);
@@ -49,6 +49,6 @@ char* zir_operand_uint_dump(struct ZirUintOperand *uint, char *output)
 
 char* zir_operand_uint_type_dump(struct ZirUintOperand *uint, char *output)
 {
-    fl_cstring_vappend(&output, "%s", zir_type_uint_to_string(uint->typeinfo));
+    fl_cstring_vappend(&output, "%s", zir_type_uint_to_string(uint->type));
     return output;
 }

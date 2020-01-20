@@ -28,6 +28,6 @@ char* zir_operand_symbol_dump(struct ZirSymbolOperand *operand, char *output)
 
 char* zir_operand_symbol_type_dump(struct ZirSymbolOperand *operand, char *output)
 {
-    fl_cstring_vappend(&output, "%s", zir_type_to_string(operand->symbol->typeinfo));
+    fl_cstring_vappend(&output, "%s", zir_type_to_string(operand->symbol->type));
     return output;
 }

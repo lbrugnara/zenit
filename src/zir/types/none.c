@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include "none.h"
 
-struct ZirTypeInfo* zir_type_none_new(void)
+struct ZirType* zir_type_none_new(void)
 {
-    struct ZirTypeInfo *typeinfo = fl_malloc(sizeof(struct ZirTypeInfo));
-    typeinfo->type = ZIR_TYPE_NONE;
+    struct ZirType *type = fl_malloc(sizeof(struct ZirType));
+    type->typekind = ZIR_TYPE_NONE;
 
-    return typeinfo;
+    return type;
 }
 
-unsigned long zir_type_none_hash(struct ZirTypeInfo *typeinfo)
+unsigned long zir_type_none_hash(struct ZirType *type)
 {
     unsigned long hash = 5381;
     FlByte c;
@@ -22,13 +22,13 @@ unsigned long zir_type_none_hash(struct ZirTypeInfo *typeinfo)
     return hash;
 }
 
-void zir_type_none_free(struct ZirTypeInfo *typeinfo)
+void zir_type_none_free(struct ZirType *type)
 {
-    if (!typeinfo)
+    if (!type)
         return;
 
-    if (typeinfo->to_string.value != NULL)
-        fl_cstring_free(typeinfo->to_string.value);
+    if (type->to_string.value != NULL)
+        fl_cstring_free(type->to_string.value);
 
-    fl_free(typeinfo);
+    fl_free(type);
 }

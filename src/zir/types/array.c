@@ -1,20 +1,20 @@
 #include <fllib.h>
 #include "array.h"
 
-struct ZirArrayTypeInfo* zir_type_array_new(void)
+struct ZirArrayType* zir_type_array_new(void)
 {
-    struct ZirArrayTypeInfo *typeinfo = fl_malloc(sizeof(struct ZirArrayTypeInfo));
-    typeinfo->base.type = ZIR_TYPE_ARRAY;
+    struct ZirArrayType *type = fl_malloc(sizeof(struct ZirArrayType));
+    type->base.typekind = ZIR_TYPE_ARRAY;
 
-    return typeinfo;
+    return type;
 }
 
-unsigned long zir_type_array_hash(struct ZirArrayTypeInfo *typeinfo)
+unsigned long zir_type_array_hash(struct ZirArrayType *type)
 {
     static const char *format = "[array][n:%zu][e:%lu]";
 
     char type_key[256] = { 0 };
-    snprintf(type_key, 256, format, typeinfo->length, zir_type_hash(typeinfo->member_type));
+    snprintf(type_key, 256, format, type->length, zir_type_hash(type->member_type));
 
     unsigned long hash = 5381;
     FlByte c;
@@ -25,14 +25,14 @@ unsigned long zir_type_array_hash(struct ZirArrayTypeInfo *typeinfo)
     return hash;
 }
 
-struct ZirArrayTypeInfo* zir_type_array_copy(struct ZirArrayTypeInfo *source)
+struct ZirArrayType* zir_type_array_copy(struct ZirArrayType *source)
 {
     if (!source)
         return NULL;
 
-    struct ZirArrayTypeInfo *dest = zir_type_array_new();
+    struct ZirArrayType *dest = zir_type_array_new();
 
-    dest->base.type = source->base.type;
+    dest->base.typekind = source->base.typekind;
     dest->length = source->length;
     dest->member_type = zir_type_copy(source->member_type);
     dest->source = source->source;
@@ -40,29 +40,29 @@ struct ZirArrayTypeInfo* zir_type_array_copy(struct ZirArrayTypeInfo *source)
     return dest;
 }
 
-char* zir_type_array_to_string(struct ZirArrayTypeInfo *typeinfo)
+char* zir_type_array_to_string(struct ZirArrayType *type)
 {
-    if (typeinfo == NULL)
+    if (type == NULL)
         return NULL;
 
-    unsigned long type_hash = zir_type_hash((struct ZirTypeInfo*) typeinfo);
+    unsigned long type_hash = zir_type_hash((struct ZirType*) type);
 
-    if (typeinfo->base.to_string.value == NULL)
+    if (type->base.to_string.value == NULL)
     {
         // First call, initialize the value
-        typeinfo->base.to_string.value = fl_cstring_new(0);
+        type->base.to_string.value = fl_cstring_new(0);
     }
-    else if (type_hash == typeinfo->base.to_string.version)
+    else if (type_hash == type->base.to_string.version)
     {
         // If the type information didn't change, just return the 
         // current value
-        return typeinfo->base.to_string.value;
+        return type->base.to_string.value;
     }
 
-    // We allocate memory for the string representation of this <struct ZirTypeInfo> object
+    // We allocate memory for the string representation of this <struct ZirType> object
     char *string_value = fl_cstring_new(0);
     
-    struct ZirArrayTypeInfo *array_type = (struct ZirArrayTypeInfo*) typeinfo;
+    struct ZirArrayType *array_type = (struct ZirArrayType*) type;
 
     fl_cstring_append(&string_value, "[");
     fl_cstring_vappend(&string_value, "%zu", array_type->length);
@@ -71,51 +71,51 @@ char* zir_type_array_to_string(struct ZirArrayTypeInfo *typeinfo)
     fl_cstring_append(&string_value, zir_type_to_string(array_type->member_type));
 
     // Update the string representation
-    typeinfo->base.to_string.version = type_hash;
-    typeinfo->base.to_string.value = fl_cstring_replace_realloc(typeinfo->base.to_string.value, typeinfo->base.to_string.value, string_value);
+    type->base.to_string.version = type_hash;
+    type->base.to_string.value = fl_cstring_replace_realloc(type->base.to_string.value, type->base.to_string.value, string_value);
 
     fl_cstring_free(string_value);
 
-    return typeinfo->base.to_string.value;
+    return type->base.to_string.value;
 }
 
-bool zir_type_array_equals(struct ZirArrayTypeInfo *type_a, struct ZirTypeInfo *type_b)
+bool zir_type_array_equals(struct ZirArrayType *type_a, struct ZirType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
-        return (struct ZirTypeInfo*) type_a == type_b;
+        return (struct ZirType*) type_a == type_b;
 
-    if (type_b->type != ZIR_TYPE_ARRAY)
+    if (type_b->typekind != ZIR_TYPE_ARRAY)
         return false;
 
-    struct ZirArrayTypeInfo *type_b_array = (struct ZirArrayTypeInfo*) type_b;
+    struct ZirArrayType *type_b_array = (struct ZirArrayType*) type_b;
 
     return type_a->length == type_b_array->length && zir_type_equals(type_a->member_type, type_b_array->member_type);
 }
 
-bool zir_type_array_is_assignable_from(struct ZirArrayTypeInfo *target_type, struct ZirTypeInfo *from_type)
+bool zir_type_array_is_assignable_from(struct ZirArrayType *target_type, struct ZirType *from_type)
 {
-    if (from_type->type != ZIR_TYPE_ARRAY)
+    if (from_type->typekind != ZIR_TYPE_ARRAY)
         return false;
 
-    struct ZirArrayTypeInfo *array_from_type = (struct ZirArrayTypeInfo*) from_type;
+    struct ZirArrayType *array_from_type = (struct ZirArrayType*) from_type;
 
     if (target_type->length != array_from_type->length)
         return false;
 
     // If rhs is an empty array, as long as the target type is not NONE, it is safe to assign
-    if (target_type->length == 0 && array_from_type->member_type->type == ZIR_TYPE_NONE)
-        return target_type->member_type->type != ZIR_TYPE_NONE;
+    if (target_type->length == 0 && array_from_type->member_type->typekind == ZIR_TYPE_NONE)
+        return target_type->member_type->typekind != ZIR_TYPE_NONE;
 
     return zir_type_is_assignable_from(target_type->member_type, array_from_type->member_type);
 }
 
-bool zir_type_array_is_castable_to(struct ZirArrayTypeInfo *array_type, struct ZirTypeInfo *target_type)
+bool zir_type_array_is_castable_to(struct ZirArrayType *array_type, struct ZirType *target_type)
 {
     if (array_type == NULL || target_type == NULL)
         return false;
 
     // We can only cast can the array type to another compatible array type
-    if (target_type->type != ZIR_TYPE_ARRAY)
+    if (target_type->typekind != ZIR_TYPE_ARRAY)
         return false;
 
     // If target_type is the same type of the array type, we are ok to cast    
@@ -126,7 +126,7 @@ bool zir_type_array_is_castable_to(struct ZirArrayTypeInfo *array_type, struct Z
     //  - The target type has a different number of elements than the array type
     //  - The number of elements are equals, in that case we should check if we can cast from the array's declared/inferred
     //    type to the target declared/inferred type
-    struct ZirArrayTypeInfo *target_array_type = (struct ZirArrayTypeInfo*) target_type;
+    struct ZirArrayType *target_array_type = (struct ZirArrayType*) target_type;
 
     if (array_type->length != target_array_type->length)
         return false;
@@ -134,23 +134,23 @@ bool zir_type_array_is_castable_to(struct ZirArrayTypeInfo *array_type, struct Z
     return zir_type_is_castable_to(array_type->member_type, target_array_type->member_type);
 }
 
-size_t zir_type_array_size(struct ZirArrayTypeInfo *typeinfo)
+size_t zir_type_array_size(struct ZirArrayType *type)
 {
-    if (!typeinfo)
+    if (!type)
         return 0;
 
-    return typeinfo->length * zir_type_size(typeinfo->member_type);
+    return type->length * zir_type_size(type->member_type);
 }
 
-void zir_type_array_free(struct ZirArrayTypeInfo *typeinfo)
+void zir_type_array_free(struct ZirArrayType *type)
 {
-    if (!typeinfo)
+    if (!type)
         return;
 
-    if (typeinfo->base.to_string.value != NULL)
-        fl_cstring_free(typeinfo->base.to_string.value);
+    if (type->base.to_string.value != NULL)
+        fl_cstring_free(type->base.to_string.value);
 
-    zir_type_free(typeinfo->member_type);
+    zir_type_free(type->member_type);
 
-    fl_free(typeinfo);
+    fl_free(type);
 }

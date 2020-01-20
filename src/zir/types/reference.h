@@ -3,19 +3,19 @@
 
 #include "type.h"
 
-struct ZirReferenceTypeInfo {
-    struct ZirTypeInfo base;
-    struct ZirTypeInfo *element;
+struct ZirReferenceType {
+    struct ZirType base;
+    struct ZirType *element;
 };
 
-struct ZirReferenceTypeInfo* zir_type_reference_new(struct ZirTypeInfo *element);
-unsigned long zir_type_reference_hash(struct ZirReferenceTypeInfo *typeinfo);
-struct ZirReferenceTypeInfo* zir_type_reference_copy(struct ZirReferenceTypeInfo *src_type);
-char* zir_type_reference_to_string(struct ZirReferenceTypeInfo *typeinfo);
-bool zir_type_reference_equals(struct ZirReferenceTypeInfo *type_a, struct ZirTypeInfo *type_b);
-bool zir_type_reference_is_assignable_from(struct ZirReferenceTypeInfo *target_type, struct ZirTypeInfo *value_type);
-bool zir_type_reference_is_castable_to(struct ZirReferenceTypeInfo *reference, struct ZirTypeInfo *target_type);
-size_t zir_type_reference_size(struct ZirReferenceTypeInfo *typeinfo);
-void zir_type_reference_free(struct ZirReferenceTypeInfo *typeinfo);
+struct ZirReferenceType* zir_type_reference_new(struct ZirType *element);
+unsigned long zir_type_reference_hash(struct ZirReferenceType *type);
+struct ZirReferenceType* zir_type_reference_copy(struct ZirReferenceType *src_type);
+char* zir_type_reference_to_string(struct ZirReferenceType *type);
+bool zir_type_reference_equals(struct ZirReferenceType *type_a, struct ZirType *type_b);
+bool zir_type_reference_is_assignable_from(struct ZirReferenceType *target_type, struct ZirType *value_type);
+bool zir_type_reference_is_castable_to(struct ZirReferenceType *reference, struct ZirType *target_type);
+size_t zir_type_reference_size(struct ZirReferenceType *type);
+void zir_type_reference_free(struct ZirReferenceType *type);
 
 #endif /* ZIR_TYPE_REFERENCE_H */

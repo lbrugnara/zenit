@@ -3,8 +3,8 @@
 
 #include "type.h"
 
-struct ZirTypeInfo* zir_type_none_new(void);
-unsigned long zir_type_none_hash(struct ZirTypeInfo *typeinfo);
-void zir_type_none_free(struct ZirTypeInfo *typeinfo);
+struct ZirType* zir_type_none_new(void);
+unsigned long zir_type_none_hash(struct ZirType *type);
+void zir_type_none_free(struct ZirType *type);
 
 #endif /* ZIR_TYPE_NONE_H */

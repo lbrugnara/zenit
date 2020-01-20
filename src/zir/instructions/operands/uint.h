@@ -12,11 +12,11 @@ union ZirUintValue {
 
 struct ZirUintOperand {
     struct ZirOperand base;
-    struct ZirUintTypeInfo *typeinfo;
+    struct ZirUintType *type;
     union ZirUintValue value;
 };
 
-struct ZirUintOperand* zir_operand_uint_new(struct ZirUintTypeInfo *typeinfo, union ZirUintValue value);
+struct ZirUintOperand* zir_operand_uint_new(struct ZirUintType *type, union ZirUintValue value);
 void zir_operand_uint_free(struct ZirUintOperand *primitive);
 char* zir_operand_uint_dump(struct ZirUintOperand *uint, char *output);
 char* zir_operand_uint_type_dump(struct ZirUintOperand *uint, char *output);

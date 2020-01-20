@@ -23,21 +23,21 @@ enum ZirUintTypeSize zir_type_uint_size_from_slice(struct FlSlice *slice)
     return ZIR_UINT_UNK;
 }
 
-struct ZirUintTypeInfo* zir_type_uint_new(enum ZirUintTypeSize size)
+struct ZirUintType* zir_type_uint_new(enum ZirUintTypeSize size)
 {
-    struct ZirUintTypeInfo *typeinfo = fl_malloc(sizeof(struct ZirUintTypeInfo));
-    typeinfo->base.type = ZIR_TYPE_UINT;
-    typeinfo->size = size;
+    struct ZirUintType *type = fl_malloc(sizeof(struct ZirUintType));
+    type->base.typekind = ZIR_TYPE_UINT;
+    type->size = size;
 
-    return typeinfo;
+    return type;
 }
 
-unsigned long zir_type_uint_hash(struct ZirUintTypeInfo *typeinfo)
+unsigned long zir_type_uint_hash(struct ZirUintType *type)
 {
     static const char *format = "[uint][s:%s]";
 
     char type_key[256] = { 0 };
-    snprintf(type_key, 256, format, zir_type_uint_to_string(typeinfo));
+    snprintf(type_key, 256, format, zir_type_uint_to_string(type));
 
     unsigned long hash = 5381;
     FlByte c;
@@ -48,7 +48,7 @@ unsigned long zir_type_uint_hash(struct ZirUintTypeInfo *typeinfo)
     return hash;
 }
 
-struct ZirUintTypeInfo* zir_type_uint_copy(struct ZirUintTypeInfo *src_type)
+struct ZirUintType* zir_type_uint_copy(struct ZirUintType *src_type)
 {
     if (!src_type)
         return NULL;
@@ -56,58 +56,58 @@ struct ZirUintTypeInfo* zir_type_uint_copy(struct ZirUintTypeInfo *src_type)
     return zir_type_uint_new(src_type->size);
 }
 
-char* zir_type_uint_to_string(struct ZirUintTypeInfo *typeinfo)
+char* zir_type_uint_to_string(struct ZirUintType *type)
 {
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
     {
         struct TypeMapping mapping = type_mappings[i];
-        if (typeinfo->size == mapping.size)
+        if (type->size == mapping.size)
             return mapping.string;
     }
 
     return NULL;
 }
 
-bool zir_type_uint_equals(struct ZirUintTypeInfo *type_a, struct ZirTypeInfo *type_b)
+bool zir_type_uint_equals(struct ZirUintType *type_a, struct ZirType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
-        return (struct ZirTypeInfo*) type_a == type_b;
+        return (struct ZirType*) type_a == type_b;
 
-    if (type_b->type != ZIR_TYPE_UINT)
+    if (type_b->typekind != ZIR_TYPE_UINT)
         return false;
 
-    return type_a->size == ((struct ZirUintTypeInfo*) type_b)->size;
+    return type_a->size == ((struct ZirUintType*) type_b)->size;
 }
 
-bool zir_type_uint_is_assignable_from(struct ZirUintTypeInfo *target_type, struct ZirTypeInfo *from_type)
+bool zir_type_uint_is_assignable_from(struct ZirUintType *target_type, struct ZirType *from_type)
 {
     if (target_type == NULL || from_type == NULL)
         return false;
 
-    if (from_type->type != ZIR_TYPE_UINT)
+    if (from_type->typekind != ZIR_TYPE_UINT)
         return false;
 
-    struct ZirUintTypeInfo *from_uint_type = (struct ZirUintTypeInfo*) from_type;
+    struct ZirUintType *from_uint_type = (struct ZirUintType*) from_type;
 
     // If the "from" size is lesser or equals than the target size, it is ok to implicit cast
     return from_uint_type->size <= target_type->size;
 }
 
-bool zir_type_uint_is_castable_to(struct ZirUintTypeInfo *uint_type, struct ZirTypeInfo *target_type)
+bool zir_type_uint_is_castable_to(struct ZirUintType *uint_type, struct ZirType *target_type)
 {
     if (target_type == NULL || target_type == NULL)
         return false;
 
     // It is safe to cast between uints
-    return target_type->type == ZIR_TYPE_UINT;
+    return target_type->typekind == ZIR_TYPE_UINT;
 }
 
-size_t zir_type_uint_size(struct ZirUintTypeInfo *typeinfo)
+size_t zir_type_uint_size(struct ZirUintType *type)
 {
-    if (!typeinfo)
+    if (!type)
         return 0;
 
-    switch (typeinfo->size)
+    switch (type->size)
     {
         case ZIR_UINT_8:
             return 1;
@@ -122,13 +122,13 @@ size_t zir_type_uint_size(struct ZirUintTypeInfo *typeinfo)
     return 0;
 }
 
-void zir_type_uint_free(struct ZirUintTypeInfo *typeinfo)
+void zir_type_uint_free(struct ZirUintType *type)
 {
-    if (!typeinfo)
+    if (!type)
         return;
 
-    if (typeinfo->base.to_string.value != NULL)
-        fl_cstring_free(typeinfo->base.to_string.value);
+    if (type->base.to_string.value != NULL)
+        fl_cstring_free(type->base.to_string.value);
 
-    fl_free(typeinfo);
+    fl_free(type);
 }

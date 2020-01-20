@@ -20,7 +20,7 @@ void zenit_nes_emit_store_array(struct ZenitNesProgram *program, struct ZenitNes
         else if (operand->type == ZIR_OPERAND_ARRAY)
         {
             struct ZirArrayOperand *array_elem = (struct ZirArrayOperand*)operand;
-            zenit_nes_emit_store_array(program, nes_symbol, offset + (i * gap), zir_type_size(array_elem->typeinfo->member_type), array_elem);
+            zenit_nes_emit_store_array(program, nes_symbol, offset + (i * gap), zir_type_size(array_elem->type->member_type), array_elem);
         }
         else if (operand->type == ZIR_OPERAND_REFERENCE)
         {
@@ -363,11 +363,11 @@ void zenit_nes_emit_store_uint(struct ZenitNesProgram *program, struct ZenitNesS
     // NOTE: We use a uint16_t because it can hold all the current uint values
     uint16_t uint_value = 0;
 
-    if (uint_operand->typeinfo->size == ZIR_UINT_8)
+    if (uint_operand->type->size == ZIR_UINT_8)
     {
         uint_value = uint_operand->value.uint8;
     }
-    else if (uint_operand->typeinfo->size == ZIR_UINT_16)
+    else if (uint_operand->type->size == ZIR_UINT_16)
     {
         uint_value = uint_operand->value.uint16;
     }

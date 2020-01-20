@@ -11,7 +11,7 @@
  */
 struct ZirSymbol {
     const char *name;
-    struct ZirTypeInfo *typeinfo;
+    struct ZirType *type;
 };
 
 /*
@@ -21,7 +21,7 @@ struct ZirSymbol {
  *
  * Parameters:
  *  name - Symbol name
- *  typeinfo - Type information
+ *  type - Type information
  *  temporal - True if the symbol is a temporal object
  *
  * Returns:
@@ -31,7 +31,7 @@ struct ZirSymbol {
  *  The object returned by this function must be freed with the <zir_symbol_free> function
  *
  */
-struct ZirSymbol* zir_symbol_new(const char *name, struct ZirTypeInfo *typeinfo);
+struct ZirSymbol* zir_symbol_new(const char *name, struct ZirType *type);
 
 /*
  * Function: zir_symbol_free
