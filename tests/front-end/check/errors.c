@@ -111,11 +111,14 @@ void zenit_test_check_types_struct_errors(void)
         "struct B { x: uint8; y: uint8; z: uint8; }"        "\n"
         "var a = A { x: 0x1FF, y: [ 0x2FF ] };"             "\n"
         "var b : B = A { x: 0, y: 0 };"                     "\n"
+        "struct C { a: A; }"                                "\n"
+        "var c = C { a: B { x: 0, y: 1, z: 2 } }; "         "\n"
     ;
     struct ExpectedError expected_errors[] = {
         { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from uint16 to uint8"     },
         { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from [1]uint16 to uint8"  },
         { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from A to B"              },
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from B to A"              },
     };
 
     zenit_test_check_type_errors(source, expected_errors, sizeof(expected_errors) / sizeof(expected_errors[0]));

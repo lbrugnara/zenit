@@ -1,5 +1,6 @@
 #include "program.h"
 #include "symbol.h"
+#include "types/context.h"
 
 struct ZenitProgram* zenit_program_new()
 {
@@ -131,4 +132,110 @@ char* zenit_program_dump(struct ZenitProgram *program, bool verbose)
     fl_cstring_append(&output, ")");
 
     return output;
+}
+
+
+/*
+ * Function: zenit_program_is_type_defined
+ *  If the type is a native type, we are sure it is a defined type, but if the
+ *  type is a CUSTOM one, we need to check if the type is registered in the symbol
+ *  table
+ *
+ * Parameters:
+ *  program - Program object
+ *  typeinfo - Type information
+ *
+ * Returns:
+ *  bool - *true* if the type is a native type or a struct type defined in the symbol
+ *          table, otherwise this function returns *false*.
+ */
+bool zenit_program_is_type_defined(struct ZenitProgram *program, struct ZenitType *type)
+{
+    if (type->typekind == ZENIT_TYPE_UINT)
+        return true;
+
+    if (type->typekind == ZENIT_TYPE_REFERENCE)
+    {
+        struct ZenitReferenceType *rti = (struct ZenitReferenceType*) type;
+        return zenit_program_is_type_defined(program, rti->element);
+    }
+
+    if (type->typekind == ZENIT_TYPE_STRUCT)
+    {
+        struct ZenitStructType *struct_type = (struct ZenitStructType*) type;
+
+        if (struct_type->name != NULL && !zenit_program_has_scope(program, ZENIT_SCOPE_STRUCT, struct_type->name))
+            return false;
+
+        struct FlListNode *tmp = fl_list_head(struct_type->members);
+
+        while (tmp)
+        {
+            struct ZenitStructTypeMember *struct_member = (struct ZenitStructTypeMember*) tmp->value;
+
+            if (!zenit_program_is_type_defined(program, struct_member->type))
+                return false;
+
+            tmp = tmp->next;
+        }
+
+        return true;
+    }
+    
+    if (type->typekind == ZENIT_TYPE_ARRAY)
+    {
+        struct ZenitArrayType *ati = (struct ZenitArrayType*) type;
+        return zenit_program_is_type_defined(program, ati->member_type);
+    }
+
+    return false;
+}
+
+struct ZenitType* zenit_program_get_undefined_type(struct ZenitProgram *program, struct ZenitType *type)
+{
+    // Cannot be undefined
+    if (type->typekind == ZENIT_TYPE_UINT)
+        return NULL;
+
+    if (type->typekind == ZENIT_TYPE_REFERENCE)
+    {
+        struct ZenitReferenceType *rti = (struct ZenitReferenceType*) type;
+        if (!zenit_program_is_type_defined(program, rti->element))
+            return zenit_program_get_undefined_type(program, rti->element);
+
+        return NULL;
+    }
+
+    if (type->typekind == ZENIT_TYPE_STRUCT)
+    {
+        struct ZenitStructType *struct_type = (struct ZenitStructType*) type;
+
+        if (struct_type->name != NULL && !zenit_program_has_symbol(program, struct_type->name))
+            return type;
+
+        struct FlListNode *tmp = fl_list_head(struct_type->members);
+
+        while (tmp)
+        {
+            struct ZenitStructTypeMember *struct_member = (struct ZenitStructTypeMember*) tmp->value;
+
+            if (!zenit_program_is_type_defined(program, struct_member->type))
+                return zenit_program_get_undefined_type(program, struct_member->type);
+
+            tmp = tmp->next;
+        }
+
+        return NULL;
+    }
+    
+    if (type->typekind == ZENIT_TYPE_ARRAY)
+    {
+        struct ZenitArrayType *ati = (struct ZenitArrayType*) type;
+        if (!zenit_program_is_type_defined(program, ati->member_type))
+            return zenit_program_get_undefined_type(program, ati->member_type);
+        
+        return NULL;
+    }
+
+    return NULL;
 }

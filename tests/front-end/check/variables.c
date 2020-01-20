@@ -82,20 +82,28 @@ void zenit_test_check_types_struct(void)
 
         "struct Cstruct { a: Astruct; b: Bstruct; c: uint8; }"          "\n"
         "var c1 = Cstruct { a: { a: 2 }, b: { a: { a: 3} }, c: 1 };"    "\n"
+
+        "var d1 = { a: 1, b: 0x1FF, c: { x: 1 } };"                     "\n"
+        "var d2 = d1;"                                                  "\n"
+        "var d3 = &d1;"                                                 "\n"
     ;
 
     const char *tests[][2] = {
-        { "a1",          "Astruct"          },
-        { "a2",          "Astruct"          },
-        { "a3",          "Astruct"          },
-        { "a4",          "Astruct"          },
+        { "a1",          "Astruct"                                      },
+        { "a2",          "Astruct"                                      },
+        { "a3",          "Astruct"                                      },
+        { "a4",          "Astruct"                                      },
 
-        { "b1",          "Bstruct"          },
-        { "b2",          "Bstruct"          },
-        { "b3",          "Bstruct"          },
-        { "b4",          "Bstruct"          },
+        { "b1",          "Bstruct"                                      },
+        { "b2",          "Bstruct"                                      },
+        { "b3",          "Bstruct"                                      },
+        { "b4",          "Bstruct"                                      },
 
-        { "c1",          "Cstruct"          },
+        { "c1",          "Cstruct"                                      },
+
+        { "d1",          "{ a: uint8, b: uint16, c: { x: uint8 } }"     },
+        { "d2",          "{ a: uint8, b: uint16, c: { x: uint8 } }"     },
+        { "d3",          "&{ a: uint8, b: uint16, c: { x: uint8 } }"    },
     };
 
     zenit_test_check_types(source, tests, sizeof(tests) / sizeof(tests[0]));

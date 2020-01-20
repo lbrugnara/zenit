@@ -34,3 +34,29 @@ void zenit_test_resolve_run(const char *source, const char *test_case, bool verb
 
     zenit_context_free(&ctx);
 }
+
+void zenit_test_resolve_errors(const char *source, struct ResolveTestCase *tests, size_t tests_count)
+{
+    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+
+    bool valid_parse = zenit_parse_source(&ctx);
+    bool valid_resolve = valid_parse ? zenit_resolve_symbols(&ctx) : false;
+
+    fl_vexpect(!valid_resolve && zenit_context_error_count(&ctx) == tests_count, "Resolve pass must fail with %zu errors", tests_count);
+
+    size_t i=0;
+    struct FlListNode *tmp = fl_list_head(ctx.errors);
+    while (tmp != NULL)
+    {
+        struct ZenitError *error = (struct ZenitError*) tmp->value;
+
+        fl_vexpect(error->type == tests[i].error, 
+            "L%u:%u: %s (%s)",
+            error->location.line, error->location.col, error->message, tests[i].message);
+
+        tmp = tmp->next;
+        i++;
+    }
+
+    zenit_context_free(&ctx);
+}

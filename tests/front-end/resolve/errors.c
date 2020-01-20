@@ -6,7 +6,7 @@
 #include "../../../src/front-end/symtable.h"
 #include "tests.h"
 
-void zenit_test_resolve_errors(void)
+void zenit_test_resolve_variable_errors(void)
 {
     const char *source = 
         "var sym_a : uint8 = 2;"                "\n"
@@ -16,6 +16,24 @@ void zenit_test_resolve_errors(void)
         "var sym_d = &unknown;"                 "\n"
         "#[Attr(key:missing_symbol)]"           "\n"
         "var sym_e = 1;"                        "\n"
+    ;
+
+    struct ResolveTestCase tests[] = {
+        { ZENIT_ERROR_DUPLICATED_SYMBOL,    "sym_a already exists"                      },
+        { ZENIT_ERROR_MISSING_SYMBOL,       "sym_not_defined does not exist"            },
+        { ZENIT_ERROR_MISSING_SYMBOL,       "sym_not_defined2 does not exist"           },
+        { ZENIT_ERROR_MISSING_SYMBOL,       "unknown does not exist"                    },
+        { ZENIT_ERROR_MISSING_SYMBOL,       "missing_symbol does not exist"             },
+    };
+
+    size_t error_count = sizeof(tests) / sizeof(tests[0]);
+
+    zenit_test_resolve_errors(source, tests, error_count);
+}
+
+void zenit_test_resolve_struct_errors(void)
+{
+    const char *source = 
         "struct A { a: uint8; a: uint16; }"     "\n"
         "struct B { b: uint8; }"                "\n"
         "struct B { b: uint8; }"                "\n"
@@ -23,45 +41,21 @@ void zenit_test_resolve_errors(void)
         "struct Point { x: uint8; y: uint8; }"  "\n"
         "var p = Point { x: 1 };"               "\n"
         "var p2 : Point = { y: 1 };"            "\n" // Here '{ y: 1 }' is resolved as an unnamed struct, it will fail later in the type check
+        "struct C { x: [2]MissingType; }"       "\n"
+        "var w = W { x: 1, y: 2 };"             "\n"
     ;
 
-    struct TestCase {
-        enum ZenitErrorType error;
-        const char *message;
-    } tests[] = {
-        { ZENIT_ERROR_DUPLICATED_SYMBOL,    "sym_a already exists"                      },
-        { ZENIT_ERROR_MISSING_SYMBOL,       "sym_not_defined does not exist"            },
-        { ZENIT_ERROR_MISSING_SYMBOL,       "sym_not_defined2 does not exist"           },
-        { ZENIT_ERROR_MISSING_SYMBOL,       "unknown does not exist"                    },
-        { ZENIT_ERROR_MISSING_SYMBOL,       "missing_symbol does not exist"             },
+    struct ResolveTestCase tests[] = {
         { ZENIT_ERROR_DUPLICATED_SYMBOL,    "struct A already has an 'a' field"         },
         { ZENIT_ERROR_DUPLICATED_SYMBOL,    "struct B already exists"                   },
         { ZENIT_ERROR_UNKNOWN_MEMBER,       "struct B does not contain a 'c' field"     },
         { ZENIT_ERROR_UNINITIALIZED_MEMBER, "Member 'y' must be initialized"            },
+        { ZENIT_ERROR_MISSING_SYMBOL,       "MissingType does not exist"                },
+        { ZENIT_ERROR_MISSING_SYMBOL,       "W does not exist"                          },
     };
 
     size_t error_count = sizeof(tests) / sizeof(tests[0]);
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
-
-    bool valid_parse = zenit_parse_source(&ctx);
-    bool valid_resolve = valid_parse ? zenit_resolve_symbols(&ctx) : false;
-
-    fl_vexpect(!valid_resolve && zenit_context_error_count(&ctx) == error_count, "Resolve pass must fail with %zu errors", error_count);
-
-    size_t i=0;
-    struct FlListNode *tmp = fl_list_head(ctx.errors);
-    while (tmp != NULL)
-    {
-        struct ZenitError *error = (struct ZenitError*) tmp->value;
-
-        fl_vexpect(error->type == tests[i].error, 
-            "L%u:%u: %s (%s)",
-            error->location.line, error->location.col, error->message, tests[i].message);
-
-        tmp = tmp->next;
-        i++;
-    }
-
-    zenit_context_free(&ctx);
+    zenit_test_resolve_errors(source, tests, error_count);
 }
+

@@ -109,4 +109,7 @@ struct ZenitSymbol* zenit_program_remove_symbol(struct ZenitProgram *program, co
 
 char* zenit_program_dump(struct ZenitProgram *program, bool verbose);
 
+bool zenit_program_is_type_defined(struct ZenitProgram *program, struct ZenitType *type);
+struct ZenitType* zenit_program_get_undefined_type(struct ZenitProgram *program, struct ZenitType *type);
+
 #endif /* ZENIT_PROGRAM_H */

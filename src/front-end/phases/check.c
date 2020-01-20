@@ -3,93 +3,6 @@
 #include "../program.h"
 #include "../symbol.h"
 
-/*
- * Function: is_type_defined
- *  If the type is a native type, we are sure it is a defined type, but if the
- *  type is a CUSTOM one, we need to check if the type is registered in the symbol
- *  table
- *
- * Parameters:
- *  program - Program object
- *  typeinfo - Type information
- *
- * Returns:
- *  bool - *true* if the type is a native type or a struct type defined in the symbol
- *          table, otherwise this function returns *false*.
- */
-static bool is_type_defined(struct ZenitProgram *program, struct ZenitType *type)
-{
-    if (type->typekind == ZENIT_TYPE_UINT)
-        return true;
-
-    if (type->typekind == ZENIT_TYPE_REFERENCE)
-    {
-        struct ZenitReferenceType *rti = (struct ZenitReferenceType*) type;
-        return is_type_defined(program, rti->element);
-    }
-
-    if (type->typekind == ZENIT_TYPE_STRUCT)
-    {
-        // FIXME: Update this once struct members are implemented
-        return zenit_program_has_scope(program, ZENIT_SCOPE_STRUCT, ((struct ZenitStructType*) type)->name);
-    }
-    
-    if (type->typekind == ZENIT_TYPE_ARRAY)
-    {
-        struct ZenitArrayType *ati = (struct ZenitArrayType*) type;
-/*
-        if (ati->decl_type && !is_type_defined(program, ati->decl_type))
-            return false;
-
-        if (ati->inferred_type && !is_type_defined(program, ati->inferred_type))
-            return false;
-
-        for (size_t i=0; i < fl_array_length(ati->members); i++)
-            if (!is_type_defined(program, ati->members[i]))
-                return false;
-*/
-        return is_type_defined(program, ati->member_type);
-    }
-
-    return false;
-}
-
-static struct ZenitType* get_undefined_type(struct ZenitProgram *program, struct ZenitType *type)
-{
-    // Cannot be undefined
-    if (type->typekind == ZENIT_TYPE_UINT)
-        return NULL;
-
-    if (type->typekind == ZENIT_TYPE_REFERENCE)
-    {
-        struct ZenitReferenceType *rti = (struct ZenitReferenceType*) type;
-        if (!is_type_defined(program, rti->element))
-            return get_undefined_type(program, rti->element);
-
-        return NULL;
-    }
-
-    if (type->typekind == ZENIT_TYPE_STRUCT)
-    {
-        // FIXME: Update this once struct members are implemented
-        if (!zenit_program_has_symbol(program, ((struct ZenitStructType*) type)->name))
-            return type;
-
-        return NULL;
-    }
-    
-    if (type->typekind == ZENIT_TYPE_ARRAY)
-    {
-        struct ZenitArrayType *ati = (struct ZenitArrayType*) type;
-        if (!is_type_defined(program, ati->member_type))
-            return get_undefined_type(program, ati->member_type);
-        
-        return NULL;
-    }
-
-    return NULL;
-}
-
 typedef struct ZenitSymbol*(*ZenitTypeChecker)(struct ZenitContext *ctx, struct ZenitNode *node);
 
 // Visitor functions
@@ -243,8 +156,8 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 
     // The array type is inferred in the inference pass, so we have information
     // about it, but it can be a struct type that doesn't exist in the symbol
-    // table, so the <is_type_defined> function will tell us that
-    bool is_array_type_defined = is_type_defined(ctx->program, array_symbol->type);
+    // table, so the <zenit_program_is_type_defined> function will tell us that
+    bool is_array_type_defined = zenit_program_is_type_defined(ctx->program, array_symbol->type);
 
     for (size_t i=0; i < fl_array_length(array->elements); i++)
     {
@@ -296,9 +209,9 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
             struct ZenitSymbol *prop_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) prop);
             visit_node(ctx, prop->value);
 
-            if (!is_type_defined(ctx->program, prop_symbol->type))
+            if (!zenit_program_is_type_defined(ctx->program, prop_symbol->type))
             {
-                struct ZenitType *type = get_undefined_type(ctx->program, prop_symbol->type);
+                struct ZenitType *type = zenit_program_get_undefined_type(ctx->program, prop_symbol->type);
         
                 // Last resort
                 if (type == NULL)
@@ -335,7 +248,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
             if (field_decl_symbol == NULL)
                 continue; // The resolve pass should have added an error in this case
 
-            bool is_var_type_defined = is_type_defined(ctx->program, field_decl_symbol->type);
+            bool is_var_type_defined = zenit_program_is_type_defined(ctx->program, field_decl_symbol->type);
 
             // We check types to make sure the assignment is valid, but we do it only if
             // the variable type is valid, because if not, we might be targeting a false-positive
@@ -395,12 +308,12 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx->program, variable_node->name);
 
     // Check if the variable's type is native or it is registered in the symbol table
-    bool is_var_type_defined = is_type_defined(ctx->program, symbol->type);
+    bool is_var_type_defined = zenit_program_is_type_defined(ctx->program, symbol->type);
 
     // If the variable type is missing, we add an error
     if (!is_var_type_defined && variable_node->type_decl != NULL)
     {
-        struct ZenitType *type = get_undefined_type(ctx->program, symbol->type);
+        struct ZenitType *type = zenit_program_get_undefined_type(ctx->program, symbol->type);
         
         // Last resort
         if (type == NULL)
