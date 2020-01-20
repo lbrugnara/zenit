@@ -2,12 +2,12 @@
 #include <fllib.h>
 
 #include "../../Test.h"
-#include "../../../src/front-end/passes/check.h"
-#include "../../../src/front-end/passes/infer.h"
-#include "../../../src/front-end/passes/parse.h"
-#include "../../../src/front-end/passes/resolve.h"
+#include "../../../src/front-end/phases/check.h"
+#include "../../../src/front-end/phases/infer.h"
+#include "../../../src/front-end/phases/parse.h"
+#include "../../../src/front-end/phases/resolve.h"
 #include "../../../src/front-end/symtable.h"
-#include "../../../src/front-end/passes/zirgen.h"
+#include "../../../src/front-end/phases/zirgen.h"
 #include "tests.h"
 
 void zenit_test_generate_ir_casts(void)

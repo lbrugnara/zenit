@@ -69,7 +69,7 @@ static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct Zeni
 /*
  * Function: visit_cast_node
  *  If the cast has a type hint, we need to get that information know to build a temporal symbol that will be
- *  helpful in the type inference and type checking passes
+ *  helpful in the type inference and type checking phases
  *
  * Parameters:
  *  <struct ZenitContext> *ctx - Context object
@@ -170,7 +170,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
         return NULL;
 
     // We start creating an array type, we flag it as INFERRED because the truth is, at this point we can't make
-    // sure of its type, so we will need help/confirmation from the inference and type check passes.
+    // sure of its type, so we will need help/confirmation from the inference and type check phases.
     struct ZenitArrayType *array_type = zenit_type_ctx_new_array(ctx->types, zenit_type_ctx_new_none(ctx->types));
     
     // The length is the number of elements within the array initializer, that's something we know

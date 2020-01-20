@@ -1,11 +1,11 @@
 #include <fllib.h>
 
 #include "../../Test.h"
-#include "../../../src/front-end/passes/infer.h"
-#include "../../../src/front-end/passes/parse.h"
+#include "../../../src/front-end/phases/infer.h"
+#include "../../../src/front-end/phases/parse.h"
 #include "../../../src/front-end/program.h"
 #include "../../../src/front-end/types/context.h"
-#include "../../../src/front-end/passes/resolve.h"
+#include "../../../src/front-end/phases/resolve.h"
 #include "../../../src/front-end/symtable.h"
 #include "tests.h"
 
@@ -36,7 +36,7 @@ void zenit_test_infer_variable_uint(void)
     bool is_resolve_valid = is_parsing_valid && zenit_resolve_symbols(&ctx);
     bool is_inference_valid = is_resolve_valid && zenit_infer_types(&ctx);
     
-    fl_expect("Parsing, symbol resolving, and type inference passes should not contain errors", is_inference_valid);
+    fl_expect("Parsing, symbol resolving, and type inference phases should not contain errors", is_inference_valid);
 
     for (size_t i=0; i < count; i++)
     {
@@ -82,7 +82,7 @@ void zenit_test_infer_variable_reference(void)
     bool is_resolve_valid = is_parsing_valid && zenit_resolve_symbols(&ctx);
     bool is_inference_valid = is_resolve_valid && zenit_infer_types(&ctx);
     
-    fl_expect("Parsing, symbol resolving, and type inference passes should not contain errors", is_inference_valid);
+    fl_expect("Parsing, symbol resolving, and type inference phases should not contain errors", is_inference_valid);
 
     for (size_t i=0; i < count; i++)
     {
@@ -157,7 +157,7 @@ void zenit_test_infer_variable_array(void)
     bool is_resolve_valid = is_parsing_valid && zenit_resolve_symbols(&ctx);
     bool is_inference_valid = is_resolve_valid && zenit_infer_types(&ctx);
     
-    fl_expect("Parsing, symbol resolving, and type inference passes should not contain errors", is_inference_valid);
+    fl_expect("Parsing, symbol resolving, and type inference phases should not contain errors", is_inference_valid);
 
     for (size_t i=0; i < count; i++)
     {

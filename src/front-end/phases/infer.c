@@ -439,7 +439,7 @@ static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, stru
  */
 static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *variable_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
-    // The variable declaration node does not perform type inference in this function, but it passes type information
+    // The variable declaration node does not perform type inference in this function, but it phases type information
     // to the right-hand side expression's visitor with possibly INFER_BIDIRECTIONAL when the type is not present in the
     // declaration:
     //  e.g.: var a = [ 1, 2, 3 ]

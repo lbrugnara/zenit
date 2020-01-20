@@ -1,11 +1,11 @@
 #include <fllib.h>
 
 #include "../../Test.h"
-#include "../../../src/front-end/passes/infer.h"
-#include "../../../src/front-end/passes/parse.h"
+#include "../../../src/front-end/phases/infer.h"
+#include "../../../src/front-end/phases/parse.h"
 #include "../../../src/front-end/program.h"
 #include "../../../src/front-end/types/context.h"
-#include "../../../src/front-end/passes/resolve.h"
+#include "../../../src/front-end/phases/resolve.h"
 #include "../../../src/front-end/symtable.h"
 #include "tests.h"
 
