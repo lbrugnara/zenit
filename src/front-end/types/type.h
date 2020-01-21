@@ -36,6 +36,20 @@ struct ZenitTypeString {
     char *value;
 };
 
+/*
+ * Struct: struct ZenitType
+ *  It is the "base type" of all the Zenit type objects that contains
+ *  information that is shared between all the different types
+ * 
+ * Members:
+ *  <enum ZenitTypeKind> typekind: The native kind of this type
+ *  <struct ZenitTypeString> to_string: String representation of the type
+ * 
+ * Notes:
+ *  The *to_string* property is populated when a call to the function zenit_type_to_string occurs (or to any of its
+ *  specializations) and shouldn't be directly manipulated
+ * 
+ */
 struct ZenitType {
     enum ZenitTypeKind typekind;
     struct ZenitTypeString to_string;
@@ -46,11 +60,10 @@ struct ZenitType {
  *  Return a hash number for the current version of the type information object
  *
  * Parameters:
- *  <struct ZenitType> *typeinfo: Type object
+ *  <struct ZenitType> *type: Type object
  *
  * Returns:
  *  <unsigned long>: Hash of the type object
- * 
  */
 unsigned long zenit_type_hash(struct ZenitType *type);
 
@@ -63,7 +76,6 @@ unsigned long zenit_type_hash(struct ZenitType *type);
  *
  * Returns:
  *  <enum ZenitTypeKind>: The type that matches the sequence of bytes
- *
  */
 enum ZenitTypeKind zenit_type_from_slice(struct FlSlice *slice);
 
@@ -76,7 +88,6 @@ enum ZenitTypeKind zenit_type_from_slice(struct FlSlice *slice);
  *
  * Returns:
  *  <char>*: String representation of the *type* object
- *
  */
 char* zenit_type_to_string(struct ZenitType *type);
 
@@ -90,10 +101,21 @@ char* zenit_type_to_string(struct ZenitType *type);
  *
  * Returns:
  *  <bool>: *true* if the objects are equals, otherwise *false*.
- *
  */
 bool zenit_type_equals(struct ZenitType *type_a, struct ZenitType *type_b);
 
+/*
+ * Function: zenit_type_can_unify
+ *  Checks if the type *type_a* can be unified with the type *type_b*
+ *
+ * Parameters:
+ *  <struct ZenitUintType> *type_a: Type object
+ *  <struct ZenitType> *type_b: Type object
+ *
+ * Returns:
+ *  bool: *true* if the types can be unified, which means they can both be represented by an ancestor
+ *        or enclosing -base- type, otherwise *false*.
+ */
 bool zenit_type_can_unify(struct ZenitType *type_a, struct ZenitType *type_b);
 
 /*
@@ -107,7 +129,6 @@ bool zenit_type_can_unify(struct ZenitType *type_a, struct ZenitType *type_b);
  *
  * Returns:
  *  <bool>: *true* if *target_type* accepts the *value_type*, otherwise, *false*.
- *
  */
 bool zenit_type_is_assignable_from(struct ZenitType *target_type, struct ZenitType *value_type);
 
@@ -122,7 +143,6 @@ bool zenit_type_is_assignable_from(struct ZenitType *target_type, struct ZenitTy
  *
  * Returns:
  *  <bool>: *true* if the source type can be casted to the target type, otherwise, *false*.
- * 
  */
 bool zenit_type_is_castable_to(struct ZenitType *source_type, struct ZenitType *target_cast_type);
 

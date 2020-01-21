@@ -61,6 +61,9 @@ struct ZenitToken {
  * Returns:
  *  <const char>*: String pointer
  *
+ * Notes:
+ *  The pointer returned by this function does not need to be
+ *  freed
  */
 const char* zenit_token_print(enum ZenitTokenType type);
 

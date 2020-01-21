@@ -156,8 +156,8 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 
     // The array type is inferred in the inference pass, so we have information
     // about it, but it can be a struct type that doesn't exist in the symbol
-    // table, so the <zenit_program_is_type_defined> function will tell us that
-    bool is_array_type_defined = zenit_program_is_type_defined(ctx->program, array_symbol->type);
+    // table, so the <zenit_program_is_valid_type> function will tell us that
+    bool is_array_type_defined = zenit_program_is_valid_type(ctx->program, array_symbol->type);
 
     for (size_t i=0; i < fl_array_length(array->elements); i++)
     {
@@ -209,9 +209,9 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
             struct ZenitSymbol *prop_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) prop);
             visit_node(ctx, prop->value);
 
-            if (!zenit_program_is_type_defined(ctx->program, prop_symbol->type))
+            if (!zenit_program_is_valid_type(ctx->program, prop_symbol->type))
             {
-                struct ZenitType *type = zenit_program_get_undefined_type(ctx->program, prop_symbol->type);
+                struct ZenitType *type = zenit_program_get_invalid_type_component(ctx->program, prop_symbol->type);
         
                 // Last resort
                 if (type == NULL)
@@ -248,7 +248,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
             if (field_decl_symbol == NULL)
                 continue; // The resolve pass should have added an error in this case
 
-            bool is_var_type_defined = zenit_program_is_type_defined(ctx->program, field_decl_symbol->type);
+            bool is_var_type_defined = zenit_program_is_valid_type(ctx->program, field_decl_symbol->type);
 
             // We check types to make sure the assignment is valid, but we do it only if
             // the variable type is valid, because if not, we might be targeting a false-positive
@@ -308,12 +308,12 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx->program, variable_node->name);
 
     // Check if the variable's type is native or it is registered in the symbol table
-    bool is_var_type_defined = zenit_program_is_type_defined(ctx->program, symbol->type);
+    bool is_var_type_defined = zenit_program_is_valid_type(ctx->program, symbol->type);
 
     // If the variable type is missing, we add an error
     if (!is_var_type_defined && variable_node->type_decl != NULL)
     {
-        struct ZenitType *type = zenit_program_get_undefined_type(ctx->program, symbol->type);
+        struct ZenitType *type = zenit_program_get_invalid_type_component(ctx->program, symbol->type);
         
         // Last resort
         if (type == NULL)

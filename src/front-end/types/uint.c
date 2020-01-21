@@ -13,11 +13,11 @@ static struct TypeMapping {
 
 struct ZenitUintType* zenit_type_uint_new(enum ZenitUintTypeSize size)
 {
-    struct ZenitUintType *typeinfo = fl_malloc(sizeof(struct ZenitUintType));
-    typeinfo->base.typekind = ZENIT_TYPE_UINT;
-    typeinfo->size = size;
+    struct ZenitUintType *type = fl_malloc(sizeof(struct ZenitUintType));
+    type->base.typekind = ZENIT_TYPE_UINT;
+    type->size = size;
 
-    return typeinfo;
+    return type;
 }
 
 enum ZenitUintTypeSize zenit_type_uint_size_from_slice(struct FlSlice *slice)
@@ -32,12 +32,12 @@ enum ZenitUintTypeSize zenit_type_uint_size_from_slice(struct FlSlice *slice)
     return ZENIT_UINT_UNK;
 }
 
-unsigned long zenit_type_uint_hash(struct ZenitUintType *typeinfo)
+unsigned long zenit_type_uint_hash(struct ZenitUintType *type)
 {
     static const char *format = "[uint][s:%s]";
 
     char type_key[256] = { 0 };
-    snprintf(type_key, 256, format, zenit_type_uint_to_string(typeinfo));
+    snprintf(type_key, 256, format, zenit_type_uint_to_string(type));
 
     unsigned long hash = 5381;
     FlByte c;
@@ -48,12 +48,12 @@ unsigned long zenit_type_uint_hash(struct ZenitUintType *typeinfo)
     return hash;
 }
 
-char* zenit_type_uint_to_string(struct ZenitUintType *typeinfo)
+char* zenit_type_uint_to_string(struct ZenitUintType *type)
 {
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
     {
         struct TypeMapping mapping = type_mappings[i];
-        if (typeinfo->size == mapping.size)
+        if (type->size == mapping.size)
             return mapping.string;
     }
 
@@ -108,13 +108,13 @@ bool zenit_type_uint_can_unify(struct ZenitUintType *uint_type, struct ZenitType
     return true;
 }
 
-void zenit_type_uint_free(struct ZenitUintType *typeinfo)
+void zenit_type_uint_free(struct ZenitUintType *type)
 {
-    if (!typeinfo)
+    if (!type)
         return;
 
-    if (typeinfo->base.to_string.value != NULL)
-        fl_cstring_free(typeinfo->base.to_string.value);
+    if (type->base.to_string.value != NULL)
+        fl_cstring_free(type->base.to_string.value);
 
-    fl_free(typeinfo);
+    fl_free(type);
 }

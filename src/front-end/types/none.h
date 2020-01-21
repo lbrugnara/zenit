@@ -3,8 +3,44 @@
 
 #include "type.h"
 
+/*
+ * Function: zenit_type_none_new
+ *  Returns a new instance of a type that represents the lack of type
+ *
+ * Parameters:
+ *  void: this function does not take parameters
+ *
+ * Returns:
+ *  struct ZenitType*: Pointer to a a none type object
+ *
+ * Notes:
+ *  The object returned by this function must be freed using the
+ *  <zenit_type_none_free> function
+ */
 struct ZenitType* zenit_type_none_new(void);
-unsigned long zenit_type_none_hash(struct ZenitType *typeinfo);
-void zenit_type_none_free(struct ZenitType *typeinfo);
+
+/*
+ * Function: zenit_type_none_hash
+ *  Returns a hash that identifies the none type object
+ *
+ * Parameters:
+ *  <struct ZenitType> *type: Type object
+ *
+ * Returns:
+ *  unsigned long: Hash code of the type object
+ */
+unsigned long zenit_type_none_hash(struct ZenitType *type);
+
+/*
+ * Function: zenit_type_none_free
+ *  Frees the memory of the none type object
+ *
+ * Parameters:
+ *  <struct ZenitType> *type: Type object
+ *
+ * Returns:
+ *  void: This function does not return a value
+ */
+void zenit_type_none_free(struct ZenitType *type);
 
 #endif /* ZENIT_TYPE_NONE_H */

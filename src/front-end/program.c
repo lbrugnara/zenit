@@ -27,12 +27,13 @@ void zenit_program_add_scope(struct ZenitProgram *program, enum ZenitScopeType t
     program->current_scope->children = fl_array_append(program->current_scope->children, &scope);
 }
 
-void zenit_program_enter_scope(struct ZenitProgram *program, struct ZenitScope *scope)
+bool zenit_program_enter_scope(struct ZenitProgram *program, struct ZenitScope *scope)
 {
     if (scope->parent != program->current_scope)
-        return;
+        return false;
 
     program->current_scope = scope;
+    return true;
 }
 
 void zenit_program_push_scope(struct ZenitProgram *program, enum ZenitScopeType type, const char *name)
@@ -108,13 +109,13 @@ struct ZenitSymbol* zenit_program_add_symbol(struct ZenitProgram *program, struc
 bool zenit_program_has_symbol(struct ZenitProgram *program, const char *symbol_name)
 {
     // FIXME: Fix this to lookup symbols in different scopes
-    return zenit_symtable_has(&program->current_scope->symtable, symbol_name);
+    return zenit_scope_has_symbol(program->current_scope, symbol_name);
 }
 
 struct ZenitSymbol* zenit_program_get_symbol(struct ZenitProgram *program, const char *symbol_name)
 {
     // FIXME: Fix this to lookup symbols in different scopes
-    return zenit_symtable_get(&program->current_scope->symtable, symbol_name);
+    return zenit_scope_get_symbol(program->current_scope, symbol_name);
 }
 
 struct ZenitSymbol* zenit_program_remove_symbol(struct ZenitProgram *program, const char *symbol_name)
@@ -134,22 +135,7 @@ char* zenit_program_dump(struct ZenitProgram *program, bool verbose)
     return output;
 }
 
-
-/*
- * Function: zenit_program_is_type_defined
- *  If the type is a native type, we are sure it is a defined type, but if the
- *  type is a CUSTOM one, we need to check if the type is registered in the symbol
- *  table
- *
- * Parameters:
- *  program - Program object
- *  typeinfo - Type information
- *
- * Returns:
- *  bool - *true* if the type is a native type or a struct type defined in the symbol
- *          table, otherwise this function returns *false*.
- */
-bool zenit_program_is_type_defined(struct ZenitProgram *program, struct ZenitType *type)
+bool zenit_program_is_valid_type(struct ZenitProgram *program, struct ZenitType *type)
 {
     if (type->typekind == ZENIT_TYPE_UINT)
         return true;
@@ -157,7 +143,7 @@ bool zenit_program_is_type_defined(struct ZenitProgram *program, struct ZenitTyp
     if (type->typekind == ZENIT_TYPE_REFERENCE)
     {
         struct ZenitReferenceType *rti = (struct ZenitReferenceType*) type;
-        return zenit_program_is_type_defined(program, rti->element);
+        return zenit_program_is_valid_type(program, rti->element);
     }
 
     if (type->typekind == ZENIT_TYPE_STRUCT)
@@ -173,7 +159,7 @@ bool zenit_program_is_type_defined(struct ZenitProgram *program, struct ZenitTyp
         {
             struct ZenitStructTypeMember *struct_member = (struct ZenitStructTypeMember*) tmp->value;
 
-            if (!zenit_program_is_type_defined(program, struct_member->type))
+            if (!zenit_program_is_valid_type(program, struct_member->type))
                 return false;
 
             tmp = tmp->next;
@@ -185,13 +171,13 @@ bool zenit_program_is_type_defined(struct ZenitProgram *program, struct ZenitTyp
     if (type->typekind == ZENIT_TYPE_ARRAY)
     {
         struct ZenitArrayType *ati = (struct ZenitArrayType*) type;
-        return zenit_program_is_type_defined(program, ati->member_type);
+        return zenit_program_is_valid_type(program, ati->member_type);
     }
 
     return false;
 }
 
-struct ZenitType* zenit_program_get_undefined_type(struct ZenitProgram *program, struct ZenitType *type)
+struct ZenitType* zenit_program_get_invalid_type_component(struct ZenitProgram *program, struct ZenitType *type)
 {
     // Cannot be undefined
     if (type->typekind == ZENIT_TYPE_UINT)
@@ -200,8 +186,8 @@ struct ZenitType* zenit_program_get_undefined_type(struct ZenitProgram *program,
     if (type->typekind == ZENIT_TYPE_REFERENCE)
     {
         struct ZenitReferenceType *rti = (struct ZenitReferenceType*) type;
-        if (!zenit_program_is_type_defined(program, rti->element))
-            return zenit_program_get_undefined_type(program, rti->element);
+        if (!zenit_program_is_valid_type(program, rti->element))
+            return zenit_program_get_invalid_type_component(program, rti->element);
 
         return NULL;
     }
@@ -219,8 +205,8 @@ struct ZenitType* zenit_program_get_undefined_type(struct ZenitProgram *program,
         {
             struct ZenitStructTypeMember *struct_member = (struct ZenitStructTypeMember*) tmp->value;
 
-            if (!zenit_program_is_type_defined(program, struct_member->type))
-                return zenit_program_get_undefined_type(program, struct_member->type);
+            if (!zenit_program_is_valid_type(program, struct_member->type))
+                return zenit_program_get_invalid_type_component(program, struct_member->type);
 
             tmp = tmp->next;
         }
@@ -231,8 +217,8 @@ struct ZenitType* zenit_program_get_undefined_type(struct ZenitProgram *program,
     if (type->typekind == ZENIT_TYPE_ARRAY)
     {
         struct ZenitArrayType *ati = (struct ZenitArrayType*) type;
-        if (!zenit_program_is_type_defined(program, ati->member_type))
-            return zenit_program_get_undefined_type(program, ati->member_type);
+        if (!zenit_program_is_valid_type(program, ati->member_type))
+            return zenit_program_get_invalid_type_component(program, ati->member_type);
         
         return NULL;
     }

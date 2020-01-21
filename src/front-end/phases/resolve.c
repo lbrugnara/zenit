@@ -376,9 +376,9 @@ static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struc
     // We need a type for our symbol
     struct ZenitType *type = get_type_from_type_declaration(ctx, field_node->type_decl, NULL);
 
-    if (!zenit_program_is_type_defined(ctx->program, type))
+    if (!zenit_program_is_valid_type(ctx->program, type))
     {
-        struct ZenitType *missing_type = zenit_program_get_undefined_type(ctx->program, type);
+        struct ZenitType *missing_type = zenit_program_get_invalid_type_component(ctx->program, type);
         zenit_context_error(ctx, field_node->base.location, ZENIT_ERROR_MISSING_SYMBOL, "Type '%s' is not defined", zenit_type_to_string(missing_type));
     }
 

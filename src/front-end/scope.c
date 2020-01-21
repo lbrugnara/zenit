@@ -39,6 +39,11 @@ bool zenit_scope_has_symbol(struct ZenitScope *scope, const char *symbol_name)
     return zenit_symtable_has(&scope->symtable, symbol_name);
 }
 
+struct ZenitSymbol* zenit_scope_add_symbol(struct ZenitScope *scope, struct ZenitSymbol *symbol)
+{
+    return zenit_symtable_add(&scope->symtable, symbol);
+}
+
 struct ZenitSymbol* zenit_scope_get_symbol(struct ZenitScope *scope, const char *symbol_name)
 {
     return zenit_symtable_get(&scope->symtable, symbol_name);
@@ -47,6 +52,11 @@ struct ZenitSymbol* zenit_scope_get_symbol(struct ZenitScope *scope, const char 
 struct ZenitSymbol** zenit_scope_get_symbols(struct ZenitScope *scope, bool include_temporals)
 {
     return zenit_symtable_get_all(&scope->symtable, include_temporals);
+}
+
+struct ZenitSymbol* zenit_scope_remove_symbol(struct ZenitScope *scope, const char *symbol_name)
+{
+    return zenit_symtable_remove(&scope->symtable, symbol_name);
 }
 
 bool zenit_scope_has_symbols(struct ZenitScope *scope)

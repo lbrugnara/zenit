@@ -9,9 +9,8 @@
  *  A symbol table object that keeps track of the program's symbols
  * 
  * Members:
- *  <const char> *id: Symbol table identifier
  *  <FlHashtable> symbols: Hashtable of symbols using the name (string) as key
- *  <enum ZenitScopeType> type: The type of symbol table
+ *  <FlList> names: List that keeps track of the insertion order of the symbols
  * 
  */
 struct ZenitSymtable {
@@ -24,8 +23,7 @@ struct ZenitSymtable {
  *  Creates a new symbol table
  *
  * Parameters:
- *  <enum ZenitScopeType> type: The type of symbol table
- *  <const char> *id: An identifier for the symbol table
+ *  <void> - This function does not receive parameters
  *
  * Returns:
  *  <struct ZenitSymtable>: The created symbol table
@@ -45,7 +43,6 @@ struct ZenitSymtable zenit_symtable_new(void);
  *
  * Returns:
  *  void: This function does not return a value
- * 
  */
 void zenit_symtable_free(struct ZenitSymtable *symtable);
 
@@ -59,7 +56,11 @@ void zenit_symtable_free(struct ZenitSymtable *symtable);
  *
  * Returns:
  *  <struct ZenitSymbol>*: The symbol object
- *
+ * 
+ * Notes:
+ *  The symbol table takes ownership of all the symbols that are added to it, which means the memory
+ *  those symbols will be released when the symbol table object is freed with the <zenit_symtable_free>
+ *  function
  */
 struct ZenitSymbol* zenit_symtable_add(struct ZenitSymtable *symtable, struct ZenitSymbol *symbol);
 
@@ -104,13 +105,64 @@ struct ZenitSymbol* zenit_symtable_get(struct ZenitSymtable *symtable, const cha
  * Returns:
  *  struct ZenitSymbol*: Removed symbol
  *
+ * Notes:
+ *  The symbol table losses ownership of the symbol returned by this function, which means that caller
+ *  is in charge of releasing the memory of the symbol.
  */
 struct ZenitSymbol* zenit_symtable_remove(struct ZenitSymtable *symtable, const char *symbol_name);
 
+/*
+ * Function: zenit_symtable_get_all
+ *  Returns an array of all the symbols within the symbol table in the order they were inserted
+ *
+ * Parameters:
+ *  <struct ZenitSymtable> *symtable: Symbol table object
+ *  <bool> include_temporals: If true, the tempora symbols within the symbol table are added to the output array.
+ *
+ * Returns:
+ *  struct ZenitSymbol**: Array of pointers to <struct ZenitSymbol> objects
+ *
+ * Notes:
+ *  The array returned by this function must be freed using the <fl_array_free> function
+ */
 struct ZenitSymbol** zenit_symtable_get_all(struct ZenitSymtable *symtable, bool include_temporals);
 
+/*
+ * Function: zenit_symtable_is_empty
+ *  Returns true or false based on if the symbol table contains symbols or not.
+ *
+ * Parameters:
+ *  <struct ZenitSymtable> *symtable: Symbol table object
+ *
+ * Returns:
+ *  bool: *true* if the symbol table does not contain symbols, otherwise *false*.
+ *
+ * Notes:
+ *  This function does take into account temporal symbols too.
+ */
 bool zenit_symtable_is_empty(struct ZenitSymtable *symtable);
 
+/*
+ * Function: zenit_symtable_dump
+ *  Appends a dump of the symbol table object to the output pointer, and
+ *  returns a pointer to the -possibly reallocated- output
+ *
+ * Parameters:
+ *  <struct ZenitSymtable> *symtable: Symbol table object to dump to the output
+ *  <char> *output: Pointer to a heap allocated string
+ *  <bool> verbose: If true, the temporal symbols are added to the output, otherwise they are ignored
+ *
+ * Returns:
+ *  char*: Pointer to the output string
+ *
+ * Notes:
+ *  Because the *output* pointer can be modified, this function returns
+ *  a pointer to the new location in case the memory is reallocated or
+ *  to the old one in case the pointer does not need to be modified. Either
+ *  way, it is safe to use the function as:
+ *      output = zenit_symtable_dump(symtable, output, verbose);
+ *  If the memory of *output* cannot be reallocated this function frees the memory.
+ */
 char* zenit_symtable_dump(struct ZenitSymtable *symtable, char *output, bool verbose);
 
 #endif /* ZENIT_SYMTABLE_H */

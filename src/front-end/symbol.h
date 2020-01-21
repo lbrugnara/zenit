@@ -21,7 +21,7 @@ struct ZenitSymbol {
  *
  * Parameters:
  *  name - Symbol name
- *  typeinfo - Type information
+ *  type - Type information
  *
  * Returns:
  *  struct ZenitSymbol* - The new symbol
@@ -44,6 +44,26 @@ struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitType *type);
  */
 void zenit_symbol_free(struct ZenitSymbol *symbol);
 
+/*
+ * Function: zenit_symbol_dump
+ *  Appends a dump of the symbol object to the output pointer, and
+ *  returns a pointer to the -possibly reallocated- output
+ *
+ * Parameters:
+ *  <struct ZenitSymbol> *symbol: Symbol object to dump to the output
+ *  <char> *output: Pointer to a heap allocated string
+ *
+ * Returns:
+ *  char*: Pointer to the output string
+ *
+ * Notes:
+ *  Because the *output* pointer can be modified, this function returns
+ *  a pointer to the new location in case the memory is reallocated or
+ *  to the old one in case the pointer does not need to be modified. Either
+ *  way, it is safe to use the function as:
+ *      output = zenit_symbol_dump(symbol, output);
+ *  If the memory of *output* cannot be reallocated this function frees the memory.
+ */
 char* zenit_symbol_dump(struct ZenitSymbol *symbol, char *output);
 
 #endif /* ZENIT_SYMBOL_H */

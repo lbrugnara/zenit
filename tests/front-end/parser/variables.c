@@ -47,7 +47,7 @@ void zenit_test_parser_array_variable_literal(void)
     zenit_test_parser_run(source, ast_dump);
 }
 
-void zenit_test_parser_variable_literal_typeinfo(void)
+void zenit_test_parser_variable_literal_type(void)
 {
     const char *source = 
         "var num0 : uint8 = 0;"
@@ -71,7 +71,7 @@ void zenit_test_parser_variable_literal_typeinfo(void)
 }
 
 
-void zenit_test_parser_array_variable_literal_typeinfo(void)
+void zenit_test_parser_array_variable_literal_type(void)
 {
     const char *source = 
         "var num0 : [0]uint8 = [];"
@@ -115,7 +115,7 @@ void zenit_test_parser_variable_(void)
     zenit_test_parser_run(source, ast_dump);
 }
 
-void zenit_test_parser_variable_typeinfo(void)
+void zenit_test_parser_variable_type(void)
 {
     const char *source = 
         "var num0 : uint8 = some_extern_id;"

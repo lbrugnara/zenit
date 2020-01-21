@@ -156,7 +156,7 @@ static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struc
 /*
  * Function: visit_reference_node
  *  In this function we need to fill the type information of the <struct ZenitReferenceNode> object using
- *  the expression typeinfo object.
+ *  the expression type object.
  *
  * Parameters:
  *  ctx - Context object
