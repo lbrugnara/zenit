@@ -5,7 +5,7 @@
 struct ZenitUintNode* zenit_node_uint_new(struct ZenitSourceLocation location, enum ZenitUintTypeSize size, union ZenitUintValue value)
 {
     struct ZenitUintNode *uint_node = fl_malloc(sizeof(struct ZenitUintNode));
-    uint_node->base.type = ZENIT_NODE_UINT;
+    uint_node->base.nodekind = ZENIT_NODE_UINT;
     uint_node->base.location = location;
     uint_node->size = size;
     uint_node->value = value;

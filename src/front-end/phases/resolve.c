@@ -31,7 +31,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
 
 /*
  * Variable: symbol_resolvers
- *  An array indexed with a <enum ZenitNodeType> to get a <ZenitSymbolResolver> function
+ *  An array indexed with a <enum ZenitNodeKind> to get a <ZenitSymbolResolver> function
  */
 static const ZenitSymbolResolver symbol_resolvers[] = {
     [ZENIT_NODE_VARIABLE]       = (ZenitSymbolResolver) &visit_variable_node,
@@ -285,7 +285,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
     
     for (size_t i=0; i < members_length; i++)
     {
-        if (struct_node->members[i]->type == ZENIT_NODE_FIELD)
+        if (struct_node->members[i]->nodekind == ZENIT_NODE_FIELD)
         {
             struct ZenitFieldNode *field_node = (struct ZenitFieldNode*) struct_node->members[i];
 
@@ -513,7 +513,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
  */
 static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node, enum ResolvePass pass)
 {
-    return symbol_resolvers[node->type](ctx, node, pass);
+    return symbol_resolvers[node->nodekind](ctx, node, pass);
 }
 
 /*

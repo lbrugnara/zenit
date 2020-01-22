@@ -4,7 +4,7 @@
 struct ZenitFieldDeclNode* zenit_node_field_decl_new(struct ZenitSourceLocation location, char *name)
 {
     struct ZenitFieldDeclNode *field_node = fl_malloc(sizeof(struct ZenitFieldDeclNode));
-    field_node->base.type = ZENIT_NODE_FIELD_DECL;
+    field_node->base.nodekind = ZENIT_NODE_FIELD_DECL;
     field_node->base.location = location;
     field_node->name = name;
 

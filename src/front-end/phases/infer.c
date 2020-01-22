@@ -26,7 +26,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
 
 /*
  * Variable: inferrers
- *  An array indexed with a <enum ZenitNodeType> to get a <ZenitTypeInferrer> function
+ *  An array indexed with a <enum ZenitNodeKind> to get a <ZenitTypeInferrer> function
  */
 static const ZenitTypeInferrer inferrers[] = {
     [ZENIT_NODE_UINT]           = (ZenitTypeInferrer) &visit_uint_node,
@@ -366,7 +366,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
 
     for (size_t i=0; i < fl_array_length(struct_node->members); i++)
     {
-        if (struct_node->members[i]->type == ZENIT_NODE_FIELD)
+        if (struct_node->members[i]->nodekind == ZENIT_NODE_FIELD)
         {
             struct ZenitFieldNode *field_node = (struct ZenitFieldNode*) struct_node->members[i];
 
@@ -492,7 +492,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
  */
 static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
-    return inferrers[node->type](ctx, node, ctx_type, infer_kind);
+    return inferrers[node->nodekind](ctx, node, ctx_type, infer_kind);
 }
 
 /*

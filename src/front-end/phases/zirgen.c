@@ -37,7 +37,7 @@ static struct ZirOperand* visit_struct_decl_node(struct ZenitContext *ctx, struc
 
 /*
  * Variable: generators
- *  An array indexed with a <enum ZenitNodeType> to get a <ZirGenerator> function
+ *  An array indexed with a <enum ZenitNodeKind> to get a <ZirGenerator> function
  */
 static const ZirGenerator generators[] = {
     [ZENIT_NODE_UINT]           = (ZirGenerator) &visit_uint_node,
@@ -394,7 +394,7 @@ static struct ZirOperand* visit_variable_node(struct ZenitContext *ctx, struct Z
  */
 static struct ZirOperand* visit_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitNode *node)
 {
-    return generators[node->type](ctx, program, node);
+    return generators[node->nodekind](ctx, program, node);
 }
 
 static void convert_zenit_scopes_to_zir_blocks(struct ZenitScope *scope, struct ZirBlock *block)

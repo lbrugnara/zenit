@@ -4,7 +4,7 @@
 struct ZenitVariableNode* zenit_node_variable_new(struct ZenitSourceLocation location, char *name)
 {
     struct ZenitVariableNode *var_node = fl_malloc(sizeof(struct ZenitVariableNode));
-    var_node->base.type = ZENIT_NODE_VARIABLE;
+    var_node->base.nodekind = ZENIT_NODE_VARIABLE;
     var_node->base.location = location;
     var_node->name = name;
 

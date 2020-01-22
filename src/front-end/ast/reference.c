@@ -5,7 +5,7 @@
 struct ZenitReferenceNode* zenit_node_reference_new(struct ZenitSourceLocation location, struct ZenitNode *expression)
 {
     struct ZenitReferenceNode *ref_node = fl_malloc(sizeof(struct ZenitReferenceNode));
-    ref_node->base.type = ZENIT_NODE_REFERENCE;
+    ref_node->base.nodekind = ZENIT_NODE_REFERENCE;
     ref_node->base.location = location;
     ref_node->expression = expression;
 

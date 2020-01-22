@@ -35,7 +35,7 @@ char* zenit_node_to_string(struct ZenitNode *node)
     if (!node)
         return "null";
 
-    switch (node->type)
+    switch (node->nodekind)
     {
         case ZENIT_NODE_UINT:
             return "literal";
@@ -97,7 +97,7 @@ char* zenit_node_uid(struct ZenitNode *node)
     if (!node)
         return NULL;
 
-    switch (node->type)
+    switch (node->nodekind)
     {
         case ZENIT_NODE_UINT:
             return zenit_node_uint_uid((struct ZenitUintNode*)node);
@@ -156,7 +156,7 @@ char* zenit_node_dump(struct ZenitNode *node, char *output)
     if (!node)
         return NULL;
 
-    switch (node->type)
+    switch (node->nodekind)
     {
         case ZENIT_NODE_UINT:
             return zenit_node_uint_dump((struct ZenitUintNode*)node, output);
@@ -221,7 +221,7 @@ void zenit_node_free(struct ZenitNode *node)
     if (!node)
         return;
 
-    switch (node->type)
+    switch (node->nodekind)
     {
         case ZENIT_NODE_UINT:
             zenit_node_uint_free((struct ZenitUintNode*)node);

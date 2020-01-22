@@ -19,7 +19,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
 
 /*
  * Variable: checkers
- *  An array indexed with a <enum ZenitNodeType> to get a <ZenitTypeChecker> function
+ *  An array indexed with a <enum ZenitNodeKind> to get a <ZenitTypeChecker> function
  */
 static const ZenitTypeChecker checkers[] = {
     [ZENIT_NODE_UINT]           = (ZenitTypeChecker) &visit_uint_node,
@@ -235,7 +235,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
 
     for (size_t i=0; i < fl_array_length(struct_node->members); i++)
     {
-        if (struct_node->members[i]->type == ZENIT_NODE_FIELD)
+        if (struct_node->members[i]->nodekind == ZENIT_NODE_FIELD)
         {
             struct ZenitFieldNode *field_node = (struct ZenitFieldNode*) struct_node->members[i];
             struct ZenitSymbol *value_symbol = visit_node(ctx, field_node->value);
@@ -356,7 +356,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
  */
 static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node)
 {
-    return checkers[node->type](ctx, node);
+    return checkers[node->nodekind](ctx, node);
 }
 
 /*

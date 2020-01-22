@@ -4,7 +4,7 @@
 struct ZenitStructDeclNode* zenit_node_struct_decl_new(struct ZenitSourceLocation location, char *name)
 {
     struct ZenitStructDeclNode *struct_node = fl_malloc(sizeof(struct ZenitStructDeclNode));
-    struct_node->base.type = ZENIT_NODE_STRUCT_DECL;
+    struct_node->base.nodekind = ZENIT_NODE_STRUCT_DECL;
     struct_node->base.location = location;
     struct_node->name = name;
     struct_node->members = fl_array_new(sizeof(struct ZenitNode*), 0);

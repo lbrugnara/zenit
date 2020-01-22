@@ -4,7 +4,7 @@
 struct ZenitIdentifierNode* zenit_node_identifier_new(struct ZenitSourceLocation location, char *name)
 {
     struct ZenitIdentifierNode *id_node = fl_malloc(sizeof(struct ZenitIdentifierNode));
-    id_node->base.type = ZENIT_NODE_IDENTIFIER;
+    id_node->base.nodekind = ZENIT_NODE_IDENTIFIER;
     id_node->base.location = location;
     id_node->name = name;
 

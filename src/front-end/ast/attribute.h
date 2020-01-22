@@ -20,7 +20,7 @@ struct ZenitAttributeNodeMap {
 static inline struct ZenitAttributeNode* zenit_node_attribute_new(struct ZenitSourceLocation location, char *name)
 {
     struct ZenitAttributeNode *attribute = fl_malloc(sizeof(struct ZenitAttributeNode));
-    attribute->base.type = ZENIT_NODE_ATTRIBUTE;
+    attribute->base.nodekind = ZENIT_NODE_ATTRIBUTE;
     attribute->base.location = location;
     attribute->name = name;
     attribute->properties = zenit_property_node_map_new();

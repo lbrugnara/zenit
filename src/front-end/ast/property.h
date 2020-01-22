@@ -18,7 +18,7 @@ struct ZenitPropertyNodeMap {
 static inline struct ZenitPropertyNode* zenit_node_property_new(struct ZenitSourceLocation location, char *name, struct ZenitNode *value)
 {
     struct ZenitPropertyNode *property = fl_malloc(sizeof(struct ZenitPropertyNode));
-    property->base.type = ZENIT_NODE_PROPERTY;
+    property->base.nodekind = ZENIT_NODE_PROPERTY;
     property->base.location = location;
     property->name = name;
     property->value = value;

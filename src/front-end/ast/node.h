@@ -5,10 +5,10 @@
 #include "../types/type.h"
 
 /*
- * Enum: enum ZenitNodeType 
+ * Enum: enum ZenitNodeKind 
  *  Types of AST node
  */
-enum ZenitNodeType {
+enum ZenitNodeKind {
     ZENIT_NODE_UINT,
     ZENIT_NODE_VARIABLE,
     ZENIT_NODE_STRUCT_DECL,
@@ -32,11 +32,11 @@ enum ZenitNodeType {
  *  The base node object. All the specific objects are compound with this one
  * 
  * Members:
- *  <enum ZenitNodeType> type: The specific type of the AST node
+ *  <enum ZenitNodeKind> type: The specific type of the AST node
  *  <struct ZenitSourceLocation> location: The place in the source code represented by the node
  */
 struct ZenitNode {
-    enum ZenitNodeType type;
+    enum ZenitNodeKind nodekind;
     struct ZenitSourceLocation location;
 };
 

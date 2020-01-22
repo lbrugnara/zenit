@@ -4,7 +4,7 @@
 struct ZenitCastNode* zenit_node_cast_new(struct ZenitSourceLocation location, struct ZenitNode *expression, bool implicit)
 {
     struct ZenitCastNode *cast_node = fl_malloc(sizeof(struct ZenitCastNode));
-    cast_node->base.type = ZENIT_NODE_CAST;
+    cast_node->base.nodekind = ZENIT_NODE_CAST;
     cast_node->base.location = location;
     cast_node->implicit = implicit;
     cast_node->expression = expression;
