@@ -5,107 +5,87 @@
 
 #include "node.h"
 
+/*
+ * Struct: struct ZenitPropertyNode
+ *  Represents an attribute's property in the source code
+ * 
+ * Members:
+ *  <struct ZenitNode> base: Basic information of the node object
+ *  <char> *name: The property name
+ *  <struct ZenitNode> *value: A node that represents the expression to initialize the property
+ */
 struct ZenitPropertyNode {
     struct ZenitNode base;
     char *name;
     struct ZenitNode *value;
 };
 
-struct ZenitPropertyNodeMap {
-    FlHashtable map;
-};
+/*
+ * Function: zenit_node_property_new
+ *  Creates a new AST node that represents an attribute's property
+ *
+ * Parameters:
+ *  <struct ZenitSourceLocation> location: Location information about the property
+ *  <char> *name: The property name
+ *  <struct ZenitNode> *value: The node that represents the value of the property
+ *
+ * Returns:
+ *  struct ZenitPropertyNode*: Property node
+ *
+ * Notes:
+ *  The object returned by this function must be freed using the
+ *  <zenit_node_property_free> function
+ */
+struct ZenitPropertyNode* zenit_node_property_new(struct ZenitSourceLocation location, char *name, struct ZenitNode *value);
 
-static inline struct ZenitPropertyNode* zenit_node_property_new(struct ZenitSourceLocation location, char *name, struct ZenitNode *value)
-{
-    struct ZenitPropertyNode *property = fl_malloc(sizeof(struct ZenitPropertyNode));
-    property->base.nodekind = ZENIT_NODE_PROPERTY;
-    property->base.location = location;
-    property->name = name;
-    property->value = value;
+/*
+ * Function: zenit_node_property_uid
+ *  Returns a UID for the property node
+ *
+ * Parameters:
+ *  <struct ZenitPropertyNode> *property: Property node
+ *
+ * Returns:
+ *  char*: UID of the property node
+ *
+ * Notes:
+ *  The object returned by this function must be freed using the
+ *  <fl_cstring_free> function
+ */
+char* zenit_node_property_uid(struct ZenitPropertyNode *property);
 
-    return property;
-}
+/*
+ * Function: zenit_node_property_dump
+ *  Appends a dump of the property node to the output pointer, and
+ *  returns a pointer to the -possibly reallocated- output
+ *
+ * Parameters:
+ *  <struct ZenitPropertyNode> *property: Property node to dump to the output
+ *  <char> *output: Pointer to a heap allocated string
+ *
+ * Returns:
+ *  char*: Pointer to the output string
+ *
+ * Notes:
+ *  Because the *output* pointer can be modified, this function returns
+ *  a pointer to the new location in case the memory is reallocated or
+ *  to the old location in case the pointer does not need to be modified. Either
+ *  way, it is safe to use the function as:
+ *      output = zenit_node_property_dump(property, output);
+ *  If the memory of *output* cannot be reallocated this function frees the memory.
+ */
+char* zenit_node_property_dump(struct ZenitPropertyNode *property, char *output);
 
-static inline char* zenit_node_property_uid(struct ZenitPropertyNode *property)
-{
-    if (!property)
-        return NULL;
-
-    return fl_cstring_vdup("%%L%u:C%u_property_%s", property->base.location.line, property->base.location.col, property->name);
-}
-
-static inline char* zenit_node_property_dump(struct ZenitPropertyNode *property, char *output)
-{
-    fl_cstring_vappend(&output, "(prop %s ", property->name);
-    
-    output = zenit_node_dump(property->value, output);    
-    
-    fl_cstring_append(&output, ")");
-
-    return output;
-}
-
-static inline void zenit_node_property_free(struct ZenitPropertyNode *node)
-{
-    if (!node)
-        return;
-
-    if (node->name)
-        fl_cstring_free(node->name);
-
-    zenit_node_free(node->value);
-
-    fl_free(node);
-}
-
-static inline struct ZenitPropertyNodeMap zenit_property_node_map_new()
-{
-    return (struct ZenitPropertyNodeMap) {
-        .map = fl_hashtable_new_args((struct FlHashtableArgs) {
-            .hash_function = fl_hashtable_hash_string,
-            .key_allocator = fl_container_allocator_string,
-            .key_comparer = fl_container_equals_string,
-            .key_cleaner = fl_container_cleaner_pointer,
-            .value_cleaner = (FlContainerCleanupFunction)zenit_node_free,
-            .value_allocator = NULL
-        })
-    };
-}
-
-static inline void zenit_property_node_map_free(struct ZenitPropertyNodeMap *property_map)
-{
-    if (property_map->map)
-        fl_hashtable_free(property_map->map);
-}
-
-static inline struct ZenitPropertyNode* zenit_property_node_map_add(struct ZenitPropertyNodeMap *property_map, struct ZenitPropertyNode *property)
-{
-    return (struct ZenitPropertyNode*)fl_hashtable_add(property_map->map, property->name, property);
-}
-
-static inline const char** zenit_property_node_map_keys(struct ZenitPropertyNodeMap *property_map)
-{
-    return fl_hashtable_keys(property_map->map);
-}
-
-static inline struct ZenitPropertyNode** zenit_property_node_map_values(struct ZenitPropertyNodeMap *property_map)
-{
-    return fl_hashtable_values(property_map->map);
-}
-
-static inline struct ZenitPropertyNode* zenit_property_node_map_get(struct ZenitPropertyNodeMap *property_map, const char *property_name)
-{
-    return (struct ZenitPropertyNode*)fl_hashtable_get(property_map->map, property_name);
-}
-
-static inline size_t zenit_property_node_map_length(struct ZenitPropertyNodeMap *property_map)
-{
-    return fl_hashtable_length(property_map->map);
-}
-
-static inline bool zenit_property_node_map_has_key(struct ZenitPropertyNodeMap *property_map, const char *property_name)
-{
-    return fl_hashtable_has_key(property_map->map, property_name);
-}
+/*
+ * Function: zenit_node_property_free
+ *  Frees the memory used by the property node
+ *
+ * Parameters:
+ *  <struct ZenitPropertyNode> *property: Property node
+ *
+ * Returns:
+ *  void: This function does not return a value
+ */
+void zenit_node_property_free(struct ZenitPropertyNode *node);
 
 #endif /* ZENIT_AST_T_PROPERTY_H */

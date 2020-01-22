@@ -4,125 +4,88 @@
 #include <fllib.h>
 
 #include "node.h"
-#include "property.h"
+#include "property_map.h"
 
+/*
+ * Struct: struct ZenitAttributeNode
+ *  Represents an attribute in the source code
+ * 
+ * Members:
+ *  <struct ZenitNode> base: Basic information of the node object
+ *  <char> *name: The attribute name
+ *  <struct ZenitPropertyNodeMap> properties: Map of properties of the attribute
+ */
 struct ZenitAttributeNode {
     struct ZenitNode base;
     char *name;
     struct ZenitPropertyNodeMap properties;
 };
 
-struct ZenitAttributeNodeMap {
-    FlHashtable map;
-};
+/*
+ * Function: zenit_node_attribute_new
+ *  Creates a new AST node that represents an attribute
+ *
+ * Parameters:
+ *  <struct ZenitSourceLocation> location: Location information about the attribute
+ *  <char> *name: The attribute name
+ *
+ * Returns:
+ *  struct ZenitAttributeNode*: Attribute node
+ *
+ * Notes:
+ *  The object returned by this function must be freed using the
+ *  <zenit_node_attribute_free> function
+ */
+struct ZenitAttributeNode* zenit_node_attribute_new(struct ZenitSourceLocation location, char *name);
 
+/*
+ * Function: zenit_node_attribute_uid
+ *  Returns a UID for the attribute node
+ *
+ * Parameters:
+ *  <struct ZenitAttributeNode> *attribute: Attribute node
+ *
+ * Returns:
+ *  char*: UID of the attribute node
+ *
+ * Notes:
+ *  The object returned by this function must be freed using the
+ *  <fl_cstring_free> function
+ */
+char* zenit_node_attribute_uid(struct ZenitAttributeNode *attribute);
 
-static inline struct ZenitAttributeNode* zenit_node_attribute_new(struct ZenitSourceLocation location, char *name)
-{
-    struct ZenitAttributeNode *attribute = fl_malloc(sizeof(struct ZenitAttributeNode));
-    attribute->base.nodekind = ZENIT_NODE_ATTRIBUTE;
-    attribute->base.location = location;
-    attribute->name = name;
-    attribute->properties = zenit_property_node_map_new();
+/*
+ * Function: zenit_node_attribute_dump
+ *  Appends a dump of the attribute node to the output pointer, and
+ *  returns a pointer to the -possibly reallocated- output
+ *
+ * Parameters:
+ *  <struct ZenitAttributeNode> *attribute: Attribute node to dump to the output
+ *  <char> *output: Pointer to a heap allocated string
+ *
+ * Returns:
+ *  char*: Pointer to the output string
+ *
+ * Notes:
+ *  Because the *output* pointer can be modified, this function returns
+ *  a pointer to the new location in case the memory is reallocated or
+ *  to the old location in case the pointer does not need to be modified. Either
+ *  way, it is safe to use the function as:
+ *      output = zenit_node_attribute_dump(attribute, output);
+ *  If the memory of *output* cannot be reallocated this function frees the memory.
+ */
+char* zenit_node_attribute_dump(struct ZenitAttributeNode *attribute, char *output);
 
-    return attribute;
-}
-
-static inline char* zenit_node_attribute_uid(struct ZenitAttributeNode *attribute)
-{
-    if (!attribute)
-        return NULL;
-
-    return fl_cstring_vdup("%%L%u:C%u_attr_%s", attribute->base.location.line, attribute->base.location.col, attribute->name);
-}
-
-static inline char* zenit_node_attribute_dump(struct ZenitAttributeNode *attribute, char *output)
-{
-    fl_cstring_vappend(&output, "(attr %s", attribute->name);
-
-    struct ZenitPropertyNode **properties = zenit_property_node_map_values(&attribute->properties);
-    
-    size_t length = fl_array_length(properties);
-    if (length > 0)
-    {
-        fl_cstring_append(&output, " ");
-        for (size_t i=0; i < length; i++)
-        {
-            output = zenit_node_property_dump(properties[i], output);
-            if (i != length - 1)
-                fl_cstring_append(&output, " ");
-        }
-    }
-
-    fl_array_free(properties);
-
-    fl_cstring_append(&output, ")");
-
-    return output;
-}
-
-static inline void zenit_node_attribute_free(struct ZenitAttributeNode *attribute_node)
-{
-    if (!attribute_node)
-        return;
-
-    if (attribute_node->name)
-        fl_cstring_free(attribute_node->name);
-
-    zenit_property_node_map_free(&attribute_node->properties);
-
-    fl_free(attribute_node);
-}
-
-
-static inline struct ZenitAttributeNodeMap zenit_attribute_node_map_new()
-{
-    return (struct ZenitAttributeNodeMap) {
-        .map = fl_hashtable_new_args((struct FlHashtableArgs) {
-            .hash_function = fl_hashtable_hash_string,
-            .key_allocator = fl_container_allocator_string,
-            .key_comparer = fl_container_equals_string,
-            .key_cleaner = fl_container_cleaner_pointer,
-            .value_cleaner = (FlContainerCleanupFunction) zenit_node_free,
-            .value_allocator = NULL
-        })
-    };
-}
-
-static inline void zenit_attribute_node_map_free(struct ZenitAttributeNodeMap *mapptr)
-{
-    if (mapptr->map)
-        fl_hashtable_free(mapptr->map);
-}
-
-static inline struct ZenitAttributeNode* zenit_attribute_node_map_add(struct ZenitAttributeNodeMap *mapptr, struct ZenitAttributeNode *attr)
-{
-    return (struct ZenitAttributeNode*) fl_hashtable_add(mapptr->map, attr->name, attr);
-}
-
-static inline const char** zenit_attribute_node_map_keys(struct ZenitAttributeNodeMap *mapptr)
-{
-    return fl_hashtable_keys(mapptr->map);
-}
-
-static inline struct ZenitAttributeNode** zenit_attribute_node_map_values(struct ZenitAttributeNodeMap *mapptr)
-{
-    return fl_hashtable_values(mapptr->map);
-}
-
-static inline struct ZenitAttributeNode* zenit_attribute_node_map_get(struct ZenitAttributeNodeMap *mapptr, const char *attrname)
-{
-    return (struct ZenitAttributeNode*) fl_hashtable_get(mapptr->map, attrname);
-}
-
-static inline size_t zenit_attribute_node_map_length(struct ZenitAttributeNodeMap *mapptr)
-{
-    return fl_hashtable_length(mapptr->map);
-}
-
-static inline bool zenit_attribute_node_map_has_key(struct ZenitAttributeNodeMap *mapptr, const char *attrname)
-{
-    return fl_hashtable_has_key(mapptr->map, attrname);
-}
+/*
+ * Function: zenit_node_attribute_free
+ *  Frees the memory used by the attribute node
+ *
+ * Parameters:
+ *  <struct ZenitAttributeNode> *attribute: Attribute node
+ *
+ * Returns:
+ *  void: This function does not return a value
+ */
+void zenit_node_attribute_free(struct ZenitAttributeNode *attribute_node);
 
 #endif /* ZENIT_AST_ATTRIBUTE_H */

@@ -174,7 +174,7 @@ bool zenit_scope_has_symbols(struct ZenitScope *scope);
  * Notes:
  *  Because the *output* pointer can be modified, this function returns
  *  a pointer to the new location in case the memory is reallocated or
- *  to the old one in case the pointer does not need to be modified. Either
+ *  to the old location in case the pointer does not need to be modified. Either
  *  way, it is safe to use the function as:
  *      output = zenit_scope_dump(scope, output, verbose);
  *  If the memory of *output* cannot be reallocated this function frees the memory.

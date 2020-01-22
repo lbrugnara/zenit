@@ -25,13 +25,42 @@
  *  Represents the abstract syntax tree of the parsed program
  * 
  * Members:
- *  <struct ZenitNode> **decls: -fllib- array of pointers that contains the declarations of the program
+ *  <struct ZenitNode> **decls: Array of pointers that contains the declarations of the program
  * 
  */
 struct ZenitAst {
     struct ZenitNode **decls;
 };
 
+/*
+ * Function: zenit_ast_new
+ *  Creates a new AST object
+ *
+ * Parameters:
+ *  <struct ZenitNode> **decls: Array of declarations to be included in the AST
+ *
+ * Returns:
+ *  struct ZenitAst*: AST object
+ *
+ * Notes:
+ *  The AST object takes ownership of the *decls* array, which means that the caller does not need to free
+ *  the memory used by the declaration objects 
+ */
+struct ZenitAst* zenit_ast_new(struct ZenitNode **decls);
+
+/*
+ * Function: zenit_ast_dump
+ *  Returns a heap allocated string containing a dump of the AST object
+ *
+ * Parameters:
+ *  <struct ZenitAst> *ast: AST object to dump to the output
+ *
+ * Returns:
+ *  char*: Pointer to a heap allocated string containing the dump of the AST
+ *
+ * Notes:
+ *  The string returned by this function must be freed with the <fl_cstring_free> function
+ */
 char* zenit_ast_dump(struct ZenitAst *ast);
 
 /*

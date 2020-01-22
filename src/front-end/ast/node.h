@@ -32,7 +32,7 @@ enum ZenitNodeKind {
  *  The base node object. All the specific objects are compound with this one
  * 
  * Members:
- *  <enum ZenitNodeKind> type: The specific type of the AST node
+ *  <enum ZenitNodeKind> type: The specific kind of AST node
  *  <struct ZenitSourceLocation> location: The place in the source code represented by the node
  */
 struct ZenitNode {
@@ -50,22 +50,32 @@ struct ZenitNode {
  * Returns:
  *  <char>*: UID of the node object
  *
+ * Notes:
+ *  The object returned by this function must be freed using the
+ *  <fl_cstring_free> function.
  */
 char* zenit_node_uid(struct ZenitNode *node);
 
 /*
- * Function: zenit_node_to_string
- *  Returns a string representation of the node's type
+ * Function: zenit_node_dump
+ *  Appends a dump of the node object to the output pointer, and
+ *  returns a pointer to the -possibly reallocated- output
  *
  * Parameters:
- *  <struct ZenitNode> *node: Node object
+ *  <struct ZenitNode> *node: Node object to dump to the output
+ *  <char> *output: Pointer to a heap allocated string
  *
  * Returns:
- *  <char>*: String representation of the node's type
- * 
+ *  char*: Pointer to the output string
+ *
+ * Notes:
+ *  Because the *output* pointer can be modified, this function returns
+ *  a pointer to the new location in case the memory is reallocated or
+ *  to the old location in case the pointer does not need to be modified. Either
+ *  way, it is safe to use the function as:
+ *      output = zenit_node_dump(node, output);
+ *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_to_string(struct ZenitNode *node);
-
 char* zenit_node_dump(struct ZenitNode *node, char *output);
 
 /*

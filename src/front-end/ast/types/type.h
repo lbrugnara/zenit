@@ -3,6 +3,14 @@
 
 #include "../node.h"
 
+/*
+ * Struct: struct ZenitTypeNode
+ *  The base type node object. All the specific type node objects are compound with this one
+ * 
+ * Members:
+ *  <struct ZenitNode> base: Basic information of the node object
+ *  <enum ZenitNodeKind> typekind: The specific native type kind
+ */
 struct ZenitTypeNode {
     struct ZenitNode base;
     enum ZenitTypeKind typekind;
@@ -24,8 +32,8 @@ struct ZenitTypeNode {
  *  <char>*: String representation of the *typenode* object
  *
  * Notes:
- *  The string returned by this function must be freed with
- *  the fl_cstring_free or the free functions
+ *  The object returned by this function must be freed using the
+ *  <fl_cstring_Free> function
  */
 static char* zenit_node_type_to_string(struct ZenitTypeNode *typenode)
 {

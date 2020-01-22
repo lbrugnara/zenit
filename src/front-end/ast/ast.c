@@ -1,5 +1,13 @@
 #include "ast.h"
 
+struct ZenitAst* zenit_ast_new(struct ZenitNode **decls)
+{
+    struct ZenitAst *ast = fl_malloc(sizeof(struct ZenitAst));
+    ast->decls = decls;
+
+    return ast;
+}
+
 char* zenit_ast_dump(struct ZenitAst *ast)
 {
     char *output = fl_cstring_dup("(ast");

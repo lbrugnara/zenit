@@ -30,68 +30,6 @@ static inline void free_node_array_entry(void *nodeptr)
     zenit_node_free(node);
 }
 
-char* zenit_node_to_string(struct ZenitNode *node)
-{
-    if (!node)
-        return "null";
-
-    switch (node->nodekind)
-    {
-        case ZENIT_NODE_UINT:
-            return "literal";
-
-        case ZENIT_NODE_VARIABLE:
-            return "var";
-
-        case ZENIT_NODE_STRUCT_DECL:
-            return "struct decl";
-
-        case ZENIT_NODE_FIELD_DECL:
-            return "field decl";
-
-        case ZENIT_NODE_ATTRIBUTE:
-            return "attr";
-
-        case ZENIT_NODE_PROPERTY:
-            return "prop";
-
-        case ZENIT_NODE_ARRAY:
-            return "array";
-
-        case ZENIT_NODE_IDENTIFIER:
-            return "id";
-
-        case ZENIT_NODE_REFERENCE:
-            return "ref";
-
-        case ZENIT_NODE_CAST:
-            return "cast";
-
-        case ZENIT_NODE_STRUCT:
-            return "struct";
-
-        case ZENIT_NODE_FIELD:
-            return "field";
-
-        case ZENIT_NODE_TYPE_ARRAY:
-            return "array type";
-
-        case ZENIT_NODE_TYPE_UINT:
-            return "uint type";
-
-        case ZENIT_NODE_TYPE_REFERENCE:
-            return "ref type";
-
-        case ZENIT_NODE_TYPE_STRUCT:
-            return "struct type";
-        
-        default:
-            break;
-    }
-
-    return "unknown";
-}
-
 char* zenit_node_uid(struct ZenitNode *node)
 {
     if (!node)

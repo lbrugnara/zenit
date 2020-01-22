@@ -1169,8 +1169,7 @@ bool zenit_parse_source(struct ZenitContext *ctx)
     }
 
     // Create the struct ZenitAst object
-    ctx->ast = fl_malloc(sizeof(struct ZenitAst));
-    ctx->ast->decls = fl_vector_to_array(tempvec);
+    ctx->ast = zenit_ast_new(fl_vector_to_array(tempvec));
     fl_vector_free(tempvec);
 
     return !ctx->errors;

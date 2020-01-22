@@ -158,7 +158,7 @@ bool zenit_symtable_is_empty(struct ZenitSymtable *symtable);
  * Notes:
  *  Because the *output* pointer can be modified, this function returns
  *  a pointer to the new location in case the memory is reallocated or
- *  to the old one in case the pointer does not need to be modified. Either
+ *  to the old location in case the pointer does not need to be modified. Either
  *  way, it is safe to use the function as:
  *      output = zenit_symtable_dump(symtable, output, verbose);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
