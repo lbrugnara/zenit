@@ -372,9 +372,9 @@ bool zenit_type_ctx_unify_types(struct ZenitTypeContext *type_ctx, struct ZenitT
     return false;
 }
 
-void zenit_type_ctx_free(struct ZenitTypeContext *system)
+void zenit_type_ctx_free(struct ZenitTypeContext *type_ctx)
 {
-    fl_list_free(system->uniques);
-    fl_hashtable_free(system->pool);
-    fl_free(system);
+    fl_list_free(type_ctx->uniques);
+    fl_hashtable_free(type_ctx->pool);
+    fl_free(type_ctx);
 }

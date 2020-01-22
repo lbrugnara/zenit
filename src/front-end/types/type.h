@@ -10,15 +10,10 @@
  */
 enum ZenitTypeKind {
     ZENIT_TYPE_NONE,
-
     ZENIT_TYPE_REFERENCE,
-
     ZENIT_TYPE_ARRAY,
-
     ZENIT_TYPE_STRUCT,
-
     ZENIT_TYPE_UINT,
-
     ZENIT_TYPE_END
 };
 
