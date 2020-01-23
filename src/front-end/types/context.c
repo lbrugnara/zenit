@@ -81,6 +81,14 @@ struct ZenitStructType* zenit_type_ctx_new_struct(struct ZenitTypeContext *type_
     return struct_type;
 }
 
+struct ZenitStructType* zenit_type_ctx_get_named_struct(struct ZenitTypeContext *type_ctx, char *name)
+{
+    if (fl_hashtable_has_key(type_ctx->pool, name))
+        return fl_hashtable_get(type_ctx->pool, name);
+
+    return NULL;
+}
+
 struct ZenitUintType* zenit_type_ctx_new_uint(struct ZenitTypeContext *type_ctx, enum ZenitUintTypeSize size)
 {
     const char *key = NULL;

@@ -109,3 +109,16 @@ executable zenit-tests-sanitize {
         ]
     }
 }
+
+compile zenit-objects-asm {
+    includes: [
+        "../fllib/include"
+    ],
+    output_dir: "asm/",
+    sources: [
+        "src/front-end/.*[.]c$",
+        "src/zir/.*[.]c$",
+
+        "src/back-end/nes/.*[.]c$"
+    ]
+}

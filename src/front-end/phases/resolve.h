@@ -18,9 +18,9 @@
  *          should contain the error(s) description
  * 
  * Notes:
- *  This function just creates the <struct ZenitSymbol> entries with the information
- *  present in the symbol definition, it does not perform any type of type 
- *  inference nor type checking
+ *  This function creates the <struct ZenitSymbol> entries with the information
+ *  present in the symbol definition, and performs some basic checks on user-defined
+ *  types
  */
 bool zenit_resolve_symbols(struct ZenitContext *ctx);
 

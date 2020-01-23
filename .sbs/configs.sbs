@@ -96,11 +96,27 @@ config clang-debug extends clang-config {
     }
 }
 
+config clang-debug-asm extends clang-debug {
+    compile: {
+        flags: [
+            "-S",
+        ]
+    }
+}
+
 # The release configuration adds specifc flags to get optimized code
 config clang-release extends clang-config {
     compile: {
         flags: [
             "-O3"
+        ]
+    }
+}
+
+config clang-release-asm extends clang-release {
+    compile: {
+        flags: [
+            "-S",
         ]
     }
 }

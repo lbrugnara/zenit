@@ -100,6 +100,37 @@ static struct ZenitTypeNode* parse_type_declaration(struct ZenitParser *parser, 
 static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *parser, struct ZenitContext *ctx, bool allow_partial_types);
 static struct ZenitTypeNode* parse_type_reference_declaration(struct ZenitParser *parser, struct ZenitContext *ctx, bool allow_partial_types);
 static bool parse_uint_value(struct ZenitContext *ctx, struct ZenitToken *primitive_token, enum ZenitUintTypeSize *size, union ZenitUintValue *value);
+static inline bool synchronize(struct ZenitParser *parser, enum ZenitTokenType *tokens, size_t length);
+
+/*
+ * Function: synchronize
+ *  This function consumes tokens up to find a token that matches its type with one of the provided tokens
+ *
+ * Parameters:
+ *  <struct ZenitParser> *parser: Parser object
+ *  <enum ZenitTokenType> *tokens: Array of synchronization tokens
+ *  <size_t> length: Number of elements in the array
+ *
+ * Returns:
+ *  bool: If the synchronization function finds one of the provided tokens, this function returns *true*, 
+ *        otherwise it returns *false*.
+ *
+ * Notes:
+ *  This function consume the matching token too.
+ */
+static inline bool synchronize(struct ZenitParser *parser, enum ZenitTokenType *tokens, size_t length)
+{
+    while (zenit_parser_has_input(parser))
+    {
+        struct ZenitToken token = zenit_parser_consume(parser);
+
+        for (size_t i=0; i < length; i++)
+            if (token.type == tokens[i])
+                return true;
+    }
+
+    return false;
+}
 
 static struct ZenitTypeNode* parse_type_array_declaration(struct ZenitParser *parser, struct ZenitContext *ctx, bool allow_partial_types)
 {
@@ -505,10 +536,7 @@ static struct ZenitNode* parse_struct_literal(struct ZenitParser *parser, struct
             struct ZenitToken tmp;
             zenit_parser_peek(parser, &tmp);
 
-            while (zenit_parser_has_input(parser) && !zenit_parser_next_is(parser, ZENIT_TOKEN_RBRACE))
-                zenit_parser_consume(parser);
-
-            if (zenit_parser_next_is(parser, ZENIT_TOKEN_RBRACE))
+            if (synchronize(parser, (enum ZenitTokenType[]) { ZENIT_TOKEN_RBRACE }, 1))
             {
                 zenit_context_error(ctx, ctx->srcinfo->location, ZENIT_ERROR_SYNTAX,
                     "Expecting token %s, received %s",
@@ -1133,12 +1161,8 @@ static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct Ze
  */
 bool zenit_parse_source(struct ZenitContext *ctx)
 {
-    // We use a vector with an initial capacity, if there are more
-    // nodes the vector will resize automatically
-    FlVector tempvec = fl_vector_new_args((struct FlVectorArgs) {
-        .element_size = sizeof(struct ZenitNode*),
-        .capacity = 1000
-    });
+    FlList templist = fl_list_new();
+    size_t decls_count = 0;
 
     struct ZenitParser parser = zenit_parser_new(ctx->srcinfo);
 
@@ -1151,26 +1175,31 @@ bool zenit_parse_source(struct ZenitContext *ctx)
         // If declaration is NULL, something happened, so let's synch
         if (declaration == NULL)
         {
-            do {
-                struct ZenitToken token = zenit_parser_consume(&parser);
-
-                // SEMICOLON is our synchronizing token. On EOF we break
-                if (token.type == ZENIT_TOKEN_SEMICOLON || token.type == ZENIT_TOKEN_EOF)
-                    break;
-
-            } while (true);
+            if (!synchronize(&parser, (enum ZenitTokenType[]) { ZENIT_TOKEN_SEMICOLON, ZENIT_TOKEN_EOF }, 2))
+                break;
 
             // Let's try again
             continue;
         }
 
-        // The "top-level" node is a declaration
-        fl_vector_add(tempvec, declaration);
+        fl_list_append(templist, declaration);
+        decls_count++;
+    }
+
+    // Create the decls array
+    struct ZenitNode **decls = fl_array_new(sizeof(struct ZenitNode*), decls_count);
+
+    decls_count = 0;
+    struct FlListNode *node = fl_list_head(templist);
+    while (node)
+    {
+        decls[decls_count++] = (struct ZenitNode*) node->value;
+        node = node->next;
     }
 
     // Create the struct ZenitAst object
-    ctx->ast = zenit_ast_new(fl_vector_to_array(tempvec));
-    fl_vector_free(tempvec);
+    ctx->ast = zenit_ast_new(decls);
+    fl_list_free(templist);
 
     return !ctx->errors;
 }

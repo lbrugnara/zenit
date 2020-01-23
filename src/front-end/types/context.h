@@ -46,7 +46,7 @@ struct ZenitTypeContext* zenit_type_ctx_new(void);
  *
  * Parameters:
  *  <struct ZenitTypeContext> *type_ctx: The type context object
- *  <> : 
+ *  <struct ZenitType> *member_type:  The type for the array's members
  *
  * Returns:
  *  struct ZenitArrayType*: The new array type object
@@ -106,6 +106,19 @@ struct ZenitReferenceType* zenit_type_ctx_new_reference(struct ZenitTypeContext 
  *  not need to free the memory used by the type object.
  */
 struct ZenitStructType* zenit_type_ctx_new_struct(struct ZenitTypeContext *type_ctx, char *name);
+
+/*
+ * Function: zenit_type_ctx_get_named_struct
+ *  Returns a named struct that must be already present in the type context
+ *
+ * Parameters:
+ *  <struct ZenitTypeContext> *type_ctx: The type context object
+ *  <char> *name: A valid string for the name of the struct type. It cannot be <NULL>
+ *
+ * Returns:
+ *  struct ZenitStructType*: The named struct type or NULL if it doesn't exist
+ */
+struct ZenitStructType* zenit_type_ctx_get_named_struct(struct ZenitTypeContext *type_ctx, char *name);
 
 /*
  * Function: zenit_type_ctx_new_uint
