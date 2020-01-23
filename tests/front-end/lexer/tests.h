@@ -19,5 +19,6 @@ void zenit_test_lexer_punctuation(void);
 void zenit_test_lexer_specials(void);
 void zenit_test_lexer_errors(void);
 void zenit_test_lexer_combinations(void);
+void zenit_test_lexer_comments(void);
 
 #endif /* ZENIT_TESTS_LEXER_H */

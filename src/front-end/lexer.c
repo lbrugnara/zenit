@@ -262,15 +262,25 @@ static inline void remove_ws_and_comments(struct ZenitLexer *lexer)
         else if (cc.sequence && is_string(&cc, "/*"))
         {
             // Consume comment line
+            consume(lexer); // '/'
+            consume(lexer);//  '*'
+            size_t level = 0;
             while (has_input(lexer))
             {
                 char c = consume(lexer);
                 if (c == '*' && peek(lexer) == '/')
                 {
                     consume(lexer);
-                    break;
+                    if (level == 0)
+                        break;
+                    level--;
                 }
-                if (c == '\n')
+                else if (c == '/' && peek(lexer) == '*')
+                {
+                    consume(lexer);
+                    level++;
+                }
+                else if (c == '\n')
                 {
                     lexer->srcinfo->location.line++;
                     lexer->srcinfo->location.col = 1;
