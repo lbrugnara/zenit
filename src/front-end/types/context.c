@@ -309,26 +309,42 @@ bool zenit_type_ctx_unify_struct(struct ZenitTypeContext *type_ctx, struct Zenit
     // If they are structurally equals, we just copy one of them and return an unnamed struct
     // (an unnamed struct can be casted or assigned to a named struct as long as they are structurally
     // equals and the other way around)
-    if (zenit_type_struct_structurally_equals(struct_type, struct_type_b))
+    bool struct_equals = zenit_type_struct_structurally_equals(struct_type, struct_type_b);
+
+    struct ZenitStructType *unified_struct = zenit_type_ctx_new_struct(type_ctx, NULL);
+
+    struct FlListNode *struct_a_node = fl_list_head(struct_type->members);
+    while (struct_a_node)
     {
-        struct ZenitStructType *unified_struct = zenit_type_ctx_new_struct(type_ctx, NULL);
+        struct ZenitStructTypeMember *struct_a_member = (struct ZenitStructTypeMember*) struct_a_node->value;
 
-        struct FlListNode *struct_node = fl_list_head(struct_type->members);
-        while (struct_node)
+        struct ZenitStructTypeMember *struct_b_member = struct_equals ? NULL : zenit_type_struct_get_member(struct_type_b, struct_a_member->name);
+
+        // If the structs are structurally equals, we can safely add the member, but if not, we need to make sure
+        // the member is present in both types
+        if (struct_equals || struct_b_member != NULL)
         {
-            struct ZenitStructTypeMember *struct_member = (struct ZenitStructTypeMember*) struct_node->value;
-
-            zenit_type_struct_add_member(unified_struct, struct_member->name, zenit_type_ctx_copy_type(type_ctx, struct_member->type));
-
-            struct_node = struct_node->next;
+            struct ZenitType *member_type = NULL;
+            if (struct_equals)
+            {
+                // Equals means there is no need to unify the member type
+                member_type = zenit_type_ctx_copy_type(type_ctx, struct_a_member->type);
+            }
+            else
+            {
+                if (!zenit_type_can_unify(struct_a_member->type, struct_b_member->type)
+                    || !zenit_type_ctx_unify_types(type_ctx, struct_a_member->type, struct_b_member->type, &member_type))
+                    return false;
+            }
+            
+            zenit_type_struct_add_member(unified_struct, struct_a_member->name, member_type);
         }
 
-        *dest = (struct ZenitType*) unified_struct;
-        return true;
+        struct_a_node = struct_a_node->next;
     }
 
-    // FIXME: Let's assume we can't unify structurally inequal structs
-    return false;
+    *dest = (struct ZenitType*) unified_struct;
+    return true;
 }
 
 bool zenit_type_ctx_unify_uint(struct ZenitTypeContext *type_ctx, struct ZenitUintType *uint_type, struct ZenitType *type_b, struct ZenitType **dest)

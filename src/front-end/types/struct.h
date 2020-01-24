@@ -65,6 +65,19 @@ struct ZenitStructType* zenit_type_struct_new(char *name);
 void zenit_type_struct_add_member(struct ZenitStructType *struct_type, const char *name, struct ZenitType *member_type);
 
 /*
+ * Function: zenit_type_struct_get_member
+ *  Returns -if it exists- the struct type member matching its name with the provided *name*.
+ *
+ * Parameters:
+ *  <struct ZenitStructType> *struct_type: Struct type object
+ *  <const char> *name: The member name
+ *
+ * Returns:
+ *  struct ZenitStructTypeMember*: The struct type member or NULL if it doesn't exist
+ */
+struct ZenitStructTypeMember* zenit_type_struct_get_member(struct ZenitStructType *struct_type, const char *name);
+
+/*
  * Function: zenit_type_struct_hash
  *  Returns a hash that identifies the struct type object
  *

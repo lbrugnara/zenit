@@ -55,24 +55,39 @@ void zenit_test_infer_variable_uint(void)
 void zenit_test_infer_variable_reference(void)
 {
     const char *source = 
-        "var sym_a = 1;"                        "\n"
-        "var sym_b = 0x1FF;"                    "\n"
+        "var sym_a = 1;"                                "\n"
+        "var sym_b = 0x1FF;"                            "\n"
 
-        "var sym_c = &sym_a;"                   "\n"
-        "var sym_d = &sym_b;"                   "\n"
-        "var sym_e = &sym_d;"                   "\n"
-        "var sym_f = cast(&sym_b : &uint8);"    "\n"
-        "var sym_g = cast(&sym_a : &uint16);"   "\n" // Not valid (it doesn't pass the type check, but the inference for sym_g should still work)
+        "var sym_c = &sym_a;"                           "\n"
+        "var sym_d = &sym_b;"                           "\n"
+        "var sym_e = &sym_d;"                           "\n"
+        "var sym_f = cast(&sym_b : &uint8);"            "\n"
+        "var sym_g = cast(&sym_a : &uint16);"           "\n" // Not valid (it doesn't pass the type check, but the inference for sym_g should still work)
+
+        "var sym_h = { x: 1, y: 2, z: [ 1, 0x1FF ] };"  "\n"
+        "var sym_i = &sym_h;"                           "\n"
+
+        "struct Point { x: uint8; y: uint8; }"          "\n"
+        "var sym_j = { x: 1, y: 2};"                    "\n"
+        "var p = cast(sym_j : Point);"                  "\n"
+        "var p2 : Point = cast(sym_j);"                 "\n"
+        "var p3 : Point = sym_j;"                       "\n"
     ;
     
     const char *tests[][2] = { 
-        { "sym_a", "uint8" },
-        { "sym_b", "uint16" },
-        { "sym_c", "&uint8" },
-        { "sym_d", "&uint16" },
-        { "sym_e", "&&uint16" },
-        { "sym_f", "&uint8" },
-        { "sym_g", "&uint16" },
+        { "sym_a",  "uint8"                                     },
+        { "sym_b",  "uint16"                                    },
+        { "sym_c",  "&uint8"                                    },
+        { "sym_d",  "&uint16"                                   },
+        { "sym_e",  "&&uint16"                                  },
+        { "sym_f",  "&uint8"                                    },
+        { "sym_g",  "&uint16"                                   },
+        { "sym_h",  "{ x: uint8, y: uint8, z: [2]uint16 }"      },
+        { "sym_i",  "&{ x: uint8, y: uint8, z: [2]uint16 }"     },
+        { "sym_j",  "{ x: uint8, y: uint8 }"                    },
+        { "p",      "Point"                                     },
+        { "p2",     "Point"                                     },
+        { "p3",     "Point"                                     },
     };
 
     const size_t count = sizeof(tests) / sizeof(tests[0]);
@@ -119,7 +134,7 @@ void zenit_test_infer_variable_array(void)
         "var sym_p = [ 0x1, 0x200];"                                    "\n"
         "var sym_q : [2]&uint8 = [ &sym_a, cast(&sym_b : &uint8) ];"    "\n"
         "var sym_r : [2]uint16 = [ 0x1, 0x2 ];"                         "\n"
-        "var sym_s : [2]uint8 = [ 0x1FF, 0x2FF ];"                      "\n"
+        "var sym_s : [2]uint8 = [ 0x1FF, 0x2FF ];"                      "\n"    // This will fail in the type check pass
         "var sym_t = [ sym_r, sym_s ];"                                 "\n"
         "var sym_u = [ cast(sym_r : [2]uint8), sym_s ];"                "\n"
         "var sym_v = [ &sym_r, &sym_s ];"                               "\n"

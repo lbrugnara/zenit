@@ -37,6 +37,22 @@ void zenit_type_struct_add_member(struct ZenitStructType *struct_type, const cha
     fl_list_append(struct_type->members, member);
 }
 
+struct ZenitStructTypeMember* zenit_type_struct_get_member(struct ZenitStructType *struct_type, const char *name)
+{
+    struct FlListNode *tmp = fl_list_head(struct_type->members);
+    while (tmp != NULL)
+    {
+        struct ZenitStructTypeMember *member = (struct ZenitStructTypeMember*) tmp->value;
+        
+        if (flm_cstring_equals(name, member->name))
+            return member;
+
+        tmp = tmp->next;
+    }
+
+    return NULL;
+}
+
 unsigned long zenit_type_struct_hash(struct ZenitStructType *type)
 {
     static const char *format = "[struct][n:%s]";
@@ -224,8 +240,20 @@ bool zenit_type_struct_can_unify(struct ZenitStructType *struct_type, struct Zen
     if (struct_type->name != NULL && struct_type_b->name != NULL && flm_cstring_equals(struct_type->name, struct_type_b->name))
         return true;
 
-    // FIXME: Let's assume we can't unify structurally inequal structs
-    return false;
+    struct FlListNode *member_node = fl_list_head(struct_type->members);
+
+    while (member_node)
+    {
+        struct ZenitStructTypeMember *member_a = (struct ZenitStructTypeMember*) member_node->value;
+        struct ZenitStructTypeMember *member_b = zenit_type_struct_get_member(struct_type_b, member_a->name);
+
+        if (member_b == NULL || !zenit_type_can_unify(member_a->type, member_b->type))
+            return false;
+
+        member_node = member_node->next; 
+    }
+
+    return true;
 }
 
 void zenit_type_struct_free(struct ZenitStructType *type)
