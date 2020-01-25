@@ -6,11 +6,11 @@
 
 /*
  * Function: zenit_check_types
- *  This pass ensures the statements and expressions are valid based
- *  on the types involved in them.
+ *  This pass ensures that types of expressions are valid in the context they
+ *  occur
  *
  * Parameters:
- *  ctx - Context object
+ *  <struct ZenitContext> *ctx - Context object
  *
  * Returns:
  *  void - *true* on a pass without errors. Otheriwise, this function returns
@@ -18,7 +18,6 @@
  *          should contain the error(s) description
  * 
  * Notes:
- *  This function only perform checks and does not update the symbol table. 
  *  At the end of this pass, we can say all the operations in the program
  *  are valid in regard to types
  */
