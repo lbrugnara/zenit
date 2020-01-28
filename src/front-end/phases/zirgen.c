@@ -128,10 +128,8 @@ static inline struct ZirType* new_zir_type_from_zenit_type(struct ZirProgram *pr
     {
         struct ZenitArrayType *zenit_array = (struct ZenitArrayType*) zenit_type;
         
-        struct ZirArrayType *zir_array = zir_type_array_new();
-
+        struct ZirArrayType *zir_array = zir_type_array_new(new_zir_type_from_zenit_type(program, zenit_array->member_type));
         zir_array->length = zenit_array->length;
-        zir_array->member_type = new_zir_type_from_zenit_type(program, zenit_array->member_type);
         
         return (struct ZirType*) zir_array;
     }

@@ -27,20 +27,12 @@ unsigned long zir_type_reference_hash(struct ZirReferenceType *type)
     return hash;
 }
 
-struct ZirReferenceType* zir_type_reference_copy(struct ZirReferenceType *src_type)
-{
-    if (!src_type)
-        return NULL;
-
-    return zir_type_reference_new(zir_type_copy(src_type->element));
-}
-
 char* zir_type_reference_to_string(struct ZirReferenceType *type)
 {
     if (type == NULL)
         return NULL;
 
-    unsigned long type_hash = zir_type_hash((struct ZirType*) type);
+    unsigned long type_hash = zir_type_reference_hash(type);
 
     if (type->base.to_string.value == NULL)
     {
@@ -54,7 +46,7 @@ char* zir_type_reference_to_string(struct ZirReferenceType *type)
         return type->base.to_string.value;
     }
 
-    // We allocate memory for the string representation of this <struct ZirType> object
+    // We allocate memory for the string representation of this object
     char *string_value = fl_cstring_vdup("&%s", zir_type_to_string(type->element));
 
     // Update the string representation
@@ -100,6 +92,9 @@ bool zir_type_reference_is_castable_to(struct ZirReferenceType *reference, struc
     // Cast between the same types are valid
     if (zir_type_reference_equals(reference, target_type))
         return true;
+
+    if (target_type->typekind == ZIR_TYPE_REFERENCE)
+        return zir_type_is_assignable_from(reference->element, ((struct ZirReferenceType*) target_type)->element);
 
     // We can cast a reference to an unsigned integer
     if (target_type->typekind == ZIR_TYPE_UINT)

@@ -32,7 +32,7 @@ char* zir_type_to_string(struct ZirType *type)
     if (!type)
         return NULL;
 
-    unsigned long type_hash = zir_type_hash((struct ZirType*) type);
+    unsigned long type_hash = zir_type_hash(type);
 
     if (type_hash == type->to_string.version && type->to_string.value != NULL)
     {
@@ -55,29 +55,6 @@ char* zir_type_to_string(struct ZirType *type)
     
     if (type->typekind == ZIR_TYPE_NONE)
         return "<unknown>";
-
-    return NULL;
-}
-
-struct ZirType* zir_type_copy(struct ZirType *src_type)
-{
-    if (!src_type)
-        return NULL;
-
-    if (src_type->typekind == ZIR_TYPE_STRUCT)
-        return (struct ZirType*) zir_type_struct_copy((struct ZirStructType*) src_type);
-    
-    if (src_type->typekind == ZIR_TYPE_REFERENCE)
-        return (struct ZirType*) zir_type_reference_copy((struct ZirReferenceType*) src_type);
-    
-    if (src_type->typekind == ZIR_TYPE_ARRAY)
-        return (struct ZirType*) zir_type_array_copy((struct ZirArrayType*) src_type);
-    
-    if (src_type->typekind == ZIR_TYPE_UINT)
-        return (struct ZirType*) zir_type_uint_copy((struct ZirUintType*) src_type);
-    
-    if (src_type->typekind == ZIR_TYPE_NONE)
-        return zir_type_none_new();
 
     return NULL;
 }

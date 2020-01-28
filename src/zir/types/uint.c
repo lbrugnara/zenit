@@ -11,6 +11,15 @@ static struct TypeMapping {
     { "uint16",     ZIR_UINT_16   },
 };
 
+struct ZirUintType* zir_type_uint_new(enum ZirUintTypeSize size)
+{
+    struct ZirUintType *type = fl_malloc(sizeof(struct ZirUintType));
+    type->base.typekind = ZIR_TYPE_UINT;
+    type->size = size;
+
+    return type;
+}
+
 enum ZirUintTypeSize zir_type_uint_size_from_slice(struct FlSlice *slice)
 {
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
@@ -21,15 +30,6 @@ enum ZirUintTypeSize zir_type_uint_size_from_slice(struct FlSlice *slice)
     }
 
     return ZIR_UINT_UNK;
-}
-
-struct ZirUintType* zir_type_uint_new(enum ZirUintTypeSize size)
-{
-    struct ZirUintType *type = fl_malloc(sizeof(struct ZirUintType));
-    type->base.typekind = ZIR_TYPE_UINT;
-    type->size = size;
-
-    return type;
 }
 
 unsigned long zir_type_uint_hash(struct ZirUintType *type)
@@ -46,14 +46,6 @@ unsigned long zir_type_uint_hash(struct ZirUintType *type)
         hash = ((hash << 5) + hash) + type_key[i];
 
     return hash;
-}
-
-struct ZirUintType* zir_type_uint_copy(struct ZirUintType *src_type)
-{
-    if (!src_type)
-        return NULL;
-
-    return zir_type_uint_new(src_type->size);
 }
 
 char* zir_type_uint_to_string(struct ZirUintType *type)

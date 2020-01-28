@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "struct.h"
 
-void member_free(void *ptr)
+static void member_free(void *ptr)
 {
     if (!ptr)
         return;

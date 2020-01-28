@@ -1,7 +1,6 @@
 #ifndef ZIR_TYPE_H
 #define ZIR_TYPE_H
 
-#include <stdlib.h>
 #include <stdbool.h>
 
 /*
@@ -36,12 +35,17 @@ struct ZirTypeString {
 
 /*
  * Struct: struct ZirType
- *  Represents the information of a type. 
+ *  It is the "base type" of all the Zir type objects that contains
+ *  information that is shared between all the different types
  * 
  * Members:
- *  <enum ZirTypeKind> type: The raw type.
- *  <struct ZirTypeString> to_string: Keeps track of the string representation of the type object
- *  
+ *  <enum ZirTypeKind> typekind: The native kind of this type
+ *  <struct ZirTypeString> to_string: String representation of the type
+ * 
+ * Notes:
+ *  The *to_string* property is populated when a call to the function zir_type_to_string occurs (or to any of its
+ *  specializations) and shouldn't be directly manipulated
+ * 
  */
 struct ZirType {
     enum ZirTypeKind typekind;
@@ -57,7 +61,6 @@ struct ZirType {
  *
  * Returns:
  *  <unsigned long>: Hash of the type object
- * 
  */
 unsigned long zir_type_hash(struct ZirType *type);
 
@@ -70,7 +73,6 @@ unsigned long zir_type_hash(struct ZirType *type);
  *
  * Returns:
  *  <char>*: String representation of the *type* object
- *
  */
 char* zir_type_to_string(struct ZirType *type);
 
@@ -84,22 +86,8 @@ char* zir_type_to_string(struct ZirType *type);
  *
  * Returns:
  *  <bool>: *true* if the objects are equals, otherwise *false*.
- *
  */
 bool zir_type_equals(struct ZirType *type_a, struct ZirType *type_b);
-
-/*
- * Function: zir_type_copy
- *  Returns a new object that is a copy of the source object
- *
- * Parameters:
- *  <struct ZirType> *src_type: Type object to be copied
- *
- * Returns:
- *  <struct ZirType>*: New object copied from the source object
- * 
- */
-struct ZirType* zir_type_copy(struct ZirType *src_type);
 
 /*
  * Function: zir_type_is_assignable_from
@@ -112,7 +100,6 @@ struct ZirType* zir_type_copy(struct ZirType *src_type);
  *
  * Returns:
  *  <bool>: *true* if *target_type* accepts the *value_type*, otherwise, *false*.
- *
  */
 bool zir_type_is_assignable_from(struct ZirType *target_type, struct ZirType *value_type);
 
@@ -127,7 +114,6 @@ bool zir_type_is_assignable_from(struct ZirType *target_type, struct ZirType *va
  *
  * Returns:
  *  <bool>: *true* if the source type can be casted to the target type, otherwise, *false*.
- * 
  */
 bool zir_type_is_castable_to(struct ZirType *source_type, struct ZirType *target_cast_type);
 
@@ -140,7 +126,6 @@ bool zir_type_is_castable_to(struct ZirType *source_type, struct ZirType *target
  *
  * Returns:
  *  size_t: Size needed to store an instance of the type
- * 
  */
 size_t zir_type_size(struct ZirType *type);
 

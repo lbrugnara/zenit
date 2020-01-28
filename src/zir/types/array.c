@@ -1,17 +1,18 @@
 #include <fllib.h>
 #include "array.h"
 
-struct ZirArrayType* zir_type_array_new(void)
+struct ZirArrayType* zir_type_array_new(struct ZirType *member_type)
 {
     struct ZirArrayType *type = fl_malloc(sizeof(struct ZirArrayType));
     type->base.typekind = ZIR_TYPE_ARRAY;
+    type->member_type = member_type;
 
     return type;
 }
 
 unsigned long zir_type_array_hash(struct ZirArrayType *type)
 {
-    static const char *format = "[array][n:%zu][e:%lu]";
+    static const char *format = "[array][e:%lu]";
 
     char type_key[256] = { 0 };
     snprintf(type_key, 256, format, type->length, zir_type_hash(type->member_type));
@@ -25,27 +26,12 @@ unsigned long zir_type_array_hash(struct ZirArrayType *type)
     return hash;
 }
 
-struct ZirArrayType* zir_type_array_copy(struct ZirArrayType *source)
-{
-    if (!source)
-        return NULL;
-
-    struct ZirArrayType *dest = zir_type_array_new();
-
-    dest->base.typekind = source->base.typekind;
-    dest->length = source->length;
-    dest->member_type = zir_type_copy(source->member_type);
-    dest->source = source->source;
-
-    return dest;
-}
-
 char* zir_type_array_to_string(struct ZirArrayType *type)
 {
     if (type == NULL)
         return NULL;
 
-    unsigned long type_hash = zir_type_hash((struct ZirType*) type);
+    unsigned long type_hash = zir_type_array_hash(type);
 
     if (type->base.to_string.value == NULL)
     {
@@ -59,16 +45,14 @@ char* zir_type_array_to_string(struct ZirArrayType *type)
         return type->base.to_string.value;
     }
 
-    // We allocate memory for the string representation of this <struct ZirType> object
+    // We allocate memory for the string representation of this object
     char *string_value = fl_cstring_new(0);
-    
-    struct ZirArrayType *array_type = (struct ZirArrayType*) type;
 
     fl_cstring_append(&string_value, "[");
-    fl_cstring_vappend(&string_value, "%zu", array_type->length);
+    fl_cstring_vappend(&string_value, "%zu", type->length);
     fl_cstring_append(&string_value, "]");
 
-    fl_cstring_append(&string_value, zir_type_to_string(array_type->member_type));
+    fl_cstring_append(&string_value, zir_type_to_string(type->member_type));
 
     // Update the string representation
     type->base.to_string.version = type_hash;
