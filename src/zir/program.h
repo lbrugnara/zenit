@@ -42,6 +42,7 @@ struct ZirProgram* zir_program_new(void);
  */
 void zir_program_free(struct ZirProgram *program);
 
+bool zir_program_enter_block(struct ZirProgram *program, struct ZirBlock *block);
 void zir_program_push_block(struct ZirProgram *program, enum ZirBlockType type, const char *name);
 void zir_program_pop_block(struct ZirProgram *program);
 bool zir_program_has_block(struct ZirProgram *program, enum ZirBlockType type, const char *name);

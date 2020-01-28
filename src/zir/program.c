@@ -20,6 +20,17 @@ void zir_program_free(struct ZirProgram *program)
     fl_free(program);
 }
 
+
+bool zir_program_enter_block(struct ZirProgram *program, struct ZirBlock *block)
+{
+    if (block->parent != program->current)
+        return false;
+
+    program->current = block;
+    return true;
+}
+
+
 void zir_program_push_block(struct ZirProgram *program, enum ZirBlockType type, const char *name)
 {
     // First we search for an existent block with the provided type and name    
@@ -42,26 +53,42 @@ void zir_program_pop_block(struct ZirProgram *program)
 
 bool zir_program_has_block(struct ZirProgram *program, enum ZirBlockType type, const char *name)
 {
-    // NOTE: For simplicity we use an array, we could replace this with a hashtable later
-    for (size_t i=0; i < fl_array_length(program->current->children); i++)
+    struct ZirBlock *tmp_block = program->current;
+    do
     {
-        struct ZirBlock *block = program->current->children[i];
-        if (flm_cstring_equals(block->id, name) && block->type == type)
-            return true;
-    }
+        // NOTE: For simplicity we use an array, we could replace this with a hashtable later
+        for (size_t i=0; i < fl_array_length(program->current->children); i++)
+        {
+            struct ZirBlock *block = program->current->children[i];
+            if (flm_cstring_equals(block->id, name) && block->type == type)
+                return true;
+        }
+        if (type == ZIR_BLOCK_STRUCT)
+            tmp_block = tmp_block->parent;
+        else break;
+
+    } while (tmp_block);
 
     return false;
 }
 
 struct ZirBlock* zir_program_get_block(struct ZirProgram *program, enum ZirBlockType type, const char *name)
 {
-    // NOTE: For simplicity we use an array, we could replace this with a hashtable later
-    for (size_t i=0; i < fl_array_length(program->current->children); i++)
+    struct ZirBlock *tmp_block = program->current;
+    do
     {
-        struct ZirBlock *block = program->current->children[i];
-        if (flm_cstring_equals(block->id, name) && block->type == type)
-            return block;
-    }
+        // NOTE: For simplicity we use an array, we could replace this with a hashtable later
+        for (size_t i=0; i < fl_array_length(program->current->children); i++)
+        {
+            struct ZirBlock *block = program->current->children[i];
+            if (flm_cstring_equals(block->id, name) && block->type == type)
+                return block;
+        }
+        if (type == ZIR_BLOCK_STRUCT)
+            tmp_block = tmp_block->parent;
+        else break;
+
+    } while (tmp_block);
 
     return NULL;
 }
