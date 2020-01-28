@@ -1,9 +1,13 @@
 #include "symtable.h"
 #include "symbol.h"
 
-struct ZirSymbolTable zir_symtable_new(void)
+struct ZirSymtable zir_symtable_new(void)
 {
-    return (struct ZirSymbolTable) {
+    return (struct ZirSymtable) {
+        .names = fl_list_new_args((struct FlListArgs) {
+            .value_allocator = fl_container_allocator_string,
+            .value_cleaner = fl_container_cleaner_pointer
+        }),
         .symbols = fl_hashtable_new_args((struct FlHashtableArgs) {
             .hash_function = fl_hashtable_hash_string,
             .key_allocator = fl_container_allocator_string,
@@ -15,56 +19,80 @@ struct ZirSymbolTable zir_symtable_new(void)
     };
 }
 
-void zir_symtable_free(struct ZirSymbolTable *symtable)
+void zir_symtable_free(struct ZirSymtable *symtable)
 {
     if (!symtable)
         return;
 
     if (symtable->symbols)
         fl_hashtable_free(symtable->symbols);
+    
+    if (symtable->names)
+        fl_list_free(symtable->names);
 }
 
-struct ZirSymbol* zir_symtable_add(struct ZirSymbolTable *symtable, struct ZirSymbol *symbol)
+struct ZirSymbol* zir_symtable_add(struct ZirSymtable *symtable, struct ZirSymbol *symbol)
 {
+    fl_list_append(symtable->names, symbol->name);
     fl_hashtable_add(symtable->symbols, symbol->name, symbol);
     return symbol;
 }
 
-bool zir_symtable_has(struct ZirSymbolTable *symtable, const char *symbol_name)
+bool zir_symtable_has(struct ZirSymtable *symtable, const char *symbol_name)
 {
     return fl_hashtable_has_key(symtable->symbols, symbol_name);
 }
 
-struct ZirSymbol* zir_symtable_get(struct ZirSymbolTable *symtable, const char *symbol_name)
+struct ZirSymbol* zir_symtable_get(struct ZirSymtable *symtable, const char *symbol_name)
 {
     return (struct ZirSymbol*)fl_hashtable_get(symtable->symbols, symbol_name);
 }
 
-struct ZirSymbol** zir_symtable_get_all(struct ZirSymbolTable *symtable)
+struct ZirSymbol** zir_symtable_get_all(struct ZirSymtable *symtable)
 {
-    return (struct ZirSymbol**)fl_hashtable_values(symtable->symbols);
-}
+    struct FlListNode *tmp = fl_list_head(symtable->names);
 
-char* zir_symtable_dump(struct ZirSymbolTable *symtable, char *output)
-{
-    struct ZirSymbol **symbols = fl_hashtable_values(symtable->symbols);
+    if (tmp == NULL)
+        return NULL;
 
-    size_t length = fl_array_length(symbols);
-    if (length > 0)
+    struct ZirSymbol **symbols = fl_array_new(sizeof(struct ZirSymbol*), 0);
+
+    while (tmp)
     {
-        bool started = false;
-        for (size_t i=0; i < length; i++)
-        {
-            if (started)
-                fl_cstring_append(&output, ", ");
+        char *name = (char*) tmp->value;
 
-            started = true;
+        struct ZirSymbol *symbol = zir_symtable_get(symtable, name);
+        symbols = fl_array_append(symbols, &symbol);
 
-            output = zir_symbol_dump(symbols[i], output);            
-        }
+        tmp = tmp->next;
     }
 
-    fl_array_free(symbols);
+    return symbols;
+}
+
+char* zir_symtable_dump(struct ZirSymtable *symtable, char *output)
+{
+    struct FlListNode *tmp = fl_list_head(symtable->names);
+
+    if (tmp == NULL)
+        return output;
+
+    bool started = false;
+    while (tmp)
+    {
+        char *name = (char*) tmp->value;
+
+        struct ZirSymbol *symbol = zir_symtable_get(symtable, name);
+
+        if (started)
+            fl_cstring_append(&output, ", ");
+
+        started = true;
+
+        output = zir_symbol_dump(symbol, output);
+
+        tmp = tmp->next;
+    }
 
     return output;
 }

@@ -104,7 +104,7 @@ struct ZirInstruction* zir_program_emit(struct ZirProgram *program, struct ZirIn
     return instruction;
 }
 
-char* zir_program_dump(struct ZirProgram *program, char *output)
+char* zir_program_dump(struct ZirProgram *program)
 {
-    return zir_block_dump(program->global, output);
+    return zir_block_dump(program->global, fl_cstring_new(0));
 }

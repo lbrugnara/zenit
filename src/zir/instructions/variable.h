@@ -11,25 +11,25 @@
  * 
  * Members:
  *  <struct ZirInstruction> base: Base information
- *  <struct ZirOperand> lvalue: Left-hand side of the variable declaration
- *  <struct ZirOperand> rvalue: Right-hand side of the variable declaration
+ *  <struct ZirOperand> *source: Represents the right-hand side of the variable declaration
+ *  <struct ZirAttributeMap> attributes: Attributes of the variable declaration instruction
  * 
  */
 struct ZirVariableInstruction {
     struct ZirInstruction base;
-    struct ZirAttributeMap attributes;
     struct ZirOperand *source;
+    struct ZirAttributeMap attributes;
 };
 
 /*
  * Function: zir_instruction_variable_new
- *  Creates and returns a new instruction based on the provided *type*
+ *  Creates a new variable instruction
  *
  * Parameters:
- *  <enum ZirInstructionType> type - Type of the instruction to be created
+ *  <struct ZirOperand> *destination: The destination of the variable declaration instruction (it represents the var. decl. left-hand side)
  *
  * Returns:
- *  <struct ZirInstruction>* - Instruction object
+ *  <struct ZirVariableInstruction>*: The variable declaration instruction
  *
  * Notes:
  *  The object returned by this function must be freed with the
@@ -39,14 +39,13 @@ struct ZirVariableInstruction* zir_instruction_variable_new(struct ZirOperand *d
 
 /*
  * Function: zir_instruction_variable_free
- *  Releases the memory used by an instruction object
+ *  Releases the memory used by the variable declaration instruction
  *
  * Parameters:
- *  <struct ZirInstruction> *instruction - The instruction object to be freed
+ *  <struct ZirVariableInstruction> *instruction: The instruction object to be freed
  *
  * Returns:
- *  void - This function does not return a value
- *
+ *  void: This function does not return a value
  */
 void zir_instruction_variable_free(struct ZirVariableInstruction *instruction);
 
@@ -61,11 +60,11 @@ void zir_instruction_variable_free(struct ZirVariableInstruction *instruction);
  * ===========
  *
  * Parameters:
- *  instruction - Instruction object
- *  output - Output buffer
+ *  instruction: Instruction object
+ *  output: Output buffer
  *
  * Returns:
- *  char* - *output* pointer
+ *  char*: *output* pointer
  *
  */
 char* zir_instruction_variable_dump(struct ZirVariableInstruction *instruction, char *output);

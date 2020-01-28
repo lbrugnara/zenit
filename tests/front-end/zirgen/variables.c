@@ -54,7 +54,7 @@ void zenit_test_generate_ir_variables(void)
     // At this point we can free the Zenit context, from now on, everything should work only with ZIR objects
     zenit_context_free(&ctx);
     
-    char *codegen = zir_program_dump(program, fl_cstring_new(0));
+    char *codegen = zir_program_dump(program);
 
     fl_expect("Generated IR must be equals to the hand-written version", flm_cstring_equals(codegen, zir_src));
     

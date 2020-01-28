@@ -16,11 +16,12 @@ enum ZirInstructionType {
 
 /*
  * Struct: struct ZirInstruction
- *  Base object that tracks common information between the
+ *  Base object that contains basic information between the
  *  different types of instructions
  * 
  * Members:
  *  <enum ZirInstructionType> type: Instruction's internal type
+ *  <struct ZirOperand> *destination: The destination operand for the instruction's result
  * 
  */
 struct ZirInstruction {
@@ -33,11 +34,10 @@ struct ZirInstruction {
  *  Releases the memory used by an instruction object
  *
  * Parameters:
- *  <struct ZirInstruction> *instruction - The instruction object to be freed
+ *  <struct ZirInstruction> *instruction: The instruction object to be freed
  *
  * Returns:
- *  void - This function does not return a value
- *
+ *  void: This function does not return a value
  */
 void zir_instruction_free(struct ZirInstruction *instruction);
 
@@ -52,11 +52,11 @@ void zir_instruction_free(struct ZirInstruction *instruction);
  * ===========
  *
  * Parameters:
- *  instruction - Instruction object
- *  output - Output buffer
+ *  <struct ZirInstruction> *instruction: Instruction object
+ *  <char> *output: Output buffer
  *
  * Returns:
- *  char* - *output* pointer
+ *  char*: *output* pointer
  *
  */
 char* zir_instruction_dump(struct ZirInstruction *instruction, char *output);

@@ -6,11 +6,44 @@
 #include "operands/symbol.h"
 #include "../types/type.h"
 
+/*
+ * Struct: struct ZirLoadInstruction
+ *  The load instruction "prepares" the destination operand to be used by another instruction
+ *  as the source operand
+ * 
+ * Members:
+ *  <struct ZirInstruction> base: Basic information of the instruction
+ */
 struct ZirLoadInstruction {
     struct ZirInstruction base;
 };
 
+/*
+ * Function: zir_instruction_load_new
+ *  Creates and returns a new load instruction
+ *
+ * Parameters:
+ *  <struct ZirOperand> *destination: The destination operand of the load instruction
+ *
+ * Returns:
+ *  <struct ZirLoadInstruction>*: Load instruction object
+ *
+ * Notes:
+ *  The object returned by this function must be freed with the
+ *  <zir_instruction_load_free> function
+ */
 struct ZirLoadInstruction* zir_instruction_load_new(struct ZirOperand *destination);
+
+/*
+ * Function: zir_instruction_load_free
+ *  Releases the memory used by the load instruction object
+ *
+ * Parameters:
+ *  <struct ZirLoadInstruction> *instruction: The load instruction object to be freed
+ *
+ * Returns:
+ *  void: This function does not return a value
+ */
 void zir_instruction_load_free(struct ZirLoadInstruction *instruction);
 
 /*

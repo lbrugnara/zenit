@@ -78,6 +78,21 @@ struct ZenitSymbol* zenit_symtable_remove(struct ZenitSymtable *symtable, const 
 
     fl_hashtable_remove(symtable->symbols, symbol_name, true, false);
 
+    struct FlListNode *tmp = fl_list_head(symtable->names);
+
+    while (tmp)
+    {
+        char *name = (char*) tmp->value;
+
+        if (flm_cstring_equals(name, symbol->name))
+        {
+            fl_list_remove(symtable->names, tmp);
+            break;
+        }
+
+        tmp = tmp->next;
+    }
+
     return symbol;
 }
 

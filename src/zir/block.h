@@ -27,7 +27,7 @@ enum ZirBlockType {
  *  <struct ZirBlock> *parent: Pointer to the parent block
  *  <struct ZirBlock> **children: Set of children blocks
  *  <struct ZirInstruction> **instructions: Set of block instructions
- *  <struct ZirSymbolTable> symtable: Symbol table of the current block
+ *  <struct ZirSymtable> symtable: Symbol table of the current block
  * 
  */
 struct ZirBlock {
@@ -35,7 +35,7 @@ struct ZirBlock {
     struct ZirBlock *parent;
     struct ZirBlock **children;
     struct ZirInstruction **instructions;
-    struct ZirSymbolTable symtable;
+    struct ZirSymtable symtable;
     unsigned long long temp_counter;
     enum ZirBlockType type;
 };

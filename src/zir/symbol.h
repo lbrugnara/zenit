@@ -45,6 +45,26 @@ struct ZirSymbol* zir_symbol_new(const char *name, struct ZirType *type);
  */
 void zir_symbol_free(struct ZirSymbol *symbol);
 
+/*
+ * Function: zir_symbol_dump
+ *  Appends a dump of the symbol object to the output pointer, and
+ *  returns a pointer to the -possibly reallocated- output
+ *
+ * Parameters:
+ *  <struct ZirSymbol> *symbol: Symbol object to dump to the output
+ *  <char> *output: Pointer to a heap allocated string
+ *
+ * Returns:
+ *  char*: Pointer to the output string
+ *
+ * Notes:
+ *  Because the *output* pointer can be modified, this function returns
+ *  a pointer to the new location in case the memory is reallocated or
+ *  to the old location in case the pointer does not need to be modified. Either
+ *  way, it is safe to use the function as:
+ *      output = zir_symbol_dump(symbol, output);
+ *  If the memory of *output* cannot be reallocated this function frees the memory.
+ */
 char* zir_symbol_dump(struct ZirSymbol *symbol, char *output);
 
 #endif /* ZIR_SYMBOL_H */

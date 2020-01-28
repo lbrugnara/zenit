@@ -35,7 +35,7 @@ void zenit_test_generate_ir_struct_decl(void)
         "struct B { b : uint16 }"                       "\n"
         "struct C { c : &uint8 }"                       "\n"
         "struct D { d : [2]uint8 }"                     "\n"
-        "struct E { e2 : uint8, e : &[2]uint8 }"        "\n"
+        "struct E { e : &[2]uint8, e2 : uint8 }"        "\n"
         "struct F { f : [10]E }"                        "\n"
         "struct G { "
             "a : A, " 
@@ -62,7 +62,7 @@ void zenit_test_generate_ir_struct_decl(void)
     // At this point we can free the Zenit context, from now on, everything should work only with ZIR objects
     zenit_context_free(&ctx);
     
-    char *codegen = zir_program_dump(program, fl_cstring_new(0));
+    char *codegen = zir_program_dump(program);
 
     fl_expect("Generated IR must be equals to the hand-written version", flm_cstring_equals(codegen, zir_src));
     
