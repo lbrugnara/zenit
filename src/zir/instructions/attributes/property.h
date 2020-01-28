@@ -23,6 +23,9 @@ static inline void zir_property_free(struct ZirProperty *property)
     if (!property)
         return;
 
+    if (property->value && property->value->owner == NULL)
+        zir_operand_free(property->value);
+
     if (property->name)
         fl_cstring_free(property->name);
 

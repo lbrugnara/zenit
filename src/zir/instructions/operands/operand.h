@@ -21,6 +21,7 @@ enum ZirOperandType {
  */
 struct ZirOperand {
     enum ZirOperandType type;
+    struct ZirInstruction *owner;
 };
 
 /*

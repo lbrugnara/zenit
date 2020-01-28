@@ -217,16 +217,19 @@ static struct ZirOperand* visit_cast_node(struct ZenitContext *ctx, struct ZirPr
     if (zenit_cast->implicit)
         return visit_node(ctx, program, zenit_cast->expression);
 
+    struct ZirOperand *source = visit_node(ctx, program, zenit_cast->expression);
+
     struct ZenitSymbol *zenit_cast_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) zenit_cast);
     
     // We use a temporal symbol for the cast's destination. We copy the type informaton from the Zenit cast's object type information
     struct ZirSymbol *temp_symbol = new_temp_symbol(program, new_zir_type_from_zenit_type(program, zenit_cast_symbol->type));
 
-    // We create the cast instruction with the temporal symbol as the destination operand
-    struct ZirCastInstruction *cast_instr = zir_instruction_cast_new((struct ZirOperand*) zir_operand_symbol_new(temp_symbol));
-
     // Now, we need to get the source operand of the cast, and for that we need to visit the casted expression
-    cast_instr->source = visit_node(ctx, program, zenit_cast->expression);
+    struct ZirOperand *destination = (struct ZirOperand*) zir_operand_symbol_new(temp_symbol);
+
+    // We create the cast instruction with the temporal symbol as the destination operand
+    struct ZirCastInstruction *cast_instr = zir_instruction_cast_new(destination, source);
+
 
     // We add the instruction to the program, and we return the destination operand
     return zir_program_emit(program, (struct ZirInstruction*) cast_instr)->destination;
@@ -266,13 +269,9 @@ static struct ZirOperand* visit_uint_node(struct ZenitContext *ctx, struct ZirPr
     }
 
     // Then, we create a primitive operand, and we copy the type information from the Zenit node
-    struct ZirUintOperand *zir_uint = zir_operand_uint_new((struct ZirUintType*) new_zir_type_from_zenit_type(program, zenit_uint_symbol->type), zir_value);
+    struct ZirUintOperand *zir_uint_source = zir_operand_uint_new((struct ZirUintType*) new_zir_type_from_zenit_type(program, zenit_uint_symbol->type), zir_value);
 
-    // Now, we can create the load instruction
-    struct ZirLoadInstruction *load_instr = zir_instruction_load_new((struct ZirOperand*) zir_uint);
-
-    // We add the instruction and we return the destination operand
-    return zir_program_emit(program, (struct ZirInstruction*) load_instr)->destination;
+    return (struct ZirOperand*) zir_uint_source;
 }
 
 /*
@@ -299,14 +298,20 @@ static struct ZirOperand* visit_reference_node(struct ZenitContext *ctx, struct 
         return NULL;
     }
 
-    // We use the load instruction
     struct ZenitSymbol *zenit_ref_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) zenit_ref);
+
+    // We use the load instruction
+    struct ZirSymbol *temp_symbol = new_temp_symbol(program, new_zir_type_from_zenit_type(program, zenit_ref_symbol->type));
+    struct ZirOperand *destination = (struct ZirOperand*) zir_operand_symbol_new(temp_symbol);    
+
     struct ZirReferenceType *ref_zir_type = (struct ZirReferenceType*) new_zir_type_from_zenit_type(program, zenit_ref_symbol->type);
     struct ZirReferenceOperand *ref_operand = zir_operand_reference_new(ref_zir_type, (struct ZirSymbolOperand*) operand);
-    struct ZirLoadInstruction *load_instr = zir_instruction_load_new((struct ZirOperand*) ref_operand);
+
+    struct ZirVariableInstruction *var_instr = zir_instruction_variable_new(destination, (struct ZirOperand*) ref_operand);
+    var_instr->attributes = zir_attribute_map_new();
 
     // We add the instruction and we return the destination operand
-    return zir_program_emit(program, (struct ZirInstruction*) load_instr)->destination;
+    return zir_program_emit(program, (struct ZirInstruction*) var_instr)->destination;
 }
 
 /*
@@ -324,16 +329,14 @@ static struct ZirOperand* visit_reference_node(struct ZenitContext *ctx, struct 
  */
 static struct ZirOperand* visit_identifier_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitIdentifierNode *zenit_id)
 {
+    struct ZenitSymbol *zenit_symbol = zenit_program_get_symbol(ctx->program, zenit_id->name);
+
     // We retrieve the symbol from the symbol table
     struct ZirSymbol *zir_symbol = zir_symtable_get(&program->current->symtable, zenit_id->name);
 
     assert_or_return(ctx, zir_symbol != NULL, zenit_id->base.location, "ZIR symbol does not exist");
 
-    // We use a load instruction for the symbol operand
-    struct ZirLoadInstruction *load_instr = zir_instruction_load_new((struct ZirOperand*) zir_operand_symbol_new(zir_symbol));
-
-    // We add the instruction and we return the dest operand
-    return zir_program_emit(program, (struct ZirInstruction*) load_instr)->destination;
+    return (struct ZirOperand*) zir_operand_symbol_new(zir_symbol);
 }
 
 /*
@@ -362,11 +365,15 @@ static struct ZirOperand* visit_array_node(struct ZenitContext *ctx, struct ZirP
         zir_array->elements = fl_array_append(zir_array->elements, &zir_operand);
     }
 
+    struct ZirSymbol *temp_symbol = new_temp_symbol(program, new_zir_type_from_zenit_type(program, zenit_array_symbol->type));
+    struct ZirOperand *destination = (struct ZirOperand*) zir_operand_symbol_new(temp_symbol);
+
     // We use load instruction with array literals
-    struct ZirLoadInstruction *load_instr = zir_instruction_load_new((struct ZirOperand*) zir_array);
+    struct ZirVariableInstruction *var_instr = zir_instruction_variable_new(destination, (struct ZirOperand*) zir_array);
+    var_instr->attributes = zir_attribute_map_new();
 
     // We add the instruction and we return the destination operand
-    return zir_program_emit(program, (struct ZirInstruction*) load_instr)->destination;
+    return zir_program_emit(program, (struct ZirInstruction*) var_instr)->destination;
 }
 
 /*
@@ -452,12 +459,13 @@ static struct ZirOperand* visit_variable_node(struct ZenitContext *ctx, struct Z
 
     assert_or_return(ctx, zir_symbol != NULL, zenit_variable->base.location, "Could not create ZIR symbol");
 
-    // Create the variable declaration instruction with the destination symbol operand
-    struct ZirVariableInstruction *zir_varinst = zir_instruction_variable_new((struct ZirOperand*) zir_operand_symbol_new(zir_symbol));
-    zir_varinst->attributes = zenit_attr_map_to_zir_attr_map(ctx, program, zenit_variable->attributes);
-
     // The source operand is the one we get from the visit to the <struct ZenitVariableNode>'s value
-    zir_varinst->source = visit_node(ctx, program, zenit_variable->rvalue);
+    struct ZirOperand *lhs = (struct ZirOperand*) zir_operand_symbol_new(zir_symbol);
+    struct ZirOperand *rhs = visit_node(ctx, program, zenit_variable->rvalue);
+
+    // Create the variable declaration instruction with the source and destination operands
+    struct ZirVariableInstruction *zir_varinst = zir_instruction_variable_new(lhs, rhs);
+    zir_varinst->attributes = zenit_attr_map_to_zir_attr_map(ctx, program, zenit_variable->attributes);
 
     // We add the variable definition instruction to the program and finally return the destination operand
     return zir_program_emit(program, (struct ZirInstruction*) zir_varinst)->destination;

@@ -41,8 +41,9 @@ void zenit_test_generate_ir_casts(void)
         "%tmp2 : uint8 = cast(513, uint8)"          "\n"
         "@d : uint8 = %tmp2"                        "\n"
 
-        "%tmp3 : uint16 = cast(ref @d, uint16)"     "\n"
-        "@e : uint16 = %tmp3"                       "\n"
+        "%tmp3 : &uint8 = ref @d"                   "\n"
+        "%tmp4 : uint16 = cast(%tmp3, uint16)"      "\n"
+        "@e : uint16 = %tmp4"                       "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);

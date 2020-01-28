@@ -17,6 +17,12 @@ void zir_operand_array_free(struct ZirArrayOperand *operand)
     if (!operand)
         return;
 
+    for (size_t i=0; i < fl_array_length(operand->elements); i++)
+    {
+        if (operand->elements[i]->owner == NULL)
+            zir_operand_free(operand->elements[i]);
+    }
+
     fl_array_free(operand->elements);
 
     if (operand->type)

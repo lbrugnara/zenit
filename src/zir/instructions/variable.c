@@ -1,17 +1,28 @@
 #include <stdio.h>
 #include "variable.h"
 
-struct ZirVariableInstruction* zir_instruction_variable_new(struct ZirOperand *destination)
+struct ZirVariableInstruction* zir_instruction_variable_new(struct ZirOperand *destination, struct ZirOperand *source)
 {
     struct ZirVariableInstruction *instruction = fl_malloc(sizeof(struct ZirVariableInstruction));
     instruction->base.type = ZIR_INSTR_VARIABLE;
     instruction->base.destination = destination;
-    
+    instruction->source = source;
+
+    instruction->base.destination->owner = (struct ZirInstruction*) instruction;
+
+    if (instruction->source && instruction->source->owner == NULL)
+        instruction->source->owner = (struct ZirInstruction*) instruction;
+
     return instruction;
 }
 
 void zir_instruction_variable_free(struct ZirVariableInstruction *instruction)
 {
+    zir_operand_free(instruction->base.destination);
+
+    if (instruction->source && (void*) instruction->source->owner == (void*) instruction)
+        zir_operand_free(instruction->source);
+
     zir_attribute_map_free(&instruction->attributes);
     fl_free(instruction);
 }

@@ -37,7 +37,9 @@ void zenit_nes_emit_store_temp(struct ZenitNesProgram *program, struct ZenitNesS
 {
     if (temp_symbol->source->type == ZIR_OPERAND_ARRAY)
     {
-        zenit_nes_emit_store_array(program, nes_symbol, offset, temp_symbol->base.element_size, (struct ZirArrayOperand*) temp_symbol->source);
+        size_t array_size = zir_type_size(((struct ZirArrayOperand*) temp_symbol->source)->type->member_type);
+        size_t gap = nes_symbol->element_size > array_size ? array_size : nes_symbol->element_size;
+        zenit_nes_emit_store_array(program, nes_symbol, offset, gap, (struct ZirArrayOperand*) temp_symbol->source);
     }
     else if (temp_symbol->source->type == ZIR_OPERAND_REFERENCE)
     {
@@ -312,6 +314,12 @@ void zenit_nes_emit_store_reference(struct ZenitNesProgram *program, struct Zeni
 
     uint16_t target_address = nes_symbol->address + offset;
     struct ZenitNesSymbol *ref_op_symbol = fl_hashtable_get(program->symbols, reference_operand->operand->symbol->name);
+
+    if (ref_op_symbol->segment == ZENIT_NES_SEGMENT_TEMP)
+        ref_op_symbol = zenit_nes_program_get_tmpsym_symbol(program, ref_op_symbol);
+
+    if (ref_op_symbol == NULL)
+        return;
 
     struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
 

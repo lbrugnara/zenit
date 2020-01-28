@@ -2,6 +2,7 @@
 #define ZENIT_TESTS_BACK_END_NES_H
 
 void zenit_test_nes_global_vars(void);
+void zenit_test_nes_global_vars_array(void);
 void zenit_test_nes_global_vars_zp(void);
 void zenit_test_nes_global_vars_data(void);
 void zenit_test_nes_global_vars_code(void);

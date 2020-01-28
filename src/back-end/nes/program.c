@@ -70,6 +70,69 @@ void zenit_nes_program_free(struct ZenitNesProgram *program)
     fl_free(program);
 }
 
+struct ZenitNesSymbol* zenit_nes_program_get_tmpsym_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol *temp_symbol)
+{
+    if (temp_symbol->segment != ZENIT_NES_SEGMENT_TEMP)
+        return NULL;
+
+    struct ZenitNesSymbol *target_symbol = NULL;
+
+    struct ZirOperand *temp_operand = ((struct ZenitNesTmpSymbol*) temp_symbol)->source;
+
+    while (temp_operand)
+    {
+        if (temp_operand->type != ZIR_OPERAND_SYMBOL)
+            break;
+
+        struct ZenitNesSymbol *tmp_symbol = fl_hashtable_get(program->symbols, ((struct ZirSymbolOperand*) temp_operand)->symbol->name);
+
+        if (tmp_symbol == NULL)
+            break;
+
+        if (tmp_symbol->segment == ZENIT_NES_SEGMENT_TEMP)
+        {
+            temp_operand = ((struct ZenitNesTmpSymbol*) tmp_symbol)->source;
+            continue;
+        }
+
+        struct ZenitNesSymbol *symbol = fl_hashtable_get(program->symbols, ((struct ZirSymbolOperand*) temp_operand)->symbol->name);
+            
+        target_symbol = symbol;
+        break;
+    }
+
+    return target_symbol;
+}
+
+struct ZirOperand* zenit_nes_program_get_tmpsym_operand(struct ZenitNesProgram *program, struct ZenitNesSymbol *temp_symbol, enum ZirOperandType type)
+{
+    if (temp_symbol->segment != ZENIT_NES_SEGMENT_TEMP)
+        return NULL;
+
+    struct ZirOperand *temp_operand = ((struct ZenitNesTmpSymbol*) temp_symbol)->source;
+
+    while (temp_operand)
+    {
+        if (temp_operand->type == type)
+            return temp_operand;
+
+        if (temp_operand->type != ZIR_OPERAND_SYMBOL)
+            break;
+
+        struct ZenitNesSymbol *tmp_symbol = fl_hashtable_get(program->symbols, ((struct ZirSymbolOperand*) temp_operand)->symbol->name);
+
+        if (tmp_symbol == NULL)
+            break;
+
+        if (tmp_symbol->segment != ZENIT_NES_SEGMENT_TEMP)
+            break;
+
+        temp_operand = ((struct ZenitNesTmpSymbol*) tmp_symbol)->source;
+    }
+
+    return NULL;
+}
+
 static inline bool reserve_zp_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol **nes_symbol, struct ZirSymbol *zir_symbol, uint8_t *address)
 {
     if (!program || !nes_symbol || !zir_symbol)
@@ -297,7 +360,26 @@ struct ZenitNesSymbol* zenit_nes_program_reserve_symbol(struct ZenitNesProgram *
         else if (zir_property_map_has_key(&nes_attribute->properties, "address"))
         {
             struct ZirProperty *address_property = zir_property_map_get(&nes_attribute->properties, "address");
-            struct ZirUintOperand *uint_value = (struct ZirUintOperand*)address_property->value;
+            struct ZirUintOperand *uint_value = NULL;
+
+            if (address_property->value->type == ZIR_OPERAND_UINT)
+            {
+                uint_value = (struct ZirUintOperand*) address_property->value;
+            }
+            else if (address_property->value->type == ZIR_OPERAND_SYMBOL)
+            {
+                struct ZirSymbolOperand *symbol_operand = (struct ZirSymbolOperand*) address_property->value;
+
+                struct ZenitNesSymbol *symbol = fl_hashtable_get(program->symbols, symbol_operand->symbol->name);
+
+                struct ZirOperand *tmp = zenit_nes_program_get_tmpsym_operand(program, symbol, ZIR_OPERAND_UINT);
+
+                if (tmp->type == ZIR_OPERAND_UINT)
+                    uint_value = (struct ZirUintOperand*) tmp;
+            }
+
+            if (uint_value == NULL)
+                return NULL;
 
             if (uint_value->type->size == ZIR_UINT_8)
             {

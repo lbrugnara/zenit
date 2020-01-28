@@ -18,6 +18,9 @@ void zir_operand_reference_free(struct ZirReferenceOperand *reference)
     if (!reference)
         return;
 
+    if (reference->operand->base.owner == NULL)
+        zir_operand_symbol_free(reference->operand);
+
     if (reference->type)
         zir_type_reference_free(reference->type);
 

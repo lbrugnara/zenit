@@ -4,7 +4,6 @@
 #include "symtable.h"
 #include "instructions/instruction.h"
 #include "instructions/cast.h"
-#include "instructions/load.h"
 #include "instructions/variable.h"
 
 /*

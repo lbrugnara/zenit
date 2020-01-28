@@ -16,34 +16,13 @@ static void visit_block(struct ZirBlock *block, struct ZenitNesProgram *program)
 
 typedef void(*ZirInstructionVisitor)(struct ZirInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
 static void visit_instruction(struct ZirInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
-static void visit_load_instruction(struct ZirLoadInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
 static void visit_variable_instruction(struct ZirVariableInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
 static void visit_cast_instruction(struct ZirCastInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
 
 static const ZirInstructionVisitor instruction_visitors[] = {
     [ZIR_INSTR_VARIABLE]   = (ZirInstructionVisitor) &visit_variable_instruction,
     [ZIR_INSTR_CAST]       = (ZirInstructionVisitor) &visit_cast_instruction,
-    [ZIR_INSTR_LOAD]       = (ZirInstructionVisitor) &visit_load_instruction,
 };
-
-/*
- * Function: visit_load_instruction
- *  By now, the load instruction does not need to perform anything here, because we directly access the different operands in
- *  the other visitors.
- *
- * Parameters:
- *  <struct ZirCastInstruction> *instruction: ZIR instruction
- *  <struct ZirBlock> *block: The current block where the ZIR instruction comes from
- *  <struct ZenitNesProgram> *program: The NES program being built
- *
- * Returns:
- *  void: This function does not return a value
- * 
- */
-static void visit_load_instruction(struct ZirLoadInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program)
-{
-    // nothing...
-}
 
 /*
  * Function: visit_cast_instruction

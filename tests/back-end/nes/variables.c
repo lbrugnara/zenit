@@ -97,6 +97,35 @@ void zenit_test_nes_global_vars(void)
     zenit_context_free(&ctx);
 }
 
+void zenit_test_nes_global_vars_array(void)
+{
+    const char *zenit_source = 
+        "var a = 0x1ff;"                                                "\n"
+        "var arr = [ 0, 1, 2 ];"                                        "\n"
+    ;
+
+    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
+
+    fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
+    fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
+    fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
+    fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
+    
+    struct ZirProgram *zir_program = zenit_generate_zir(&ctx);
+
+    struct ZenitNesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    
+    fl_expect("Data segment at 0x00 should be 0xff (a lo)",             nes_program->data.bytes[0x00] == 0xFF);
+    fl_expect("Data segment at 0x01 should be 0x01 (a hi)",             nes_program->data.bytes[0x01] == 0x01);
+    fl_expect("Data segment at 0x02 should be 0x01 (arr[0])",           nes_program->data.bytes[0x02] == 0x00);
+    fl_expect("Data segment at 0x03 should be 0x01 (arr[1])",           nes_program->data.bytes[0x03] == 0x01);
+    fl_expect("Data segment at 0x04 should be 0x02 (arr[2])",           nes_program->data.bytes[0x04] == 0x02);
+
+    zenit_nes_program_free(nes_program);
+    zir_program_free(zir_program);
+    zenit_context_free(&ctx);
+}
+
 void zenit_test_nes_global_vars_zp(void)
 {
     const char *zenit_source = 

@@ -27,6 +27,7 @@ struct ZirVariableInstruction {
  *
  * Parameters:
  *  <struct ZirOperand> *destination: The destination of the variable declaration instruction (it represents the var. decl. left-hand side)
+ *  <struct ZirOperand> *source: The source operand of the variable declaration instruction (it represents the var. decl. right-hand side)
  *
  * Returns:
  *  <struct ZirVariableInstruction>*: The variable declaration instruction
@@ -35,7 +36,7 @@ struct ZirVariableInstruction {
  *  The object returned by this function must be freed with the
  *  <zir_instruction_variable_free> function
  */
-struct ZirVariableInstruction* zir_instruction_variable_new(struct ZirOperand *destination);
+struct ZirVariableInstruction* zir_instruction_variable_new(struct ZirOperand *destination, struct ZirOperand *source);
 
 /*
  * Function: zir_instruction_variable_free

@@ -78,6 +78,7 @@ int main(int argc, char **argv)
         ),
         fl_test_suite("nes",
             { "NES global variables",           &zenit_test_nes_global_vars         },
+            { "NES global array variables",     &zenit_test_nes_global_vars_array   },
             { "NES global variables (ZP)",      &zenit_test_nes_global_vars_zp      },
             { "NES global variables (DATA)",    &zenit_test_nes_global_vars_data    },
             { "NES global variables (CODE)",    &zenit_test_nes_global_vars_code    },

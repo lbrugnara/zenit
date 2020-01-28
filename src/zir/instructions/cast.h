@@ -26,6 +26,7 @@ struct ZirCastInstruction {
  *
  * Parameters:
  *  <struct ZirOperand> *destination: The destination operand of the cast instruction
+ *  <struct ZirOperand> *source: The source operand of the cast instruction
  *
  * Returns:
  *  <struct ZirCastInstruction>*: Cast instruction object
@@ -34,7 +35,7 @@ struct ZirCastInstruction {
  *  The object returned by this function must be freed with the
  *  <zir_instruction_cast_free> function
  */
-struct ZirCastInstruction* zir_instruction_cast_new(struct ZirOperand *destination);
+struct ZirCastInstruction* zir_instruction_cast_new(struct ZirOperand *destination, struct ZirOperand *source);
 
 /*
  * Function: zir_instruction_cast_free

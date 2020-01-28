@@ -1,17 +1,28 @@
 #include <stdio.h>
 #include "cast.h"
 
-struct ZirCastInstruction* zir_instruction_cast_new(struct ZirOperand *destination)
+struct ZirCastInstruction* zir_instruction_cast_new(struct ZirOperand *destination, struct ZirOperand *source)
 {
     struct ZirCastInstruction *instruction = fl_malloc(sizeof(struct ZirCastInstruction));
     instruction->base.type = ZIR_INSTR_CAST;
     instruction->base.destination = destination;
+    instruction->source = source;
+
+    instruction->base.destination->owner = (struct ZirInstruction*) instruction;
+
+    if (instruction->source && instruction->source->owner == NULL)
+        instruction->source->owner = (struct ZirInstruction*) instruction;
     
     return instruction;
 }
 
 void zir_instruction_cast_free(struct ZirCastInstruction *instruction)
 {
+    zir_operand_free(instruction->base.destination);
+
+    if (instruction->source && (void*) instruction->source->owner == (void*) instruction)
+        zir_operand_free(instruction->source);
+
     fl_free(instruction);
 }
 
