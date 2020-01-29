@@ -15,6 +15,9 @@ static inline struct ZirProperty* zir_property_new(char *name, struct ZirOperand
     property->name = fl_cstring_dup(name);
     property->value = value;
 
+    if (property->value->owner == NULL)
+        property->value->owner = property;
+
     return property;
 }
 
@@ -23,7 +26,7 @@ static inline void zir_property_free(struct ZirProperty *property)
     if (!property)
         return;
 
-    if (property->value && property->value->owner == NULL)
+    if (property->value && property->value->owner == property)
         zir_operand_free(property->value);
 
     if (property->name)

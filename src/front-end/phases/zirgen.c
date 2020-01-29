@@ -362,7 +362,7 @@ static struct ZirOperand* visit_array_node(struct ZenitContext *ctx, struct ZirP
     for (size_t i=0; i < fl_array_length(zenit_array->elements); i++)
     {
         struct ZirOperand *zir_operand = visit_node(ctx, program, zenit_array->elements[i]);
-        zir_array->elements = fl_array_append(zir_array->elements, &zir_operand);
+        zir_operand_array_add_member(zir_array, zir_operand);
     }
 
     struct ZirSymbol *temp_symbol = new_temp_symbol(program, new_zir_type_from_zenit_type(program, zenit_array_symbol->type));

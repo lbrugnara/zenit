@@ -11,6 +11,7 @@ struct ZirArrayOperand {
 };
 
 struct ZirArrayOperand* zir_operand_array_new(struct ZirArrayType *type);
+void zir_operand_array_add_member(struct ZirArrayOperand *array_operand, struct ZirOperand *member_operand);
 void zir_operand_array_free(struct ZirArrayOperand *operand);
 char* zir_operand_array_dump(struct ZirArrayOperand *operand, char *output);
 char* zir_operand_array_type_dump(struct ZirArrayOperand *array, char *output);

@@ -8,10 +8,10 @@ struct ZirCastInstruction* zir_instruction_cast_new(struct ZirOperand *destinati
     instruction->base.destination = destination;
     instruction->source = source;
 
-    instruction->base.destination->owner = (struct ZirInstruction*) instruction;
+    instruction->base.destination->owner = instruction;
 
     if (instruction->source && instruction->source->owner == NULL)
-        instruction->source->owner = (struct ZirInstruction*) instruction;
+        instruction->source->owner = instruction;
     
     return instruction;
 }
@@ -20,7 +20,7 @@ void zir_instruction_cast_free(struct ZirCastInstruction *instruction)
 {
     zir_operand_free(instruction->base.destination);
 
-    if (instruction->source && (void*) instruction->source->owner == (void*) instruction)
+    if (instruction->source && instruction->source->owner == instruction)
         zir_operand_free(instruction->source);
 
     fl_free(instruction);
