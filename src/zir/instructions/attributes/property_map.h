@@ -5,7 +5,7 @@
 #include "property.h"
 
 struct ZirPropertyMap {
-    FlHashtable map;
+    FlHashtable *map;
 };
 
 static inline struct ZirPropertyMap zir_property_map_new()

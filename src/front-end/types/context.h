@@ -16,12 +16,12 @@
  *  the functions in this module
  * 
  * Members:
- *  <FlHashtable> pool: Set of reusable types
- *  <FlList> uniques: Set of types created by the system that can't be reused
+ *  <FlHashtable> *pool: Set of reusable types
+ *  <FlList> *uniques: Set of types created by the system that can't be reused
  */
 struct ZenitTypeContext {
-    FlHashtable pool;
-    FlList uniques;
+    FlHashtable *pool;
+    FlList *uniques;
 };
 
 /*

@@ -25,12 +25,12 @@ struct ZenitStructTypeMember {
  * Members:
  *  <struct ZenitType> base: Base type information
  *  <char> *name: The name of the struct if it is a named struct or <NULL> for unnamed structs
- *  <FlList> members: List of <struct ZenitStructTypeMember> objects that represents each struct member
+ *  <FlList> *members: List of <struct ZenitStructTypeMember> objects that represents each struct member
  */
 struct ZenitStructType {
     struct ZenitType base;
     char *name;
-    FlList members;
+    FlList *members;
 };
 
 /*

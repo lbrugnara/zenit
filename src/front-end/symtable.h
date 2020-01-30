@@ -9,13 +9,13 @@
  *  A symbol table object that keeps track of the program's symbols
  * 
  * Members:
- *  <FlHashtable> symbols: Hashtable of symbols using the name (string) as key
- *  <FlList> names: List that keeps track of the insertion order of the symbols
+ *  <FlHashtable> *symbols: Hashtable of symbols using the name (string) as key
+ *  <FlList> *names: List that keeps track of the insertion order of the symbols
  * 
  */
 struct ZenitSymtable {
-    FlHashtable symbols;
-    FlList names;
+    FlHashtable *symbols;
+    FlList *names;
 };
 
 /*

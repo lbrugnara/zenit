@@ -6,7 +6,7 @@
 #include "property.h"
 
 struct ZenitPropertyNodeMap {
-    FlHashtable map;
+    FlHashtable *map;
 };
 
 static inline struct ZenitPropertyNodeMap zenit_property_node_map_new()

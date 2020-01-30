@@ -5,7 +5,7 @@
 #include "attribute.h"
 
 struct ZirAttributeMap {
-    FlHashtable map;
+    FlHashtable *map;
 };
 
 static inline struct ZirAttributeMap zir_attribute_map_new()

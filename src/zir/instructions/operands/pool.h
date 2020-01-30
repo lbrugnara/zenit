@@ -12,10 +12,10 @@
  *  An object that keeps track of the creation of operand objects
  * 
  * Members:
- *  <FlList> operands: The list of created operands
+ *  <FlList> *operands: The list of created operands
  */
 struct ZirOperandPool {
-    FlList operands;
+    FlList *operands;
 };
 
 /*

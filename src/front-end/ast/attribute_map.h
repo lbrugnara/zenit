@@ -6,7 +6,7 @@
 #include "attribute.h"
 
 struct ZenitAttributeNodeMap {
-    FlHashtable map;
+    FlHashtable *map;
 };
 
 static inline struct ZenitAttributeNodeMap zenit_attribute_node_map_new()

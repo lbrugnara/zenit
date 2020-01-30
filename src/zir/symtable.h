@@ -10,11 +10,11 @@
  * 
  * Members:
  *  <FlHashtable> symbols: Hashtable of symbols using the name (string) as the key
- *  <FlList> names: List that keeps track of the insertion order of the symbols
+ *  <FlList> *names: List that keeps track of the insertion order of the symbols
  */
 struct ZirSymtable {
-    FlHashtable symbols;
-    FlList names;
+    FlHashtable *symbols;
+    FlList *names;
 };
 
 /*

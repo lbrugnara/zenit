@@ -1161,7 +1161,7 @@ static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct Ze
  */
 bool zenit_parse_source(struct ZenitContext *ctx)
 {
-    FlList templist = fl_list_new();
+    FlList *templist = fl_list_new();
     size_t decls_count = 0;
 
     struct ZenitParser parser = zenit_parser_new(ctx->srcinfo);
