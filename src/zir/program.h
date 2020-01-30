@@ -14,6 +14,7 @@
 struct ZirProgram {
     struct ZirBlock *global;
     struct ZirBlock *current;
+    struct ZirOperandPool *operands;
 };
 
 /*

@@ -10,9 +10,6 @@ struct ZirReferenceOperand* zir_operand_reference_new(struct ZirReferenceType *t
     reference->operand = operand;
     reference->type = type;
 
-    if (operand && operand->base.owner == NULL)
-        operand->base.owner = reference;
-
     return reference;
 }
 
@@ -20,9 +17,6 @@ void zir_operand_reference_free(struct ZirReferenceOperand *reference)
 {
     if (!reference)
         return;
-
-    if (reference->operand->base.owner == reference)
-        zir_operand_symbol_free(reference->operand);
 
     if (reference->type)
         zir_type_reference_free(reference->type);

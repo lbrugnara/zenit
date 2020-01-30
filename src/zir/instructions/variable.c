@@ -8,21 +8,11 @@ struct ZirVariableInstruction* zir_instruction_variable_new(struct ZirOperand *d
     instruction->base.destination = destination;
     instruction->source = source;
 
-    instruction->base.destination->owner = instruction;
-
-    if (instruction->source && instruction->source->owner == NULL)
-        instruction->source->owner = instruction;
-
     return instruction;
 }
 
 void zir_instruction_variable_free(struct ZirVariableInstruction *instruction)
 {
-    zir_operand_free(instruction->base.destination);
-
-    if (instruction->source && instruction->source->owner == instruction)
-        zir_operand_free(instruction->source);
-
     zir_attribute_map_free(&instruction->attributes);
     fl_free(instruction);
 }

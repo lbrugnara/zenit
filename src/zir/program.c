@@ -1,11 +1,13 @@
 #include "program.h"
 #include "symbol.h"
+#include "instructions/operands/pool.h"
 
 struct ZirProgram* zir_program_new()
 {
     struct ZirProgram *program = fl_malloc(sizeof(struct ZirProgram));
     program->global = zir_block_new("global", ZIR_BLOCK_GLOBAL, NULL);
     program->current = program->global;
+    program->operands = zir_operand_pool_new();
 
     return program;
 }
@@ -14,6 +16,8 @@ void zir_program_free(struct ZirProgram *program)
 {
     if (!program)
         return;
+
+    zir_operand_pool_free(program->operands);
         
     zir_block_free(program->global);
 
