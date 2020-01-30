@@ -21,12 +21,6 @@ enum ZirOperandType {
  * 
  * Members:
  *  <enum ZirOperandType> type: The type of operand this object represents
- *  <void> *owner: The object owner of the operand that is in charge of freeing its memory
- * 
- * Notes:
- *  An operand object can be held by another operand (like arrays or references operands) or by instructions. These
- *  objects are the owner of the operands that are part of them (if these operands don't have a previous owner yet) and
- *  because of that they are in charge of check if it is up to them to call <zir_operand_free> on those operands.
  */
 struct ZirOperand {
     enum ZirOperandType type;

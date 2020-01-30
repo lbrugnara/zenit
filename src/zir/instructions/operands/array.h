@@ -34,7 +34,7 @@ struct ZirArrayOperand {
  * Notes:
  *  The object returned by this function must be freed using the <zir_operand_array_free> function.
  *  The array operand takes ownership of the <struct ZirArrayType> object, which means it will release
- *  they type object memory too when <zir_operand_array_free> is called with the array operand as argument.
+ *  the type object memory too when <zir_operand_array_free> is called with the array operand as argument.
  */
 struct ZirArrayOperand* zir_operand_array_new(struct ZirArrayType *type);
 
@@ -48,27 +48,18 @@ struct ZirArrayOperand* zir_operand_array_new(struct ZirArrayType *type);
  *
  * Returns:
  *  void: This function does not return a value
- *
- * Notes:
- *  The array operand takes ownership of the <struct ZirOperand> object if it is not already owned by some other
- *  object. In the case the array operand takes ownership of the operand, when the <zir_operand_array_free> function 
- *  is called with the array operand as argument, the memory of the operand object is realeased too.
  */
 void zir_operand_array_add_element(struct ZirArrayOperand *array_operand, struct ZirOperand *operand);
 
 /*
  * Function: zir_operand_array_free
- *  Frees the memory of the array operand including the memory used by the *type* property and the 
- *  memory of all the owned operands in the *elements* property
+ *  Frees the memory of the array operand
  *
  * Parameters:
  *  <struct ZirArrayOperand> *array_operand: Array operand object
  *
  * Returns:
  *  void: This function does not return a value
- *
- * Notes:
- *  Mind that this function may not free all the memory used by the operands in the *element* property
  */
 void zir_operand_array_free(struct ZirArrayOperand *array_operand);
 

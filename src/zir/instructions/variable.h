@@ -3,7 +3,7 @@
 
 #include "instruction.h"
 #include "operands/symbol.h"
-#include "attributes/attribute.h"
+#include "attributes/attribute_map.h"
 
 /*
  * Struct: struct ZirVariableInstruction

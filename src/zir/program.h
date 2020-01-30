@@ -10,6 +10,7 @@
  * Members:
  *  <struct ZirBlock> *global: A pointer to the global block or block
  *  <struct ZirBlock> *current: A pointer to the current block
+ *  <struct ZirOperandPool> *operands: Keeps track of the operands. (Work as a root aggregate for operand objects)
  */
 struct ZirProgram {
     struct ZirBlock *global;
