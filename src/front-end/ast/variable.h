@@ -14,7 +14,7 @@
  *  <char> *name: The variable name
  *  <struct ZenitTypeNode> *type_decl: If present in the declaration, the variable's type
  *  <struct ZenitNode> *rvalue: The right-hand side expression that initializes the variable
- *  <struct ZenitAttributeNodeMap> attributes: If present, a list of all the variable's attributes
+ *  <ZenitAttributeNodeMap> *attributes: If present, a list of all the variable's attributes
  * 
  */
 struct ZenitVariableNode {
@@ -22,7 +22,7 @@ struct ZenitVariableNode {
     char *name;
     struct ZenitTypeNode *type_decl;
     struct ZenitNode *rvalue;
-    struct ZenitAttributeNodeMap attributes;
+    ZenitAttributeNodeMap *attributes;
 };
 
 /*

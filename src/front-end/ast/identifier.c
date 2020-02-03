@@ -1,4 +1,5 @@
-#include <fllib.h>
+
+#include <fllib/Cstring.h>
 #include "identifier.h"
 
 struct ZenitIdentifierNode* zenit_node_identifier_new(struct ZenitSourceLocation location, char *name)

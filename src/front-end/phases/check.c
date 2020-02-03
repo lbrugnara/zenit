@@ -181,7 +181,7 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
  *
  * Parameters:
  *  <struct ZenitContext> *ctx - Context object
- *  <struct ZenitAttributeNodeMap> *attributes: Attributes map
+ *  <ZenitAttributeNodeMap> *attributes: Attributes map
  * 
  * Returns:
  *  void - This function does not return a value
@@ -190,14 +190,14 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
  *  By now, this function is pretty dumb because there is nothing to check in the
  *  properties
  */
-static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttributeNodeMap *attributes)
+static void visit_attribute_node_map(struct ZenitContext *ctx, ZenitAttributeNodeMap *attributes)
 {
     const char **names = zenit_attribute_node_map_keys(attributes);
     for (size_t i=0; i < fl_array_length(names); i++)
     {
         struct ZenitAttributeNode *attr = zenit_attribute_node_map_get(attributes, names[i]);
 
-        struct ZenitPropertyNode **properties = zenit_property_node_map_values(&attr->properties);
+        struct ZenitPropertyNode **properties = zenit_property_node_map_values(attr->properties);
         for (size_t j=0; j < fl_array_length(properties); j++)
         {
             struct ZenitPropertyNode *prop = properties[j];
@@ -311,7 +311,7 @@ static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struc
 static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node)
 {
     // Visit the attributes and its properties
-    visit_attribute_node_map(ctx, &struct_node->attributes);
+    visit_attribute_node_map(ctx, struct_node->attributes);
 
     zenit_program_push_scope(ctx->program, ZENIT_SCOPE_STRUCT, struct_node->name);
 
@@ -338,7 +338,7 @@ static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, stru
 static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *variable_node)
 {
     // Visit the attributes
-    visit_attribute_node_map(ctx, &variable_node->attributes);
+    visit_attribute_node_map(ctx, variable_node->attributes);
 
     // We get the variable's symbol
     struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx->program, variable_node->name);

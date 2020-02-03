@@ -1,4 +1,6 @@
-#include <fllib.h>
+
+#include <fllib/Cstring.h>
+#include <fllib/containers/Vector.h>
 #include "lexer.h"
 
 /*

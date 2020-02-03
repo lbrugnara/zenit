@@ -1,5 +1,8 @@
-#include <fllib.h>
+
 #include <stdlib.h>
+#include <string.h>
+#include <fllib/Mem.h>
+#include <fllib/Cstring.h>
 #include "reference.h"
 
 struct ZirReferenceType* zir_type_reference_new(struct ZirType *element)

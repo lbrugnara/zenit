@@ -1,4 +1,4 @@
-#include <fllib.h>
+
 #include <errno.h>
 #include <limits.h>
 #include "parse.h"
@@ -1032,7 +1032,7 @@ static struct ZenitNode* parse_attribute_declaration(struct ZenitParser *parser,
 
             if (property != NULL)
             {
-                zenit_property_node_map_add(&attribute->properties, property);
+                zenit_property_node_map_add(attribute->properties, property);
             }
             else
             {
@@ -1070,12 +1070,12 @@ static struct ZenitNode* parse_attribute_declaration(struct ZenitParser *parser,
  *  ctx - <struct ZenitContext> object
  *
  * Returns:
- * struct ZenitAttributeNodeMap - Map with the parsed attributes or an empty map
+ * ZenitAttributeNodeMap* - Map with the parsed attributes or an empty map
  *
  */
-static struct ZenitAttributeNodeMap parse_attribute_declaration_list(struct ZenitParser *parser, struct ZenitContext *ctx)
+static ZenitAttributeNodeMap* parse_attribute_declaration_list(struct ZenitParser *parser, struct ZenitContext *ctx)
 {
-    struct ZenitAttributeNodeMap attributes = zenit_attribute_node_map_new();
+    ZenitAttributeNodeMap *attributes = zenit_attribute_node_map_new();
 
     while (zenit_parser_next_is(parser, ZENIT_TOKEN_HASH))
     {
@@ -1084,7 +1084,7 @@ static struct ZenitAttributeNodeMap parse_attribute_declaration_list(struct Zeni
         if (attribute == NULL)
             continue;
 
-        zenit_attribute_node_map_add(&attributes, attribute);
+        zenit_attribute_node_map_add(attributes, attribute);
     }
 
     return attributes;
@@ -1110,7 +1110,7 @@ static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct Ze
     struct ZenitSourceLocation location = ctx->srcinfo->location;
 
     // We first check for attributes
-    struct ZenitAttributeNodeMap attributes = parse_attribute_declaration_list(parser, ctx);
+    ZenitAttributeNodeMap *attributes = parse_attribute_declaration_list(parser, ctx);
 
     // Check for variables, functions, etc
     if (zenit_parser_next_is(parser, ZENIT_TOKEN_VAR))
@@ -1139,17 +1139,17 @@ static struct ZenitNode* parse_declaration(struct ZenitParser *parser, struct Ze
     }
 
     // If the attribute map is not empty at this point, it means their usage is invalid
-    if (zenit_attribute_node_map_length(&attributes) > 0)
+    if (zenit_attribute_node_map_length(attributes) > 0)
         zenit_context_error(ctx, location, ZENIT_ERROR_SYNTAX, "Invalid use of attributes");
         
     // At this point we always free the attributes map, no one will use it
-    zenit_attribute_node_map_free(&attributes);
+    zenit_attribute_node_map_free(attributes);
 
     // If there are no variables or functions declarations, it is a statement
     return parse_statement(parser, ctx);
 
     // Errors..
-    on_parsing_error: zenit_attribute_node_map_free(&attributes);
+    on_parsing_error: zenit_attribute_node_map_free(attributes);
 
     return NULL;
 }

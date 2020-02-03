@@ -1,4 +1,6 @@
-#include <fllib.h>
+
+#include <fllib/IO.h>
+#include <fllib/Cstring.h>
 #include "source.h"
 
 static struct ZenitSourceInfo* new_from_file(const char *filename);

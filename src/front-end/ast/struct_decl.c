@@ -1,4 +1,6 @@
-#include <fllib.h>
+
+#include <fllib/Array.h>
+#include <fllib/Cstring.h>
 #include "struct_decl.h"
 
 struct ZenitStructDeclNode* zenit_node_struct_decl_new(struct ZenitSourceLocation location, char *name)
@@ -32,7 +34,7 @@ char* zenit_node_struct_decl_dump(struct ZenitStructDeclNode *struct_node, char 
             fl_cstring_append(&output, " ");
     }
 
-    struct ZenitAttributeNode **attrs = zenit_attribute_node_map_values(&struct_node->attributes);
+    struct ZenitAttributeNode **attrs = zenit_attribute_node_map_values(struct_node->attributes);
 
     length = fl_array_length(attrs);
     if (length > 0)
@@ -74,7 +76,7 @@ void zenit_node_struct_decl_free(struct ZenitStructDeclNode *struct_node)
 
     fl_array_free_each_pointer(struct_node->members, (FlArrayFreeElementFunc) zenit_node_free);
 
-    zenit_attribute_node_map_free(&struct_node->attributes);
+    zenit_attribute_node_map_free(struct_node->attributes);
 
     fl_free(struct_node);
 }

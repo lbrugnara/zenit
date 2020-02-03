@@ -1,4 +1,5 @@
-#include <fllib.h>
+
+#include <fllib/Cstring.h>
 #include "uint.h"
 #include "../../types/uint.h"
 

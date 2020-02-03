@@ -1,6 +1,8 @@
 #ifndef ZENIT_TYPE_H
 #define ZENIT_TYPE_H
 
+#include <fllib/Slice.h>
+
 /*
  * Enum: enum ZenitTypeKind
  *  Enumerates all the native type supported by Zenit

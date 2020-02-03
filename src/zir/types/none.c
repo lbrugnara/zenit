@@ -1,5 +1,8 @@
-#include <fllib.h>
+
 #include <stdlib.h>
+#include <string.h>
+#include <fllib/Mem.h>
+#include <fllib/Cstring.h>
 #include "none.h"
 
 struct ZirType* zir_type_none_new(void)

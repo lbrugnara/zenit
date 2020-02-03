@@ -1,62 +1,32 @@
 #ifndef ZENIT_AST_ATTRIBUTE_MAP_H
 #define ZENIT_AST_ATTRIBUTE_MAP_H
 
-#include <fllib.h>
-
 #include "attribute.h"
 
-struct ZenitAttributeNodeMap {
-    FlHashtable *map;
-};
+typedef FlHashtable ZenitAttributeNodeMap;
 
-static inline struct ZenitAttributeNodeMap zenit_attribute_node_map_new()
-{
-    return (struct ZenitAttributeNodeMap) {
-        .map = fl_hashtable_new_args((struct FlHashtableArgs) {
-            .hash_function = fl_hashtable_hash_string,
-            .key_allocator = fl_container_allocator_string,
-            .key_comparer = fl_container_equals_string,
-            .key_cleaner = fl_container_cleaner_pointer,
-            .value_cleaner = (FlContainerCleanupFunction) zenit_node_free,
-            .value_allocator = NULL
-        })
-    };
-}
+#define zenit_attribute_node_map_new()  \
+    ((ZenitAttributeNodeMap*) fl_hashtable_new_args((struct FlHashtableArgs) {  \
+            .hash_function = fl_hashtable_hash_string,  \
+            .key_allocator = fl_container_allocator_string, \
+            .key_comparer = fl_container_equals_string, \
+            .key_cleaner = fl_container_cleaner_pointer,    \
+            .value_cleaner = (FlContainerCleanupFunction) zenit_node_free,  \
+            .value_allocator = NULL \
+        }))
 
-static inline void zenit_attribute_node_map_free(struct ZenitAttributeNodeMap *mapptr)
-{
-    if (mapptr->map)
-        fl_hashtable_free(mapptr->map);
-}
+#define zenit_attribute_node_map_free(mapptr) do { if (mapptr) fl_hashtable_free(mapptr); } while (0)
 
-static inline struct ZenitAttributeNode* zenit_attribute_node_map_add(struct ZenitAttributeNodeMap *mapptr, struct ZenitAttributeNode *attr)
-{
-    return (struct ZenitAttributeNode*) fl_hashtable_add(mapptr->map, attr->name, attr);
-}
+#define zenit_attribute_node_map_add(mapptr, attr) ((struct ZenitAttributeNode*) fl_hashtable_add(mapptr, attr->name, attr))
 
-static inline const char** zenit_attribute_node_map_keys(struct ZenitAttributeNodeMap *mapptr)
-{
-    return fl_hashtable_keys(mapptr->map);
-}
+#define zenit_attribute_node_map_keys(mapptr) fl_hashtable_keys(mapptr)
 
-static inline struct ZenitAttributeNode** zenit_attribute_node_map_values(struct ZenitAttributeNodeMap *mapptr)
-{
-    return fl_hashtable_values(mapptr->map);
-}
+#define zenit_attribute_node_map_values(mapptr) ((struct ZenitAttributeNode**) fl_hashtable_values(mapptr))
 
-static inline struct ZenitAttributeNode* zenit_attribute_node_map_get(struct ZenitAttributeNodeMap *mapptr, const char *attrname)
-{
-    return (struct ZenitAttributeNode*) fl_hashtable_get(mapptr->map, attrname);
-}
+#define zenit_attribute_node_map_get(mapptr, attrname) ((struct ZenitAttributeNode*) fl_hashtable_get(mapptr, attrname))
 
-static inline size_t zenit_attribute_node_map_length(struct ZenitAttributeNodeMap *mapptr)
-{
-    return fl_hashtable_length(mapptr->map);
-}
+#define zenit_attribute_node_map_length(mapptr) fl_hashtable_length(mapptr)
 
-static inline bool zenit_attribute_node_map_has_key(struct ZenitAttributeNodeMap *mapptr, const char *attrname)
-{
-    return fl_hashtable_has_key(mapptr->map, attrname);
-}
+#define zenit_attribute_node_map_has_key(mapptr, attrname) fl_hashtable_has_key(mapptr, attrname)
 
 #endif /* ZENIT_AST_ATTRIBUTE_MAP_H */

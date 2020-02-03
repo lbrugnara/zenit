@@ -1,4 +1,5 @@
-#include <fllib.h>
+
+#include <fllib/Cstring.h>
 #include "attribute.h"
 
 struct ZirAttribute* zir_attribute_new(char *name)
@@ -18,7 +19,7 @@ void zir_attribute_free(struct ZirAttribute *attribute)
     if (attribute->name)
         fl_cstring_free(attribute->name);
 
-    zir_property_map_free(&attribute->properties);
+    zir_property_map_free(attribute->properties);
         
     fl_free(attribute);
 }

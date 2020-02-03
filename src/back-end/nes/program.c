@@ -1,3 +1,4 @@
+#include <fllib/Cstring.h>
 #include "program.h"
 #include "opcode.h"
 
@@ -327,7 +328,7 @@ static inline bool map_symbol(struct ZenitNesProgram *program, struct ZenitNesSy
 }
 
 
-struct ZenitNesSymbol* zenit_nes_program_reserve_symbol(struct ZenitNesProgram *program, struct ZirBlock *block, struct ZirAttributeMap *attributes, struct ZirSymbol *zir_symbol)
+struct ZenitNesSymbol* zenit_nes_program_reserve_symbol(struct ZenitNesProgram *program, struct ZirBlock *block, ZirAttributeMap *attributes, struct ZirSymbol *zir_symbol)
 {
     struct ZenitNesSymbol *nes_symbol = NULL;
 
@@ -343,9 +344,9 @@ struct ZenitNesSymbol* zenit_nes_program_reserve_symbol(struct ZenitNesProgram *
     {
         struct ZirAttribute *nes_attribute = zir_attribute_map_get(attributes, "NES");
 
-        if (zir_property_map_has_key(&nes_attribute->properties, "segment"))
+        if (zir_property_map_has_key(nes_attribute->properties, "segment"))
         {
-            struct ZirProperty *segment_property = zir_property_map_get(&nes_attribute->properties, "segment");
+            struct ZirProperty *segment_property = zir_property_map_get(nes_attribute->properties, "segment");
 
             if (segment_property->value->type == ZIR_OPERAND_SYMBOL)
             {
@@ -357,9 +358,9 @@ struct ZenitNesSymbol* zenit_nes_program_reserve_symbol(struct ZenitNesProgram *
                     reserve_data_symbol(program, &nes_symbol, zir_symbol, NULL);
             }
         }
-        else if (zir_property_map_has_key(&nes_attribute->properties, "address"))
+        else if (zir_property_map_has_key(nes_attribute->properties, "address"))
         {
-            struct ZirProperty *address_property = zir_property_map_get(&nes_attribute->properties, "address");
+            struct ZirProperty *address_property = zir_property_map_get(nes_attribute->properties, "address");
             struct ZirUintOperand *uint_value = NULL;
 
             if (address_property->value->type == ZIR_OPERAND_UINT)

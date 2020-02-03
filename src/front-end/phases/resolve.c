@@ -218,13 +218,13 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
  *
  * Parameters:
  *  <struct ZenitContext> *ctx - Context object
- *  <struct ZenitAttributeNodeMap> *attributes: Attributes map
+ *  <ZenitAttributeNodeMap> *attributes: Attributes map
  * 
  * Returns:
  *  void - This function does not return a value
  *
  */
-static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttributeNodeMap *attributes, enum ResolvePass pass)
+static void visit_attribute_node_map(struct ZenitContext *ctx, ZenitAttributeNodeMap *attributes, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return;
@@ -234,7 +234,7 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, struct ZenitAttri
     {
         struct ZenitAttributeNode *attr = zenit_attribute_node_map_get(attributes, names[i]);
 
-        struct ZenitPropertyNode **properties = zenit_property_node_map_values(&attr->properties);
+        struct ZenitPropertyNode **properties = zenit_property_node_map_values(attr->properties);
         for (size_t j=0; j < fl_array_length(properties); j++)
         {
             struct ZenitPropertyNode *prop = properties[j];
@@ -518,7 +518,7 @@ static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, stru
     // Visit the attributes and its properties (outside of the struct's scope)
     // TODO: The attributes are pretty simple right now, we should check if this visit should
     // happen outside or inside the struct scope
-    visit_attribute_node_map(ctx, &struct_node->attributes, pass);
+    visit_attribute_node_map(ctx, struct_node->attributes, pass);
 
     // Now it's time to enter to the scope of the struct to visit its members
     zenit_program_enter_scope(ctx->program, scope);
@@ -573,7 +573,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
     }
 
     // Visit the attributes and its properties
-    visit_attribute_node_map(ctx, &variable_node->attributes, pass);
+    visit_attribute_node_map(ctx, variable_node->attributes, pass);
 
     // We need a type for our symbol
     struct ZenitType *type = NULL;

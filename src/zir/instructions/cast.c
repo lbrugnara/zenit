@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <fllib/Cstring.h>
 #include "cast.h"
 
 struct ZirCastInstruction* zir_instruction_cast_new(struct ZirOperand *destination, struct ZirOperand *source)

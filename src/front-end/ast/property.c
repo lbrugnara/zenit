@@ -1,5 +1,5 @@
-#include <fllib.h>
 
+#include <fllib/Cstring.h>
 #include "property.h"
 
 struct ZenitPropertyNode* zenit_node_property_new(struct ZenitSourceLocation location, char *name, struct ZenitNode *value)

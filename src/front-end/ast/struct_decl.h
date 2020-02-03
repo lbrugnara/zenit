@@ -13,14 +13,14 @@
  *  <struct ZenitNode> base: Basic information of the node object
  *  <char> *name: The struct name
  *  <struct ZenitNode> **members: Pointers to the struct members
- *  <struct ZenitAttributeNodeMap> attributes: If present, a list of all the struct attributes
+ *  <ZenitAttributeNodeMap> *attributes: If present, a list of all the struct attributes
  * 
  */
 struct ZenitStructDeclNode {
     struct ZenitNode base;
     char *name;
     struct ZenitNode **members;
-    struct ZenitAttributeNodeMap attributes;
+    ZenitAttributeNodeMap *attributes;
 };
 
 /*

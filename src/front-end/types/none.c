@@ -1,5 +1,6 @@
-#include <fllib.h>
+
 #include <stdlib.h>
+#include <fllib/Cstring.h>
 #include "none.h"
 
 struct ZenitType* zenit_type_none_new(void)

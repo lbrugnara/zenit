@@ -12,13 +12,13 @@
  * Members:
  *  <struct ZirInstruction> base: Base information
  *  <struct ZirOperand> *source: Represents the right-hand side of the variable declaration
- *  <struct ZirAttributeMap> attributes: Attributes of the variable declaration instruction
+ *  <ZirAttributeMap> *attributes: Attributes of the variable declaration instruction
  * 
  */
 struct ZirVariableInstruction {
     struct ZirInstruction base;
     struct ZirOperand *source;
-    struct ZirAttributeMap attributes;
+    ZirAttributeMap *attributes;
 };
 
 /*

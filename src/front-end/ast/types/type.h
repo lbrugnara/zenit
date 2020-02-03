@@ -1,6 +1,7 @@
 #ifndef ZENIT_AST_TYPE_H
 #define ZENIT_AST_TYPE_H
 
+#include <fllib/Cstring.h>
 #include "../node.h"
 
 /*

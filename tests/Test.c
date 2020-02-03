@@ -13,7 +13,13 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include <fllib.h>
+
+#include <fllib/Mem.h>
+#include <fllib/Error.h>
+#include <fllib/Cstring.h>
+#include <fllib/Array.h>
+#include <fllib/os/Signal.h>
+#include <fllib/os/Timer.h>
 #include "Test.h"
 
 /*
@@ -117,6 +123,7 @@ void test_signal_handler(int sign)
 }
 
 #ifdef _WIN32
+#include <fllib/os/WinEx.h>
 /*
  * Function: exception_filter
  *

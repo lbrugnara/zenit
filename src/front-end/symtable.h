@@ -1,7 +1,9 @@
 #ifndef ZENIT_SYMTABLE_H
 #define ZENIT_SYMTABLE_H
 
-#include <fllib.h>
+
+#include <fllib/containers/List.h>
+#include <fllib/containers/Hashtable.h>
 #include "symbol.h"
 
 /*

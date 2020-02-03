@@ -1,3 +1,4 @@
+#include <fllib/Cstring.h>
 #include "block.h"
 
 struct ZirBlock* zir_block_new(const char *id, enum ZirBlockType type, struct ZirBlock *parent)

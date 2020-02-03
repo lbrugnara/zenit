@@ -1,7 +1,8 @@
 #ifndef ZENIT_TOKEN_H
 #define ZENIT_TOKEN_H
 
-#include <fllib.h>
+
+#include <fllib/Slice.h>
 #include "source.h"
 
 /*

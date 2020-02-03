@@ -1,8 +1,9 @@
 #ifndef ZENIT_TYPE_SYSTEM_H
 #define ZENIT_TYPE_SYSTEM_H
 
-#include <fllib.h>
 
+#include <fllib/containers/List.h>
+#include <fllib/containers/Hashtable.h>
 #include "type.h"
 #include "array.h"
 #include "none.h"

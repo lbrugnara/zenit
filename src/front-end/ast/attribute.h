@@ -1,8 +1,6 @@
 #ifndef ZENIT_AST_ATTRIBUTE_H
 #define ZENIT_AST_ATTRIBUTE_H
 
-#include <fllib.h>
-
 #include "node.h"
 #include "property_map.h"
 
@@ -13,12 +11,12 @@
  * Members:
  *  <struct ZenitNode> base: Basic information of the node object
  *  <char> *name: The attribute name
- *  <struct ZenitPropertyNodeMap> properties: Map of properties of the attribute
+ *  <ZenitPropertyNodeMap> *properties: Map of properties of the attribute
  */
 struct ZenitAttributeNode {
     struct ZenitNode base;
     char *name;
-    struct ZenitPropertyNodeMap properties;
+    ZenitPropertyNodeMap *properties;
 };
 
 /*

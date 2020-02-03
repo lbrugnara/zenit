@@ -1,5 +1,6 @@
-#include <fllib.h>
+
 #include <stdlib.h>
+#include <fllib/Cstring.h>
 #include "struct.h"
 
 static void member_free(void *ptr)

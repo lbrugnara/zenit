@@ -1,3 +1,4 @@
+#include <fllib/Cstring.h>
 #include "attribute.h"
 
 struct ZenitAttributeNode* zenit_node_attribute_new(struct ZenitSourceLocation location, char *name)
@@ -23,7 +24,7 @@ char* zenit_node_attribute_dump(struct ZenitAttributeNode *attribute, char *outp
 {
     fl_cstring_vappend(&output, "(attr %s", attribute->name);
 
-    struct ZenitPropertyNode **properties = zenit_property_node_map_values(&attribute->properties);
+    struct ZenitPropertyNode **properties = zenit_property_node_map_values(attribute->properties);
     
     size_t length = fl_array_length(properties);
     if (length > 0)
@@ -52,7 +53,7 @@ void zenit_node_attribute_free(struct ZenitAttributeNode *attribute_node)
     if (attribute_node->name)
         fl_cstring_free(attribute_node->name);
 
-    zenit_property_node_map_free(&attribute_node->properties);
+    zenit_property_node_map_free(attribute_node->properties);
 
     fl_free(attribute_node);
 }

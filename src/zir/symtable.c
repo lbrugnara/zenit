@@ -1,3 +1,4 @@
+#include <fllib/Cstring.h>
 #include "symtable.h"
 #include "symbol.h"
 

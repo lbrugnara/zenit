@@ -1,7 +1,8 @@
-#include <fllib.h>
+
+#include <stdbool.h>
+#include "type.h"
 #include <stdlib.h>
 #include <limits.h>
-#include "type.h"
 #include "system.h"
 
 unsigned long zir_type_hash(struct ZirType *type)

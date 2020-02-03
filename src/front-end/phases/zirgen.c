@@ -15,7 +15,7 @@
         }
 
 static inline struct ZirType* new_zir_type_from_zenit_type(struct ZirProgram *program, struct ZenitType *zenit_type);
-static struct ZirAttributeMap zenit_attr_map_to_zir_attr_map(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitAttributeNodeMap zenit_attrs);
+ZirAttributeMap* zenit_attr_map_to_zir_attr_map(struct ZenitContext *ctx, struct ZirProgram *program, ZenitAttributeNodeMap *zenit_attrs);
 
 typedef struct ZirOperand*(*ZirGenerator)(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitNode *node);
 
@@ -143,26 +143,26 @@ static inline struct ZirType* new_zir_type_from_zenit_type(struct ZirProgram *pr
  * Parameters:
  *  <struct ZenitContext>  *ctx: Context object
  *  <struct ZirProgram>  *program: The ZIR program
- *  <struct ZenitAttributeNodeMap>  zenit_attrs: The Zenit attribute map
+ *  <ZenitAttributeNodeMap> *zenit_attrs: The Zenit attribute map
  *
  * Returns:
- *  struct ZirAttributeMap: The map of ZIR attributes converted from the Zenit attribute map
+ *  ZirAttributeMap: The map of ZIR attributes converted from the Zenit attribute map
  */
-static struct ZirAttributeMap zenit_attr_map_to_zir_attr_map(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitAttributeNodeMap zenit_attrs)
+ZirAttributeMap* zenit_attr_map_to_zir_attr_map(struct ZenitContext *ctx, struct ZirProgram *program, ZenitAttributeNodeMap *zenit_attrs)
 {
     // We always initialize the ZIR attributes map
-    struct ZirAttributeMap zir_attrs = zir_attribute_map_new();
+    ZirAttributeMap *zir_attrs = zir_attribute_map_new();
 
     // Get the Zenit attributes
-    const char **zenit_attr_names = zenit_attribute_node_map_keys(&zenit_attrs);
+    const char **zenit_attr_names = zenit_attribute_node_map_keys(zenit_attrs);
     size_t zenit_attr_count = fl_array_length(zenit_attr_names);    
 
     for (size_t i=0; i < zenit_attr_count; i++)
     {
         // Get the Zenit attribute
-        struct ZenitAttributeNode *zenit_attr = zenit_attribute_node_map_get(&zenit_attrs, zenit_attr_names[i]);
+        struct ZenitAttributeNode *zenit_attr = zenit_attribute_node_map_get(zenit_attrs, zenit_attr_names[i]);
         // Get the Zenit properties
-        const char **zenit_prop_names = zenit_property_node_map_keys(&zenit_attr->properties);
+        const char **zenit_prop_names = zenit_property_node_map_keys(zenit_attr->properties);
         size_t zenit_prop_count = fl_array_length(zenit_prop_names);
 
         // Create the ZIR attribute
@@ -172,19 +172,19 @@ static struct ZirAttributeMap zenit_attr_map_to_zir_attr_map(struct ZenitContext
         for (size_t j=0; j < zenit_prop_count; j++)
         {
             // Get the Zenit property
-            struct ZenitPropertyNode *zenit_prop = zenit_property_node_map_get(&zenit_attr->properties, zenit_prop_names[j]);
+            struct ZenitPropertyNode *zenit_prop = zenit_property_node_map_get(zenit_attr->properties, zenit_prop_names[j]);
 
             // Create the ZIR property with the operand obtained from visiting the property's value
             struct ZirProperty *zir_prop = zir_property_new(zenit_prop->name, visit_node(ctx, program, zenit_prop->value));
 
             // We add the parsed property to the attribute's properties map
-            zir_property_map_add(&zir_attr->properties, zir_prop);
+            zir_property_map_add(zir_attr->properties, zir_prop);
         }
 
         fl_array_free(zenit_prop_names);
 
         // Add the ZIR attribute to the map
-        zir_attribute_map_add(&zir_attrs, zir_attr);
+        zir_attribute_map_add(zir_attrs, zir_attr);
     }
 
     fl_array_free(zenit_attr_names);
@@ -455,8 +455,9 @@ static struct ZirOperand* visit_variable_node(struct ZenitContext *ctx, struct Z
 
     assert_or_return(ctx, zir_symbol != NULL, zenit_variable->base.location, "Could not create ZIR symbol");
 
-    // The source operand is the one we get from the visit to the <struct ZenitVariableNode>'s value
+    // The destination operand is a symbol operand
     struct ZirOperand *lhs = (struct ZirOperand*) zir_operand_pool_new_symbol(program->operands, zir_symbol);
+    // The source operand is the one we get from the visit to the <struct ZenitVariableNode>'s value
     struct ZirOperand *rhs = visit_node(ctx, program, zenit_variable->rvalue);
 
     // Create the variable declaration instruction with the source and destination operands

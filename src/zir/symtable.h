@@ -1,7 +1,9 @@
 #ifndef ZIR_SYMTABLE_H
 #define ZIR_SYMTABLE_H
 
-#include <fllib.h>
+
+#include <fllib/containers/List.h>
+#include <fllib/containers/Hashtable.h>
 #include "symbol.h"
 
 /*

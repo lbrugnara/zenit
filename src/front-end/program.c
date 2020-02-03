@@ -1,3 +1,4 @@
+#include <fllib/Cstring.h>
 #include "program.h"
 #include "symbol.h"
 #include "types/context.h"

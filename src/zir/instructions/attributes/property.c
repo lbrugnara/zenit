@@ -1,4 +1,5 @@
-#include <fllib.h>
+
+#include <fllib/Cstring.h>
 #include "property.h"
 
 struct ZirProperty* zir_property_new(char *name, struct ZirOperand *value)

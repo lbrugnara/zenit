@@ -1,4 +1,5 @@
-#include <fllib.h>
+
+#include <fllib/Cstring.h>
 #include "array.h"
 
 struct ZenitArrayType* zenit_type_array_new(struct ZenitType *member_type)

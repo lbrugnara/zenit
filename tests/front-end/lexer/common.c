@@ -1,5 +1,5 @@
-#include <fllib.h>
 
+#include <fllib/Array.h>
 #include "../../Test.h"
 #include "../../../src/front-end/lexer.h"
 #include "tests.h"

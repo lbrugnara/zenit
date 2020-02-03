@@ -1,7 +1,8 @@
 #ifndef ZIR_TYPE_UINT_H
 #define ZIR_TYPE_UINT_H
 
-#include <fllib.h>
+
+#include <fllib/Slice.h>
 #include "type.h"
 
 /*

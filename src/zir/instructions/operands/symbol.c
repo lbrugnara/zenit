@@ -1,4 +1,5 @@
-#include <fllib.h>
+
+#include <fllib/Cstring.h>
 #include "symbol.h"
 
 struct ZirSymbolOperand* zir_operand_symbol_new(struct ZirSymbol *symbol)

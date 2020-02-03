@@ -1,4 +1,5 @@
-#include <fllib.h>
+
+#include <fllib/Cstring.h>
 #include "variable.h"
 
 struct ZenitVariableNode* zenit_node_variable_new(struct ZenitSourceLocation location, char *name)
@@ -31,7 +32,7 @@ char* zenit_node_variable_dump(struct ZenitVariableNode *variable, char *output)
 
     output = zenit_node_dump((struct ZenitNode*) variable->rvalue, output);
 
-    struct ZenitAttributeNode **attrs = zenit_attribute_node_map_values(&variable->attributes);
+    struct ZenitAttributeNode **attrs = zenit_attribute_node_map_values(variable->attributes);
     size_t length = fl_array_length(attrs);
     if (length > 0)
     {
@@ -76,7 +77,7 @@ void zenit_node_variable_free(struct ZenitVariableNode *var_node)
     if (var_node->type_decl)
         zenit_node_free((struct ZenitNode*) var_node->type_decl);
 
-    zenit_attribute_node_map_free(&var_node->attributes);
+    zenit_attribute_node_map_free(var_node->attributes);
 
     fl_free(var_node);
 }

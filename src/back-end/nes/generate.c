@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <fllib.h>
+
 #include "generate.h"
 #include "program.h"
 #include "emit.h"
@@ -78,7 +78,7 @@ static void visit_cast_instruction(struct ZirCastInstruction *instruction, struc
 static void visit_variable_instruction(struct ZirVariableInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program)
 {
     struct ZirSymbol *zir_symbol = ((struct ZirSymbolOperand*) instruction->base.destination)->symbol;
-    struct ZenitNesSymbol *nes_symbol = zenit_nes_program_reserve_symbol(program, block, &instruction->attributes, zir_symbol);
+    struct ZenitNesSymbol *nes_symbol = zenit_nes_program_reserve_symbol(program, block, instruction->attributes, zir_symbol);
 
     if (instruction->source->type == ZIR_OPERAND_UINT)
     {

@@ -1,5 +1,6 @@
-#include <fllib.h>
+
 #include <stdlib.h>
+#include <fllib/Cstring.h>
 #include "reference.h"
 
 struct ZenitReferenceType* zenit_type_reference_new(struct ZenitType *element)

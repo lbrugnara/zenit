@@ -1,3 +1,4 @@
+#include <fllib/Cstring.h>
 #include "symbol.h"
 
 struct ZirSymbol* zir_symbol_new(const char *name, struct ZirType *type)

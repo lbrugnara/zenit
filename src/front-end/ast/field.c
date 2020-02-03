@@ -1,4 +1,5 @@
-#include <fllib.h>
+
+#include <fllib/Cstring.h>
 #include "field.h"
 
 struct ZenitFieldNode* zenit_node_field_new(struct ZenitSourceLocation location, char *name)

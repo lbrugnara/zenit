@@ -1,7 +1,7 @@
 #ifndef ZENIT_SYMBOL_H
 #define ZENIT_SYMBOL_H
 
-#include <fllib.h>
+
 #include "types/type.h"
 
 /*

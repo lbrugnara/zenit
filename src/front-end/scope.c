@@ -1,3 +1,4 @@
+#include <fllib/Cstring.h>
 #include "scope.h"
 
 struct ZenitScope* zenit_scope_new(const char *id, enum ZenitScopeType type, struct ZenitScope *parent)

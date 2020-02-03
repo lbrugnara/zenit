@@ -1,6 +1,7 @@
 #ifndef ZENIT_AST_UINT_H
 #define ZENIT_AST_UINT_H
 
+#include <stdint.h>
 #include "node.h"
 #include "../types/uint.h"
 

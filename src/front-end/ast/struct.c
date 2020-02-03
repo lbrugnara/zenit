@@ -1,4 +1,6 @@
-#include <fllib.h>
+
+#include <fllib/Array.h>
+#include <fllib/Cstring.h>
 #include "struct.h"
 
 struct ZenitStructNode* zenit_node_struct_new(struct ZenitSourceLocation location, char *name)

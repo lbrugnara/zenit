@@ -1,4 +1,8 @@
-#include <fllib.h>
+
+#include <stdio.h>
+#include <string.h>
+#include <fllib/Mem.h>
+#include <fllib/Cstring.h>
 #include "array.h"
 
 struct ZirArrayType* zir_type_array_new(struct ZirType *member_type)

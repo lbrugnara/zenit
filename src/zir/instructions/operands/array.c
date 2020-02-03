@@ -1,4 +1,7 @@
-#include <fllib.h>
+
+#include <fllib/Mem.h>
+#include <fllib/Array.h>
+#include <fllib/Cstring.h>
 #include "array.h"
 #include "../../types/array.h"
 

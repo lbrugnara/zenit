@@ -1,7 +1,7 @@
 #ifndef ZIR_OPERAND_H
 #define ZIR_OPERAND_H
 
-#include <fllib.h>
+
 #include "../../types/type.h"
 
 /*

@@ -1,7 +1,7 @@
 #ifndef ZENIT_LEXER_H
 #define ZENIT_LEXER_H
 
-#include <fllib.h>
+
 #include "token.h"
 
 /*

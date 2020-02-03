@@ -9,11 +9,11 @@
  * 
  * Members:
  *  <char> *name: The attribute name
- *  <struct ZirPropertyMap> properties: The set of properties associated with this attribute
+ *  <ZirPropertyMap> *properties: The set of properties associated with this attribute
  */
 struct ZirAttribute {
     char *name;
-    struct ZirPropertyMap properties;
+    ZirPropertyMap *properties;
 };
 
 /*

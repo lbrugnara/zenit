@@ -1,7 +1,7 @@
 #ifndef ZENIT_TYPE_UINT_H
 #define ZENIT_TYPE_UINT_H
 
-#include <fllib.h>
+
 #include "type.h"
 
 /*

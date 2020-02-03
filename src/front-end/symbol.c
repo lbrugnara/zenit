@@ -1,3 +1,4 @@
+#include <fllib/Cstring.h>
 #include "symbol.h"
 
 struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitType *type)

@@ -1,7 +1,8 @@
 #ifndef ZENIT_TYPE_STRUCT_H
 #define ZENIT_TYPE_STRUCT_H
 
-#include <fllib.h>
+
+#include <fllib/containers/List.h>
 #include "type.h"
 
 /*

@@ -14,6 +14,10 @@
  *
  * Returns:
  *  struct ZirProgram*: The ZIR program
+ * 
+ * Notes:
+ * The object returned by this function must be freed using the
+ *  <zir_program_free> function.
  */
 struct ZirProgram* zenit_generate_zir(struct ZenitContext *ctx);
 
