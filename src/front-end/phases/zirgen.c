@@ -29,6 +29,7 @@ static struct ZirOperand* visit_reference_node(struct ZenitContext *ctx, struct 
 static struct ZirOperand* visit_cast_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitCastNode *cast_node);
 static struct ZirOperand* visit_field_decl_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitFieldDeclNode *field_node);
 static struct ZirOperand* visit_struct_decl_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitStructDeclNode *struct_node);
+static struct ZirOperand* visit_struct_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitStructNode *zenit_struct);
 
 /*
  * Variable: generators
@@ -43,6 +44,7 @@ static const ZirGenerator generators[] = {
     [ZENIT_NODE_CAST]           = (ZirGenerator) &visit_cast_node,
     [ZENIT_NODE_FIELD_DECL]     = (ZirGenerator) &visit_field_decl_node,
     [ZENIT_NODE_STRUCT_DECL]    = (ZirGenerator) &visit_struct_decl_node,
+    [ZENIT_NODE_STRUCT]         = (ZirGenerator) &visit_struct_node,
 };
 
 /*
@@ -117,7 +119,18 @@ static inline struct ZirType* new_zir_type_from_zenit_type(struct ZirProgram *pr
     if (zenit_type->typekind == ZENIT_TYPE_STRUCT)
     {
         struct ZenitStructType *zenit_struct = (struct ZenitStructType*) zenit_type;
-        return (struct ZirType*) zir_type_struct_new(zenit_struct->name);
+        struct ZirStructType *zir_struct_type = zir_type_struct_new(zenit_struct->name);
+
+        struct FlListNode *zenit_node = fl_list_head(zenit_struct->members);
+
+        while (zenit_node)
+        {
+            struct ZenitStructTypeMember *zenit_member = (struct ZenitStructTypeMember*) zenit_node->value;
+            zir_type_struct_add_member(zir_struct_type, zenit_member->name, new_zir_type_from_zenit_type(program, zenit_member->type));
+            zenit_node = zenit_node->next;
+        }
+
+        return (struct ZirType*) zir_struct_type;
     }
 
     if (zenit_type->typekind == ZENIT_TYPE_ARRAY)
@@ -226,14 +239,13 @@ static struct ZirOperand* visit_cast_node(struct ZenitContext *ctx, struct ZirPr
     // We create the cast instruction with the temporal symbol as the destination operand
     struct ZirCastInstruction *cast_instr = zir_instruction_cast_new(destination, source);
 
-
     // We add the instruction to the program, and we return the destination operand
     return zir_program_emit(program, (struct ZirInstruction*) cast_instr)->destination;
 }
 
 /*
  * Function: visit_uint_node
- *  Adds a load instruction using the uint literal as the operand
+ *  Returns a uint operand
  *
  * Parameters:
  *  <struct ZenitContext> *ctx: Context object
@@ -272,7 +284,7 @@ static struct ZirOperand* visit_uint_node(struct ZenitContext *ctx, struct ZirPr
 
 /*
  * Function: visit_reference_node
- *  Adds a load instruction to the program using the referenced expression as the operand of the instruction
+ *  Returns a reference operand for the referenced expression
  *
  * Parameters:
  *  <struct ZenitContext> *ctx: Context object
@@ -293,26 +305,19 @@ static struct ZirOperand* visit_reference_node(struct ZenitContext *ctx, struct 
         zenit_context_error(ctx, zenit_ref->base.location, ZENIT_ERROR_INVALID_REFERENCE, "Invalid usage of the reference operator");
         return NULL;
     }
-
+    
     struct ZenitSymbol *zenit_ref_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) zenit_ref);
-
-    // We use the load instruction
-    struct ZirSymbol *temp_symbol = new_temp_symbol(program, new_zir_type_from_zenit_type(program, zenit_ref_symbol->type));
-    struct ZirOperand *destination = (struct ZirOperand*) zir_operand_pool_new_symbol(program->operands, temp_symbol);    
-
+    
+    // We convert from the Zenit type to the ZIR type
     struct ZirReferenceType *ref_zir_type = (struct ZirReferenceType*) new_zir_type_from_zenit_type(program, zenit_ref_symbol->type);
-    struct ZirReferenceOperand *ref_operand = zir_operand_pool_new_reference(program->operands, ref_zir_type, (struct ZirSymbolOperand*) operand);
 
-    struct ZirVariableInstruction *var_instr = zir_instruction_variable_new(destination, (struct ZirOperand*) ref_operand);
-    var_instr->attributes = zir_attribute_map_new();
-
-    // We add the instruction and we return the destination operand
-    return zir_program_emit(program, (struct ZirInstruction*) var_instr)->destination;
+    // We return a reference operand with the symbol operand we received from the visit to the referenced expression
+    return (struct ZirOperand*) zir_operand_pool_new_reference(program->operands, ref_zir_type, (struct ZirSymbolOperand*) operand);    
 }
 
 /*
  * Function: visit_identifier_node
- *  Adds a load instruction to the program using the identifier's symbol as the operand of the instruction
+ *  Returns a symbol operand for the identifier
  *
  * Parameters:
  *  <struct ZenitContext> *ctx: Context object
@@ -337,7 +342,7 @@ static struct ZirOperand* visit_identifier_node(struct ZenitContext *ctx, struct
 
 /*
  * Function: visit_array_node
- *  Creates an array operand and adds a load instruction to the program
+ *  Creates an array operand for the array literal
  *
  * Parameters:
  *  <struct ZenitContext> *ctx: Context object
@@ -352,7 +357,9 @@ static struct ZirOperand* visit_array_node(struct ZenitContext *ctx, struct ZirP
 {
     struct ZenitSymbol *zenit_array_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) zenit_array);
 
-    struct ZirArrayOperand *zir_array = zir_operand_pool_new_array(program->operands, (struct ZirArrayType*) new_zir_type_from_zenit_type(program, zenit_array_symbol->type));
+    // We create an array operand for the array literal
+    struct ZirArrayType *zir_array_type = (struct ZirArrayType*) new_zir_type_from_zenit_type(program, zenit_array_symbol->type);
+    struct ZirArrayOperand *zir_array = zir_operand_pool_new_array(program->operands, zir_array_type);
 
     // Visit the array's elements to get the operands
     for (size_t i=0; i < fl_array_length(zenit_array->elements); i++)
@@ -361,15 +368,31 @@ static struct ZirOperand* visit_array_node(struct ZenitContext *ctx, struct ZirP
         zir_operand_array_add_element(zir_array, zir_operand);
     }
 
-    struct ZirSymbol *temp_symbol = new_temp_symbol(program, new_zir_type_from_zenit_type(program, zenit_array_symbol->type));
-    struct ZirOperand *destination = (struct ZirOperand*) zir_operand_pool_new_symbol(program->operands, temp_symbol);
+    return (struct ZirOperand*) zir_array;
+}
 
-    // We use load instruction with array literals
-    struct ZirVariableInstruction *var_instr = zir_instruction_variable_new(destination, (struct ZirOperand*) zir_array);
-    var_instr->attributes = zir_attribute_map_new();
+static struct ZirOperand* visit_struct_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitStructNode *zenit_struct)
+{
+    struct ZenitSymbol *zenit_struct_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) zenit_struct);
 
-    // We add the instruction and we return the destination operand
-    return zir_program_emit(program, (struct ZirInstruction*) var_instr)->destination;
+    // Create struct operand
+    struct ZirStructType *zir_struct_type = (struct ZirStructType*) new_zir_type_from_zenit_type(program, zenit_struct_symbol->type);
+    struct ZirStructOperand *struct_operand = zir_operand_pool_new_struct(program->operands, zir_struct_type);
+
+    for (size_t i=0; i < fl_array_length(zenit_struct->members); i++)
+    {
+        struct ZenitNode *member_node = zenit_struct->members[i];
+
+        if (member_node->nodekind == ZENIT_NODE_FIELD)
+        {
+            struct ZenitFieldNode *field_node = (struct ZenitFieldNode*) member_node;
+            struct ZirOperand *field_operand = visit_node(ctx, program, field_node->value);
+            zir_operand_struct_add_member(struct_operand, field_node->name, field_operand);
+        }
+    }
+
+    // Return struct operand
+    return (struct ZirOperand*) struct_operand;
 }
 
 /*
@@ -387,9 +410,9 @@ static struct ZirOperand* visit_array_node(struct ZenitContext *ctx, struct ZirP
 static struct ZirOperand* visit_field_decl_node(struct ZenitContext *ctx, struct ZirProgram *program, struct ZenitFieldDeclNode *zenit_field)
 {
     struct ZenitSymbol *zenit_symbol = zenit_program_get_symbol(ctx->program, zenit_field->name);
-    
-    struct ZirSymbol *zir_symbol = zir_symbol_new(zenit_field->name, new_zir_type_from_zenit_type(program, zenit_symbol->type));
-    
+
+    // We add a new symbol in the current block.   
+    struct ZirSymbol *zir_symbol = zir_symbol_new(zenit_field->name, new_zir_type_from_zenit_type(program, zenit_symbol->type));    
     zir_symbol = zir_program_add_symbol(program, zir_symbol);
 
     assert_or_return(ctx, zir_symbol != NULL, zenit_field->base.location, "Could not create ZIR symbol");

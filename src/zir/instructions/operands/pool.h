@@ -4,6 +4,7 @@
 
 #include "array.h"
 #include "reference.h"
+#include "struct.h"
 #include "symbol.h"
 #include "uint.h"
 
@@ -63,6 +64,24 @@ void zir_operand_pool_free(struct ZirOperandPool *pool);
  *  as argument.
  */
 struct ZirArrayOperand* zir_operand_pool_new_array(struct ZirOperandPool *pool, struct ZirArrayType *type);
+
+/*
+ * Function: zir_operand_pool_new_struct
+ *  Creates a new struct operand and adds it to the pool
+ *
+ * Parameters:
+ *  <struct ZirOperandPool> *pool: The pool object
+ *  <struct ZirArrayType> *type: The type of the struct operand
+ *
+ * Returns:
+ *  struct ZirStructOperand*: The struct operand
+ *
+ * Notes:
+ *   The pool object takes ownership of the <struct ZirArrayOperand> object, which means it will release
+ *  the struct operand memory when the <zir_operand_pool_free> function is called with the pool object 
+ *  as argument.
+ */
+struct ZirStructOperand* zir_operand_pool_new_struct(struct ZirOperandPool *pool, struct ZirStructType *type);
 
 /*
  * Function: zir_operand_pool_new_reference

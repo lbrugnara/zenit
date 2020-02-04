@@ -2,6 +2,7 @@
 #include "array.h"
 #include "uint.h"
 #include "reference.h"
+#include "struct.h"
 #include "symbol.h"
 
 void zir_operand_free(struct ZirOperand *operand)
@@ -17,6 +18,10 @@ void zir_operand_free(struct ZirOperand *operand)
 
         case ZIR_OPERAND_ARRAY:
             zir_operand_array_free((struct ZirArrayOperand*)operand);
+            break;
+
+        case ZIR_OPERAND_STRUCT:
+            zir_operand_struct_free((struct ZirStructOperand*)operand);
             break;
 
         case ZIR_OPERAND_SYMBOL:
@@ -39,6 +44,9 @@ char* zir_operand_dump(struct ZirOperand *operand, char *output)
         case ZIR_OPERAND_ARRAY:
             return zir_operand_array_dump((struct ZirArrayOperand*)operand, output);
 
+        case ZIR_OPERAND_STRUCT:
+            return zir_operand_struct_dump((struct ZirStructOperand*)operand, output);
+
         case ZIR_OPERAND_SYMBOL:
             return zir_operand_symbol_dump((struct ZirSymbolOperand*)operand, output);
 
@@ -58,6 +66,9 @@ char* zir_operand_type_dump(struct ZirOperand *operand, char *output)
 
         case ZIR_OPERAND_ARRAY:
             return zir_operand_array_type_dump((struct ZirArrayOperand*)operand, output);
+
+        case ZIR_OPERAND_STRUCT:
+            return zir_operand_struct_type_dump((struct ZirStructOperand*)operand, output);
 
         case ZIR_OPERAND_SYMBOL:
             return zir_operand_symbol_type_dump((struct ZirSymbolOperand*)operand, output);

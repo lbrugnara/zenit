@@ -12,7 +12,7 @@
 #include "front-end/parser/tests.h"
 #include "front-end/resolve/tests.h"
 #include "front-end/symtable/tests.h"
-#include "front-end/zirgen/tests.h"
+#include "zir/tests.h"
 #include "back-end/nes/tests.h"
 
 int main(int argc, char **argv) 
@@ -71,10 +71,11 @@ int main(int argc, char **argv)
             { "Type check variable errors", &zenit_test_check_types_variable_errors     },
             { "Type check struct errors",   &zenit_test_check_types_struct_errors       },
         ),
-        fl_test_suite("zirgen",
-            { "Generate ZIR variables",     &zenit_test_generate_ir_variables   },
-            { "Generate ZIR casts",         &zenit_test_generate_ir_casts       },
-            { "Generate ZIR struct decl",   &zenit_test_generate_ir_struct_decl },
+        fl_test_suite("zir",
+            { "Generate ZIR variables",         &zenit_test_generate_ir_variables       },
+            { "Generate ZIR casts",             &zenit_test_generate_ir_casts           },
+            { "Generate ZIR struct decl",       &zenit_test_generate_ir_struct_decl     },
+            { "Generate ZIR struct",            &zenit_test_generate_ir_struct          },
         ),
         fl_test_suite("nes",
             { "NES global variables",           &zenit_test_nes_global_vars         },

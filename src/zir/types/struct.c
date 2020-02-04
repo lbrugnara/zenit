@@ -9,9 +9,11 @@ static void member_free(void *ptr)
         return;
 
     struct ZirStructTypeMember *member = (struct ZirStructTypeMember*) ptr;
-    
+
     if (member->name)
         fl_cstring_free(member->name);
+
+    zir_type_free(member->type);
 
     fl_free(member);
 }

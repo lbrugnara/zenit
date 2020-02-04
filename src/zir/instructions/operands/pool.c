@@ -23,6 +23,13 @@ struct ZirArrayOperand* zir_operand_pool_new_array(struct ZirOperandPool *pool, 
     return array_operand;
 }
 
+struct ZirStructOperand* zir_operand_pool_new_struct(struct ZirOperandPool *pool, struct ZirStructType *type)
+{
+    struct ZirStructOperand *struct_operand = zir_operand_struct_new(type);
+    fl_list_append(pool->operands, struct_operand);
+    return struct_operand;
+}
+
 struct ZirReferenceOperand* zir_operand_pool_new_reference(struct ZirOperandPool *pool, struct ZirReferenceType *type, struct ZirSymbolOperand *operand)
 {
     struct ZirReferenceOperand *reference_operand = zir_operand_reference_new(type, operand);

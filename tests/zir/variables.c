@@ -1,13 +1,12 @@
 #include <stdio.h>
 
-
-#include "../../Test.h"
-#include "../../../src/front-end/phases/check.h"
-#include "../../../src/front-end/phases/infer.h"
-#include "../../../src/front-end/phases/parse.h"
-#include "../../../src/front-end/phases/resolve.h"
-#include "../../../src/front-end/symtable.h"
-#include "../../../src/front-end/phases/zirgen.h"
+#include "../Test.h"
+#include "../../src/front-end/phases/check.h"
+#include "../../src/front-end/phases/infer.h"
+#include "../../src/front-end/phases/parse.h"
+#include "../../src/front-end/phases/resolve.h"
+#include "../../src/front-end/symtable.h"
+#include "../../src/front-end/phases/zirgen.h"
 #include "tests.h"
 
 void zenit_test_generate_ir_variables(void)
@@ -27,32 +26,26 @@ void zenit_test_generate_ir_variables(void)
     ;
 
     const char *zir_src = 
-        "struct Astruct { a : uint8 }"                          "\n"
+        "struct Astruct { a: uint8 }"                           "\n"
 
         "@a : uint8 = 1"                                        "\n"
 
         "@b : uint8 = 2"                                        "\n"
 
-        "%tmp0 : [2]uint8 = [ 0, 1 ]"                           "\n"
-        "@c : [2]uint8 = %tmp0"                                 "\n"
+        "@c : [2]uint8 = [ 0, 1 ]"                              "\n"
 
-        "%tmp1 : [3]uint8 = [ 0, 1, 2 ]"                        "\n"
-        "@d : [3]uint8 = %tmp1"                                 "\n"
+        "@d : [3]uint8 = [ 0, 1, 2 ]"                           "\n"
 
         "@e : uint8 = @a"                                       "\n"
 
-        "%tmp2 : &uint8 = ref @a"                               "\n"
-        "@f : &uint8 = %tmp2"                                   "\n"
+        "@f : &uint8 = ref @a"                                  "\n"
 
         "@g : &uint8 = @f"                                      "\n"
 
-        "%tmp3 : &uint8 = ref @a"                               "\n"
-        "%tmp4 : [2]&uint8 = [ %tmp3, @f ]"                     "\n"
         // FIXME: The order of the properties is unspecified because of the hashtable
-        "@h : [2]&uint8 = %tmp4 ; #Attr(k2:2, k:1)"             "\n"
+        "@h : [2]&uint8 = [ ref @a, @f ] ; #Attr(k2:2, k:1)"    "\n"
 
-        "%tmp5 : [0]Astruct = [ ]"                              "\n"
-        "@i : [0]Astruct = %tmp5"                               "\n"
+        "@i : [0]Astruct = [ ]"                                 "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);

@@ -6,7 +6,7 @@
 
 /*
  * Struct: struct ZenitArrayNode
- *  Represents a literal array initializer in the source code
+ *  Represents a array literal initializer in the source code
  * 
  * Members:
  *  <struct ZenitNode> base: Basic information of the node object
