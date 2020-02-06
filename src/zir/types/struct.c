@@ -229,8 +229,17 @@ size_t zir_type_struct_size(struct ZirStructType *type)
     if (!type)
         return 0;
     
-    // FIXME: Add the size of the members
-    return 0;
+    size_t struct_size = 0;
+
+    struct FlListNode *tmp = fl_list_head(type->members);
+    while (tmp != NULL)
+    {
+        struct ZirStructTypeMember *member = (struct ZirStructTypeMember*) tmp->value;
+        struct_size += zir_type_size(member->type);
+        tmp = tmp->next;
+    }
+    
+    return struct_size;
 }
 
 void zir_type_struct_free(struct ZirStructType *type)

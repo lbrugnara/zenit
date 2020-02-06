@@ -182,7 +182,12 @@ void zenit_test_infer_variable_array(void)
 
         struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test[0]);
 
-        fl_vexpect(flm_cstring_equals(zenit_type_to_string(symbol->type), test[1]), "Symbol %s's type must be %s", test[0], test[1]);
+        bool equals = flm_cstring_equals(zenit_type_to_string(symbol->type), test[1]);
+
+        if (equals)
+            fl_vexpect(equals, "Symbol %s's type must be %s", test[0], test[1]);
+        else
+            fl_vexpect(equals, "Symbol %s's type must be %s but actual type is %s", test[0], test[1], zenit_type_to_string(symbol->type));
     }
 
     zenit_context_free(&ctx);
@@ -191,9 +196,10 @@ void zenit_test_infer_variable_array(void)
 void zenit_test_infer_variables_structs(void)
 {
     const char *source = 
-        "struct Point { x: uint8; y: uint8; }"              "\n"
-        "var p = Point { x: 0, y: 0 };"                     "\n"
-        "var p2 : Point = { x: 1, y: 1 };"                  "\n"
+        "struct Point { x: uint8; y: uint8; }"                          "\n"
+        "var p = Point { x: 0, y: 0 };"                                 "\n"
+        "var p2 : Point = { x: 1, y: 1 };"                              "\n"
+        "var parr = [ { a: 1 }, { a: 2 }, { a: 3 }, { a: 0x1FF } ];"    "\n"
     ;
 
     const char *program_dump = 
@@ -207,7 +213,20 @@ void zenit_test_infer_variables_structs(void)
                 " (symbol %L3:C29_uint uint8)"
                 " (symbol %L3:C18_struct { x: uint8, y: uint8 })"   // <- At the inference pass, an unnamed struct remains unnamed...
                 " (symbol p2 Point)"
-                " (symbol %L3:C18_cast_impl Point)"                 // <- This symbols is the implicit cast from { x: uint8, y: uint8 } to Point
+                " (symbol %L4:C19_uint uint8)"
+                " (symbol %L4:C14_struct { a: uint8 })"
+                " (symbol %L4:C29_uint uint8)"
+                " (symbol %L4:C24_struct { a: uint8 })"
+                " (symbol %L4:C39_uint uint8)"
+                " (symbol %L4:C34_struct { a: uint8 })"
+                " (symbol %L4:C49_uint uint16)"
+                " (symbol %L4:C44_struct { a: uint16 })"
+                " (symbol %L4:C12_array [4]{ a: uint16 })"
+                " (symbol parr [4]{ a: uint16 })"
+                " (symbol %L3:C18_cast_impl Point)"                 // <- This symbol is the implicit cast from { x: uint8, y: uint8 } to Point
+                " (symbol %L4:C14_cast_impl { a: uint16 })"         // <- This symbol is the implicit cast from { a: uint8 } to { a: uint16 }
+                " (symbol %L4:C24_cast_impl { a: uint16 })"         // <- This symbol is the implicit cast from { a: uint8 } to { a: uint16 }
+                " (symbol %L4:C34_cast_impl { a: uint16 })"         // <- This symbol is the implicit cast from { a: uint8 } to { a: uint16 }
             " (scope struct Point"
                 " (symbol x uint8)"
                 " (symbol y uint8))))"

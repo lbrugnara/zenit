@@ -280,6 +280,8 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
 
     struct ZenitArrayType *array_type = (struct ZenitArrayType*) array_symbol->type;
 
+    struct ZenitSymbol **elements = fl_array_new(sizeof(struct ZenitSymbol*), fl_array_length(array_node->elements));
+
     // Visit each element node and try to unify each element type with the array's member type
     for (size_t i=0; i < fl_array_length(array_node->elements); i++)
     {
@@ -288,7 +290,26 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
                                                      // We directly pass the array member type
                                                      &((struct ZenitArrayType*) array_symbol->type)->member_type, 
                                                      member_infer_kind);
+
+        elements[i] = elem_symbol;
     }
+
+    for (size_t i=0; i < fl_array_length(elements); i++)
+    {
+        // If the types are not equals, we try to cast the RHS to the LHS type, and if that is not possible, we don't do anything here, we just let
+        // the type check to fail later.
+        if (!zenit_type_equals(array_type->member_type, elements[i]->type) && zenit_type_is_castable_to(elements[i]->type, array_type->member_type))
+        {   
+            // NOTE: the ZenitVariableNode structure changes, but we don't need to worry about its UID changing because of that
+            // as the variables are always accessed by its name, and not by the UID
+            struct ZenitCastNode *cast_node = zenit_node_cast_new(array_node->elements[i]->location, array_node->elements[i], true);
+            array_node->elements[i] = (struct ZenitNode*) cast_node;
+
+            zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node, zenit_type_ctx_copy_type(ctx->types, array_type->member_type));
+        }
+    }
+
+    fl_array_free(elements);
 
     // If the context is waiting for type information (BIDIRECTIONAL) we need to check the array's member type, because we could
     // have updated it when we visited the array elements, and that type information must be shared with the caller:

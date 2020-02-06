@@ -1,6 +1,6 @@
 #include "emit.h"
 
-void zenit_nes_emit_store_array(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, size_t offset, size_t gap, struct ZirArrayOperand *array)
+void zenit_nes_emit_store_array(struct ZenitNesProgram *program, struct ZirArrayOperand *array, struct ZenitNesSymbol *nes_symbol, size_t offset, size_t gap)
 {
     // The store array on a temp symbol is just the assignment of the array operand to the "source" property of the temp symbol
     if (nes_symbol->segment == ZENIT_NES_SEGMENT_TEMP)
@@ -15,21 +15,59 @@ void zenit_nes_emit_store_array(struct ZenitNesProgram *program, struct ZenitNes
         
         if (operand->type == ZIR_OPERAND_UINT)
         {
-            zenit_nes_emit_store_uint(program, nes_symbol, offset + (i * gap), (struct ZirUintOperand*) operand);
+            zenit_nes_emit_store_uint(program, (struct ZirUintOperand*) operand, nes_symbol, offset + (i * gap));
         }
         else if (operand->type == ZIR_OPERAND_ARRAY)
         {
             struct ZirArrayOperand *array_elem = (struct ZirArrayOperand*)operand;
-            zenit_nes_emit_store_array(program, nes_symbol, offset + (i * gap), zir_type_size(array_elem->type->member_type), array_elem);
+            zenit_nes_emit_store_array(program, array_elem, nes_symbol, offset + (i * gap), zir_type_size(array_elem->type->member_type));
+        }
+        else if (operand->type == ZIR_OPERAND_STRUCT)
+        {
+            zenit_nes_emit_store_struct(program, (struct ZirStructOperand*) operand, nes_symbol, offset + (i * gap));
         }
         else if (operand->type == ZIR_OPERAND_REFERENCE)
         {
-            zenit_nes_emit_store_reference(program, nes_symbol, offset + (i * gap), (struct ZirReferenceOperand*) operand);
+            zenit_nes_emit_store_reference(program, (struct ZirReferenceOperand*) operand, nes_symbol, offset + (i * gap));
         }
         else if (operand->type == ZIR_OPERAND_SYMBOL)
         {
-            zenit_nes_emit_store_symbol(program, nes_symbol, offset + (i * gap), (struct ZirSymbolOperand*) operand);
+            zenit_nes_emit_store_symbol(program, (struct ZirSymbolOperand*) operand, nes_symbol, offset + (i * gap));
         }
+    }
+}
+
+void zenit_nes_emit_store_struct(struct ZenitNesProgram *program, struct ZirStructOperand *struct_operand, struct ZenitNesSymbol *nes_symbol, size_t offset)
+{
+    size_t gap = 0;
+    for (size_t i=0; i < fl_array_length(struct_operand->members); i++)
+    {
+        struct ZirStructOperandMember *operand_member = struct_operand->members[i];
+        struct ZirStructTypeMember *type_member = zir_type_struct_get_member(struct_operand->type, operand_member->name);
+
+        if (operand_member->operand->type == ZIR_OPERAND_UINT)
+        {
+            zenit_nes_emit_store_uint(program, (struct ZirUintOperand*) operand_member->operand, nes_symbol, offset + (i * gap));
+        }
+        else if (operand_member->operand->type == ZIR_OPERAND_ARRAY)
+        {
+            struct ZirArrayOperand *array_elem = (struct ZirArrayOperand*)operand_member->operand;
+            zenit_nes_emit_store_array(program, array_elem, nes_symbol, offset + (i * gap), zir_type_size(array_elem->type->member_type));
+        }
+        else if (operand_member->operand->type == ZIR_OPERAND_STRUCT)
+        {
+            zenit_nes_emit_store_struct(program, (struct ZirStructOperand*) operand_member->operand, nes_symbol, offset + (i * gap));
+        }
+        else if (operand_member->operand->type == ZIR_OPERAND_REFERENCE)
+        {
+            zenit_nes_emit_store_reference(program, (struct ZirReferenceOperand*) operand_member->operand, nes_symbol, offset + (i * gap));
+        }
+        else if (operand_member->operand->type == ZIR_OPERAND_SYMBOL)
+        {
+            zenit_nes_emit_store_symbol(program, (struct ZirSymbolOperand*) operand_member->operand, nes_symbol, offset + (i * gap));
+        }
+
+        gap += zir_type_size(type_member->type);
     }
 }
 
@@ -39,23 +77,27 @@ void zenit_nes_emit_store_temp(struct ZenitNesProgram *program, struct ZenitNesS
     {
         size_t array_size = zir_type_size(((struct ZirArrayOperand*) temp_symbol->source)->type->member_type);
         size_t gap = nes_symbol->element_size > array_size ? array_size : nes_symbol->element_size;
-        zenit_nes_emit_store_array(program, nes_symbol, offset, gap, (struct ZirArrayOperand*) temp_symbol->source);
+        zenit_nes_emit_store_array(program, (struct ZirArrayOperand*) temp_symbol->source, nes_symbol, offset, gap);
+    }
+    else if (temp_symbol->source->type == ZIR_OPERAND_STRUCT)
+    {
+        zenit_nes_emit_store_struct(program, (struct ZirStructOperand*) temp_symbol->source, nes_symbol, offset);
     }
     else if (temp_symbol->source->type == ZIR_OPERAND_REFERENCE)
     {
-        zenit_nes_emit_store_reference(program, nes_symbol, offset, (struct ZirReferenceOperand*) temp_symbol->source);
+        zenit_nes_emit_store_reference(program, (struct ZirReferenceOperand*) temp_symbol->source, nes_symbol, offset);
     }
     else if (temp_symbol->source->type == ZIR_OPERAND_SYMBOL)
     {
-        zenit_nes_emit_store_symbol(program, nes_symbol, offset, (struct ZirSymbolOperand*) temp_symbol->source);
+        zenit_nes_emit_store_symbol(program, (struct ZirSymbolOperand*) temp_symbol->source, nes_symbol, offset);
     }
     else if (temp_symbol->source->type == ZIR_OPERAND_UINT)
     {
-        zenit_nes_emit_store_uint(program, nes_symbol, offset, (struct ZirUintOperand*) temp_symbol->source);
+        zenit_nes_emit_store_uint(program, (struct ZirUintOperand*) temp_symbol->source, nes_symbol, offset);
     }
 }
 
-void zenit_nes_emit_store_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, size_t offset, struct ZirSymbolOperand *symbol_operand)
+void zenit_nes_emit_store_symbol(struct ZenitNesProgram *program, struct ZirSymbolOperand *symbol_operand, struct ZenitNesSymbol *nes_symbol, size_t offset)
 {
     // The store symbol on a temp symbol is just the assignment of the symbol operand to the "source" property of the temp symbol
     if (nes_symbol->segment == ZENIT_NES_SEGMENT_TEMP)
@@ -303,7 +345,7 @@ void zenit_nes_emit_store_symbol(struct ZenitNesProgram *program, struct ZenitNe
     }
 }
 
-void zenit_nes_emit_store_reference(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, size_t offset, struct ZirReferenceOperand *reference_operand)
+void zenit_nes_emit_store_reference(struct ZenitNesProgram *program, struct ZirReferenceOperand *reference_operand, struct ZenitNesSymbol *nes_symbol, size_t offset)
 {
     // The store reference on a temp symbol is just the assignment of the reference operand to the "source" property of the temp symbol
     if (nes_symbol->segment == ZENIT_NES_SEGMENT_TEMP)
@@ -355,7 +397,7 @@ void zenit_nes_emit_store_reference(struct ZenitNesProgram *program, struct Zeni
     }
 }
 
-void zenit_nes_emit_store_uint(struct ZenitNesProgram *program, struct ZenitNesSymbol *nes_symbol, size_t offset, struct ZirUintOperand *uint_operand)
+void zenit_nes_emit_store_uint(struct ZenitNesProgram *program, struct ZirUintOperand *uint_operand, struct ZenitNesSymbol *nes_symbol, size_t offset)
 {
     // The store uint on a temp symbol is just the assignment of the uint operand to the "source" property of the temp symbol
     if (nes_symbol->segment == ZENIT_NES_SEGMENT_TEMP)

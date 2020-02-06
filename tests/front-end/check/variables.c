@@ -86,6 +86,8 @@ void zenit_test_check_types_struct(void)
         "var d1 = { a: 1, b: 0x1FF, c: { x: 1 } };"                     "\n"
         "var d2 = d1;"                                                  "\n"
         "var d3 = &d1;"                                                 "\n"
+
+        "var parr = [ { a: 1 }, { a: 2 }, { a: 3 }, { a: 0x1FF } ];"    "\n"
     ;
 
     const char *tests[][2] = {
@@ -104,6 +106,8 @@ void zenit_test_check_types_struct(void)
         { "d1",          "{ a: uint8, b: uint16, c: { x: uint8 } }"     },
         { "d2",          "{ a: uint8, b: uint16, c: { x: uint8 } }"     },
         { "d3",          "&{ a: uint8, b: uint16, c: { x: uint8 } }"    },
+
+        { "parr",        "[4]{ a: uint16 }"                             },
     };
 
     zenit_test_check_types(source, tests, sizeof(tests) / sizeof(tests[0]));

@@ -45,6 +45,11 @@ void zenit_test_nes_global_vars(void)
         "var ppuctrl_ref = &ppuctrl;"                                   "\n"
 
         "var aaarr = [ [ [ 3, 4 ] ], [ [ 5, 6 ] ], [ [ 7, 8 ] ] ];"     "\n"
+
+        "var p1 = { x: 1, y: 2 };"                                      "\n"
+        "var p2 = { x: 0x1FF, y: 0x2FF };"                              "\n"
+        "var p3 = { a: p2, b: p1 };"                                    "\n"
+        "var parr = [ { a: 1 }, { a: 2 }, { a: 3 }, { a: 0x1FF } ];"    "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
@@ -91,6 +96,24 @@ void zenit_test_nes_global_vars(void)
     fl_expect("Data segment at 0x1E should be 0x06 (aarr[1][0][1])",    nes_program->data.bytes[0x1E] == 0x06);
     fl_expect("Data segment at 0x1F should be 0x07 (aarr[2][0][0])",    nes_program->data.bytes[0x1F] == 0x07);
     fl_expect("Data segment at 0x20 should be 0x08 (aarr[2][0][1])",    nes_program->data.bytes[0x20] == 0x08);
+    fl_expect("Data segment at 0x21 should be 0x01 (p1.x)",             nes_program->data.bytes[0x21] == 0x01);
+    fl_expect("Data segment at 0x22 should be 0x02 (p1.y)",             nes_program->data.bytes[0x22] == 0x02);
+    fl_expect("Data segment at 0x23 should be 0xFF (p2.x lo)",          nes_program->data.bytes[0x23] == 0xFF);
+    fl_expect("Data segment at 0x24 should be 0x01 (p2.x hi)",          nes_program->data.bytes[0x24] == 0x01);
+    fl_expect("Data segment at 0x25 should be 0xFF (p2.y lo)",          nes_program->data.bytes[0x25] == 0xFF);
+    fl_expect("Data segment at 0x26 should be 0x02 (p2.y hi)",          nes_program->data.bytes[0x26] == 0x02);
+    fl_expect("Data segment at 0x27 should be 0xFF (p3.a.x lo)",        nes_program->data.bytes[0x27] == 0xFF);
+    fl_expect("Data segment at 0x28 should be 0x01 (p3.a.x hi)",        nes_program->data.bytes[0x28] == 0x01);
+    fl_expect("Data segment at 0x29 should be 0xFF (p3.a.y lo)",        nes_program->data.bytes[0x29] == 0xFF);
+    fl_expect("Data segment at 0x2A should be 0x02 (p3.a.y hi)",        nes_program->data.bytes[0x2A] == 0x02);
+    fl_expect("Data segment at 0x2B should be 0x01 (parr[0].a lo)",     nes_program->data.bytes[0x2B] == 0x01);
+    fl_expect("Data segment at 0x2C should be 0x00 (parr[0].a hi)",     nes_program->data.bytes[0x2C] == 0x00);
+    fl_expect("Data segment at 0x2D should be 0x02 (parr[1].a lo)",     nes_program->data.bytes[0x2D] == 0x02);
+    fl_expect("Data segment at 0x2E should be 0x00 (parr[1].a hi)",     nes_program->data.bytes[0x2E] == 0x00);
+    fl_expect("Data segment at 0x2F should be 0x03 (parr[2].a lo)",     nes_program->data.bytes[0x2F] == 0x03);
+    fl_expect("Data segment at 0x30 should be 0x00 (parr[2].a hi)",     nes_program->data.bytes[0x30] == 0x00);
+    fl_expect("Data segment at 0x31 should be 0xFF (parr[3].a lo)",     nes_program->data.bytes[0x31] == 0xFF);
+    fl_expect("Data segment at 0x32 should be 0x01 (parr[3].a hi)",     nes_program->data.bytes[0x32] == 0x01);
 
     zenit_nes_program_free(nes_program);
     zir_program_free(zir_program);
@@ -273,17 +296,17 @@ void zenit_test_nes_global_vars_code(void)
     const char *zenit_source = 
         // CODE
         "#[NES(address: 0x2000)]"
-        "var codevar : uint8 = 1;"                                    "\n"
+        "var codevar : uint8 = 1;"                                      "\n"
 
         // CODE to DATA
-        "var datavar = codevar;"                                      "\n"
+        "var datavar = codevar;"                                        "\n"
 
         // CODE to ZP
         "#[NES(address: 0x00)]"
-        "var zpvar = codevar;"                                      "\n"
+        "var zpvar = codevar;"                                          "\n"
 
         // CODE to TEMP (to DATA)
-        "var tempvar = cast(codevar : uint16);"                       "\n"
+        "var tempvar = cast(codevar : uint16);"                         "\n"
 
         // CODE to CODE
         "#[NES(address: 0x2001)]"

@@ -134,41 +134,31 @@ bool zenit_type_struct_structurally_equals(struct ZenitStructType *type_a, struc
 {
     if (fl_list_length(type_a->members) != fl_list_length(type_b->members))
         return false;
+    
+    // If the length of the unnamed structs are not equals, we can't cast it
+    if (fl_list_length(type_a->members) != fl_list_length(type_b->members))
+        return false;
 
-    struct FlListNode *a_node = fl_list_head(type_a->members);    
+    struct FlListNode *src_node = fl_list_head(type_a->members);    
 
-    while (a_node)
+    while (src_node)
     {
-        struct ZenitStructTypeMember *a_member = (struct ZenitStructTypeMember*) a_node->value;
+        struct ZenitStructTypeMember *src_member = (struct ZenitStructTypeMember*) src_node->value;
+        struct ZenitStructTypeMember *dest_member = zenit_type_struct_get_member(type_b, src_member->name);
 
-        struct FlListNode *b_node = fl_list_head(type_b->members);
-        bool a_exists_in_b = false;
-        while (b_node)
-        {
-            struct ZenitStructTypeMember *b_member = (struct ZenitStructTypeMember*) b_node->value;
-
-            if (flm_cstring_equals(a_member->name, b_member->name))
-            {
-                bool equals = false;
-                if (a_member->type->typekind != ZENIT_TYPE_STRUCT || b_member->type->typekind != ZENIT_TYPE_STRUCT)
-                    equals = zenit_type_equals(a_member->type, b_member->type);
-                else
-                    equals = zenit_type_struct_structurally_equals((struct ZenitStructType*) a_member->type, (struct ZenitStructType*) b_member->type);
-                
-                if (equals)
-                {
-                    a_exists_in_b = true;
-                    break;
-                }
-            }
-
-            b_node = b_node->next;
-        }
-
-        if (!a_exists_in_b)
+        if (dest_member == NULL)
             return false;
 
-        a_node = a_node->next;
+        bool equals = false;
+        if (src_member->type->typekind != ZENIT_TYPE_STRUCT || dest_member->type->typekind != ZENIT_TYPE_STRUCT)
+            equals = zenit_type_equals(src_member->type, dest_member->type);
+        else
+            equals = zenit_type_struct_structurally_equals((struct ZenitStructType*) src_member->type, (struct ZenitStructType*) dest_member->type);
+        
+        if (!equals)
+            return false;
+
+        src_node = src_node->next;
     }
 
     return true;
@@ -206,8 +196,27 @@ bool zenit_type_struct_is_assignable_from(struct ZenitStructType *target_type, s
     if (target_type->name != NULL && struct_from_type->name != NULL)
         return flm_cstring_equals(target_type->name, struct_from_type->name);
 
-    // Structural equality (we can safely convert between struturally equals objects)
-    return zenit_type_struct_structurally_equals(target_type, struct_from_type);
+    // If the length of the unnamed structs are not equals, we can't cast it
+    if (fl_list_length(target_type->members) != fl_list_length(struct_from_type->members))
+        return false;
+
+    struct FlListNode *src_node = fl_list_head(target_type->members);    
+
+    while (src_node)
+    {
+        struct ZenitStructTypeMember *src_member = (struct ZenitStructTypeMember*) src_node->value;
+        struct ZenitStructTypeMember *dest_member = zenit_type_struct_get_member(struct_from_type, src_member->name);
+
+        if (dest_member == NULL)
+            return false;
+
+        if (!zenit_type_is_assignable_from(src_member->type, dest_member->type))
+            return false;
+
+        src_node = src_node->next;
+    }
+
+    return true;
 }
 
 bool zenit_type_struct_is_castable_to(struct ZenitStructType *struct_type, struct ZenitType *target_type)
@@ -218,8 +227,33 @@ bool zenit_type_struct_is_castable_to(struct ZenitStructType *struct_type, struc
     if (target_type->typekind != ZENIT_TYPE_STRUCT)
         return false;
 
-    // If we can assign the struct to a target type instance, we can cast to it too
-    return zenit_type_is_assignable_from(target_type, (struct ZenitType*) struct_type);
+    struct ZenitStructType *target_struct_type = (struct ZenitStructType*) target_type;
+
+    // Dummy check but we can "cast" to the same type
+    if (struct_type->name != NULL && target_struct_type->name != NULL)
+        return flm_cstring_equals(struct_type->name, target_struct_type->name);
+
+    // If the length of the unnamed structs are not equals, we can't cast it
+    if (fl_list_length(struct_type->members) != fl_list_length(target_struct_type->members))
+        return false;
+
+    struct FlListNode *src_node = fl_list_head(struct_type->members);    
+
+    while (src_node)
+    {
+        struct ZenitStructTypeMember *src_member = (struct ZenitStructTypeMember*) src_node->value;
+        struct ZenitStructTypeMember *dest_member = zenit_type_struct_get_member(target_struct_type, src_member->name);
+
+        if (dest_member == NULL)
+            return false;
+
+        if (!zenit_type_is_castable_to(src_member->type, dest_member->type))
+            return false;
+
+        src_node = src_node->next;
+    }
+
+    return true;
 }
 
 bool zenit_type_struct_can_unify(struct ZenitStructType *struct_type, struct ZenitType *type_b)
