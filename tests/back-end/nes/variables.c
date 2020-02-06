@@ -171,6 +171,14 @@ void zenit_test_nes_global_vars_zp(void)
         // ZP to ZP
         "#[NES(address: 0x01)]"
         "var zpvar2 = zpvar;"                                       "\n"
+
+        // ZP allocation of structs
+        "#[NES(address: 0x02)]"
+        "var p1 = { x: 1, y: 2 };"                                  "\n"
+        
+        // ZP allocation of array of structs
+        "#[NES(address: 0x04)]"
+        "var parr = [ { a: 1 }, { a: 2 }, { a: 3 }, { a: 0x1FF } ];""\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
@@ -224,6 +232,56 @@ void zenit_test_nes_global_vars_zp(void)
     fl_expect("Startup routine at 0x19 should be 0x00 ($00)",           nes_program->startup.bytes[0x19] == 0x00);
     fl_expect("Startup routine at 0x1A should be 0x85 (STA)",           nes_program->startup.bytes[0x1A] == 0x85);
     fl_expect("Startup routine at 0x1B should be 0x01 ($01)",           nes_program->startup.bytes[0x1B] == 0x01);
+
+    // ZP allocation of structs
+    // Allocate x = 1
+    fl_expect("Startup routine at 0x1C should be 0xA9 (LDA)",           nes_program->startup.bytes[0x1C] == 0xA9);
+    fl_expect("Startup routine at 0x1D should be 0x01 (#$01)",          nes_program->startup.bytes[0x1D] == 0x01);
+    fl_expect("Startup routine at 0x1E should be 0x85 (STA)",           nes_program->startup.bytes[0x1E] == 0x85);
+    fl_expect("Startup routine at 0x1F should be 0x01 ($02)",           nes_program->startup.bytes[0x1F] == 0x02);
+    // Allocate y = 2
+    fl_expect("Startup routine at 0x20 should be 0xA9 (LDA)",           nes_program->startup.bytes[0x20] == 0xA9);
+    fl_expect("Startup routine at 0x21 should be 0x01 (#$02)",          nes_program->startup.bytes[0x21] == 0x02);
+    fl_expect("Startup routine at 0x22 should be 0x85 (STA)",           nes_program->startup.bytes[0x22] == 0x85);
+    fl_expect("Startup routine at 0x23 should be 0x03 ($03)",           nes_program->startup.bytes[0x23] == 0x03);
+
+    // ZP allocation of array of structs
+    // Allocate parr[0] = { a: 1 }
+    fl_expect("Startup routine at 0x24 should be 0xA9 (LDA)",           nes_program->startup.bytes[0x24] == 0xA9);
+    fl_expect("Startup routine at 0x25 should be 0x01 (#$01)",          nes_program->startup.bytes[0x25] == 0x01);
+    fl_expect("Startup routine at 0x26 should be 0x85 (STA)",           nes_program->startup.bytes[0x26] == 0x85);
+    fl_expect("Startup routine at 0x27 should be 0x04 ($04)",           nes_program->startup.bytes[0x27] == 0x04);
+    fl_expect("Startup routine at 0x28 should be 0xA2 (LDX)",           nes_program->startup.bytes[0x28] == 0xA2);
+    fl_expect("Startup routine at 0x29 should be 0x00 (#$00)",          nes_program->startup.bytes[0x29] == 0x00);
+    fl_expect("Startup routine at 0x2A should be 0x86 (STX)",           nes_program->startup.bytes[0x2A] == 0x86);
+    fl_expect("Startup routine at 0x2B should be 0x05 ($05)",           nes_program->startup.bytes[0x2B] == 0x05);
+    // Allocate parr[1] = { a: 2 }
+    fl_expect("Startup routine at 0x2C should be 0xA9 (LDA)",           nes_program->startup.bytes[0x2C] == 0xA9);
+    fl_expect("Startup routine at 0x2D should be 0x02 (#$02)",          nes_program->startup.bytes[0x2D] == 0x02);
+    fl_expect("Startup routine at 0x2E should be 0x85 (STA)",           nes_program->startup.bytes[0x2E] == 0x85);
+    fl_expect("Startup routine at 0x2F should be 0x06 ($06)",           nes_program->startup.bytes[0x2F] == 0x06);
+    fl_expect("Startup routine at 0x30 should be 0xA2 (LDX)",           nes_program->startup.bytes[0x30] == 0xA2);
+    fl_expect("Startup routine at 0x31 should be 0x00 (#$00)",          nes_program->startup.bytes[0x31] == 0x00);
+    fl_expect("Startup routine at 0x32 should be 0x86 (STX)",           nes_program->startup.bytes[0x32] == 0x86);
+    fl_expect("Startup routine at 0x33 should be 0x07 ($07)",           nes_program->startup.bytes[0x33] == 0x07);
+    // Allocate parr[2] = { a: 3 }
+    fl_expect("Startup routine at 0x34 should be 0xA9 (LDA)",           nes_program->startup.bytes[0x34] == 0xA9);
+    fl_expect("Startup routine at 0x35 should be 0x03 (#$03)",          nes_program->startup.bytes[0x35] == 0x03);
+    fl_expect("Startup routine at 0x36 should be 0x85 (STA)",           nes_program->startup.bytes[0x36] == 0x85);
+    fl_expect("Startup routine at 0x37 should be 0x08 ($08)",           nes_program->startup.bytes[0x37] == 0x08);
+    fl_expect("Startup routine at 0x38 should be 0xA2 (LDX)",           nes_program->startup.bytes[0x38] == 0xA2);
+    fl_expect("Startup routine at 0x39 should be 0x00 (#$00)",          nes_program->startup.bytes[0x39] == 0x00);
+    fl_expect("Startup routine at 0x3A should be 0x86 (STX)",           nes_program->startup.bytes[0x3A] == 0x86);
+    fl_expect("Startup routine at 0x3B should be 0x09 ($09)",           nes_program->startup.bytes[0x3B] == 0x09);
+    // Allocate parr[3] = { a: 0x1FF }
+    fl_expect("Startup routine at 0x3C should be 0xA9 (LDA)",           nes_program->startup.bytes[0x3C] == 0xA9);
+    fl_expect("Startup routine at 0x3D should be 0xFF (#$FF)",          nes_program->startup.bytes[0x3D] == 0xFF);
+    fl_expect("Startup routine at 0x3E should be 0x85 (STA)",           nes_program->startup.bytes[0x3E] == 0x85);
+    fl_expect("Startup routine at 0x3F should be 0x0A ($0A)",           nes_program->startup.bytes[0x3F] == 0x0A);
+    fl_expect("Startup routine at 0x40 should be 0xA2 (LDX)",           nes_program->startup.bytes[0x40] == 0xA2);
+    fl_expect("Startup routine at 0x41 should be 0x01 (#$10)",          nes_program->startup.bytes[0x41] == 0x01);
+    fl_expect("Startup routine at 0x42 should be 0x86 (STX)",           nes_program->startup.bytes[0x42] == 0x86);
+    fl_expect("Startup routine at 0x43 should be 0x0B ($0B)",           nes_program->startup.bytes[0x43] == 0x0B);
 
     zenit_nes_program_free(nes_program);
     zir_program_free(zir_program);

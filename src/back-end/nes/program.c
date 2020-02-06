@@ -151,7 +151,7 @@ struct ZirOperand* zenit_nes_program_get_tmpsym_operand(struct ZenitNesProgram *
     return NULL;
 }
 
-static inline struct ZenitNesSymbol* create_symbol(struct ZenitNesProgram *program, const char *name, struct ZirType *zir_type, enum ZenitNesSegment segment, uint16_t address)
+static inline struct ZenitNesSymbol* create_symbol(const char *name, struct ZirType *zir_type, enum ZenitNesSegment segment, uint16_t address)
 {
     struct ZenitNesSymbol *nes_symbol = NULL;
 
@@ -174,7 +174,7 @@ static inline struct ZenitNesSymbol* create_symbol(struct ZenitNesProgram *progr
             size_t to_write = snprintf(NULL, 0, "%zu", i);
             snprintf(buf, 1024, "%zu", i);
 
-            struct ZenitNesSymbol *element = create_symbol(program, buf, zir_array_type->member_type, segment, address + (member_size * i));
+            struct ZenitNesSymbol *element = create_symbol(buf, zir_array_type->member_type, segment, address + (member_size * i));
             array_symbol->elements[i] = element;
         }
 
@@ -197,7 +197,7 @@ static inline struct ZenitNesSymbol* create_symbol(struct ZenitNesProgram *progr
         {
             struct ZirStructTypeMember *zir_member = (struct ZirStructTypeMember*) zir_node->value;
 
-            struct ZenitNesSymbol *member_symbol = create_symbol(program, zir_member->name, zir_member->type, segment, address + members_offset);
+            struct ZenitNesSymbol *member_symbol = create_symbol(zir_member->name, zir_member->type, segment, address + members_offset);
             struct_symbol->members = fl_array_append(struct_symbol->members, &member_symbol);
 
             members_offset = zir_type_size(zir_member->type);
@@ -299,7 +299,7 @@ static inline bool reserve_zp_symbol(struct ZenitNesProgram *program, struct Zen
     }
 
 
-    *nes_symbol = create_symbol(program, zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_ZP, slot);
+    *nes_symbol = create_symbol(zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_ZP, slot);
     fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
 
     return true;
@@ -368,7 +368,7 @@ static inline bool reserve_data_symbol(struct ZenitNesProgram *program, struct Z
         }
     }
 
-    *nes_symbol = create_symbol(program, zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_DATA, program->data.base_address + (uint16_t) slot);
+    *nes_symbol = create_symbol(zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_DATA, program->data.base_address + (uint16_t) slot);
     fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
 
     return true;
@@ -402,7 +402,7 @@ static inline bool reserve_temp_symbol(struct ZenitNesProgram *program, struct Z
 
 static inline bool map_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol **nes_symbol, struct ZirSymbol *zir_symbol, uint16_t address)
 {
-    *nes_symbol = create_symbol(program, zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_CODE, address);
+    *nes_symbol = create_symbol(zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_CODE, address);
 
     fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
 
