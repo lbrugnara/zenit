@@ -2,7 +2,18 @@
 
 #include "generate.h"
 #include "program.h"
-#include "emit.h"
+
+#include "emitters/array.h"
+#include "emitters/reference.h"
+#include "emitters/struct.h"
+#include "emitters/symbol.h"
+#include "emitters/uint.h"
+
+#include "symbols/array.h"
+#include "symbols/reference.h"
+#include "symbols/struct.h"
+#include "symbols/temp.h"
+#include "symbols/uint.h"
 
 #include "../../zir/symtable.h"
 #include "../../zir/instructions/operands/operand.h"
@@ -45,23 +56,23 @@ static void visit_cast_instruction(struct ZirCastInstruction *instruction, struc
     
     if (instruction->source->type == ZIR_OPERAND_UINT)
     {
-        zenit_nes_emit_store_uint(program, (struct ZirUintOperand*) instruction->source, nes_symbol, 0);
+        zenit_nes_emitter_uint_store(program, (struct ZirUintOperand*) instruction->source, nes_symbol, 0);
     }
     else if (instruction->source->type == ZIR_OPERAND_ARRAY)
     {
-        zenit_nes_emit_store_array(program, (struct ZirArrayOperand*) instruction->source, nes_symbol, 0, nes_symbol->element_size);
+        zenit_nes_emitter_array_store(program, (struct ZirArrayOperand*) instruction->source, nes_symbol, 0);
     }
     else if (instruction->source->type == ZIR_OPERAND_STRUCT)
     {
-        zenit_nes_emit_store_struct(program, (struct ZirStructOperand*) instruction->source, nes_symbol, 0);
+        zenit_nes_emitter_struct_store(program, (struct ZirStructOperand*) instruction->source, nes_symbol, 0);
     }
     else if (instruction->source->type == ZIR_OPERAND_REFERENCE)
     {
-        zenit_nes_emit_store_reference(program, (struct ZirReferenceOperand*) instruction->source, nes_symbol, 0);
+        zenit_nes_emitter_reference_store(program, (struct ZirReferenceOperand*) instruction->source, nes_symbol, 0);
     }
     else if (instruction->source->type == ZIR_OPERAND_SYMBOL)
     {
-        zenit_nes_emit_store_symbol(program, (struct ZirSymbolOperand*) instruction->source, nes_symbol, 0);
+        zenit_nes_emitter_symbol_store(program, (struct ZirSymbolOperand*) instruction->source, nes_symbol, 0);
     }
 }
 
@@ -86,23 +97,23 @@ static void visit_variable_instruction(struct ZirVariableInstruction *instructio
 
     if (instruction->source->type == ZIR_OPERAND_UINT)
     {
-        zenit_nes_emit_store_uint(program, (struct ZirUintOperand*) instruction->source, nes_symbol, 0);
+        zenit_nes_emitter_uint_store(program, (struct ZirUintOperand*) instruction->source, nes_symbol, 0);
     }
     else if (instruction->source->type == ZIR_OPERAND_ARRAY)
     {
-        zenit_nes_emit_store_array(program, (struct ZirArrayOperand*) instruction->source, nes_symbol, 0, nes_symbol->element_size);
+        zenit_nes_emitter_array_store(program, (struct ZirArrayOperand*) instruction->source, nes_symbol, 0);
     }
     else if (instruction->source->type == ZIR_OPERAND_STRUCT)
     {
-        zenit_nes_emit_store_struct(program, (struct ZirStructOperand*) instruction->source, nes_symbol, 0);
+        zenit_nes_emitter_struct_store(program, (struct ZirStructOperand*) instruction->source, nes_symbol, 0);
     }
     else if (instruction->source->type == ZIR_OPERAND_REFERENCE)
     {
-        zenit_nes_emit_store_reference(program, (struct ZirReferenceOperand*) instruction->source, nes_symbol, 0);
+        zenit_nes_emitter_reference_store(program, (struct ZirReferenceOperand*) instruction->source, nes_symbol, 0);
     }
     else if (instruction->source->type == ZIR_OPERAND_SYMBOL)
     {
-        zenit_nes_emit_store_symbol(program, (struct ZirSymbolOperand*) instruction->source, nes_symbol, 0);
+        zenit_nes_emitter_symbol_store(program, (struct ZirSymbolOperand*) instruction->source, nes_symbol, 0);
     }
 }
 

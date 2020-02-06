@@ -4,46 +4,12 @@
 #include <stdint.h>
 
 #include "opcode.h"
+#include "segment.h"
+#include "symbols/symbol.h"
 
 #include "../../zir/block.h"
 #include "../../zir/symbol.h"
 #include "../../zir/instructions/attributes/attribute.h"
-
-enum ZenitNesSegment {
-    ZENIT_NES_SEGMENT_ZP,
-    ZENIT_NES_SEGMENT_DATA,
-    ZENIT_NES_SEGMENT_CODE,
-    ZENIT_NES_SEGMENT_TEMP,
-};
-
-struct ZenitNesSymbol {
-    char *name;
-    size_t elements;
-    size_t size;
-    size_t element_size;
-    uint16_t address;
-    enum ZenitNesSegment segment;
-};
-
-struct ZenitNesTmpSymbol {
-    struct ZenitNesSymbol base;
-    struct ZirOperand *source;
-};
-
-struct ZenitNesDataSegment {
-    uint8_t *bytes;
-    uint8_t *slots;
-    uint16_t base_address;
-};
-
-struct ZenitNesCodeSegment {
-    uint8_t *bytes;
-    uint16_t pc;
-};
-
-struct ZenitNesZeroPageSegment {
-    uint8_t slots[255];
-};
 
 struct ZenitNesProgram {
     FlHashtable *symbols;

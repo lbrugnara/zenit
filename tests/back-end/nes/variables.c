@@ -106,14 +106,16 @@ void zenit_test_nes_global_vars(void)
     fl_expect("Data segment at 0x28 should be 0x01 (p3.a.x hi)",        nes_program->data.bytes[0x28] == 0x01);
     fl_expect("Data segment at 0x29 should be 0xFF (p3.a.y lo)",        nes_program->data.bytes[0x29] == 0xFF);
     fl_expect("Data segment at 0x2A should be 0x02 (p3.a.y hi)",        nes_program->data.bytes[0x2A] == 0x02);
-    fl_expect("Data segment at 0x2B should be 0x01 (parr[0].a lo)",     nes_program->data.bytes[0x2B] == 0x01);
-    fl_expect("Data segment at 0x2C should be 0x00 (parr[0].a hi)",     nes_program->data.bytes[0x2C] == 0x00);
-    fl_expect("Data segment at 0x2D should be 0x02 (parr[1].a lo)",     nes_program->data.bytes[0x2D] == 0x02);
-    fl_expect("Data segment at 0x2E should be 0x00 (parr[1].a hi)",     nes_program->data.bytes[0x2E] == 0x00);
-    fl_expect("Data segment at 0x2F should be 0x03 (parr[2].a lo)",     nes_program->data.bytes[0x2F] == 0x03);
-    fl_expect("Data segment at 0x30 should be 0x00 (parr[2].a hi)",     nes_program->data.bytes[0x30] == 0x00);
-    fl_expect("Data segment at 0x31 should be 0xFF (parr[3].a lo)",     nes_program->data.bytes[0x31] == 0xFF);
-    fl_expect("Data segment at 0x32 should be 0x01 (parr[3].a hi)",     nes_program->data.bytes[0x32] == 0x01);
+    fl_expect("Data segment at 0x2B should be 0x01 (p3.b.x)",           nes_program->data.bytes[0x2B] == 0x01);
+    fl_expect("Data segment at 0x2C should be 0x02 (p3.b.y)",           nes_program->data.bytes[0x2C] == 0x02);
+    fl_expect("Data segment at 0x2D should be 0x01 (parr[0].a lo)",     nes_program->data.bytes[0x2D] == 0x01);
+    fl_expect("Data segment at 0x2E should be 0x00 (parr[0].a hi)",     nes_program->data.bytes[0x2E] == 0x00);
+    fl_expect("Data segment at 0x2F should be 0x02 (parr[1].a lo)",     nes_program->data.bytes[0x2F] == 0x02);
+    fl_expect("Data segment at 0x30 should be 0x00 (parr[1].a hi)",     nes_program->data.bytes[0x30] == 0x00);
+    fl_expect("Data segment at 0x31 should be 0x03 (parr[2].a lo)",     nes_program->data.bytes[0x31] == 0x03);
+    fl_expect("Data segment at 0x32 should be 0x00 (parr[2].a hi)",     nes_program->data.bytes[0x32] == 0x00);
+    fl_expect("Data segment at 0x33 should be 0xFF (parr[3].a lo)",     nes_program->data.bytes[0x33] == 0xFF);
+    fl_expect("Data segment at 0x34 should be 0x01 (parr[3].a hi)",     nes_program->data.bytes[0x34] == 0x01);
 
     zenit_nes_program_free(nes_program);
     zir_program_free(zir_program);
