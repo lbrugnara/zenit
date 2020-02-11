@@ -23,6 +23,9 @@ void zenit_test_generate_ir_variables(void)
         "var h = [ &a, f ];"                "\n"
         "var i : [0]Astruct = [];"          "\n"
         "struct Astruct { a: uint8; }"      "\n"
+        "var b1 = true;"                    "\n"
+        "var b2 = false;"                   "\n"
+        "var ba: []bool = [ b1, b2 ];"      "\n"
     ;
 
     const char *zir_src = 
@@ -46,6 +49,10 @@ void zenit_test_generate_ir_variables(void)
         "@h : [2]&uint8 = [ ref @a, @f ] ; #Attr(k2:2, k:1)"    "\n"
 
         "@i : [0]Astruct = [ ]"                                 "\n"
+
+        "@b1 : bool = true"                                     "\n"
+        "@b2 : bool = false"                                    "\n"
+        "@ba : [2]bool = [ @b1, @b2 ]"                          "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
