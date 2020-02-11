@@ -45,19 +45,6 @@ struct ZirUintType {
 struct ZirUintType* zir_type_uint_new(enum ZirUintTypeSize size);
 
 /*
- * Function: zir_type_uint_size_from_slice
- *  Returns the size of a uint encoded in its name that is contained in a slice of bytes
- *  representing a string
- *
- * Parameters:
- *  <struct FlSlice> *slice: Slice of bytes that represents a string that contains the size information
- *
- * Returns:
- *  enum ZirUintTypeSize: The size of the uint encoded in the slice
- */
-enum ZirUintTypeSize zir_type_uint_size_from_slice(struct FlSlice *slice);
-
-/*
  * Function: zir_type_uint_hash
  *  Returns a hash that identifies the uint type object
  *

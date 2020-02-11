@@ -51,3 +51,10 @@ struct ZirUintOperand* zir_operand_pool_new_uint(struct ZirOperandPool *pool, st
     return uint_operand;
 }
 
+struct ZirBoolOperand* zir_operand_pool_new_bool(struct ZirOperandPool *pool, struct ZirBoolType *type, bool value)
+{
+    struct ZirBoolOperand *bool_operand = zir_operand_bool_new(type, value);
+    fl_list_append(pool->operands, bool_operand);
+    return bool_operand;
+}
+

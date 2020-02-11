@@ -3,6 +3,7 @@
 
 #include "type.h"
 #include "array.h"
+#include "bool.h"
 #include "none.h"
 #include "uint.h"
 #include "reference.h"

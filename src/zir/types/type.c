@@ -12,6 +12,12 @@ unsigned long zir_type_hash(struct ZirType *type)
 
     switch (type->typekind)
     {
+        case ZIR_TYPE_UINT:
+            return zir_type_uint_hash((struct ZirUintType*) type);
+
+        case ZIR_TYPE_BOOL:
+            return zir_type_bool_hash((struct ZirBoolType*) type);
+
         case ZIR_TYPE_STRUCT:
             return zir_type_struct_hash((struct ZirStructType*) type);
         
@@ -20,9 +26,6 @@ unsigned long zir_type_hash(struct ZirType *type)
         
         case ZIR_TYPE_ARRAY:
             return zir_type_array_hash((struct ZirArrayType*) type);
-        
-        case ZIR_TYPE_UINT:
-            return zir_type_uint_hash((struct ZirUintType*) type);
         
         case ZIR_TYPE_NONE:
             return zir_type_none_hash(type);
@@ -48,6 +51,12 @@ char* zir_type_to_string(struct ZirType *type)
 
     switch (type->typekind)
     {
+        case ZIR_TYPE_UINT:
+            return zir_type_uint_to_string((struct ZirUintType*) type);
+            
+        case ZIR_TYPE_BOOL:
+            return zir_type_bool_to_string((struct ZirBoolType*) type);
+
         case ZIR_TYPE_STRUCT:
             return zir_type_struct_to_string((struct ZirStructType*) type);
         
@@ -56,9 +65,6 @@ char* zir_type_to_string(struct ZirType *type)
         
         case ZIR_TYPE_ARRAY:
             return zir_type_array_to_string((struct ZirArrayType*) type);
-        
-        case ZIR_TYPE_UINT:
-            return zir_type_uint_to_string((struct ZirUintType*) type);
         
         case ZIR_TYPE_NONE:
             return "<unknown>";
@@ -74,6 +80,12 @@ bool zir_type_equals(struct ZirType *type_a, struct ZirType *type_b)
 
     switch (type_a->typekind)
     {
+        case ZIR_TYPE_UINT:
+            return zir_type_uint_equals((struct ZirUintType*) type_a, type_b);
+
+        case ZIR_TYPE_BOOL:
+            return zir_type_bool_equals((struct ZirBoolType*) type_a, type_b);
+
         case ZIR_TYPE_STRUCT:
             return zir_type_struct_equals((struct ZirStructType*) type_a, type_b);
         
@@ -82,9 +94,6 @@ bool zir_type_equals(struct ZirType *type_a, struct ZirType *type_b)
         
         case ZIR_TYPE_ARRAY:
             return zir_type_array_equals((struct ZirArrayType*) type_a, type_b);
-        
-        case ZIR_TYPE_UINT:
-            return zir_type_uint_equals((struct ZirUintType*) type_a, type_b);
         
         case ZIR_TYPE_NONE:
             return type_b->typekind == ZIR_TYPE_NONE;
@@ -102,6 +111,12 @@ bool zir_type_is_assignable_from(struct ZirType *target_type, struct ZirType *fr
     {
         case ZIR_TYPE_NONE:
             return from_type->typekind != ZIR_TYPE_NONE;
+        
+        case ZIR_TYPE_UINT:
+            return zir_type_uint_is_assignable_from((struct ZirUintType*) target_type, from_type);
+
+        case ZIR_TYPE_BOOL:
+            return zir_type_bool_is_assignable_from((struct ZirBoolType*) target_type, from_type);
 
         case ZIR_TYPE_STRUCT:
             return zir_type_struct_is_assignable_from((struct ZirStructType*) target_type, from_type);
@@ -111,9 +126,6 @@ bool zir_type_is_assignable_from(struct ZirType *target_type, struct ZirType *fr
         
         case ZIR_TYPE_ARRAY:
             return zir_type_array_is_assignable_from((struct ZirArrayType*) target_type, from_type);
-        
-        case ZIR_TYPE_UINT:
-            return zir_type_uint_is_assignable_from((struct ZirUintType*) target_type, from_type);
     }
     
     return false;
@@ -130,7 +142,13 @@ bool zir_type_is_castable_to(struct ZirType *source_type, struct ZirType *target
         return false;
 
     switch (source_type->typekind)
-    {
+    {        
+        case ZIR_TYPE_UINT:
+            return zir_type_uint_is_castable_to((struct ZirUintType*) source_type, target_type);
+
+        case ZIR_TYPE_BOOL:
+            return zir_type_bool_is_castable_to((struct ZirBoolType*) source_type, target_type);
+
         case ZIR_TYPE_STRUCT:
             return zir_type_struct_is_castable_to((struct ZirStructType*) source_type, target_type);
         
@@ -139,9 +157,6 @@ bool zir_type_is_castable_to(struct ZirType *source_type, struct ZirType *target
         
         case ZIR_TYPE_ARRAY:
             return zir_type_array_is_castable_to((struct ZirArrayType*) source_type, target_type);
-        
-        case ZIR_TYPE_UINT:
-            return zir_type_uint_is_castable_to((struct ZirUintType*) source_type, target_type);
         
         case ZIR_TYPE_NONE: // Mute warning
             break;
@@ -157,6 +172,12 @@ size_t zir_type_size(struct ZirType *type)
 
     switch (type->typekind)
     {
+        case ZIR_TYPE_UINT:
+            return zir_type_uint_size((struct ZirUintType*) type);
+
+        case ZIR_TYPE_BOOL:
+            return zir_type_bool_size((struct ZirBoolType*) type);
+
         case ZIR_TYPE_STRUCT:
             return zir_type_struct_size((struct ZirStructType*) type);
         
@@ -166,9 +187,6 @@ size_t zir_type_size(struct ZirType *type)
         case ZIR_TYPE_ARRAY:
             return zir_type_array_size((struct ZirArrayType*) type);
         
-        case ZIR_TYPE_UINT:
-            return zir_type_uint_size((struct ZirUintType*) type);
-
         case ZIR_TYPE_NONE:
             break;
     }
@@ -183,6 +201,15 @@ void zir_type_free(struct ZirType *type)
 
     switch (type->typekind)
     {
+        
+        case ZIR_TYPE_UINT:
+            zir_type_uint_free((struct ZirUintType*) type);
+            break;
+
+        case ZIR_TYPE_BOOL:
+            zir_type_bool_free((struct ZirBoolType*) type);
+            break;
+
         case ZIR_TYPE_STRUCT:
             zir_type_struct_free((struct ZirStructType*) type);
             break;
@@ -193,10 +220,6 @@ void zir_type_free(struct ZirType *type)
 
         case ZIR_TYPE_ARRAY:
             zir_type_array_free((struct ZirArrayType*) type);
-            break;
-
-        case ZIR_TYPE_UINT:
-            zir_type_uint_free((struct ZirUintType*) type);
             break;
 
         case ZIR_TYPE_NONE:

@@ -3,6 +3,7 @@
 
 
 #include "array.h"
+#include "bool.h"
 #include "reference.h"
 #include "struct.h"
 #include "symbol.h"
@@ -59,7 +60,7 @@ void zir_operand_pool_free(struct ZirOperandPool *pool);
  *  struct ZirArrayOperand*: The array operand
  *
  * Notes:
- *   The pool object takes ownership of the <struct ZirArrayOperand> object, which means it will release
+ *  The pool object takes ownership of the <struct ZirArrayOperand> object, which means it will release
  *  the array operand memory when the <zir_operand_pool_free> function is called with the pool object 
  *  as argument.
  */
@@ -77,7 +78,7 @@ struct ZirArrayOperand* zir_operand_pool_new_array(struct ZirOperandPool *pool, 
  *  struct ZirStructOperand*: The struct operand
  *
  * Notes:
- *   The pool object takes ownership of the <struct ZirArrayOperand> object, which means it will release
+ *  The pool object takes ownership of the <struct ZirArrayOperand> object, which means it will release
  *  the struct operand memory when the <zir_operand_pool_free> function is called with the pool object 
  *  as argument.
  */
@@ -96,7 +97,7 @@ struct ZirStructOperand* zir_operand_pool_new_struct(struct ZirOperandPool *pool
  *  struct ZirReferenceOperand*: The reference operand
  *
  * Notes:
- *   The pool object takes ownership of the <struct ZirReferenceOperand> object, which means it will release
+ *  The pool object takes ownership of the <struct ZirReferenceOperand> object, which means it will release
  *  the reference operand memory when the <zir_operand_pool_free> function is called with the pool object 
  *  as argument.
  */
@@ -114,7 +115,7 @@ struct ZirReferenceOperand* zir_operand_pool_new_reference(struct ZirOperandPool
  *  struct ZirSymbolOperand*: The symbol operand
  *
  * Notes:
- *   The pool object takes ownership of the <struct ZirSymbolOperand> object, which means it will release
+ *  The pool object takes ownership of the <struct ZirSymbolOperand> object, which means it will release
  *  the symbol operand memory when the <zir_operand_pool_free> function is called with the pool object 
  *  as argument.
  */
@@ -133,10 +134,29 @@ struct ZirSymbolOperand* zir_operand_pool_new_symbol(struct ZirOperandPool *pool
  *  struct ZirUintOperand*: The uint operand
  *
  * Notes:
- *   The pool object takes ownership of the <struct ZirUintOperand> object, which means it will release
+ *  The pool object takes ownership of the <struct ZirUintOperand> object, which means it will release
  *  the uint operand memory when the <zir_operand_pool_free> function is called with the pool object 
  *  as argument.
  */
 struct ZirUintOperand* zir_operand_pool_new_uint(struct ZirOperandPool *pool, struct ZirUintType *type, union ZirUintValue value);
+
+/*
+ * Function: zir_operand_pool_new_bool
+ *  Creates a new boolean operand and adds it to the pool
+ *
+ * Parameters:
+ *  <struct ZirOperandPool> *pool: The pool object
+ *  <struct ZirBoolType> *type: The type of the boolean object
+ *  <bool> value: The value of the boolean object
+ *
+ * Returns:
+ *  struct ZirBoolOperand*: The boolean operand
+ *
+ * Notes:
+ *  The pool object takes ownership of the <struct ZirBoolOperand> object, which means it will release
+ *  the boolean operand memory when the <zir_operand_pool_free> function is called with the pool object 
+ *  as argument.
+ */
+struct ZirBoolOperand* zir_operand_pool_new_bool(struct ZirOperandPool *pool, struct ZirBoolType *type, bool value);
 
 #endif /* ZIR_OPERAND_POOL_H */

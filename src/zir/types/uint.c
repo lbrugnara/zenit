@@ -21,18 +21,6 @@ struct ZirUintType* zir_type_uint_new(enum ZirUintTypeSize size)
     return type;
 }
 
-enum ZirUintTypeSize zir_type_uint_size_from_slice(struct FlSlice *slice)
-{
-    for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
-    {
-        struct TypeMapping mapping = type_mappings[i];
-        if (fl_slice_equals_sequence(slice, (FlByte*)mapping.string, strlen(mapping.string)))
-            return mapping.size;
-    }
-
-    return ZIR_UINT_UNK;
-}
-
 unsigned long zir_type_uint_hash(struct ZirUintType *type)
 {
     static const char *format = "[uint][s:%s]";

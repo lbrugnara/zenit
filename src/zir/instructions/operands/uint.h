@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include "operand.h"
-#include "uint.h"
 
 /*
  * Union: union ZirUintValue

@@ -12,10 +12,11 @@
  */
 enum ZirTypeKind {
     ZIR_TYPE_NONE,
-    ZIR_TYPE_REFERENCE,
+    ZIR_TYPE_UINT,
+    ZIR_TYPE_BOOL,
     ZIR_TYPE_ARRAY,
     ZIR_TYPE_STRUCT,
-    ZIR_TYPE_UINT,
+    ZIR_TYPE_REFERENCE,
 };
 
 /*
