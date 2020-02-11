@@ -19,15 +19,16 @@ typedef struct ZenitSymbol*(*ZenitSymbolResolver)(struct ZenitContext *ctx, stru
 
 // Visitor functions
 static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *uint_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_bool_node(struct ZenitContext *ctx, struct ZenitBoolNode *bool_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *Variable_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *id_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *ref_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, enum ResolvePass pass);
 
 /*
  * Variable: symbol_resolvers
@@ -40,6 +41,7 @@ static const ZenitSymbolResolver symbol_resolvers[] = {
     [ZENIT_NODE_REFERENCE]      = (ZenitSymbolResolver) &visit_reference_node,
     [ZENIT_NODE_CAST]           = (ZenitSymbolResolver) &visit_cast_node,
     [ZENIT_NODE_UINT]           = (ZenitSymbolResolver) &visit_uint_node,
+    [ZENIT_NODE_BOOL]           = (ZenitSymbolResolver) &visit_bool_node,
     [ZENIT_NODE_FIELD_DECL]     = (ZenitSymbolResolver) &visit_field_decl_node,
     [ZENIT_NODE_STRUCT_DECL]    = (ZenitSymbolResolver) &visit_struct_decl_node,
     [ZENIT_NODE_STRUCT]         = (ZenitSymbolResolver) &visit_struct_node,
@@ -51,19 +53,40 @@ static const ZenitSymbolResolver symbol_resolvers[] = {
  *
  * Parameters:
  *  <struct ZenitContext> *ctx - Context object
- *  <struct ZenitNode> *node - Node object
+ *  <struct ZenitUintNode> *uint_node - Node object
  *
  * Returns:
  *  struct ZenitSymbol* - Temporal symbol
  *
  */
-static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *uint_node, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return NULL;
 
     // We add a temporal symbol for the uint and we return it
-    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) node, (struct ZenitType*) zenit_type_ctx_new_uint(ctx->types, node->size));
+    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) uint_node, (struct ZenitType*) zenit_type_ctx_new_uint(ctx->types, uint_node->size));
+}
+
+/*
+ * Function: visit_bool_node
+ *  We create a temporal symbol with the boolean type information in it.
+ *
+ * Parameters:
+ *  <struct ZenitContext> *ctx - Context object
+ *  <struct ZenitBoolNode> *bool_node - Node object
+ *
+ * Returns:
+ *  struct ZenitSymbol* - Temporal symbol
+ *
+ */
+static struct ZenitSymbol* visit_bool_node(struct ZenitContext *ctx, struct ZenitBoolNode *bool_node, enum ResolvePass pass)
+{
+    if (pass != RESOLVE_ALL)
+        return NULL;
+
+    // We add a temporal symbol for the bool and we return it
+    return zenit_utils_new_tmp_symbol(ctx->program, (struct ZenitNode*) bool_node, (struct ZenitType*) zenit_type_ctx_new_bool(ctx->types));
 }
 
 /*

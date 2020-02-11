@@ -20,6 +20,11 @@ static struct ZenitType* get_type_from_type_declaration(struct ZenitContext *ctx
         struct ZenitUintTypeNode *uint_type_decl = (struct ZenitUintTypeNode*) type_decl;
         type = (struct ZenitType*) zenit_type_ctx_new_uint(ctx->types, uint_type_decl->size);
     }
+    else if (type_decl->base.nodekind == ZENIT_NODE_TYPE_BOOL)
+    {
+        struct ZenitBoolTypeNode *bool_type_decl = (struct ZenitBoolTypeNode*) type_decl;
+        type = (struct ZenitType*) zenit_type_ctx_new_bool(ctx->types);
+    }
     else if (type_decl->base.nodekind == ZENIT_NODE_TYPE_STRUCT)
     {
         struct ZenitStructTypeNode *struct_type_decl = (struct ZenitStructTypeNode*) type_decl;

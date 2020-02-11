@@ -31,7 +31,11 @@ void zenit_test_resolve_variables_primitives(void)
         "var a : uint8 = 2;"                "\n"
         "var b = 1;"                        "\n"
         "var c : uint16 = 0x1FF;"           "\n"
-        "var d = b;"                    "\n"
+        "var d = b;"                        "\n"
+        "var b1 = true;"                    "\n"
+        "var b2 = false;"                   "\n"
+        "var b3 : bool = true;"             "\n"
+        "var b4 : bool = false;"            "\n"
     ;
 
     const char *program_dump = 
@@ -41,6 +45,10 @@ void zenit_test_resolve_variables_primitives(void)
                 " (symbol b uint8)"
                 " (symbol c uint16)"
                 " (symbol d uint8)"
+                " (symbol b1 bool)"
+                " (symbol b2 bool)"
+                " (symbol b3 bool)"
+                " (symbol b4 bool)"
             ")"
         ")"
     ;
@@ -51,22 +59,29 @@ void zenit_test_resolve_variables_primitives(void)
 void zenit_test_resolve_variables_references(void)
 {
     const char *source = 
-        "var a = 2;"                    "\n"
-        "var b = &a;"                   "\n"
-        "var c : &uint8 = &a;"          "\n"
-        "var d : uint16 = 0x1FF;"       "\n"
-        "var e : &uint16 = &d;"         "\n"
-        "var f : [2]uint8 = [ 0, 1 ];"  "\n"
-        "var g : &[2]uint8 = &f;"       "\n"
-        "var h : [1]&[2]uint8 = [ g ];" "\n"
-        "var i : []&[2]uint8 = [ g ];"  "\n"
-        "var j : []&[]uint8 = [ g ];"   "\n"
+        "var a = 2;"                            "\n"
+        "var b = &a;"                           "\n"
+        "var c : &uint8 = &a;"                  "\n"
+        "var d : uint16 = 0x1FF;"               "\n"
+        "var e : &uint16 = &d;"                 "\n"
+        "var f : [2]uint8 = [ 0, 1 ];"          "\n"
+        "var g : &[2]uint8 = &f;"               "\n"
+        "var h : [1]&[2]uint8 = [ g ];"         "\n"
+        "var i : []&[2]uint8 = [ g ];"          "\n"
+        "var j : []&[]uint8 = [ g ];"           "\n"
 
         "var k : []uint16 = [ 0x1, 0x2 ];"      "\n"
         "var l : []uint8 = [ 0x1FF, 0x2FF ];"   "\n"
         "var m = [ cast(&k : &[2]uint8), &l ];" "\n"
         "var n = [ m ];"                        "\n"
         "var o : [][][]&[]uint8 = [ n ];"       "\n"
+
+        "var b1 = true;"                        "\n"
+        "var b2 = false;"                       "\n"
+        "var b1_ref = &b1;"                     "\n"
+        "var b2_ref = &b2;"                     "\n"
+        "var b_ref_arr = [ b1_ref, b2_ref ];"   "\n"
+        "var b_ref_arr_ref = &b_ref_arr;"       "\n"
     ;
 
     const char *program_dump = 
@@ -87,6 +102,12 @@ void zenit_test_resolve_variables_references(void)
                 " (symbol m [2]&[2]uint8)"
                 " (symbol n [1][2]&[2]uint8)"
                 " (symbol o [1][1][2]&[2]uint8)"
+                " (symbol b1 bool)"
+                " (symbol b2 bool)"
+                " (symbol b1_ref &bool)"
+                " (symbol b2_ref &bool)"
+                " (symbol b_ref_arr [2]&bool)"
+                " (symbol b_ref_arr_ref &[2]&bool)"
             ")"
         ")"
     ;
