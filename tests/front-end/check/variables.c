@@ -35,6 +35,9 @@ void zenit_test_check_types_array(void)
         "var w = u;"                                                    "\n"
 
         "struct Astruct { a: uint8; }"                                  "\n" // No need to forward declare the struct
+
+        "var b1 : []bool = [];"                                         "\n"
+        "var b2 : []bool = [ true, false ];"                            "\n"
     ;
 
     const char *tests[][2] = {
@@ -59,6 +62,9 @@ void zenit_test_check_types_array(void)
         { "u",          "[0]Astruct"        },
         { "v",          "[0]Astruct"        },
         { "w",          "[0]Astruct"        },
+
+        { "b1",         "[0]bool"           },
+        { "b2",         "[2]bool"           },
     };
 
     zenit_test_check_types(source, tests, sizeof(tests) / sizeof(tests[0]));

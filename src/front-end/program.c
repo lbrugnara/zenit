@@ -138,7 +138,7 @@ char* zenit_program_dump(struct ZenitProgram *program, bool verbose)
 
 bool zenit_program_is_valid_type(struct ZenitProgram *program, struct ZenitType *type)
 {
-    if (type->typekind == ZENIT_TYPE_UINT)
+    if (type->typekind == ZENIT_TYPE_UINT || type->typekind == ZENIT_TYPE_BOOL)
         return true;
 
     if (type->typekind == ZENIT_TYPE_REFERENCE)
@@ -181,7 +181,7 @@ bool zenit_program_is_valid_type(struct ZenitProgram *program, struct ZenitType 
 struct ZenitType* zenit_program_get_invalid_type_component(struct ZenitProgram *program, struct ZenitType *type)
 {
     // Cannot be undefined
-    if (type->typekind == ZENIT_TYPE_UINT)
+    if (type->typekind == ZENIT_TYPE_UINT || type->typekind == ZENIT_TYPE_BOOL)
         return NULL;
 
     if (type->typekind == ZENIT_TYPE_REFERENCE)

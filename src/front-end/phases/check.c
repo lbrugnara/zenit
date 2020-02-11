@@ -7,12 +7,13 @@ typedef struct ZenitSymbol*(*ZenitTypeChecker)(struct ZenitContext *ctx, struct 
 
 // Visitor functions
 static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node);
-static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *node);
-static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *node);
-static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *node);
-static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node);
-static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *node);
-static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *node);
+static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *uint_node);
+static struct ZenitSymbol* visit_bool_node(struct ZenitContext *ctx, struct ZenitBoolNode *bool_node);
+static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *variable_node);
+static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array_node);
+static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *id_node);
+static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *ref_node);
+static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast_node);
 static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node);
 static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node);
 static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node);
@@ -23,6 +24,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
  */
 static const ZenitTypeChecker checkers[] = {
     [ZENIT_NODE_UINT]           = (ZenitTypeChecker) &visit_uint_node,
+    [ZENIT_NODE_BOOL]           = (ZenitTypeChecker) &visit_bool_node,
     [ZENIT_NODE_VARIABLE]       = (ZenitTypeChecker) &visit_variable_node,
     [ZENIT_NODE_ARRAY]          = (ZenitTypeChecker) &visit_array_node,
     [ZENIT_NODE_IDENTIFIER]     = (ZenitTypeChecker) &visit_identifier_node,
@@ -42,7 +44,7 @@ static const ZenitTypeChecker checkers[] = {
  *  <struct ZenitCastNode> *cast_node - Node to visit
  *
  * Returns:
- *  struct ZenitSymbol* - The cast temporal symbol
+ *  <struct ZenitSymbol>* - The cast temporal symbol
  */
 static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast_node)
 {
@@ -75,11 +77,27 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
  *  <struct ZenitUintNode> *uint_node - Node to visit
  *
  * Returns:
- *  struct ZenitSymbol* - The uint symbol
+ *  <struct ZenitSymbol>* - The uint symbol
  */
 static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *uint_node)
 {
     return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) uint_node);
+}
+
+/*
+ * Function: visit_bool_node
+ *  The bool visitor doesn't need to check anything, it just returns the bool temporal symbol
+ *
+ * Parameters:
+ *  <struct ZenitContext> *ctx - Context object
+ *  <struct ZenitBoolNode> *bool_node - Node to visit
+ *
+ * Returns:
+ *  <struct ZenitSymbol>* - The bool symbol
+ */
+static struct ZenitSymbol* visit_bool_node(struct ZenitContext *ctx, struct ZenitBoolNode *bool_node)
+{
+    return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) bool_node);
 }
 
 /*
@@ -91,7 +109,7 @@ static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct Zeni
  *  <struct ZenitIdentifierNode> *id_node - Node to visit
  *
  * Returns:
- *  struct ZenitSymbol* - The identifier type information
+ *  <struct ZenitSymbol>* - The identifier type information
  */
 static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *id_node)
 {
@@ -107,7 +125,7 @@ static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struc
  *  <struct ZenitReferenceNode> *reference_node - Node to visit
  *
  * Returns:
- *  struct ZenitSymbol* - The reference symbol
+ *  <struct ZenitSymbol>* - The reference symbol
  */
 static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *reference_node)
 {
@@ -145,7 +163,7 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
  *  <struct ZenitArrayNode> *array_node - Node to visit
  *
  * Returns:
- *  struct ZenitSymbol* - The arrays symbol
+ *  <struct ZenitSymbol>* - The arrays symbol
  */
 static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array_node)
 {
@@ -234,7 +252,7 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, ZenitAttributeNod
  *  <struct ZenitStructNode> *struct_node - Node to visit
  *
  * Returns:
- *  struct ZenitSymbol* - The struct symbol with its type information
+ *  <struct ZenitSymbol>* - The struct symbol with its type information
  */
 static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node)
 {
@@ -290,7 +308,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
  *  <struct ZenitFieldDeclNode> *field_node - Node to visit
  *
  * Returns:
- *  struct ZenitSymbol* - The field symbol with its type information
+ *  <struct ZenitSymbol>* - The field symbol with its type information
  */
 static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node)
 {
@@ -306,7 +324,7 @@ static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struc
  *  <struct ZenitStructDeclNode> *struct_node - Node to visit
  *
  * Returns:
- *  struct ZenitSymbol* - This function returns NULL as there is not symbol associated with the struct declaration
+ *  <struct ZenitSymbol>* - This function returns NULL as there is not symbol associated with the struct declaration
  */
 static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node)
 {
@@ -333,7 +351,7 @@ static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, stru
  *  <struct ZenitVariableNode> *variable_node - Node to visit
  *
  * Returns:
- *  struct ZenitSymbol* - The variable symbol
+ *  <struct ZenitSymbol>* - The variable symbol
  */
 static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *variable_node)
 {
@@ -388,7 +406,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
  *  <struct ZenitNode> *node - Node to visit
  *
  * Returns:
- *  struct ZenitSymbol* - The symbol tied to the AST node
+ *  <struct ZenitSymbol>* - The symbol tied to the AST node
  */
 static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node)
 {
