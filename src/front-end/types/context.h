@@ -6,6 +6,7 @@
 #include <fllib/containers/Hashtable.h>
 #include "type.h"
 #include "array.h"
+#include "bool.h"
 #include "none.h"
 #include "uint.h"
 #include "reference.h"
@@ -139,6 +140,22 @@ struct ZenitStructType* zenit_type_ctx_get_named_struct(struct ZenitTypeContext 
 struct ZenitUintType* zenit_type_ctx_new_uint(struct ZenitTypeContext *type_ctx, enum ZenitUintTypeSize size);
 
 /*
+ * Function: zenit_type_ctx_new_bool
+ *  Creates a new boolean type object
+ *
+ * Parameters:
+ *  <struct ZenitTypeContext> *type_ctx: The type context object
+ *
+ * Returns:
+ *  struct ZenitBoolType*: The new boolean type object
+ *
+ * Notes:
+ *  The <struct ZenitTypeContext> object takes ownership of the created type, which means that the caller does
+ *  not need to free the memory used by the type object.
+ */
+struct ZenitBoolType* zenit_type_ctx_new_bool(struct ZenitTypeContext *type_ctx);
+
+/*
  * Function: zenit_type_ctx_copy_type
  *  Creates a copy of the source type and returns that copy to the caller
  *
@@ -222,6 +239,23 @@ struct ZenitStructType* zenit_type_ctx_copy_struct(struct ZenitTypeContext *type
  *  not need to free the memory used by the type object.
  */
 struct ZenitUintType* zenit_type_ctx_copy_uint(struct ZenitTypeContext *type_ctx, struct ZenitUintType *src_uint_type);
+
+/*
+ * Function: zenit_type_ctx_copy_bool
+ *  Creates a copy of the source type and returns that copy to the caller
+ *
+ * Parameters:
+ *  <struct ZenitTypeContext> *type_ctx: Type context object
+ *  <struct ZenitBoolType> *src_bool_type: The source type
+ *
+ * Returns:
+ *  struct ZenitBoolType*: The type object copied from the source type
+ *
+ * Notes:
+ *  The <struct ZenitTypeContext> object takes ownership of the created type, which means that the caller does
+ *  not need to free the memory used by the type object.
+ */
+struct ZenitBoolType* zenit_type_ctx_copy_bool(struct ZenitTypeContext *type_ctx, struct ZenitBoolType *src_bool_type);
 
 /*
  * Function: zenit_type_ctx_unify_types

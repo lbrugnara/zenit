@@ -89,7 +89,7 @@ char* zenit_node_uint_uid(struct ZenitUintNode *uint_node);
  *      output = zenit_node_uint_dump(uint, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_uint_dump(struct ZenitUintNode *uint, char *output);
+char* zenit_node_uint_dump(struct ZenitUintNode *uint_node, char *output);
 
 /*
  * Function: zenit_node_uint_free

@@ -4,6 +4,7 @@ static const char *TokenTypeString[] = {
     [ZENIT_TOKEN_UNKNOWN]       = "UNKNOWN",
     
     [ZENIT_TOKEN_INTEGER]       = "INTEGER",
+    [ZENIT_TOKEN_BOOL]          = "BOOL",
 
     [ZENIT_TOKEN_ID]            = "IDENTIFIER",
     [ZENIT_TOKEN_VAR]           = "VAR \"var\"",

@@ -1,5 +1,5 @@
-#ifndef ZENIT_AST_TYPE_PRIMITIVE_H
-#define ZENIT_AST_TYPE_PRIMITIVE_H
+#ifndef ZENIT_AST_TYPE_UINT_H
+#define ZENIT_AST_TYPE_UINT_H
 
 #include "type.h"
 #include "../../types/uint.h"
@@ -100,4 +100,4 @@ char* zenit_node_type_uint_to_string(struct ZenitUintTypeNode *uint_type_node);
  */
 void zenit_node_type_uint_free(struct ZenitUintTypeNode *uint_type_node);
 
-#endif /* ZENIT_AST_TYPE_PRIMITIVE_H */
+#endif /* ZENIT_AST_TYPE_UINT_H */

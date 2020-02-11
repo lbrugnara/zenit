@@ -18,6 +18,7 @@ struct ZenitTypeNode {
 };
 
 #include "array.h"
+#include "bool.h"
 #include "uint.h"
 #include "reference.h"
 #include "struct.h"
@@ -52,6 +53,9 @@ static char* zenit_node_type_to_string(struct ZenitTypeNode *typenode)
     
     if (typenode->base.nodekind == ZENIT_NODE_TYPE_UINT)
         return zenit_node_type_uint_to_string((struct ZenitUintTypeNode*) typenode);
+
+    if (typenode->base.nodekind == ZENIT_NODE_TYPE_BOOL)
+        return zenit_node_type_bool_to_string((struct ZenitBoolTypeNode*) typenode);
         
     return fl_cstring_dup("<unknown>");
 }

@@ -469,6 +469,8 @@ struct ZenitToken zenit_lexer_consume(struct ZenitLexer *lexer)
                 token.type = ZENIT_TOKEN_STRUCT;
             else if (is_reserved_keyword(&token.value, "cast"))
                 token.type = ZENIT_TOKEN_CAST;
+            else if (is_reserved_keyword(&token.value, "true") || is_reserved_keyword(&token.value, "false"))
+                token.type = ZENIT_TOKEN_BOOL;
 
             return token;
         }

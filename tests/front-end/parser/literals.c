@@ -31,6 +31,23 @@ void zenit_test_parser_literal_integer(void)
     zenit_test_parser_run(source, ast_dump);
 }
 
+void zenit_test_parser_literal_boolean(void)
+{
+    const char *source = 
+        "true;"     "\n"
+        "false;"     "\n"
+    ;
+
+    const char *ast_dump =
+        "(ast"
+            " (bool true)"
+            " (bool false)"
+        ")"
+    ;
+
+    zenit_test_parser_run(source, ast_dump);
+}
+
 void zenit_test_parser_literal_array_literal(void)
 {
     const char *source = 

@@ -18,6 +18,8 @@ static struct ZenitLexerTest tests[] = {
     { "#[attr()]",                          (enum ZenitTokenType[]){ T(HASH), T(LBRACKET), T(ID), T(LPAREN), T(RPAREN), T(RBRACKET), T(EOF) } },
     { "#[attr(key: value)]",                (enum ZenitTokenType[]){ T(HASH), T(LBRACKET), T(ID), T(LPAREN), T(ID), T(COLON), T(ID), T(RPAREN), T(RBRACKET), T(EOF) } },
     { "#[attr(key: value, key2: value2)]",  (enum ZenitTokenType[]){ T(HASH), T(LBRACKET), T(ID), T(LPAREN), T(ID), T(COLON), T(ID), T(COMMA), T(ID), T(COLON), T(ID), T(RPAREN), T(RBRACKET), T(EOF) } },
+    { "var isTrue : bool = true;",          (enum ZenitTokenType[]){ T(VAR), T(ID), T(COLON), T(ID), T(ASSIGN), T(BOOL), T(SEMICOLON), T(EOF) } },
+    { "var isFalse : bool = false;",        (enum ZenitTokenType[]){ T(VAR), T(ID), T(COLON), T(ID), T(ASSIGN), T(BOOL), T(SEMICOLON), T(EOF) } },
 };
 
 void zenit_test_lexer_combinations(void)

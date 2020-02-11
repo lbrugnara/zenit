@@ -234,6 +234,10 @@ static struct ZenitTypeNode* parse_type_declaration(struct ZenitParser *parser, 
         enum ZenitUintTypeSize size = zenit_type_uint_size_from_slice(&type_token.value);
         return (struct ZenitTypeNode*) zenit_node_type_uint_new(type_token.location, size);
     }
+    else if (zenit_type == ZENIT_TYPE_BOOL)
+    {
+        return (struct ZenitTypeNode*) zenit_node_type_bool_new(type_token.location);
+    }
     else if (zenit_type == ZENIT_TYPE_STRUCT)
     {
         return (struct ZenitTypeNode*) zenit_node_type_struct_new(type_token.location, token_to_string(&type_token));
@@ -317,6 +321,30 @@ static struct ZenitNode* parse_integer_literal(struct ZenitParser *parser, struc
 }
 
 /*
+ * Function: parse_boolean_literal
+ *  Parses a boolean literal
+ *
+ * Parameters:
+ *  parser - Parser object
+ *  ctx - <struct ZenitContext> object
+ *
+ * Returns:
+ *  struct ZenitNode* - The parsed boolean literal
+ *
+ * Grammar:
+ *  boolean_literal = BOOL
+ */
+static struct ZenitNode* parse_boolean_literal(struct ZenitParser *parser, struct ZenitContext *ctx)
+{
+    struct ZenitToken bool_token;
+    consume_or_return(ctx, parser, ZENIT_TOKEN_BOOL, &bool_token);
+
+    bool value = fl_slice_equals_sequence(&bool_token.value, (const FlByte * const) "true", 4);
+
+    return (struct ZenitNode*) zenit_node_bool_new(bool_token.location, value);
+}
+
+/*
  * Function: parse_literal_expression
  *  Parses all the literal expressions supported by the language
  *
@@ -328,13 +356,15 @@ static struct ZenitNode* parse_integer_literal(struct ZenitParser *parser, struc
  *  struct ZenitNode* - Node representing the literal expression
  *
  * Grammar:
- *  literal_expression = integer_literal ;
+ *  literal_expression = integer_literal | boolean_literal ;
  */
 static struct ZenitNode* parse_literal_expression(struct ZenitParser *parser, struct ZenitContext *ctx)
 {
-    // By now we just parse integers
     if (zenit_parser_next_is(parser, ZENIT_TOKEN_INTEGER))
         return parse_integer_literal(parser, ctx);
+
+    if (zenit_parser_next_is(parser, ZENIT_TOKEN_BOOL))
+        return parse_boolean_literal(parser, ctx);
     
     zenit_context_error(ctx, ctx->srcinfo->location, ZENIT_ERROR_SYNTAX, "Unknown literal expression");
     return NULL;

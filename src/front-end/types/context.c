@@ -123,6 +123,24 @@ struct ZenitUintType* zenit_type_ctx_new_uint(struct ZenitTypeContext *type_ctx,
     return uint_type;
 }
 
+struct ZenitBoolType* zenit_type_ctx_new_bool(struct ZenitTypeContext *type_ctx)
+{
+    struct ZenitBoolType *bool_type = NULL;
+
+    if (fl_hashtable_has_key(type_ctx->pool, "bool"))
+    {
+        bool_type = fl_hashtable_get(type_ctx->pool, "bool");
+    }
+    else
+    {
+        // First time
+        bool_type = zenit_type_bool_new();
+        fl_hashtable_add(type_ctx->pool, "bool", bool_type);
+    }
+
+    return bool_type;
+}
+
 struct ZenitArrayType* zenit_type_ctx_copy_array(struct ZenitTypeContext *type_ctx, struct ZenitArrayType *src_array_type)
 {
     struct ZenitArrayType *array_type = zenit_type_array_new(zenit_type_ctx_copy_type(type_ctx, src_array_type->member_type));
@@ -191,10 +209,18 @@ struct ZenitUintType* zenit_type_ctx_copy_uint(struct ZenitTypeContext *type_ctx
     return fl_hashtable_get(type_ctx->pool, key);
 }
 
+struct ZenitBoolType* zenit_type_ctx_copy_bool(struct ZenitTypeContext *type_ctx, struct ZenitBoolType *src_bool_type)
+{
+    return fl_hashtable_get(type_ctx->pool, "bool");
+}
+
 struct ZenitType* zenit_type_ctx_copy_type(struct ZenitTypeContext *type_ctx, struct ZenitType *type)
 {
     if (type->typekind == ZENIT_TYPE_UINT)
         return (struct ZenitType*) zenit_type_ctx_copy_uint(type_ctx, (struct ZenitUintType*) type);
+
+    if (type->typekind == ZENIT_TYPE_BOOL)
+        return (struct ZenitType*) zenit_type_ctx_copy_bool(type_ctx, (struct ZenitBoolType*) type);
 
     if (type->typekind == ZENIT_TYPE_REFERENCE)
         return (struct ZenitType*) zenit_type_ctx_copy_reference(type_ctx, (struct ZenitReferenceType*) type);
@@ -208,7 +234,7 @@ struct ZenitType* zenit_type_ctx_copy_type(struct ZenitTypeContext *type_ctx, st
     return zenit_type_ctx_new_none(type_ctx);
 }
 
-bool zenit_type_ctx_unify_array(struct ZenitTypeContext *type_ctx, struct ZenitArrayType *array_type, struct ZenitType *type_b, struct ZenitType **dest)
+static bool zenit_type_ctx_unify_array(struct ZenitTypeContext *type_ctx, struct ZenitArrayType *array_type, struct ZenitType *type_b, struct ZenitType **dest)
 {
     if (array_type == NULL || type_b == NULL)
         return false;
@@ -249,7 +275,7 @@ bool zenit_type_ctx_unify_array(struct ZenitTypeContext *type_ctx, struct ZenitA
     return true;
 }
 
-bool zenit_type_ctx_unify_reference(struct ZenitTypeContext *type_ctx, struct ZenitReferenceType *ref_type, struct ZenitType *type_b, struct ZenitType **dest)
+static bool zenit_type_ctx_unify_reference(struct ZenitTypeContext *type_ctx, struct ZenitReferenceType *ref_type, struct ZenitType *type_b, struct ZenitType **dest)
 {
     if (ref_type == NULL || type_b == NULL)
         return false;
@@ -284,7 +310,7 @@ bool zenit_type_ctx_unify_reference(struct ZenitTypeContext *type_ctx, struct Ze
     return true;
 }
 
-bool zenit_type_ctx_unify_struct(struct ZenitTypeContext *type_ctx, struct ZenitStructType *struct_type, struct ZenitType *type_b, struct ZenitType **dest)
+static bool zenit_type_ctx_unify_struct(struct ZenitTypeContext *type_ctx, struct ZenitStructType *struct_type, struct ZenitType *type_b, struct ZenitType **dest)
 {
     if (struct_type == NULL || type_b == NULL)
         return false;
@@ -347,7 +373,7 @@ bool zenit_type_ctx_unify_struct(struct ZenitTypeContext *type_ctx, struct Zenit
     return true;
 }
 
-bool zenit_type_ctx_unify_uint(struct ZenitTypeContext *type_ctx, struct ZenitUintType *uint_type, struct ZenitType *type_b, struct ZenitType **dest)
+static bool zenit_type_ctx_unify_uint(struct ZenitTypeContext *type_ctx, struct ZenitUintType *uint_type, struct ZenitType *type_b, struct ZenitType **dest)
 {
     if (uint_type == NULL || type_b == NULL)
         return false;
@@ -364,6 +390,18 @@ bool zenit_type_ctx_unify_uint(struct ZenitTypeContext *type_ctx, struct ZenitUi
     // At this point, type_b must be a uint
     struct ZenitUintType *uint_b = (struct ZenitUintType*) type_b;
     *dest = (struct ZenitType*) zenit_type_ctx_copy_uint(type_ctx, uint_type->size > uint_b->size ? uint_type : uint_b);
+    return true;
+}
+
+static bool zenit_type_ctx_unify_bool(struct ZenitTypeContext *type_ctx, struct ZenitBoolType *bool_type, struct ZenitType *type_b, struct ZenitType **dest)
+{
+    if (bool_type == NULL || type_b == NULL)
+        return false;
+
+    if (type_b->typekind != ZENIT_TYPE_NONE && type_b->typekind != ZENIT_TYPE_BOOL)
+        return false;
+
+    *dest = (struct ZenitType*) zenit_type_ctx_copy_bool(type_ctx, bool_type);
     return true;
 }
 
@@ -392,6 +430,9 @@ bool zenit_type_ctx_unify_types(struct ZenitTypeContext *type_ctx, struct ZenitT
     
     if (type_a->typekind == ZENIT_TYPE_UINT)
         return zenit_type_ctx_unify_uint(type_ctx, (struct ZenitUintType*) type_a, type_b, dest);
+
+    if (type_a->typekind == ZENIT_TYPE_BOOL)
+        return zenit_type_ctx_unify_bool(type_ctx, (struct ZenitBoolType*) type_a, type_b, dest);
     
     return false;
 }

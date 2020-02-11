@@ -14,6 +14,7 @@ enum ZenitTokenType {
 
     // Types
     ZENIT_TOKEN_INTEGER,
+    ZENIT_TOKEN_BOOL,
 
     // Keywords
     ZENIT_TOKEN_ID,

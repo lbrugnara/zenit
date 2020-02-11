@@ -6,6 +6,7 @@
 #include "../types/type.h"
 
 #include "array.h"
+#include "bool.h"
 #include "attribute.h"
 #include "cast.h"
 #include "field.h"
