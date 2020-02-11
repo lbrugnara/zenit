@@ -14,7 +14,8 @@ typedef struct ZenitSymbol*(*ZenitTypeInferrer)(struct ZenitContext *ctx, struct
 
 // Visitor functions
 static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node, struct ZenitType **ctx_type, enum InferenceKind infer_kind);
-static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *node, struct ZenitType **ctx_type, enum InferenceKind infer_kind);
+static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *uint_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind);
+static struct ZenitSymbol* visit_bool_node(struct ZenitContext *ctx, struct ZenitBoolNode *bool_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind);
 static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *variable_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind);
 static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind);
 static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node, struct ZenitType **ctx_type, enum InferenceKind infer_kind);
@@ -30,6 +31,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
  */
 static const ZenitTypeInferrer inferrers[] = {
     [ZENIT_NODE_UINT]           = (ZenitTypeInferrer) &visit_uint_node,
+    [ZENIT_NODE_BOOL]           = (ZenitTypeInferrer) &visit_bool_node,
     [ZENIT_NODE_VARIABLE]       = (ZenitTypeInferrer) &visit_variable_node,
     [ZENIT_NODE_ARRAY]          = (ZenitTypeInferrer) &visit_array_node,
     [ZENIT_NODE_IDENTIFIER]     = (ZenitTypeInferrer) &visit_identifier_node,
@@ -106,11 +108,13 @@ static inline void try_type_unification(struct ZenitTypeContext *type_ctx, enum 
  *  variable declaration: "var a : uint8 = cast(0x1FF)"  )
  * 
  * Parameters:
- *  ctx - Context object
- *  node - Cast node
+ *  <struct ZenitContext> *ctx - Context object
+ *  <struct ZenitCastNode> *cast_node - Cast node
+ *  <struct ZenitType> *ctx_type: Contextual type information
+ *  <enum InferenceKind> *infer_kind: Contextual information about the inference process
  *
  * Returns:
- *
+ *  <struct ZenitSymbol>*: The temporal symbol of the cast expression
  */
 static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
@@ -147,18 +151,20 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
 
 /*
  * Function: visit_uint_node
- *  A literal node always has a type therefore we just return it
+ *  A uint node always has a type therefore we just return it
  *
  * Parameters:
- *  ctx - Context object
- *  node - Literal node
+ *  <struct ZenitContext> *ctx - Context object
+ *  <struct ZenitUintNode> *uint_node - Uint node
+ *  <struct ZenitType> *ctx_type: Contextual type information
+ *  <enum InferenceKind> *infer_kind: Contextual information about the inference process
  *
  * Returns:
- *
+ *  <struct ZenitSymbol>*: The temporal symbol of the uint literal
  */
-static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
+static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *uint_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
-    struct ZenitSymbol *uint_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) node);
+    struct ZenitSymbol *uint_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) uint_node);
 
     // NOTE: The uint type is intrinsic, it can't be updated/modified, but the context might ask for type 
     // information, and in that case, we update just the ctx_type object
@@ -169,20 +175,47 @@ static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct Zeni
 }
 
 /*
+ * Function: visit_bool_node
+ *  A bool node always has a type therefore we just return it
+ *
+ * Parameters:
+ *  <struct ZenitContext> *ctx - Context object
+ *  <struct ZenitBoolNode> *bool_node - Boolean node
+ *  <struct ZenitType> *ctx_type: Contextual type information
+ *  <enum InferenceKind> *infer_kind: Contextual information about the inference process
+ *
+ * Returns:
+ *  <struct ZenitSymbol>*: The temporal symbol of the boolean literal
+ */
+static struct ZenitSymbol* visit_bool_node(struct ZenitContext *ctx, struct ZenitBoolNode *bool_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
+{
+    struct ZenitSymbol *bool_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) bool_node);
+
+    // NOTE: The bool type is intrinsic, it can't be updated/modified, but the context might ask for type 
+    // information, and in that case, we update just the ctx_type object
+    if (ctx_type != NULL && infer_kind == INFER_BIDIRECTIONAL)
+        try_type_unification(ctx->types, UNIFY_B, &bool_symbol->type, ctx_type);
+
+    return bool_symbol;
+}
+
+/*
  * Function: visit_identifier_node
  *  At this point the symbol must be defined, so we need to retrieve it from the symbol table
  *  and return its type information
  *
  * Parameters:
- *  ctx - Context object
- *  node - Identifier node
- *
+ *  <struct ZenitContext> *ctx - Context object
+ *  <struct ZenitIdentifierNode> *id_node - Identifier node
+ *  <struct ZenitType> *ctx_type: Contextual type information
+ *  <enum InferenceKind> *infer_kind: Contextual information about the inference process
+ * 
  * Returns:
- *
+ *  <struct ZenitSymbol>*: The symbol of the identifier
  */
-static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
+static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *id_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
-    struct ZenitSymbol *id_symbol = zenit_program_get_symbol(ctx->program, node->name);
+    struct ZenitSymbol *id_symbol = zenit_program_get_symbol(ctx->program, id_node->name);
 
     // NOTE: We don't infer the identifier type, because we assume the type information is provided/inferred on the
     // symbol declaration, but we do want to provide type information to the context if it request us that information
@@ -205,8 +238,7 @@ static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struc
  *  <enum InferenceKind> *infer_kind: Contextual information about the inference process
  *
  * Returns:
- *  struct ZenitSymbol* - The reference symbol with its type information
- *
+ *  <struct ZenitSymbol>* - The reference symbol with its type information
  */
 static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *reference_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
@@ -234,7 +266,7 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
  *  <enum InferenceKind> *infer_kind: Contextual information about the inference process
  *
  * Returns:
- *  struct ZenitSymbol* - The array symbol with its type information
+ *  <struct ZenitSymbol>* - The array symbol with its type information
  */
 static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
@@ -363,6 +395,21 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, ZenitAttributeNod
     fl_array_free(names);
 }
 
+/*
+ * Function: visit_named_struct_node
+ *  The struct literal visitor iterate over the struct fields and tries to provide contextual type information for them. This visitor doesn't
+ *  need to infer anything, as all the type information should be present on the struct declaration, but the type of its fields are used to infer 
+ *  the type of the expressions that are used to initialize them.
+ *
+ * Parameters:
+ *  <struct ZenitContext> *ctx: Context object
+ *  <struct ZenitStructNode> *struct_node: Node to visit
+ *  <struct ZenitType> *ctx_type: Contextual type information
+ *  <enum InferenceKind> *infer_kind: Contextual information about the inference process
+ *
+ * Returns:
+ *  <struct ZenitSymbol>* - The struct symbol with its type information
+ */
 static struct ZenitSymbol* visit_named_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
     struct ZenitSymbol *struct_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) struct_node);
@@ -387,6 +434,25 @@ static struct ZenitSymbol* visit_named_struct_node(struct ZenitContext *ctx, str
     return struct_symbol;
 }
 
+/*
+ * Function: visit_unnamed_struct_node
+ *  For unnamed structs, we don't have type information for the initializers, unless we receive type information from the context:
+ *      e.g.:
+ *          struct Point { x: uint8; y: uint8; }
+ *          var p : Point = { x: 1, y: 2 };
+ * 
+ *      In this statement, we receive the contextual type Point from the variable declaration, with that information we can use the fields of
+ *      the Point struct to pass contextual type information to the struct literal fields (uint8)
+ *
+ * Parameters:
+ *  <struct ZenitContext> *ctx: Context object
+ *  <struct ZenitStructNode> *struct_node: Node to visit
+ *  <struct ZenitType> *ctx_type: Contextual type information
+ *  <enum InferenceKind> *infer_kind: Contextual information about the inference process
+ *
+ * Returns:
+ *  <struct ZenitSymbol>* - The struct symbol with its type information
+ */
 static struct ZenitSymbol* visit_unnamed_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
     struct ZenitSymbol *struct_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) struct_node);
@@ -437,16 +503,8 @@ static struct ZenitSymbol* visit_unnamed_struct_node(struct ZenitContext *ctx, s
 
 /*
  * Function: visit_struct_node
- *  The struct literal visitor iterate over its fields and tries to provide contextual type information for them. For named structs, it doesn't
- *  need to infer anything, as all the type information should be present on the struct declaration, but the type of its fields are used to infer 
- *  the type of the expressions that are used to initialize them.
- *  For unnamed structs, we don't have type information for the initializers, unless we receive type information from the context:
- *      e.g.:
- *          struct Point { x: uint8; y: uint8; }
- *          var p : Point = { x: 1, y: 2 };
- * 
- *      In this statement, we receive the contextual type Point from the variable declaration, with that information we can use the fields of
- *      the Point struct to pass contextual type information to the struct literal fields (uint8)
+ *  This visitor calls the specific visitor for named and unnamed structs, and after that tries to make a unification between the struct type
+ *  and the contextual type information if needed.
  *
  * Parameters:
  *  <struct ZenitContext> *ctx: Context object
@@ -455,7 +513,7 @@ static struct ZenitSymbol* visit_unnamed_struct_node(struct ZenitContext *ctx, s
  *  <enum InferenceKind> *infer_kind: Contextual information about the inference process
  *
  * Returns:
- *  struct ZenitSymbol* - The struct symbol with its type information
+ *  <struct ZenitSymbol>* - The struct symbol with its type information
  */
 static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
@@ -482,7 +540,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
  *  <enum InferenceKind> *infer_kind: Contextual information about the inference process
  *
  * Returns:
- *  struct ZenitSymbol* - The field symbol with its type information
+ *  <struct ZenitSymbol>* - The field symbol with its type information
  */
 static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
@@ -500,7 +558,7 @@ static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struc
  *  <enum InferenceKind> *infer_kind: Contextual information about the inference process
  *
  * Returns:
- *  struct ZenitSymbol* - The struct delcaration does not have an associated symbol, so this function returns <NULL>
+ *  <struct ZenitSymbol>* - The struct delcaration does not have an associated symbol, so this function returns <NULL>
  */
 static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
@@ -530,7 +588,7 @@ static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, stru
  *  <enum InferenceKind> *infer_kind: Contextual information about the inference process
  *
  * Returns:
- *  struct ZenitSymbol* - The variable symbol with its -possibly inferred- type information
+ *  <struct ZenitSymbol>* - The variable symbol with its -possibly inferred- type information
  */
 static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *variable_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
@@ -585,7 +643,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
  *  <enum InferenceKind> *infer_kind: Contextual information about the inference process
  *
  * Returns:
- *  struct ZenitSymbol* - The symbol with its -possibly inferred- type information
+ *  <struct ZenitSymbol>* - The symbol with its -possibly inferred- type information
  */
 static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
