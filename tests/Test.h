@@ -1,8 +1,8 @@
 #ifndef FL_TEST_H
 #define FL_TEST_H
 
-
 #include <stdbool.h>
+#include <stdlib.h>
 
 #define fl_test_suite(name, ...) fl_test_suite_new(name, ((const FlTest[]){__VA_ARGS__}), sizeof(((const FlTest[]){__VA_ARGS__})) / sizeof(((const FlTest[]){__VA_ARGS__}))[0])
 #define fl_test_run_all_suites(argc, argv, ...) fl_test_run_all(argc, argv, ((FlTestSuite[]){__VA_ARGS__}))

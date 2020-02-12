@@ -2,6 +2,7 @@
 #define ZIR_TYPE_H
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 /*
  * Enum: enum ZirTypeKind
