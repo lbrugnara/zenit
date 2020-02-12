@@ -50,6 +50,10 @@ void zenit_test_nes_global_vars(void)
         "var p2 = { x: 0x1FF, y: 0x2FF };"                              "\n"
         "var p3 = { a: p2, b: p1 };"                                    "\n"
         "var parr = [ { a: 1 }, { a: 2 }, { a: 3 }, { a: 0x1FF } ];"    "\n"
+
+        "var b1 = true;"                                                "\n"
+        "var b2 = false;"                                               "\n"
+        "var ba = [ true, false ];"                                     "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
@@ -116,6 +120,10 @@ void zenit_test_nes_global_vars(void)
     fl_expect("Data segment at 0x32 should be 0x00 (parr[2].a hi)",     nes_program->data.bytes[0x32] == 0x00);
     fl_expect("Data segment at 0x33 should be 0xFF (parr[3].a lo)",     nes_program->data.bytes[0x33] == 0xFF);
     fl_expect("Data segment at 0x34 should be 0x01 (parr[3].a hi)",     nes_program->data.bytes[0x34] == 0x01);
+    fl_expect("Data segment at 0x35 should be 0x01 (b1)",               nes_program->data.bytes[0x35] == 0x01);
+    fl_expect("Data segment at 0x36 should be 0x00 (b2)",               nes_program->data.bytes[0x36] == 0x00);
+    fl_expect("Data segment at 0x37 should be 0x01 (ba[0])",            nes_program->data.bytes[0x37] == 0x01);
+    fl_expect("Data segment at 0x38 should be 0x00 (ba[1])",            nes_program->data.bytes[0x38] == 0x00);
 
     zenit_nes_program_free(nes_program);
     zir_program_free(zir_program);

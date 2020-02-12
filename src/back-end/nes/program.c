@@ -2,35 +2,16 @@
 #include "program.h"
 #include "opcode.h"
 
+#include "symbols/symbol.h"
 #include "symbols/array.h"
-#include "symbols/reference.h"
 #include "symbols/struct.h"
 #include "symbols/temp.h"
-#include "symbols/uint.h"
 
 #include "../../zir/symtable.h"
 #include "../../zir/block.h"
 #include "../../zir/instructions/attributes/attribute.h"
 #include "../../zir/instructions/operands/uint.h"
 
-void zenit_nes_symbol_free(struct ZenitNesSymbol *symbol)
-{
-    if (symbol->name)
-        fl_cstring_free(symbol->name);
-
-    if (symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
-    {
-        struct ZenitNesArraySymbol *array_symbol = (struct ZenitNesArraySymbol*) symbol;
-        fl_array_free_each_pointer(array_symbol->elements, (FlArrayFreeElementFunc) zenit_nes_symbol_free);
-    }
-    else if (symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
-    {
-        struct ZenitNesStructSymbol *struct_symbol = (struct ZenitNesStructSymbol*) symbol;
-        fl_array_free_each_pointer(struct_symbol->members, (FlArrayFreeElementFunc) zenit_nes_symbol_free);
-    }
-
-    fl_free(symbol);
-}
 
 struct ZenitNesProgram* zenit_nes_program_new()
 {
@@ -151,90 +132,6 @@ struct ZirOperand* zenit_nes_program_get_tmpsym_operand(struct ZenitNesProgram *
     return NULL;
 }
 
-static inline struct ZenitNesSymbol* create_symbol(const char *name, struct ZirType *zir_type, enum ZenitNesSegment segment, uint16_t address)
-{
-    struct ZenitNesSymbol *nes_symbol = NULL;
-
-    if (zir_type->typekind == ZIR_TYPE_ARRAY)
-    {
-        struct ZirArrayType *zir_array_type = (struct ZirArrayType*) zir_type;
-        struct ZenitNesArraySymbol *array_symbol = fl_malloc(sizeof(struct ZenitNesArraySymbol));
-        array_symbol->base.address = address;
-        array_symbol->base.name = name != NULL ? fl_cstring_dup(name) : NULL;
-        array_symbol->base.segment = segment;
-        array_symbol->base.symkind = ZENIT_NES_SYMBOL_ARRAY;
-        array_symbol->base.size = zir_type_array_size(zir_array_type);
-        array_symbol->elements = fl_array_new(sizeof(struct ZenitNesSymbol*), zir_array_type->length);
-
-        size_t member_size = zir_type_size(zir_array_type->member_type);
-
-        for (size_t i=0; i < zir_array_type->length; i++)
-        {
-            char buf[1024] = { 0 };
-            size_t to_write = snprintf(NULL, 0, "%zu", i);
-            snprintf(buf, 1024, "%zu", i);
-
-            struct ZenitNesSymbol *element = create_symbol(buf, zir_array_type->member_type, segment, address + (member_size * i));
-            array_symbol->elements[i] = element;
-        }
-
-        nes_symbol = (struct ZenitNesSymbol*) array_symbol;
-    }
-    else if (zir_type->typekind == ZIR_TYPE_STRUCT)
-    {
-        struct ZirStructType *zir_struct_type = (struct ZirStructType*) zir_type;
-        struct ZenitNesStructSymbol *struct_symbol = fl_malloc(sizeof(struct ZenitNesStructSymbol));
-        struct_symbol->base.address = address;
-        struct_symbol->base.name = name != NULL ? fl_cstring_dup(name) : NULL;
-        struct_symbol->base.segment = segment;
-        struct_symbol->base.symkind = ZENIT_NES_SYMBOL_STRUCT;
-        struct_symbol->base.size = zir_type_struct_size(zir_struct_type);
-        struct_symbol->members = fl_array_new(sizeof(struct ZenitNesSymbol*), 0);
-        
-        size_t members_offset = 0;
-        struct FlListNode *zir_node = fl_list_head(zir_struct_type->members);
-        while (zir_node)
-        {
-            struct ZirStructTypeMember *zir_member = (struct ZirStructTypeMember*) zir_node->value;
-
-            struct ZenitNesSymbol *member_symbol = create_symbol(zir_member->name, zir_member->type, segment, address + members_offset);
-            struct_symbol->members = fl_array_append(struct_symbol->members, &member_symbol);
-
-            members_offset = zir_type_size(zir_member->type);
-
-            zir_node = zir_node->next;
-        }
-
-        nes_symbol = (struct ZenitNesSymbol*) struct_symbol;
-    }
-    else if (zir_type->typekind == ZIR_TYPE_UINT)
-    {
-        struct ZirUintType *zir_uint_type = (struct ZirUintType*) zir_type;
-        struct ZenitNesUintSymbol *uint_symbol = fl_malloc(sizeof(struct ZenitNesUintSymbol));
-        uint_symbol->base.address = address;
-        uint_symbol->base.name = name != NULL ? fl_cstring_dup(name) : NULL;
-        uint_symbol->base.segment = segment;
-        uint_symbol->base.symkind = ZENIT_NES_SYMBOL_UINT;
-        uint_symbol->base.size = zir_type_uint_size(zir_uint_type);
-        
-        nes_symbol = (struct ZenitNesSymbol*) uint_symbol;
-    }
-    else if (zir_type->typekind == ZIR_TYPE_REFERENCE)
-    {
-        struct ZirReferenceType *zir_reference_type = (struct ZirReferenceType*) zir_type;
-        struct ZenitNesReferenceSymbol *ref_symbol = fl_malloc(sizeof(struct ZenitNesReferenceSymbol));
-        ref_symbol->base.address = address;
-        ref_symbol->base.name = name != NULL ? fl_cstring_dup(name) : NULL;
-        ref_symbol->base.segment = segment;
-        ref_symbol->base.symkind = ZENIT_NES_SYMBOL_REFERENCE;
-        ref_symbol->base.size = zir_type_reference_size(zir_reference_type);
-
-        nes_symbol = (struct ZenitNesSymbol*) ref_symbol;
-    }
-
-    return nes_symbol;
-}
-
 static inline bool reserve_zp_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol **nes_symbol, struct ZirSymbol *zir_symbol, uint8_t *address)
 {
     if (!program || !nes_symbol || !zir_symbol)
@@ -299,7 +196,7 @@ static inline bool reserve_zp_symbol(struct ZenitNesProgram *program, struct Zen
     }
 
 
-    *nes_symbol = create_symbol(zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_ZP, slot);
+    *nes_symbol = zenit_nes_symbol_new(zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_ZP, slot);
     fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
 
     return true;
@@ -368,7 +265,7 @@ static inline bool reserve_data_symbol(struct ZenitNesProgram *program, struct Z
         }
     }
 
-    *nes_symbol = create_symbol(zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_DATA, program->data.base_address + (uint16_t) slot);
+    *nes_symbol = zenit_nes_symbol_new(zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_DATA, program->data.base_address + (uint16_t) slot);
     fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
 
     return true;
@@ -379,30 +276,15 @@ static inline bool reserve_temp_symbol(struct ZenitNesProgram *program, struct Z
     if (!program || !nes_symbol || !zir_symbol)
         return false;
 
-    // We need to get the symbol size to make sure it fits
-    size_t symbol_size = zir_symbol->type->typekind == ZIR_TYPE_REFERENCE ? 2 /*bytes*/ : zir_type_size(zir_symbol->type);
-
-    struct ZenitNesTempSymbol *temp_symbol = fl_malloc(sizeof(struct ZenitNesTempSymbol));
-
-    temp_symbol->base.symkind = ZENIT_NES_SYMBOL_TEMP;
-    temp_symbol->base.name = fl_cstring_dup(zir_symbol->name);
-    temp_symbol->base.address = 0; // Mind that it being a temp symbol means we don't actually use the address
-    temp_symbol->base.segment = ZENIT_NES_SEGMENT_TEMP;
-    temp_symbol->base.size = symbol_size;
-
-    //temp_symbol->base.elements = zir_symbol->type->typekind == ZIR_TYPE_ARRAY ? ((struct ZirArrayType*) zir_symbol->type)->length : 1;
-    //temp_symbol->base.size = symbol_size;
-    //temp_symbol->base.element_size = symbol_size / temp_symbol->base.elements;
-
-    *nes_symbol = (struct ZenitNesSymbol*) temp_symbol;
-    fl_hashtable_add(program->symbols, temp_symbol->base.name, *nes_symbol);
+    *nes_symbol = (struct ZenitNesSymbol*) zenit_nes_symbol_temp_new(zir_symbol->name, zir_symbol->type);
+    fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
 
     return true;
 }
 
 static inline bool map_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol **nes_symbol, struct ZirSymbol *zir_symbol, uint16_t address)
 {
-    *nes_symbol = create_symbol(zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_CODE, address);
+    *nes_symbol = zenit_nes_symbol_new(zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_CODE, address);
 
     fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
 

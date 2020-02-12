@@ -1,16 +1,6 @@
 #include "reference.h"
 
-#include "array.h"
-#include "struct.h"
-#include "symbol.h"
-#include "temp.h"
-#include "uint.h"
-
-#include "../symbols/array.h"
-#include "../symbols/reference.h"
-#include "../symbols/struct.h"
 #include "../symbols/temp.h"
-#include "../symbols/uint.h"
 
 void zenit_nes_emitter_reference_store(struct ZenitNesProgram *program, struct ZirReferenceOperand *reference_operand, struct ZenitNesSymbol *nes_symbol, size_t offset)
 {

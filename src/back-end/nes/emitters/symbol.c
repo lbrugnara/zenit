@@ -1,10 +1,6 @@
 #include "symbol.h"
 
-#include "array.h"
-#include "reference.h"
-#include "struct.h"
 #include "temp.h"
-#include "uint.h"
 
 #include "../symbols/array.h"
 #include "../symbols/reference.h"

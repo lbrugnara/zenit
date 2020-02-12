@@ -1,16 +1,9 @@
 #include "array.h"
 
-#include "reference.h"
-#include "struct.h"
-#include "symbol.h"
-#include "temp.h"
-#include "uint.h"
+#include "emit.h"
 
 #include "../symbols/array.h"
-#include "../symbols/reference.h"
-#include "../symbols/struct.h"
 #include "../symbols/temp.h"
-#include "../symbols/uint.h"
 
 void zenit_nes_emitter_array_store(struct ZenitNesProgram *program, struct ZirArrayOperand *array, struct ZenitNesSymbol *nes_symbol, size_t offset)
 {
@@ -34,26 +27,7 @@ void zenit_nes_emitter_array_store(struct ZenitNesProgram *program, struct ZirAr
     {
         struct ZenitNesSymbol *element_symbol = array_symbol->elements[i];
         struct ZirOperand *operand = array->elements[i];
-        
-        if (operand->type == ZIR_OPERAND_UINT)
-        {
-            zenit_nes_emitter_uint_store(program, (struct ZirUintOperand*) operand, element_symbol, 0);
-        }
-        else if (operand->type == ZIR_OPERAND_ARRAY)
-        {
-            zenit_nes_emitter_array_store(program, (struct ZirArrayOperand*) operand, element_symbol, 0);
-        }
-        else if (operand->type == ZIR_OPERAND_STRUCT)
-        {
-            zenit_nes_emitter_struct_store(program, (struct ZirStructOperand*) operand, element_symbol, 0);
-        }
-        else if (operand->type == ZIR_OPERAND_REFERENCE)
-        {
-            zenit_nes_emitter_reference_store(program, (struct ZirReferenceOperand*) operand, element_symbol, 0);
-        }
-        else if (operand->type == ZIR_OPERAND_SYMBOL)
-        {
-            zenit_nes_emitter_symbol_store(program, (struct ZirSymbolOperand*) operand, element_symbol, 0);
-        }
+
+        zenit_nes_emitter_store(program, operand, element_symbol, 0);
     }
 }
