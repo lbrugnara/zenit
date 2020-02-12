@@ -3,13 +3,6 @@
 
 void zenit_nes_emitter_uint_store(struct ZenitNesProgram *program, struct ZirUintOperand *uint_operand, struct ZenitNesSymbol *nes_symbol, size_t offset)
 {
-    // The store uint on a temp symbol is just the assignment of the uint operand to the "source" property of the temp symbol
-    if (nes_symbol->symkind == ZENIT_NES_SYMBOL_TEMP)
-    {
-        ((struct ZenitNesTempSymbol*) nes_symbol)->source = (struct ZirOperand*) uint_operand;
-        return;
-    }
-
     uint16_t target_address = nes_symbol->address + offset;
 
     struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;

@@ -1,5 +1,4 @@
 #include "emit.h"
-
 #include "array.h"
 #include "bool.h"
 #include "reference.h"
@@ -7,8 +6,16 @@
 #include "symbol.h"
 #include "uint.h"
 
+#include "../symbols/temp.h"
+
 void zenit_nes_emitter_store(struct ZenitNesProgram *program, struct ZirOperand *operand, struct ZenitNesSymbol *nes_symbol, size_t offset)
 {
+    if (nes_symbol->symkind == ZENIT_NES_SYMBOL_TEMP)
+    {
+        ((struct ZenitNesTempSymbol*) nes_symbol)->source = operand;
+        return;
+    }
+
     if (operand->type == ZIR_OPERAND_UINT)
     {
         zenit_nes_emitter_uint_store(program, (struct ZirUintOperand*) operand, nes_symbol, 0);

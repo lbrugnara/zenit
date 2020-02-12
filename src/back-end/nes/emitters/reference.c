@@ -4,13 +4,6 @@
 
 void zenit_nes_emitter_reference_store(struct ZenitNesProgram *program, struct ZirReferenceOperand *reference_operand, struct ZenitNesSymbol *nes_symbol, size_t offset)
 {
-    // The store reference on a temp symbol is just the assignment of the reference operand to the "source" property of the temp symbol
-    if (nes_symbol->symkind == ZENIT_NES_SYMBOL_TEMP)
-    {
-        ((struct ZenitNesTempSymbol*) nes_symbol)->source = (struct ZirOperand*) reference_operand;
-        return;
-    }
-
     uint16_t target_address = nes_symbol->address + offset;
     struct ZenitNesSymbol *ref_op_symbol = fl_hashtable_get(program->symbols, reference_operand->operand->symbol->name);
 

@@ -543,13 +543,6 @@ static void emit_code_to_data(struct ZenitNesProgram *program, struct ZenitNesSy
 
 void zenit_nes_emitter_symbol_store(struct ZenitNesProgram *program, struct ZirSymbolOperand *symbol_operand, struct ZenitNesSymbol *nes_symbol, size_t offset)
 {
-    // The store symbol on a temp symbol is just the assignment of the symbol operand to the "source" property of the temp symbol
-    if (nes_symbol->symkind == ZENIT_NES_SYMBOL_TEMP)
-    {
-        ((struct ZenitNesTempSymbol*) nes_symbol)->source = (struct ZirOperand*) symbol_operand;
-        return;
-    }
-
     struct ZenitNesSymbol *source_symbol = fl_hashtable_get(program->symbols, symbol_operand->symbol->name);
 
     // If the source is a temp symbol, we need to "emit" the store in a special way

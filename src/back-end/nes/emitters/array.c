@@ -7,13 +7,7 @@
 
 void zenit_nes_emitter_array_store(struct ZenitNesProgram *program, struct ZirArrayOperand *array, struct ZenitNesSymbol *nes_symbol, size_t offset)
 {
-    // The store array on a temp symbol is just the assignment of the array operand to the "source" property of the temp symbol
-    if (nes_symbol->symkind == ZENIT_NES_SYMBOL_TEMP)
-    {
-        ((struct ZenitNesTempSymbol*) nes_symbol)->source = (struct ZirOperand*) array;
-        return;
-    }
-    else if (nes_symbol->symkind != ZENIT_NES_SYMBOL_ARRAY)
+    if (nes_symbol->symkind != ZENIT_NES_SYMBOL_ARRAY)
     {
         // FIXME: Add error handling for this situation
         return;

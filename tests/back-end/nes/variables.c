@@ -135,6 +135,7 @@ void zenit_test_nes_global_vars_array(void)
     const char *zenit_source = 
         "var a = 0x1ff;"                                                "\n"
         "var arr = [ 0, 1, 2 ];"                                        "\n"
+        "var barr = [ true, false ];"                                   "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
@@ -153,6 +154,8 @@ void zenit_test_nes_global_vars_array(void)
     fl_expect("Data segment at 0x02 should be 0x01 (arr[0])",           nes_program->data.bytes[0x02] == 0x00);
     fl_expect("Data segment at 0x03 should be 0x01 (arr[1])",           nes_program->data.bytes[0x03] == 0x01);
     fl_expect("Data segment at 0x04 should be 0x02 (arr[2])",           nes_program->data.bytes[0x04] == 0x02);
+    fl_expect("Data segment at 0x05 should be 0x01 (barr[0])",          nes_program->data.bytes[0x05] == 0x01);
+    fl_expect("Data segment at 0x06 should be 0x00 (barr[1])",          nes_program->data.bytes[0x06] == 0x00);
 
     zenit_nes_program_free(nes_program);
     zir_program_free(zir_program);
@@ -187,6 +190,12 @@ void zenit_test_nes_global_vars_zp(void)
         // ZP allocation of array of structs
         "#[NES(address: 0x04)]"
         "var parr = [ { a: 1 }, { a: 2 }, { a: 3 }, { a: 0x1FF } ];""\n"
+
+        // ZP allocation of boolean
+        "#[NES(address: 0x0C)]"                                     "\n"
+        "var b1 = true;"                                            "\n"
+        "#[NES(address: 0x0D)]"                                     "\n"
+        "var b2 = false;"                                           "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
@@ -291,6 +300,18 @@ void zenit_test_nes_global_vars_zp(void)
     fl_expect("Startup routine at 0x42 should be 0x86 (STX)",           nes_program->startup.bytes[0x42] == 0x86);
     fl_expect("Startup routine at 0x43 should be 0x0B ($0B)",           nes_program->startup.bytes[0x43] == 0x0B);
 
+    // ZP allocation of boolean
+    // Allocate b1 = true
+    fl_expect("Startup routine at 0x44 should be 0xA9 (LDA)",           nes_program->startup.bytes[0x44] == 0xA9);
+    fl_expect("Startup routine at 0x45 should be 0x01 (#$01)",          nes_program->startup.bytes[0x45] == 0x01);
+    fl_expect("Startup routine at 0x46 should be 0x85 (STA)",           nes_program->startup.bytes[0x46] == 0x85);
+    fl_expect("Startup routine at 0x47 should be 0x0C ($0C)",           nes_program->startup.bytes[0x47] == 0x0C);
+    // Allocate b2 = false
+    fl_expect("Startup routine at 0x48 should be 0xA9 (LDA)",           nes_program->startup.bytes[0x48] == 0xA9);
+    fl_expect("Startup routine at 0x49 should be 0x00 (#$00)",          nes_program->startup.bytes[0x49] == 0x00);
+    fl_expect("Startup routine at 0x4A should be 0x85 (STA)",           nes_program->startup.bytes[0x4A] == 0x85);
+    fl_expect("Startup routine at 0x4B should be 0x0D ($0D)",           nes_program->startup.bytes[0x4B] == 0x0D);
+
     zenit_nes_program_free(nes_program);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
@@ -387,6 +408,12 @@ void zenit_test_nes_global_vars_code(void)
         // CODE allocation of array of structs
         "#[NES(address: 0x2004)]"
         "var parr = [ { a: 1 }, { a: 2 }, { a: 3 }, { a: 0x1FF } ];"    "\n"
+
+        // CODE allocation of boolean
+        "#[NES(address: 0x200C)]"                                       "\n"
+        "var b1 = true;"                                                "\n"
+        "#[NES(address: 0x200D)]"                                       "\n"
+        "var b2 = false;"                                               "\n"
     ;
 
     struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
@@ -505,6 +532,20 @@ void zenit_test_nes_global_vars_code(void)
     fl_expect("Startup routine at 0x50 should be 0x8E (STX)",           nes_program->startup.bytes[0x50] == 0x8E);
     fl_expect("Startup routine at 0x51 should be 0x0B ($200B lo)",      nes_program->startup.bytes[0x51] == 0x0B);
     fl_expect("Startup routine at 0x52 should be 0x20 ($200B hi)",      nes_program->startup.bytes[0x52] == 0x20);
+
+    // CODE allocation of boolean
+    // Allocate b1 = true
+    fl_expect("Startup routine at 0x53 should be 0xA9 (LDA)",           nes_program->startup.bytes[0x53] == 0xA9);
+    fl_expect("Startup routine at 0x54 should be 0x01 (#$01)",          nes_program->startup.bytes[0x54] == 0x01);
+    fl_expect("Startup routine at 0x55 should be 0x8D (STA)",           nes_program->startup.bytes[0x55] == 0x8D);
+    fl_expect("Startup routine at 0x56 should be 0x0C ($200C lo)",      nes_program->startup.bytes[0x56] == 0x0C);
+    fl_expect("Startup routine at 0x57 should be 0x20 ($200C hi)",      nes_program->startup.bytes[0x57] == 0x20);
+    // Allocate b2 = false
+    fl_expect("Startup routine at 0x58 should be 0xA9 (LDA)",           nes_program->startup.bytes[0x58] == 0xA9);
+    fl_expect("Startup routine at 0x59 should be 0x00 (#$00)",          nes_program->startup.bytes[0x59] == 0x00);
+    fl_expect("Startup routine at 0x5A should be 0x8D (STA)",           nes_program->startup.bytes[0x5A] == 0x8D);
+    fl_expect("Startup routine at 0x5B should be 0x0D ($200D lo)",      nes_program->startup.bytes[0x5B] == 0x0D);
+    fl_expect("Startup routine at 0x5C should be 0x20 ($200D hi)",      nes_program->startup.bytes[0x5C] == 0x20);
 
     zenit_nes_program_free(nes_program);
     zir_program_free(zir_program);
