@@ -1,10 +1,12 @@
 #include "array.h"
+#include "block.h"
 #include "attribute.h"
 #include "bool.h"
 #include "cast.h"
 #include "field.h"
 #include "field_decl.h"
 #include "identifier.h"
+#include "if.h"
 #include "property.h"
 #include "reference.h"
 #include "struct.h"
@@ -43,6 +45,12 @@ char* zenit_node_uid(struct ZenitNode *node)
 
         case ZENIT_NODE_BOOL:
             return zenit_node_bool_uid((struct ZenitBoolNode*) node);
+
+        case ZENIT_NODE_IF:
+            return zenit_node_if_uid((struct ZenitIfNode*) node);
+
+        case ZENIT_NODE_BLOCK:
+            return zenit_node_block_uid((struct ZenitBlockNode*) node);
 
         case ZENIT_NODE_VARIABLE:
             return zenit_node_variable_uid((struct ZenitVariableNode*) node);
@@ -108,6 +116,12 @@ char* zenit_node_dump(struct ZenitNode *node, char *output)
 
         case ZENIT_NODE_BOOL:
             return zenit_node_bool_dump((struct ZenitBoolNode*) node, output);
+
+        case ZENIT_NODE_IF:
+            return zenit_node_if_dump((struct ZenitIfNode*) node, output);
+
+        case ZENIT_NODE_BLOCK:
+            return zenit_node_block_dump((struct ZenitBlockNode*) node, output);
 
         case ZENIT_NODE_VARIABLE:
             return zenit_node_variable_dump((struct ZenitVariableNode*) node, output);
@@ -180,6 +194,14 @@ void zenit_node_free(struct ZenitNode *node)
 
         case ZENIT_NODE_BOOL:
             zenit_node_bool_free((struct ZenitBoolNode*) node);
+            break;
+
+        case ZENIT_NODE_IF:
+            zenit_node_if_free((struct ZenitIfNode*) node);
+            break;
+
+        case ZENIT_NODE_BLOCK:
+            zenit_node_block_free((struct ZenitBlockNode*) node);
             break;
 
         case ZENIT_NODE_VARIABLE:

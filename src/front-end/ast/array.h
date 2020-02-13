@@ -2,11 +2,10 @@
 #define ZENIT_AST_ARRAY_H
 
 #include "node.h"
-#include "../types/array.h"
 
 /*
  * Struct: struct ZenitArrayNode
- *  Represents a array literal initializer in the source code
+ *  Represents an array literal initializer in the source code
  * 
  * Members:
  *  <struct ZenitNode> base: Basic information of the node object
@@ -22,7 +21,7 @@ struct ZenitArrayNode {
  *  Creates a new AST node that represents an array literal
  *
  * Parameters:
- *  <struct ZenitSourceLocation> location: Location information about the array literal
+ *  <struct ZenitSourceLocation> location: Location information of the array literal
  *
  * Returns:
  *  struct ZenitArrayNode*: Array node

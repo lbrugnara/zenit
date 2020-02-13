@@ -21,6 +21,8 @@ enum ZenitTokenType {
     ZENIT_TOKEN_VAR,
     ZENIT_TOKEN_STRUCT,
     ZENIT_TOKEN_CAST,
+    ZENIT_TOKEN_IF,
+    ZENIT_TOKEN_ELSE,
 
     // Operators
     ZENIT_TOKEN_AMPERSAND,

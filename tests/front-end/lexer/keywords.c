@@ -11,6 +11,7 @@ static struct ZenitLexerTest tests[] = {
     { "var",            (enum ZenitTokenType[]){ T(VAR), T(EOF) }       },
     { "cast",           (enum ZenitTokenType[]){ T(CAST), T(EOF) }      },
     { "struct",         (enum ZenitTokenType[]){ T(STRUCT), T(EOF) }    },
+    { "if",             (enum ZenitTokenType[]){ T(IF), T(EOF) }        },
 };
 
 void zenit_test_lexer_keywords(void)

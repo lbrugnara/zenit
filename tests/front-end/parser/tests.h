@@ -17,5 +17,7 @@ void zenit_test_parser_literal_integer_error(void);
 void zenit_test_parser_literal_boolean(void);
 void zenit_test_parser_literal_array_literal(void);
 void zenit_test_parser_struct_decl(void);
+void zenit_test_parser_blocks(void);
+void zenit_test_parser_if_statements(void);
 
 #endif /* ZENIT_TESTS_PARSER_H */

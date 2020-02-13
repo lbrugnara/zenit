@@ -45,6 +45,8 @@ int main(int argc, char **argv)
             { "Variable attributes",                    &zenit_test_parser_attributes_variables         },
             { "Struct definition",                      &zenit_test_parser_struct_decl                  },
             { "Struct variables",                       &zenit_test_parser_variable_struct              },
+            { "Parse blocks",                           &zenit_test_parser_blocks                       },
+            { "Parse if statements",                    &zenit_test_parser_if_statements                },
         ),
         fl_test_suite("Symtable",
             { "Symbol creation",    &zenit_test_symtable_api },
