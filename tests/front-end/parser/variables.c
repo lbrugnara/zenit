@@ -95,7 +95,7 @@ void zenit_test_parser_array_variable_literal_type(void)
         "var bool1 : [2]bool = [ false, true ];"
         "var bool2 : []bool = [ true, false ];"
         "var boolarr : [][]bool = [ bool1, bool2 ];"
-        "var boolarr2 : [][]&bool = [ &bool1, &bool2 ];"
+        "var boolarr2 : []&[]bool = [ &bool1, &bool2 ];"
     ;
 
     const char *ast_dump = 
@@ -109,7 +109,7 @@ void zenit_test_parser_array_variable_literal_type(void)
         " (var bool1 (type [2]bool) (array (bool false) (bool true)))"
         " (var bool2 (type []bool) (array (bool true) (bool false)))"
         " (var boolarr (type [][]bool) (array (id bool1) (id bool2)))"
-        " (var boolarr2 (type [][]&bool) (array (ref (id bool1)) (ref (id bool2))))"
+        " (var boolarr2 (type []&[]bool) (array (ref (id bool1)) (ref (id bool2))))"
         ")"
     ;
 

@@ -135,6 +135,8 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
     struct ZenitSymbol *expression_symbol = visit_node(ctx, reference_node->expression);
 
     // FIXME: Cannot take a reference to a temporal symbol (temporal expression, primitive, etc)
+    // The '%' character is the starting one for temporal symbols, that in this case it is the temporal symbol
+    // that refers to the reference expression
     if (expression_symbol->name[0] == '%' && expression_symbol->type->typekind == ZENIT_TYPE_REFERENCE)
     {
         zenit_context_error(ctx, reference_node->base.location, ZENIT_ERROR_INVALID_REFERENCE, 
@@ -243,7 +245,7 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, ZenitAttributeNod
  * Function: visit_struct_node
  *  The struct literal visitor makes type check of the struct fields, but only for named structs. Unnamed structs
  *  do not have a declared type in its field, and because of that they are 100% inferred, which means that type
- *  checking the struct type member agains the value member will always returns true. On the other hand, named structs
+ *  checking the struct type member against the value member will always returns true. On the other hand, named structs
  *  have a declared type in their fields, and because of that we need to check those types with the types of the
  *  fields initializers
  *

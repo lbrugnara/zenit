@@ -577,7 +577,7 @@ static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, stru
 
 /*
  * Function: visit_variable_node
- *  The variable visitor share type information with its right-hand side expression it it contains a type hint, or possibly
+ *  The variable visitor share type information with its right-hand side expression if it contains a type hint, or possibly
  *  receives type information from the rhs when the variable does not declare a type.
  *  Also, in case the types are not equals, it tries to add an implicit cast between the rhs type and the lhs type.
  *
@@ -592,7 +592,7 @@ static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, stru
  */
 static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *variable_node, struct ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
-    // The variable declaration node does not perform type inference in this function, but it phases type information
+    // The variable declaration node does not perform type inference in this function, but it passes type information
     // to the right-hand side expression's visitor with possibly INFER_BIDIRECTIONAL when the type is not present in the
     // declaration:
     //  e.g.: var a = [ 1, 2, 3 ]

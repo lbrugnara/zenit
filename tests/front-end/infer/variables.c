@@ -142,27 +142,35 @@ void zenit_test_infer_variable_array(void)
         "var sym_x = [ sym_w ];"                                        "\n"
         "var sym_y : [][][]&[]uint8 = [ sym_x ];"                       "\n"
         "var sym_z : []uint8 = cast(sym_m : []uint8);"                  "\n"
+        "var bool1 : [2]bool = [ false, true ];"                        "\n"
+        "var bool2 : []bool = [ true, false ];"                         "\n"
+        "var boolarr : [][]bool = [ bool1, bool2 ];"                    "\n"
+        "var boolarr2 : []&[]bool = [ &bool1, &bool2 ];"                "\n"
     ;
 
     const char *tests[][2] = { 
-        {   "sym_g",  "[2]uint8",           },
-        {   "sym_h",  "[3]uint8",           },
-        {   "sym_i",  "[0]customType",      },
-        {   "sym_j",  "[1]uint16",          },
-        {   "sym_k",  "[1]uint16",          },
-        {   "sym_l",  "[2]uint16",          },
-        {   "sym_m",  "[3]uint16",          },
-        {   "sym_n",  "[1]uint16",          },
-        {   "sym_o",  "[2]uint8",           },
-        {   "sym_p",  "[2]uint16",          },
-        {   "sym_q",  "[2]&uint8",          },
-        {   "sym_t",  "[2][2]uint16",       },
-        {   "sym_u",  "[2][2]uint8",        },
-        {   "sym_v",  "[2]&[2]uint16",      },
-        {   "sym_w",  "[2]&[2]uint8",       },
-        {   "sym_x",  "[1][2]&[2]uint8",    },
-        {   "sym_y",  "[1][1][2]&[2]uint8", },
-        {   "sym_z",  "[3]uint8",           },
+        {   "sym_g",    "[2]uint8",           },
+        {   "sym_h",    "[3]uint8",           },
+        {   "sym_i",    "[0]customType",      },
+        {   "sym_j",    "[1]uint16",          },
+        {   "sym_k",    "[1]uint16",          },
+        {   "sym_l",    "[2]uint16",          },
+        {   "sym_m",    "[3]uint16",          },
+        {   "sym_n",    "[1]uint16",          },
+        {   "sym_o",    "[2]uint8",           },
+        {   "sym_p",    "[2]uint16",          },
+        {   "sym_q",    "[2]&uint8",          },
+        {   "sym_t",    "[2][2]uint16",       },
+        {   "sym_u",    "[2][2]uint8",        },
+        {   "sym_v",    "[2]&[2]uint16",      },
+        {   "sym_w",    "[2]&[2]uint8",       },
+        {   "sym_x",    "[1][2]&[2]uint8",    },
+        {   "sym_y",    "[1][1][2]&[2]uint8", },
+        {   "sym_z",    "[3]uint8",           },
+        {   "bool1",    "[2]bool",            },
+        {   "bool2",    "[2]bool",            },
+        {   "boolarr",  "[2][2]bool",         },
+        {   "boolarr2", "[2]&[2]bool",        },
     };
 
     const size_t count = sizeof(tests) / sizeof(tests[0]);

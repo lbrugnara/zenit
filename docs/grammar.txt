@@ -1,0 +1,45 @@
+declaration = attribute_declaration* ( variable_declaration | struct_declaration ) | statement ;
+
+attribute_declaration = '#' '[' ID ( '(' ID ':' expression ( ',' ID ':' expression )*  ')' )? ']' ;
+
+struct_declaration = 'struct' ID '{' field_declaration+ '}' ;
+
+field_declaration = ID ':' type_information ';' ;
+
+variable_declaration = 'var' ID ( ':' type_information )? '=' expression ';' ;
+
+statement = expression_statement | if_statement | block ;
+
+if_statement = 'if' '(' expression ')' block ( 'else' ( if_statement | block ) ) ;
+
+block = '{' declaration*  '}' ;
+
+expression_statement = expression ';' ;
+
+expression = unary_expression ;
+
+cast_expression = 'cast' '(' expression ( ':' type_information )? ')' ;
+
+unary_expression = cast_expression | array_literal | reference_expression | identifier_expression | literal_expression ;
+
+identifier_expression = named_struct_literal | identifier ;
+
+named_struct_literal = ID struct_literal ;
+
+struct_literal = '{' struct_field ( ',' struct_field )* '}' ;
+
+struct_field = ID ':' expression ;
+
+identifier = ID ;
+
+reference_expression = '&' expression ;
+
+array_literal = '[' ( expression ( ',' expression )* ','? )? ']' ;
+
+literal_expression = integer_literal | boolean_literal ;
+
+boolean_literal = BOOL ;
+
+integer_literal = INTEGER ;
+
+type_information = ( '[' integer_literal ']' )? '&'? ID ;

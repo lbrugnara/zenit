@@ -49,7 +49,9 @@ void zenit_test_parser_if_statements(void)
                     "((var x (uint16 511)) (var y (uint16 767))) "
                     "((var x (struct (a (uint8 1)))) (var y (struct (b (uint8 2)))))))"
             " (if (id b)"
-                " ((if (id b) ((var a (uint8 1))) ((var a (uint8 2))))))"
+                " ((if (id b) "
+                    "((var a (uint8 1))) "
+                    "((var a (uint8 2))))))"
         ")"
     ;
 
