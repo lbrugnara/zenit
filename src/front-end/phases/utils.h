@@ -7,7 +7,7 @@
 #include "../ast/ast.h"
 #include "../types/context.h"
 
-static struct ZenitType* get_type_from_type_declaration(struct ZenitContext *ctx, struct ZenitTypeNode *type_decl, struct ZenitType *rhs_type)
+static struct ZenitType* get_type_from_type_declaration(ZenitContext *ctx, struct ZenitTypeNode *type_decl, struct ZenitType *rhs_type)
 {
     struct ZenitType *type = NULL;
 

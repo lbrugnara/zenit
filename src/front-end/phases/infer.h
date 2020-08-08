@@ -14,7 +14,7 @@
  *
  * Returns:
  *  void - *true* on a pass without errors. Otheriwise, this function returns
- *          *false* and the *errors* property in the <struct ZenitContext> object
+ *          *false* and the *errors* property in the <ZenitContext> object
  *          should contain the error(s) description
  * 
  * Notes:
@@ -23,6 +23,6 @@
  *  all the symbols contain type information, therefore there shouldn't 
  *  be symbols with the <ZENIT_TYPE_NONE> value present in the program
  */
-bool zenit_infer_types(struct ZenitContext *ctx);
+bool zenit_infer_types(ZenitContext *ctx);
 
 #endif /* ZENIT_INFER_H */

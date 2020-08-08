@@ -1,61 +1,80 @@
 # All this present in this build do not define the environment to be used, so the build
 # command must include the --env (or -e) flag to specify one
 
-# This preset builds the Zenit compiler in release mode
-preset win-clang-release {
-    env: win-cmd,
-    toolchain: clang,
-    config: clang-release,
-    target: zenit
+# This preset builds the Zenit compiler and the tests in release mode
+preset release {
+    envs: [ win-cmd, linux-bash ],
+    toolchains: [ clang, gcc, msvc ],
+    configs: [ clang-release, msvc-release ],
+    targets: [ zenit, zenit-tests ]
+    actions: {
+        before: [ copy-fllib ]
+    }
 }
 
-# This preset builds the Zenit compiler in debug mode
-preset win-clang-debug {
-    env: win-cmd,
-    toolchain: clang,
-    config: clang-debug,
-    target: zenit
+# This preset builds the Zenit compiler and the tests in debug mode
+preset debug {
+    envs: [ win-cmd, linux-bash ],
+    toolchains: [ clang, gcc, msvc ],
+    configs: [ clang-debug, msvc-debug ],
+    targets: [ zenit, zenit-tests ]
+    actions: {
+        before: [ copy-fllib ]
+    }
 }
 
-# This preset builds the test project for the Zenit compiler
-preset win-clang-tests {
-    env: win-cmd,
-    toolchain: clang,
-    config: clang-debug,
-    target: zenit-tests
+# This preset builds the tests in release-sanitize mode
+preset release-sanitize {
+    envs: [ win-cmd, linux-bash ],
+    toolchains: [ clang, gcc ],
+    configs: [ clang-release-sanitize ],
+    targets: [ zenit-tests-sanitize ]
+    actions: {
+        before: [ copy-fllib ]
+    }
 }
 
-# This preset builds the Zenit compiler in release mode
-preset linux-gcc-release {
-    env: linux-bash,
-    toolchain: gcc,
-    config: clang-release,
-    target: zenit
-}
-
-# This preset builds the Zenit compiler in debug mode
-preset linux-gcc-debug {
-    env: linux-bash,
-    toolchain: gcc,
-    config: clang-debug,
-    target: zenit
-}
-
-# This preset builds the test project for the Zenit compiler
-preset linux-gcc-tests {
-    env: linux-bash,
-    toolchain: gcc,
-    config: clang-debug,
-    target: zenit-tests
+# This preset builds the tests in debug-sanitize mode
+preset debug-sanitize {
+    envs: [ win-cmd, linux-bash ],
+    toolchains: [ clang, gcc ],
+    configs: [ clang-debug-sanitize ],
+    targets: [ zenit-tests-sanitize ]
+    actions: {
+        before: [ copy-fllib ]
+    }
 }
 
 # This is a dummy preset to hack my own build system. We get a clean action for free by running:
 # sbs build -e=<win-cmd|linux-bash> clean
 preset clean {
-    toolchain: dummy,
-    config: dummy,
+    envs: [ win-cmd, linux-bash ],
+    toolchains: [ clang, gcc, msvc ],
+    configs: [ clang-debug, clang-release, msvc-debug, msvc-release ],
     target: dummy,
     actions: {
-        before: [ clean, clean-tests ]
+        before: [ clean ]
+    }
+}
+
+# This is a dummy preset to hack my own build system. We get a clean action for free by running:
+# sbs build -e=<win-cmd|linux-bash> clean
+preset clean-all {
+    envs: [ win-cmd, linux-bash ],
+    toolchains: [ clang, gcc, msvc ],
+    configs: [ clang-debug, clang-release, msvc-debug, msvc-release ],
+    target: dummy,
+    actions: {
+        before: [ clean-all ]
+    }
+}
+
+preset copy-fllib {
+    envs: [ win-cmd, linux-bash ],
+    toolchains: [ clang, gcc, msvc ],
+    configs: [ clang-debug, clang-release, clang-debug-sanitize, clang-release-sanitize, msvc-debug, msvc-release ],
+    target: dummy,
+    actions: {
+        before: [ copy-fllib ]
     }
 }

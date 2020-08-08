@@ -4,7 +4,7 @@
 #include "../../../src/front-end/context.h"
 
 struct ResolveTestCase {
-    enum ZenitErrorType error;
+    ZenitErrorType error;
     const char *message;
 };
 

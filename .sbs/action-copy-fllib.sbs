@@ -1,0 +1,32 @@
+action copy-fllib
+{
+    if $sbs.os == win and $sbs.shell in [ system, cmd ]
+    {
+        # Create the include directory
+        `if not exist .\include (md .\include)`,
+
+        # Copy the fllib header
+        `if exist ..\fllib\include\fllib.h (copy /Y ..\fllib\include\fllib.h .\include\ )`,
+
+        # Create the fllib library directory
+        `if not exist .\lib\fllib\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config} (\
+            md .\lib\fllib\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config} )`,
+
+        # Copy the fllib library
+        `if exist ..\fllib\build\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config}\libfl.lib ( \
+            copy /Y ..\fllib\build\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config}\libfl.lib \
+                 .\lib\fllib\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config}\ )`,
+    }
+
+    if $sbs.os == linux and $sbs.shell in [ system, bash ]
+    {
+        `mkdir -p ./include`
+        `if [ -f "../fllib/include/fllib.h" ]; then cp ../fllib/include/fllib.h ./include/ ; fi`
+
+        `mkdir -p ./lib/fllib/${sbs.os}/${sbs.arch}/${sbs.toolchain}/${sbs.config}`
+        `if [ -f "../fllib/build/${sbs.os}/${sbs.arch}/${sbs.toolchain}/${sbs.config}/libfl.a" ]; then \
+            cp  ../fllib/build/${sbs.os}/${sbs.arch}/${sbs.toolchain}/${sbs.config}/libfl.a            \
+                ./lib/fllib/${sbs.os}/${sbs.arch}/${sbs.toolchain}/${sbs.config}/ ;                    \
+        fi`
+    }
+}

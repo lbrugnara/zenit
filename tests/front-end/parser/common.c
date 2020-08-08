@@ -9,7 +9,7 @@
 
 void zenit_test_parser_run(const char *source, const char *test_case)
 {
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
 
     bool is_valid = zenit_parse_source(&ctx);
 

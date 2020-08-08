@@ -11,24 +11,24 @@ enum ResolvePass {
 
 /*
  * Type: ZenitSymbolResolver
- *  A resolver function takes the <struct ZenitContext>, a <struct ZenitNode>, and a <enum ResolvePass>
+ *  A resolver function takes the <ZenitContext>, a <struct ZenitNode>, and a <enum ResolvePass>
  *  to populates the symbol table with symbol information.
  *  The function returns a <struct ZenitSymbol> representing the visited node's result
  */
-typedef struct ZenitSymbol*(*ZenitSymbolResolver)(struct ZenitContext *ctx, struct ZenitNode *node, enum ResolvePass pass);
+typedef struct ZenitSymbol*(*ZenitSymbolResolver)(ZenitContext *ctx, struct ZenitNode *node, enum ResolvePass pass);
 
 // Visitor functions
-static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *uint_node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_bool_node(struct ZenitContext *ctx, struct ZenitBoolNode *bool_node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *Variable_node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array_node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *id_node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *ref_node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast_node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node, enum ResolvePass pass);
-static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_node(ZenitContext *ctx, struct ZenitNode *node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_uint_node(ZenitContext *ctx, struct ZenitUintNode *uint_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_bool_node(ZenitContext *ctx, struct ZenitBoolNode *bool_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_variable_node(ZenitContext *ctx, struct ZenitVariableNode *Variable_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_array_node(ZenitContext *ctx, struct ZenitArrayNode *array_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_identifier_node(ZenitContext *ctx, struct ZenitIdentifierNode *id_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_reference_node(ZenitContext *ctx, struct ZenitReferenceNode *ref_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_cast_node(ZenitContext *ctx, struct ZenitCastNode *cast_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, struct ZenitFieldDeclNode *field_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, struct ZenitStructDeclNode *struct_node, enum ResolvePass pass);
+static struct ZenitSymbol* visit_struct_node(ZenitContext *ctx, struct ZenitStructNode *struct_node, enum ResolvePass pass);
 
 /*
  * Variable: symbol_resolvers
@@ -52,14 +52,14 @@ static const ZenitSymbolResolver symbol_resolvers[] = {
  *  We create a temporal symbol with the uint type information in it.
  *
  * Parameters:
- *  <struct ZenitContext> *ctx - Context object
+ *  <ZenitContext> *ctx - Context object
  *  <struct ZenitUintNode> *uint_node - Node object
  *
  * Returns:
  *  struct ZenitSymbol* - Temporal symbol
  *
  */
-static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct ZenitUintNode *uint_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_uint_node(ZenitContext *ctx, struct ZenitUintNode *uint_node, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return NULL;
@@ -73,14 +73,14 @@ static struct ZenitSymbol* visit_uint_node(struct ZenitContext *ctx, struct Zeni
  *  We create a temporal symbol with the boolean type information in it.
  *
  * Parameters:
- *  <struct ZenitContext> *ctx - Context object
+ *  <ZenitContext> *ctx - Context object
  *  <struct ZenitBoolNode> *bool_node - Node object
  *
  * Returns:
  *  struct ZenitSymbol* - Temporal symbol
  *
  */
-static struct ZenitSymbol* visit_bool_node(struct ZenitContext *ctx, struct ZenitBoolNode *bool_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_bool_node(ZenitContext *ctx, struct ZenitBoolNode *bool_node, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return NULL;
@@ -95,14 +95,14 @@ static struct ZenitSymbol* visit_bool_node(struct ZenitContext *ctx, struct Zeni
  *  helpful in the type inference and type checking phases
  *
  * Parameters:
- *  <struct ZenitContext> *ctx - Context object
+ *  <ZenitContext> *ctx - Context object
  *  <struct ZenitCastNode> *cast_node - Visited node
  *
  * Returns:
  *  struct ZenitSymbol* - Temporal symbol
  *
  */
-static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct ZenitCastNode *cast_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_cast_node(ZenitContext *ctx, struct ZenitCastNode *cast_node, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return NULL;
@@ -124,7 +124,7 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
  *  performs that check, if the symbol does not exist it registers an error
  *
  * Parameters:
- *  <struct ZenitContext> *ctx - Context object
+ *  <ZenitContext> *ctx - Context object
  *  <struct ZenitIdentifierNode> *id_node - Visited node
  *
  * Returns:
@@ -133,7 +133,7 @@ static struct ZenitSymbol* visit_cast_node(struct ZenitContext *ctx, struct Zeni
  * Notes:
  *  FIXME: In the future we will need a "unresolved symbol" reference to avoid forward declarations
  */
-static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struct ZenitIdentifierNode *id_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_identifier_node(ZenitContext *ctx, struct ZenitIdentifierNode *id_node, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return NULL;
@@ -153,14 +153,14 @@ static struct ZenitSymbol* visit_identifier_node(struct ZenitContext *ctx, struc
  *  This function adds a new temporal symbol with an "inferred" type information about the reference
  *
  * Parameters:
- *  <struct ZenitContext> *ctx - Context object
+ *  <ZenitContext> *ctx - Context object
  *  <struct ZenitReferenceNode> *reference_node - Visited node
  *
  * Returns:
  *  struct ZenitSymbol* - Temporal symbol
  *
  */
-static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct ZenitReferenceNode *reference_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_reference_node(ZenitContext *ctx, struct ZenitReferenceNode *reference_node, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return NULL;
@@ -179,14 +179,14 @@ static struct ZenitSymbol* visit_reference_node(struct ZenitContext *ctx, struct
  *  In this function we construct a big part of the type information of an array initializer
  *
  * Parameters:
- *  <struct ZenitContext> *ctx - Context object
+ *  <ZenitContext> *ctx - Context object
  *  <struct ZenitArrayNode> *array_node - Visited node
  *
  * Returns:
  *  struct ZenitSymbol* - Temporal symbol
  *
  */
-static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct ZenitArrayNode *array_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_array_node(ZenitContext *ctx, struct ZenitArrayNode *array_node, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return NULL;
@@ -240,14 +240,14 @@ static struct ZenitSymbol* visit_array_node(struct ZenitContext *ctx, struct Zen
  *  We iterate over all the attributes to make sure the properties' values are valid symbols
  *
  * Parameters:
- *  <struct ZenitContext> *ctx - Context object
+ *  <ZenitContext> *ctx - Context object
  *  <ZenitAttributeNodeMap> *attributes: Attributes map
  * 
  * Returns:
  *  void - This function does not return a value
  *
  */
-static void visit_attribute_node_map(struct ZenitContext *ctx, ZenitAttributeNodeMap *attributes, enum ResolvePass pass)
+static void visit_attribute_node_map(ZenitContext *ctx, ZenitAttributeNodeMap *attributes, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return;
@@ -284,7 +284,7 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, ZenitAttributeNod
  *  A literal named struct must have values for all its members, so that check can be done here using the struct type.
  * 
  * Parameters:
- *  <struct ZenitContext> *ctx: Context object
+ *  <ZenitContext> *ctx: Context object
  *  <struct ZenitStructNode> *struct_node: Visited node
  *  <enum ResolvePass> pass: The current resolve pass
  *
@@ -292,7 +292,7 @@ static void visit_attribute_node_map(struct ZenitContext *ctx, ZenitAttributeNod
  *  struct ZenitSymbol* - The unnamed struct literal symbol
  *
  */
-static struct ZenitSymbol* visit_named_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_named_struct_node(ZenitContext *ctx, struct ZenitStructNode *struct_node, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return NULL;
@@ -386,7 +386,7 @@ static struct ZenitSymbol* visit_named_struct_node(struct ZenitContext *ctx, str
  *  the inference pass the type will be updated if needed.
  * 
  * Parameters:
- *  <struct ZenitContext> *ctx: Context object
+ *  <ZenitContext> *ctx: Context object
  *  <struct ZenitStructNode> *struct_node: Visited node
  *  <enum ResolvePass> pass: The current resolve pass
  *
@@ -394,7 +394,7 @@ static struct ZenitSymbol* visit_named_struct_node(struct ZenitContext *ctx, str
  *  struct ZenitSymbol* - The unnamed struct literal symbol
  *
  */
-static struct ZenitSymbol* visit_unnamed_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_unnamed_struct_node(ZenitContext *ctx, struct ZenitStructNode *struct_node, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return NULL;
@@ -432,7 +432,7 @@ static struct ZenitSymbol* visit_unnamed_struct_node(struct ZenitContext *ctx, s
  *  the two different visitors.
  * 
  * Parameters:
- *  <struct ZenitContext> *ctx: Context object
+ *  <ZenitContext> *ctx: Context object
  *  <struct ZenitStructNode> *struct_node: Visited node
  *  <enum ResolvePass> pass: The current resolve pass
  *
@@ -440,7 +440,7 @@ static struct ZenitSymbol* visit_unnamed_struct_node(struct ZenitContext *ctx, s
  *  struct ZenitSymbol* - The struct literal symbol
  *
  */
-static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct ZenitStructNode *struct_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_struct_node(ZenitContext *ctx, struct ZenitStructNode *struct_node, enum ResolvePass pass)
 {
     if (struct_node->name != NULL)
         return visit_named_struct_node(ctx, struct_node, pass);
@@ -455,7 +455,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
  *  have registered all the user-defined types.
  *
  * Parameters:
- *  <struct ZenitContext> *ctx: Context object
+ *  <ZenitContext> *ctx: Context object
  *  <struct ZenitFieldDeclNode> *field_node: Visited node
  *  <enum ResolvePass> pass: The current resolve pass
  *
@@ -463,7 +463,7 @@ static struct ZenitSymbol* visit_struct_node(struct ZenitContext *ctx, struct Ze
  *  struct ZenitSymbol* - The new symbol introduced by the field declaration or NULL on error
  *
  */
-static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struct ZenitFieldDeclNode *field_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, struct ZenitFieldDeclNode *field_node, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return NULL;
@@ -496,7 +496,7 @@ static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struc
  *      - In the second pass it visits its members to register them in the struct's scope
  *
  * Parameters:
- *  <struct ZenitContext> *ctx: Context object
+ *  <ZenitContext> *ctx: Context object
  *  <struct ZenitStructDeclNode> *struct_node: Visited node
  *  <enum ResolvePass> pass: The current resolve pass
  *
@@ -504,7 +504,7 @@ static struct ZenitSymbol* visit_field_decl_node(struct ZenitContext *ctx, struc
  *  struct ZenitSymbol* - This function always returns NULL as a struct declaration does not introduce a symbol but a scope
  *
  */
-static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, struct ZenitStructDeclNode *struct_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, struct ZenitStructDeclNode *struct_node, enum ResolvePass pass)
 {
     if (pass == RESOLVE_STRUCT)
     {
@@ -569,10 +569,10 @@ static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, stru
 /*
  * Function: visit_variable_node
  *  In this function we need to insert a new <struct ZenitSymbol> object in the symbol table. In case the
- *  symbol already exists, we need to add an error to the <struct ZenitContext> object
+ *  symbol already exists, we need to add an error to the <ZenitContext> object
  *
  * Parameters:
- *  <struct ZenitContext> *ctx: Context object
+ *  <ZenitContext> *ctx: Context object
  *  <struct ZenitVariableNode> *variable_node: Visited node
  *  <enum ResolvePass> pass: The current resolve pass
  *
@@ -580,7 +580,7 @@ static struct ZenitSymbol* visit_struct_decl_node(struct ZenitContext *ctx, stru
  *  struct ZenitSymbol* - The new symbol introduced by the variable declaration or NULL on error
  *
  */
-static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct ZenitVariableNode *variable_node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_variable_node(ZenitContext *ctx, struct ZenitVariableNode *variable_node, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return NULL;
@@ -638,7 +638,7 @@ static struct ZenitSymbol* visit_variable_node(struct ZenitContext *ctx, struct 
  *  struct ZenitSymbol* - A valid symbol if the visited node (or nodes) defines one or NULL
  *
  */
-static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode *node, enum ResolvePass pass)
+static struct ZenitSymbol* visit_node(ZenitContext *ctx, struct ZenitNode *node, enum ResolvePass pass)
 {
     return symbol_resolvers[node->nodekind](ctx, node, pass);
 }
@@ -647,7 +647,7 @@ static struct ZenitSymbol* visit_node(struct ZenitContext *ctx, struct ZenitNode
  * Function: zenit_resolve_symbols
  *  We just iterate over the declarations visiting each node
  */
-bool zenit_resolve_symbols(struct ZenitContext *ctx)
+bool zenit_resolve_symbols(ZenitContext *ctx)
 {
     if (!ctx || !ctx->ast || !ctx->ast->decls)
         return false;

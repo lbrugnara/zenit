@@ -11,7 +11,7 @@
 
 void zenit_test_resolve_run(const char *source, const char *test_case, bool verbose)
 {
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
 
     bool is_valid = zenit_parse_source(&ctx);
 
@@ -37,7 +37,7 @@ void zenit_test_resolve_run(const char *source, const char *test_case, bool verb
 
 void zenit_test_resolve_errors(const char *source, struct ResolveTestCase *tests, size_t tests_count)
 {
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
 
     bool valid_parse = zenit_parse_source(&ctx);
     bool valid_resolve = valid_parse ? zenit_resolve_symbols(&ctx) : false;

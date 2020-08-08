@@ -12,7 +12,7 @@ typedef FlHashtable ZirAttributeMap;
         .key_allocator = fl_container_allocator_string, \
         .key_comparer = fl_container_equals_string, \
         .key_cleaner = fl_container_cleaner_pointer,    \
-        .value_cleaner = (FlContainerCleanupFunction) zir_attribute_free,   \
+        .value_cleaner = (FlContainerCleanupFn) zir_attribute_free,   \
         .value_allocator = NULL \
     }))
 

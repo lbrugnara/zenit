@@ -7,7 +7,7 @@
 
 /*
  * Function: zenit_parse_source
- *  Parses the whole source code and populates the <struct ZenitContext>
+ *  Parses the whole source code and populates the <ZenitContext>
  *  with the resulting <struct ZenitAst> object.
  *
  * Parameters:
@@ -15,10 +15,10 @@
  *
  * Returns:
 *  void - *true* tif he parsing ends without errors. Otheriwise, this function 
- *          returns *false* and the *errors* property in the <struct ZenitContext> 
+ *          returns *false* and the *errors* property in the <ZenitContext> 
  *          object should contain the error(s) description
  *
  */
-bool zenit_parse_source(struct ZenitContext *ctx);
+bool zenit_parse_source(ZenitContext *ctx);
 
 #endif /* ZENIT_PARSE_H */

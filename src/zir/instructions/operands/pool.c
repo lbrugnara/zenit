@@ -5,7 +5,7 @@ struct ZirOperandPool* zir_operand_pool_new(void)
 {
     struct ZirOperandPool *pool = fl_malloc(sizeof(struct ZirOperandPool));
     pool->operands = fl_list_new_args((struct FlListArgs) {
-        .value_cleaner = (FlContainerCleanupFunction) zir_operand_free
+        .value_cleaner = (FlContainerCleanupFn) zir_operand_free
     });
 
     return pool;

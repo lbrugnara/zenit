@@ -39,9 +39,9 @@ static void error_add(FlByte **dest, const FlByte *src)
  * Function: zenit_context_new
  *  Allocates memory for a <struct ZenitSymtable> object and a <struct ZenitSourceInfo> object
  */
-struct ZenitContext zenit_context_new(enum ZenitSourceType type, const char *input)
+ZenitContext zenit_context_new(enum ZenitSourceType type, const char *input)
 {
-    struct ZenitContext ctx = { 
+    ZenitContext ctx = { 
         .program = zenit_program_new(),
         .srcinfo = zenit_source_new(type, input),
         .types = zenit_type_ctx_new(),
@@ -57,7 +57,7 @@ struct ZenitContext zenit_context_new(enum ZenitSourceType type, const char *inp
  *  array, and also if present, this function releases the memory of the <struct ZenitAst>
  *  object.
  */
-void zenit_context_free(struct ZenitContext *ctx)
+void zenit_context_free(ZenitContext *ctx)
 {
     if (!ctx)
         return;
@@ -82,7 +82,7 @@ void zenit_context_free(struct ZenitContext *ctx)
  *  Initializes the *errors* array if needed and appends a new error object to it. The memory allocated for the *errors*
  *  array and the memory allocated for each error object is freed in the <zenit_context_free> function
  */
-void zenit_context_error(struct ZenitContext *ctx, struct ZenitSourceLocation location, enum ZenitErrorType type, const char *message, ...)
+void zenit_context_error(ZenitContext *ctx, struct ZenitSourceLocation location, ZenitErrorType type, const char *message, ...)
 {
     if (message == NULL)
         return;
@@ -90,8 +90,8 @@ void zenit_context_error(struct ZenitContext *ctx, struct ZenitSourceLocation lo
     if (ctx->errors == NULL)
     {
         ctx->errors = fl_list_new_args((struct FlListArgs) {
-            .value_allocator = (FlContainerAllocatorFunction) error_add,
-            .value_cleaner = (FlContainerCleanupFunction) error_free
+            .value_allocator = (FlContainerAllocatorFn) error_add,
+            .value_cleaner = (FlContainerCleanupFn) error_free
         });
     }
 
@@ -125,7 +125,7 @@ void zenit_context_error(struct ZenitContext *ctx, struct ZenitSourceLocation lo
     fl_list_append(ctx->errors, &error);
 }
 
-void zenit_context_print_errors(struct ZenitContext *ctx)
+void zenit_context_print_errors(ZenitContext *ctx)
 {
     if (!zenit_context_has_errors(ctx))
         return;

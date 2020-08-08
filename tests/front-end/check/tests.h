@@ -4,7 +4,7 @@
 #include "../../../src/front-end/context.h"
 
 struct ExpectedError {
-    enum ZenitErrorType type;
+    ZenitErrorType type;
     const char *message;
 };
 

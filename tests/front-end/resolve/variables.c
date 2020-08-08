@@ -13,7 +13,7 @@
 
 void zenit_test_resolve_too_many_symbols(void)
 {
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_FILE, "tests/front-end/resolve/symbols.zt");
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_FILE, "tests/front-end/resolve/symbols.zt");
     bool is_valid = zenit_parse_source(&ctx);
 
     zenit_resolve_symbols(&ctx);

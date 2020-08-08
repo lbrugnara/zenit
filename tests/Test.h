@@ -6,7 +6,7 @@
 
 #define fl_test_suite(name, ...) fl_test_suite_new(name, ((const FlTest[]){__VA_ARGS__}), sizeof(((const FlTest[]){__VA_ARGS__})) / sizeof(((const FlTest[]){__VA_ARGS__}))[0])
 #define fl_test_run_all_suites(argc, argv, ...) fl_test_run_all(argc, argv, ((FlTestSuite[]){__VA_ARGS__}))
-#define fl_test_description(descr) printf(" |\n | [%s]\n |\n", (descr));
+#define fl_test_message(descr) printf(" |\n | [%s]\n |\n", (descr));
 
 typedef void(*FlTestHandler)();
 

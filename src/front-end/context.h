@@ -8,30 +8,30 @@
 
 /*
  * Macro: zenit_context_error_count
- *  Returns the number of *errors* registered in the <struct ZenitContext> object
+ *  Returns the number of *errors* registered in the <ZenitContext> object
  *
  * Parameters:
- *  <struct ZenitContext> *ctxptr: A pointer to a <struct ZenitContext> object
+ *  <ZenitContext> *ctxptr: A pointer to a <ZenitContext> object
  */
 #define zenit_context_error_count(ctxptr) ((size_t)((ctxptr)->errors ? fl_list_length((ctxptr)->errors) : 0))
 
 
 /*
  * Macro: zenit_context_has_errors
- *  Evaluates to *true* if the are *errors* registered in the <struct ZenitContext> object 
+ *  Evaluates to *true* if the are *errors* registered in the <ZenitContext> object 
  *
  * Parameters:
- *  <struct ZenitContext> *ctxptr: A pointer to a <struct ZenitContext> object
+ *  <ZenitContext> *ctxptr: A pointer to a <ZenitContext> object
  */
 #define zenit_context_has_errors(ctxptr) ((ctxptr)->errors && fl_list_head((ctxptr)->errors) != NULL)
 
 /*
- * Enum: enum ZenitErrorType 
+ * Enum: ZenitErrorType 
  *  Represents every type of error that might occur in the
  *  compilation process
  *
  */
-enum ZenitErrorType {
+typedef enum ZenitErrorType {
     // Zenit specific errors
     ZENIT_ERROR_INTERNAL,
 
@@ -61,7 +61,7 @@ enum ZenitErrorType {
 
     // A member of a compound type is not initialized on type instance creation
     ZENIT_ERROR_UNINITIALIZED_MEMBER,
-};
+} ZenitErrorType;
 
 /*
  * Struct: struct ZenitError
@@ -70,17 +70,17 @@ enum ZenitErrorType {
  * Members:
  *  <const char> *message: The error explanation
  *  <struct ZenitSourceLocation> location: Where in the source the error occurred tracked by a <struct ZenitSourceLocation> object
- *  <enum ZenitErrorType> type: The type of the error being one of the <enum ZenitErrorType> values
+ *  <ZenitErrorType> type: The type of the error being one of the <ZenitErrorType> values
  * 
  */
 struct ZenitError {
     const char *message;
     struct ZenitSourceLocation location;
-    enum ZenitErrorType type;
+    ZenitErrorType type;
 };
 
 /*
- * Struct: struct ZenitContext
+ * Struct: ZenitContext
  *  Keeps track of the information generated in the compilation
  *  process.
  * 
@@ -90,51 +90,51 @@ struct ZenitError {
  *  <struct ZenitSourceInfo> *srcinfo: <struct ZenitSourceInfo> object to track files, lines and columns
  *  <struct ZenitProgram> *program: The object that contains the program being compiled
  */
-struct ZenitContext {
+typedef struct ZenitContext {
     FlList *errors;
     struct ZenitAst *ast;
     struct ZenitSourceInfo *srcinfo;
     struct ZenitProgram *program;
     struct ZenitTypeContext *types;
-};
+} ZenitContext;
 
 /*
  * Function: zenit_context_new
- *  Creates a new <struct ZenitContext> object that can be used to start the compilation process.
+ *  Creates a new <ZenitContext> object that can be used to start the compilation process.
  *
  * Parameters:
  *  <enum ZenitSourceType> type: The origin or source from where to get the program's source code
  *  <const char> *input: Based on the *type* parameter this could be a filename or the program's source code
  *
  * Returns:
- *  <struct ZenitContext>: A context object ready to be used in the compilation process
+ *  <ZenitContext>: A context object ready to be used in the compilation process
  *
  * Notes:
  *  The object returned by this function internally allocates memory for its properties, so
  *  the user must free that memory with the <zenit_context_free> function
  */
-struct ZenitContext zenit_context_new(enum ZenitSourceType type, const char *input);
+ZenitContext zenit_context_new(enum ZenitSourceType type, const char *input);
 
 /*
  * Function: zenit_context_free
  *  Releases the memory of an object allocated with the <zenit_context_new> function
  *
  * Parameters:
- *  <struct ZenitContext> *ctx: object to free
+ *  <ZenitContext> *ctx: object to free
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_context_free(struct ZenitContext* ctx);
+void zenit_context_free(ZenitContext* ctx);
 
 /*
  * Function: zenit_context_error
- *  Adds a new <struct ZenitError> object to the <struct ZenitContext>'s *errors* property
+ *  Adds a new <struct ZenitError> object to the <ZenitContext>'s *errors* property
  *
  * Parameters:
- *  <struct ZenitContext> *ctx: Context object
+ *  <ZenitContext> *ctx: Context object
  *  <struct ZenitSourceLocation> location: Object that contains information of where in the source code the error happened
- *  <enum ZenitErrorType> type: The code that represents the type of the error
+ *  <ZenitErrorType> type: The code that represents the type of the error
  *  <const char> *message: A string that accepts format specifiers containing information about the error
  *  *...*: Depending on the format string, the function may expect a sequence of additional arguments, each containing 
  *          a value to be used to replace a format specifier in the format string.
@@ -142,19 +142,19 @@ void zenit_context_free(struct ZenitContext* ctx);
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_context_error(struct ZenitContext *ctx, struct ZenitSourceLocation location, enum ZenitErrorType type, const char *message, ...);
+void zenit_context_error(ZenitContext *ctx, struct ZenitSourceLocation location, ZenitErrorType type, const char *message, ...);
 
 /*
  * Function: zenit_context_print_errors
  *  Print all the errors registered in the context object to the standard error
  *
  * Parameters:
- *  <struct ZenitContext> *ctx - Context object
+ *  <ZenitContext> *ctx - Context object
  *
  * Returns:
  *  void - This function does not return a value
  *
  */
-void zenit_context_print_errors(struct ZenitContext *ctx);
+void zenit_context_print_errors(ZenitContext *ctx);
 
 #endif /* ZENIT_CONTEXT_H */

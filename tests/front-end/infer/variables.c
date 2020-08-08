@@ -31,7 +31,7 @@ void zenit_test_infer_variable_uint(void)
 
     const size_t count = sizeof(tests) / sizeof(tests[0]);
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
     bool is_parsing_valid = zenit_parse_source(&ctx);
     bool is_resolve_valid = is_parsing_valid && zenit_resolve_symbols(&ctx);
     bool is_inference_valid = is_resolve_valid && zenit_infer_types(&ctx);
@@ -92,7 +92,7 @@ void zenit_test_infer_variable_reference(void)
 
     const size_t count = sizeof(tests) / sizeof(tests[0]);
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
     bool is_parsing_valid = zenit_parse_source(&ctx);
     bool is_resolve_valid = is_parsing_valid && zenit_resolve_symbols(&ctx);
     bool is_inference_valid = is_resolve_valid && zenit_infer_types(&ctx);
@@ -175,7 +175,7 @@ void zenit_test_infer_variable_array(void)
 
     const size_t count = sizeof(tests) / sizeof(tests[0]);
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
     bool is_parsing_valid = zenit_parse_source(&ctx);
     bool is_resolve_valid = is_parsing_valid && zenit_resolve_symbols(&ctx);
     bool is_inference_valid = is_resolve_valid && zenit_infer_types(&ctx);

@@ -1,0 +1,11 @@
+# This target compiles just the file containing the main function, that way we can
+# compile the tests project with the zenit-objects dependency without getting main redefined
+compile zenit-main {
+    includes: [
+        "./include"
+    ],
+    output_dir: "obj/${triplet}",
+    sources: [
+        "src/main.c"
+    ]
+}

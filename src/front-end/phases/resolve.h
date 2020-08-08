@@ -14,7 +14,7 @@
  *
  * Returns:
  *  void - *true* on a pass without errors. Otheriwise, this function returns
- *          *false* and the *errors* property in the <struct ZenitContext> object
+ *          *false* and the *errors* property in the <ZenitContext> object
  *          should contain the error(s) description
  * 
  * Notes:
@@ -22,6 +22,6 @@
  *  present in the symbol definition, and performs some basic checks on user-defined
  *  types
  */
-bool zenit_resolve_symbols(struct ZenitContext *ctx);
+bool zenit_resolve_symbols(ZenitContext *ctx);
 
 #endif /* ZENIT_RESOLVE_H */

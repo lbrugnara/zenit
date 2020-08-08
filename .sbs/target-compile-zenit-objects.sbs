@@ -1,0 +1,13 @@
+# The zenit-objects target compiles all the Zenit compiler's source files
+compile zenit-objects {
+    includes: [
+        "./include"
+    ],
+    output_dir: "obj/${triplet}",
+    sources: [
+        "src/front-end/.*[.]c$",
+        "src/zir/.*[.]c$",
+
+        "src/back-end/nes/.*[.]c$"
+    ]
+}

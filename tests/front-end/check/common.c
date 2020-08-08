@@ -11,7 +11,7 @@
 
 void zenit_test_check_types(const char *source, const char *cases[][2], size_t length)
 {
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
 
     fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
     fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
@@ -41,7 +41,7 @@ void zenit_test_check_type_errors(const char *source, struct ExpectedError *case
     size_t run_errors = 0;
     bool run_success = false;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
 
     fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
     fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));

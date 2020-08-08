@@ -10,17 +10,17 @@
  *  occur
  *
  * Parameters:
- *  <struct ZenitContext> *ctx - Context object
+ *  <ZenitContext> *ctx - Context object
  *
  * Returns:
  *  void - *true* on a pass without errors. Otheriwise, this function returns
- *          *false* and the *errors* property in the <struct ZenitContext> object
+ *          *false* and the *errors* property in the <ZenitContext> object
  *          should contain the error(s) description
  * 
  * Notes:
  *  At the end of this pass, we can say all the operations in the program
  *  are valid in regard to types
  */
-bool zenit_check_types(struct ZenitContext *ctx);
+bool zenit_check_types(ZenitContext *ctx);
 
 #endif /* ZENIT_CHECK_H */

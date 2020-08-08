@@ -58,7 +58,7 @@ struct ZenitSourceInfo {
 /*
  * Function: zenit_source_new
  *  Creates a <struct ZenitSourceInfo> object that contains the program's source
- *  and is ready to be used by a <struct ZenitContext> object.
+ *  and is ready to be used by a <ZenitContext> object.
  *
  * Parameters:
  *  <enum ZenitSourceType> type: The origin of the source code represented by a <enum ZenitSourceType> value
@@ -66,7 +66,7 @@ struct ZenitSourceInfo {
  *          of the *type* parameter.
  *
  * Returns:
- *  <struct ZenitSourceInfo>*: Pointer to an object that is ready to be used by a <struct ZenitContext>
+ *  <struct ZenitSourceInfo>*: Pointer to an object that is ready to be used by a <ZenitContext>
  *                      object to start the compilation process
  * 
  * Notes:

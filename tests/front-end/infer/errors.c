@@ -15,7 +15,7 @@ void zenit_test_infer_errors(void)
         "var c = 0x1FF;"                "\n"
     ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
 
     bool valid_parse = zenit_parse_source(&ctx);
     bool valid_resolve = valid_parse ? zenit_resolve_symbols(&ctx) : false;

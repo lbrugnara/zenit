@@ -343,11 +343,7 @@ struct ZenitLexer zenit_lexer_new(struct ZenitSourceInfo *srcinfo)
 
 struct ZenitToken* zenit_lexer_tokenize(struct ZenitLexer *lexer)
 {
-    FlVector *tempvec = fl_vector_new_args((struct FlVectorArgs) {
-        .writer = fl_container_writer,
-        .element_size = sizeof(struct ZenitToken),
-        .capacity = 1000
-    });
+    FlVector *tempvec = flm_vector_new_with(.element_size = sizeof(struct ZenitToken), .capacity = 1000);
 
     while (has_input(lexer))
     {

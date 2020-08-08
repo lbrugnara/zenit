@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     if (argc < 3)
         return -1;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_FILE, argv[1]);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_FILE, argv[1]);
 
     if (!zenit_parse_source(&ctx)
         || !zenit_resolve_symbols(&ctx)

@@ -47,7 +47,7 @@ void zenit_test_generate_ir_struct_decl(void)
         "struct H { h: uint16 }"                        "\n"
     ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
 
     fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
     fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
@@ -94,7 +94,7 @@ void zenit_test_generate_ir_struct(void)
         "@array : [3]A = [ { a: 1 }, { a: 2 }, { a: 3 } ]"      "\n"
     ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
 
     fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
     fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));

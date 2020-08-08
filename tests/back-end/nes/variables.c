@@ -56,7 +56,7 @@ void zenit_test_nes_global_vars(void)
         "var ba = [ true, false ];"                                     "\n"
     ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
 
     fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
     fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
@@ -138,7 +138,7 @@ void zenit_test_nes_global_vars_array(void)
         "var barr = [ true, false ];"                                   "\n"
     ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
 
     fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
     fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
@@ -198,7 +198,7 @@ void zenit_test_nes_global_vars_zp(void)
         "var b2 = false;"                                           "\n"
     ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
 
     fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
     fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
@@ -339,7 +339,7 @@ void zenit_test_nes_global_vars_data(void)
         "var datavar2 = datavar;"                               "\n"
     ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
 
     fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
     fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
@@ -416,7 +416,7 @@ void zenit_test_nes_global_vars_code(void)
         "var b2 = false;"                                               "\n"
     ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
 
     fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
     fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));

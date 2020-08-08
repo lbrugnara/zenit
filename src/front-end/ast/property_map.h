@@ -12,7 +12,7 @@ typedef FlHashtable ZenitPropertyNodeMap;
             .key_allocator = fl_container_allocator_string, \
             .key_comparer = fl_container_equals_string, \
             .key_cleaner = fl_container_cleaner_pointer,    \
-            .value_cleaner = (FlContainerCleanupFunction)zenit_node_free,   \
+            .value_cleaner = (FlContainerCleanupFn)zenit_node_free,   \
             .value_allocator = NULL \
         }))
 

@@ -1,0 +1,21 @@
+# This target creates an executable for the test suite
+executable zenit-tests {
+    output_name: "tests",
+    output_dir: "build/${triplet}",
+    objects: [
+        zenit-tests-objects,
+        zenit-objects-lib,
+    ]
+
+    if $sbs.env == win-cmd {
+        objects: [ "${lib_dir}/fllib/${triplet}/libfl.lib" ]
+    }
+
+    if $sbs.env == linux-bash {
+        objects: [ "${lib_dir}/fllib/${triplet}/libfl.a" ]
+        libraries: [
+            { name: "m" },
+            { name: "pthread" }
+        ]
+    }
+}

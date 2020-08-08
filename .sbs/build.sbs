@@ -1,11 +1,30 @@
 # This is the main build file, just a bunch of includes...
 
 include [
-    "actions.sbs",
-    "configs.sbs",
-    "envs.sbs",
-    "presets.sbs",
-    "targets.sbs",
-    "toolchains.sbs",
+    "variables.sbs",
+
+    "env-linux.sbs",
+    "env-win.sbs",
+
+    "action-clean.sbs",
+    "action-clean-all.sbs",
+    "action-copy-fllib.sbs",
+    
+    "config-clang.sbs",
+    "config-msvc.sbs",
+
+    "toolchain-gcc.sbs",
+    "toolchain-clang.sbs",
+    "toolchain-msvc.sbs",
+
+    "target-archive-zenit-objects-lib.sbs"
+    "target-compile-zenit-main.sbs"
+    "target-compile-zenit-objects.sbs"
+    "target-compile-zenit-tests-objects.sbs"
+    "target-executable-zenit.sbs"
+    "target-executable-zenit-tests.sbs"
+    "target-executable-zenit-tests-sanitize.sbs"
+
     "dummy.sbs"
+    "presets.sbs",
 ]

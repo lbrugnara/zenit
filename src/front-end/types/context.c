@@ -9,12 +9,12 @@ struct ZenitTypeContext* zenit_type_ctx_new(void)
         .key_allocator = fl_container_allocator_string,
         .key_comparer = fl_container_equals_string,
         .key_cleaner = fl_container_cleaner_pointer,
-        .value_cleaner = (FlContainerCleanupFunction) zenit_type_free,
+        .value_cleaner = (FlContainerCleanupFn) zenit_type_free,
         .value_allocator = NULL
     });
 
     type_ctx->uniques = fl_list_new_args((struct FlListArgs) {
-        .value_cleaner = (FlContainerCleanupFunction) zenit_type_free
+        .value_cleaner = (FlContainerCleanupFn) zenit_type_free
     });
     
     return type_ctx;

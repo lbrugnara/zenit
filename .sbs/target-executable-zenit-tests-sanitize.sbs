@@ -1,0 +1,61 @@
+executable zenit-tests-sanitize {
+    output_name: "tests",
+    output_dir: "build/${triplet}",
+    objects: [
+        zenit-tests-objects,
+        zenit-objects-lib,
+    ]
+
+    if ($sbs.os == win)
+    {
+        objects: [ "${lib_dir}/fllib/${triplet}/libfl.lib" ]
+    } 
+    
+    if $sbs.os == linux
+    {
+        objects: [ "${lib_dir}/fllib/${triplet}/libfl.a" ]
+        libraries: [
+            { name: "m" },
+            { name: "pthread" }
+        ]
+    }
+
+    if $sbs.env == win-cmd and $env.Platform == x86 {
+        objects: [             
+            "clang_rt.ubsan_standalone-i386.lib",
+            "clang_rt.asan-i386.lib",
+            "clang_rt.builtins-i386.lib",
+        ]
+        libraries: [
+            {
+                path: "D:\dev\LLVM\x86\lib\clang\8.0.0\lib\windows"
+            }
+        ]
+    }
+
+    if $sbs.os == win and $sbs.arch == x86 {
+        objects: [             
+            "clang_rt.ubsan_standalone-i386.lib",
+            "clang_rt.asan-i386.lib",
+            "clang_rt.builtins-i386.lib",
+        ]
+        libraries: [
+            {
+                path: "D:\dev\LLVM\10.0.0\x86\lib\clang\10.0.0\lib\windows"
+            }
+        ]
+    }
+
+    if $sbs.os == win and $sbs.arch == x86_64 {
+        objects: [ 
+            "clang_rt.ubsan_standalone-x86_64.lib",
+            "clang_rt.asan-x86_64.lib",
+            "clang_rt.builtins-x86_64.lib",
+        ]
+        libraries: [
+            {
+                path: "D:\dev\LLVM\10.0.0\x64\lib\clang\10.0.0\lib\windows"
+            }
+        ]
+    }
+}

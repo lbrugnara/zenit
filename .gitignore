@@ -3,4 +3,6 @@ build/
 lib/
 .tmp/
 .vscode/
-sbs.exe
+sbs*
+include/fllib/
+include/flut/

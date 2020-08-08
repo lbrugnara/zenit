@@ -44,7 +44,7 @@ void zenit_test_generate_ir_casts(void)
         "@e : uint16 = %tmp3"                       "\n"
     ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
 
     fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
     fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));

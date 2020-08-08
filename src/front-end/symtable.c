@@ -14,7 +14,7 @@ struct ZenitSymtable zenit_symtable_new(void)
             .key_allocator = fl_container_allocator_string,
             .key_comparer = fl_container_equals_string,
             .key_cleaner = fl_container_cleaner_pointer,
-            .value_cleaner = (FlContainerCleanupFunction)zenit_symbol_free,
+            .value_cleaner = (FlContainerCleanupFn)zenit_symbol_free,
             .value_allocator = NULL
         })
     };

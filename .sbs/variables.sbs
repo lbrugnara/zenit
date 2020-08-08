@@ -1,0 +1,2 @@
+$triplet = "${sbs.os}/${sbs.arch}/${sbs.toolchain}/${sbs.config}",
+$lib_dir = "./lib"

@@ -30,7 +30,7 @@ struct ZenitNesProgram* zenit_nes_program_new()
         .key_allocator = fl_container_allocator_string,
         .key_comparer = fl_container_equals_string,
         .key_cleaner = fl_container_cleaner_pointer,
-        .value_cleaner = (FlContainerCleanupFunction) zenit_nes_symbol_free,
+        .value_cleaner = (FlContainerCleanupFn) zenit_nes_symbol_free,
         .value_allocator = NULL
     });
 

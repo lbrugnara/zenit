@@ -1,0 +1,21 @@
+# This target creates the zenit compiler executable
+executable zenit {
+    output_name: "zenit",
+    output_dir: "build/${triplet}",
+    objects: [
+        zenit-main,
+        zenit-objects-lib,
+    ]
+
+    if $sbs.env == win-cmd {
+        objects: [ "${lib_dir}/fllib/${triplet}/libfl.lib" ]
+    }
+
+    if $sbs.env == linux-bash {
+        objects: [ "${lib_dir}/fllib/${triplet}/libfl.a" ]
+        libraries: [
+            { name: "m" },
+            { name: "pthread" }
+        ]
+    }
+}

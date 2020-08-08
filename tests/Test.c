@@ -92,8 +92,8 @@ void fl_test_suite_free(FlTestSuite suite)
  *
  */
 enum {
-    TEST_FAILURE = 1,
-    TEST_EXCEPTION
+    FL_TEST_FAILURE = 1,
+    FL_TEST_EXCEPTION
 };
 
 /*
@@ -120,7 +120,7 @@ void test_signal_handler(int sign)
 {
     char msg[FL_CTX_MSG_SIZE];
     snprintf(msg, FL_CTX_MSG_SIZE, "Signal %d", sign);
-    Throw(&testctx, TEST_FAILURE, msg);
+    Throw(&testctx, FL_TEST_FAILURE, msg);
 }
 
 #ifdef _WIN32
@@ -146,7 +146,7 @@ LONG WINAPI exception_filter(EXCEPTION_POINTERS * ExceptionInfo)
     // to the Try()
     char message[FL_CTX_MSG_SIZE];
     fl_winex_message_get(ExceptionInfo->ExceptionRecord->ExceptionCode, message, FL_CTX_MSG_SIZE);
-    Throw(&testctx, TEST_EXCEPTION, message);
+    Throw(&testctx, FL_TEST_EXCEPTION, message);
     return EXCEPTION_CONTINUE_EXECUTION;
 }
 #endif
@@ -168,7 +168,7 @@ bool fl_expect(const char* descr, bool conditionResult)
     if (!conditionResult)
     {
         printf(" |-- Failed: %s\n", descr);
-        Throw(&testctx, TEST_FAILURE, descr);
+        Throw(&testctx, FL_TEST_FAILURE, descr);
     }
     printf(" |-- Passed: %s\n", descr);
     return true;
@@ -197,7 +197,7 @@ bool fl_vexpect(bool conditionResult, const char* format, ...)
     if (!conditionResult)
     {
         printf(" |-- Failed: %s\n", descr);
-        Throw(&testctx, TEST_FAILURE, descr);
+        Throw(&testctx, FL_TEST_FAILURE, descr);
     }
     printf(" |-- Passed: %s\n", descr);
     return true;
@@ -239,7 +239,7 @@ void run_suite(FlTestSuite suite, struct FlTestSuiteResult *result)
         {
             suite->tests[i].run();
         }
-        Catch(TEST_EXCEPTION)
+        Catch(FL_TEST_EXCEPTION)
         {
             failed_tests++;
             failed = true;
@@ -255,7 +255,7 @@ void run_suite(FlTestSuite suite, struct FlTestSuiteResult *result)
 
         if (failed)
         {
-            printf(" +-- Assertion failed: %s\n\n", fl_ctx_last_frame(&testctx)->message);
+            printf(" +-- Assertion failed: %s\n\n", fl_ctx_frame_last(&testctx)->message);
         }
         else
         {

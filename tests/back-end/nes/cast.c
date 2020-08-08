@@ -26,7 +26,7 @@ void zenit_test_nes_cast(void)
         "var f : [2]uint16 = [ 0x1, 0x2 ];"                 "\n"
     ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
 
     fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
     fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));

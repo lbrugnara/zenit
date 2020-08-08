@@ -73,7 +73,7 @@ void zenit_test_parser_literal_integer_error(void)
         "18446744073709551616;          \n"
     ;
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
     bool is_valid = zenit_parse_source(&ctx);
 
     size_t expected_errors = 1;

@@ -38,8 +38,8 @@ void zenit_test_parser_variable_errors(void)
         "/* Line 14 */ var s3 = { x: 0, y: 1 ;"                                                             "\n"
     ;
 
-    const enum ZenitErrorType errors[] = {
-        [0] = (enum ZenitErrorType)-1,
+    const ZenitErrorType errors[] = {
+        [0] = (ZenitErrorType)-1,
         /* Line */ [1] = ZENIT_ERROR_SYNTAX,
         /* Line */ [2] = ZENIT_ERROR_SYNTAX,
         /* Line */ [3] = ZENIT_ERROR_SYNTAX,
@@ -56,7 +56,7 @@ void zenit_test_parser_variable_errors(void)
         /* Line */[14] = ZENIT_ERROR_SYNTAX,
     };
 
-    struct ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, source);
 
     bool is_valid = zenit_parse_source(&ctx);
 
