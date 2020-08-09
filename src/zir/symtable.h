@@ -7,17 +7,17 @@
 #include "symbol.h"
 
 /*
- * Struct: struct ZirSymtable
+ * Struct: ZirSymtable
  *  A symbol table object that keeps track of the program's symbols
  * 
  * Members:
  *  <FlHashtable> symbols: Hashtable of symbols using the name (string) as the key
  *  <FlList> *names: List that keeps track of the insertion order of the symbols
  */
-struct ZirSymtable {
+typedef struct ZirSymtable {
     FlHashtable *symbols;
     FlList *names;
-};
+} ZirSymtable;
 
 /*
  * Function: zir_symtable_new
@@ -27,20 +27,20 @@ struct ZirSymtable {
  *  void: This function does not take parameters
  *
  * Returns:
- *  <struct ZirSymtable>: The created symbol table
+ *  <ZirSymtable>: The created symbol table
  *
  * Notes:
  *  The object returned by this function must be freed using the
  *  <zir_symtable_free> function
  */
-struct ZirSymtable zir_symtable_new(void);
+ZirSymtable zir_symtable_new(void);
 
 /*
  * Function: zir_symtable_free
  *  Releases the memory allocated in the *symtable* object
  *
  * Parameters:
- *  <struct ZirSymtable> *symtable: Symbol table to be freed
+ *  <ZirSymtable> *symtable: Symbol table to be freed
  *
  * Returns:
  *  void: This function does not return a value
@@ -48,65 +48,65 @@ struct ZirSymtable zir_symtable_new(void);
  * Notes:
  *  The memory of the symbols within the symbol table is released too
  */
-void zir_symtable_free(struct ZirSymtable *symtable);
+void zir_symtable_free(ZirSymtable *symtable);
 
 /*
  * Function: zir_symtable_add
- *  Adds the <struct ZirSymbol> object to the symbol table
+ *  Adds the <ZirSymbol> object to the symbol table
  *
  * Parameters:
- *  <struct ZirSymtable> *symtable: The symbol table
- *  <struct ZirSymbol> *symbol: The symbol to be added to the symbol table
+ *  <ZirSymtable> *symtable: The symbol table
+ *  <ZirSymbol> *symbol: The symbol to be added to the symbol table
  *
  * Returns:
- *  <struct ZirSymbol>*: The symbol object
+ *  <ZirSymbol>*: The symbol object
  *
  * Notes:
  *  The symbol table takes ownership of the added symbol
  */
-struct ZirSymbol* zir_symtable_add(struct ZirSymtable *symtable, struct ZirSymbol *symbol);
+ZirSymbol* zir_symtable_add(ZirSymtable *symtable, ZirSymbol *symbol);
 
 /*
  * Function: zir_symtable_has
  *  Checks if a symbol exists in the symbol table
  *
  * Parameters:
- *  <struct ZirSymtable> *symtable: The symbol table
+ *  <ZirSymtable> *symtable: The symbol table
  *  <const char> *symbol_name: The symbol's name to look for
  *
  * Returns:
  *  bool: *true* if there is a symbol with the provided name, otherwise this function
  *          returns *false*.
  */
-bool zir_symtable_has(struct ZirSymtable *symtable, const char *symbol_name);
+bool zir_symtable_has(ZirSymtable *symtable, const char *symbol_name);
 
 /*
  * Function: zir_symtable_get
  *  This function returns a symbol from the symbol table if there is a value for the provided *symbol_name* key
  *
  * Parameters:
- *  <struct ZirSymtable> *symtable: Symbol table
+ *  <ZirSymtable> *symtable: Symbol table
  *  <const char> *symbol_name: Key to lookup the symbol
  *
  * Returns:
- *  <struct ZirSymbol>*: Pointer to the symbol object or NULL
+ *  <ZirSymbol>*: Pointer to the symbol object or NULL
  */
-struct ZirSymbol* zir_symtable_get(struct ZirSymtable *symtable, const char *symbol_name);
+ZirSymbol* zir_symtable_get(ZirSymtable *symtable, const char *symbol_name);
 
 /*
  * Function: zir_symtable_get_all
  *  Returns an array of all the symbols within the symbol table in the order they were inserted
  *
  * Parameters:
- *  <struct ZirSymtable> *symtable: Symbol table object
+ *  <ZirSymtable> *symtable: Symbol table object
  *
  * Returns:
- *  struct ZirSymbol**: Array of pointers to <struct ZirSymbol> objects
+ *  ZirSymbol**: Array of pointers to <ZirSymbol> objects
  *
  * Notes:
  *  The array returned by this function must be freed using the <fl_array_free> function
  */
-struct ZirSymbol** zir_symtable_get_all(struct ZirSymtable *symtable);
+ZirSymbol** zir_symtable_get_all(ZirSymtable *symtable);
 
 /*
  * Function: zir_symtable_dump
@@ -114,7 +114,7 @@ struct ZirSymbol** zir_symtable_get_all(struct ZirSymtable *symtable);
  *  returns a pointer to the -possibly reallocated- output
  *
  * Parameters:
- *  <struct ZirSymtable> *symtable: Symbol table object to dump to the output
+ *  <ZirSymtable> *symtable: Symbol table object to dump to the output
  *  <char> *output: Pointer to a heap allocated string
  *
  * Returns:
@@ -128,6 +128,6 @@ struct ZirSymbol** zir_symtable_get_all(struct ZirSymtable *symtable);
  *      output = zir_symtable_dump(symtable, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zir_symtable_dump(struct ZirSymtable *symtable, char *output);
+char* zir_symtable_dump(ZirSymtable *symtable, char *output);
 
 #endif /* ZIR_SYMTABLE_H */

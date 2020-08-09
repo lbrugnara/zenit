@@ -13,14 +13,14 @@
 #include "../../zir/instructions/operands/uint.h"
 
 
-struct ZenitNesProgram* zenit_nes_program_new()
+ZnesProgram* zenit_nes_program_new()
 {
-    struct ZenitNesProgram *program = fl_malloc(sizeof(struct ZenitNesProgram));
+    ZnesProgram *program = fl_malloc(sizeof(ZnesProgram));
 
     // We start in the static context (global)
     program->static_context = true;
 
-    program->code = (struct ZenitNesCodeSegment) {
+    program->code = (ZnesCodeSegment) {
         .pc = 0,
         .bytes = fl_array_new(sizeof(uint8_t), UINT16_MAX),
     };
@@ -34,16 +34,16 @@ struct ZenitNesProgram* zenit_nes_program_new()
         .value_allocator = NULL
     });
 
-    program->zp = (struct ZenitNesZeroPageSegment){
+    program->zp = (ZnesZeroPageSegment){
         .slots = { 0 },
     };
 
-    program->startup = (struct ZenitNesCodeSegment) {
+    program->startup = (ZnesCodeSegment) {
         .pc = 0,
         .bytes = fl_array_new(sizeof(uint8_t), UINT16_MAX),
     };
 
-    program->data = (struct ZenitNesDataSegment){
+    program->data = (ZnesDataSegment){
         .base_address = 0x8000,
         .slots = fl_array_new(sizeof(uint8_t), 0x8000),
         .bytes = fl_array_new(sizeof(uint8_t), 0x8000),
@@ -52,7 +52,7 @@ struct ZenitNesProgram* zenit_nes_program_new()
     return program;
 }
 
-void zenit_nes_program_free(struct ZenitNesProgram *program)
+void zenit_nes_program_free(ZnesProgram *program)
 {
     if (!program)
         return;
@@ -69,32 +69,32 @@ void zenit_nes_program_free(struct ZenitNesProgram *program)
     fl_free(program);
 }
 
-struct ZenitNesSymbol* zenit_nes_program_get_tmpsym_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol *temp_symbol)
+ZnesSymbol* zenit_nes_program_get_tmpsym_symbol(ZnesProgram *program, ZnesSymbol *temp_symbol)
 {
     if (temp_symbol->segment != ZENIT_NES_SEGMENT_TEMP)
         return NULL;
 
-    struct ZenitNesSymbol *target_symbol = NULL;
+    ZnesSymbol *target_symbol = NULL;
 
-    struct ZirOperand *temp_operand = ((struct ZenitNesTempSymbol*) temp_symbol)->source;
+    ZirOperand *temp_operand = ((ZnesTempSymbol*) temp_symbol)->source;
 
     while (temp_operand)
     {
         if (temp_operand->type != ZIR_OPERAND_SYMBOL)
             break;
 
-        struct ZenitNesSymbol *tmp_symbol = fl_hashtable_get(program->symbols, ((struct ZirSymbolOperand*) temp_operand)->symbol->name);
+        ZnesSymbol *tmp_symbol = fl_hashtable_get(program->symbols, ((ZirSymbolOperand*) temp_operand)->symbol->name);
 
         if (tmp_symbol == NULL)
             break;
 
         if (tmp_symbol->segment == ZENIT_NES_SEGMENT_TEMP)
         {
-            temp_operand = ((struct ZenitNesTempSymbol*) tmp_symbol)->source;
+            temp_operand = ((ZnesTempSymbol*) tmp_symbol)->source;
             continue;
         }
 
-        struct ZenitNesSymbol *symbol = fl_hashtable_get(program->symbols, ((struct ZirSymbolOperand*) temp_operand)->symbol->name);
+        ZnesSymbol *symbol = fl_hashtable_get(program->symbols, ((ZirSymbolOperand*) temp_operand)->symbol->name);
             
         target_symbol = symbol;
         break;
@@ -103,12 +103,12 @@ struct ZenitNesSymbol* zenit_nes_program_get_tmpsym_symbol(struct ZenitNesProgra
     return target_symbol;
 }
 
-struct ZirOperand* zenit_nes_program_get_tmpsym_operand(struct ZenitNesProgram *program, struct ZenitNesSymbol *temp_symbol, enum ZirOperandType type)
+ZirOperand* zenit_nes_program_get_tmpsym_operand(ZnesProgram *program, ZnesSymbol *temp_symbol, ZirOperandType type)
 {
     if (temp_symbol->segment != ZENIT_NES_SEGMENT_TEMP)
         return NULL;
 
-    struct ZirOperand *temp_operand = ((struct ZenitNesTempSymbol*) temp_symbol)->source;
+    ZirOperand *temp_operand = ((ZnesTempSymbol*) temp_symbol)->source;
 
     while (temp_operand)
     {
@@ -118,7 +118,7 @@ struct ZirOperand* zenit_nes_program_get_tmpsym_operand(struct ZenitNesProgram *
         if (temp_operand->type != ZIR_OPERAND_SYMBOL)
             break;
 
-        struct ZenitNesSymbol *tmp_symbol = fl_hashtable_get(program->symbols, ((struct ZirSymbolOperand*) temp_operand)->symbol->name);
+        ZnesSymbol *tmp_symbol = fl_hashtable_get(program->symbols, ((ZirSymbolOperand*) temp_operand)->symbol->name);
 
         if (tmp_symbol == NULL)
             break;
@@ -126,13 +126,13 @@ struct ZirOperand* zenit_nes_program_get_tmpsym_operand(struct ZenitNesProgram *
         if (tmp_symbol->segment != ZENIT_NES_SEGMENT_TEMP)
             break;
 
-        temp_operand = ((struct ZenitNesTempSymbol*) tmp_symbol)->source;
+        temp_operand = ((ZnesTempSymbol*) tmp_symbol)->source;
     }
 
     return NULL;
 }
 
-static inline bool reserve_zp_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol **nes_symbol, struct ZirSymbol *zir_symbol, uint8_t *address)
+static inline bool reserve_zp_symbol(ZnesProgram *program, ZnesSymbol **nes_symbol, ZirSymbol *zir_symbol, uint8_t *address)
 {
     if (!program || !nes_symbol || !zir_symbol)
         return false;
@@ -202,7 +202,7 @@ static inline bool reserve_zp_symbol(struct ZenitNesProgram *program, struct Zen
     return true;
 }
 
-static inline bool reserve_data_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol **nes_symbol, struct ZirSymbol *zir_symbol, uint16_t *address)
+static inline bool reserve_data_symbol(ZnesProgram *program, ZnesSymbol **nes_symbol, ZirSymbol *zir_symbol, uint16_t *address)
 {
     if (!program || !nes_symbol || !zir_symbol)
         return false;
@@ -271,18 +271,18 @@ static inline bool reserve_data_symbol(struct ZenitNesProgram *program, struct Z
     return true;
 }
 
-static inline bool reserve_temp_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol **nes_symbol, struct ZirSymbol *zir_symbol)
+static inline bool reserve_temp_symbol(ZnesProgram *program, ZnesSymbol **nes_symbol, ZirSymbol *zir_symbol)
 {
     if (!program || !nes_symbol || !zir_symbol)
         return false;
 
-    *nes_symbol = (struct ZenitNesSymbol*) zenit_nes_symbol_temp_new(zir_symbol->name, zir_symbol->type);
+    *nes_symbol = (ZnesSymbol*) zenit_nes_symbol_temp_new(zir_symbol->name, zir_symbol->type);
     fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
 
     return true;
 }
 
-static inline bool map_symbol(struct ZenitNesProgram *program, struct ZenitNesSymbol **nes_symbol, struct ZirSymbol *zir_symbol, uint16_t address)
+static inline bool map_symbol(ZnesProgram *program, ZnesSymbol **nes_symbol, ZirSymbol *zir_symbol, uint16_t address)
 {
     *nes_symbol = zenit_nes_symbol_new(zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_CODE, address);
 
@@ -292,9 +292,9 @@ static inline bool map_symbol(struct ZenitNesProgram *program, struct ZenitNesSy
 }
 
 
-struct ZenitNesSymbol* zenit_nes_program_reserve_symbol(struct ZenitNesProgram *program, struct ZirBlock *block, ZirAttributeMap *attributes, struct ZirSymbol *zir_symbol)
+ZnesSymbol* zenit_nes_program_reserve_symbol(ZnesProgram *program, ZirBlock *block, ZirAttributeMap *attributes, ZirSymbol *zir_symbol)
 {
-    struct ZenitNesSymbol *nes_symbol = NULL;
+    ZnesSymbol *nes_symbol = NULL;
 
     if (zir_symbol->name[0] == '%')
     {
@@ -306,15 +306,15 @@ struct ZenitNesSymbol* zenit_nes_program_reserve_symbol(struct ZenitNesProgram *
 
     if (attributes != NULL && zir_attribute_map_has_key(attributes, "NES"))
     {
-        struct ZirAttribute *nes_attribute = zir_attribute_map_get(attributes, "NES");
+        ZirAttribute *nes_attribute = zir_attribute_map_get(attributes, "NES");
 
         if (zir_property_map_has_key(nes_attribute->properties, "segment"))
         {
-            struct ZirProperty *segment_property = zir_property_map_get(nes_attribute->properties, "segment");
+            ZirProperty *segment_property = zir_property_map_get(nes_attribute->properties, "segment");
 
             if (segment_property->value->type == ZIR_OPERAND_SYMBOL)
             {
-                struct ZirSymbolOperand *symbol_operand = (struct ZirSymbolOperand*)segment_property->value;
+                ZirSymbolOperand *symbol_operand = (ZirSymbolOperand*)segment_property->value;
 
                 if (flm_cstring_equals(symbol_operand->symbol->name, "zp"))
                     reserve_zp_symbol(program, &nes_symbol, zir_symbol, NULL);
@@ -324,23 +324,23 @@ struct ZenitNesSymbol* zenit_nes_program_reserve_symbol(struct ZenitNesProgram *
         }
         else if (zir_property_map_has_key(nes_attribute->properties, "address"))
         {
-            struct ZirProperty *address_property = zir_property_map_get(nes_attribute->properties, "address");
-            struct ZirUintOperand *uint_value = NULL;
+            ZirProperty *address_property = zir_property_map_get(nes_attribute->properties, "address");
+            ZirUintOperand *uint_value = NULL;
 
             if (address_property->value->type == ZIR_OPERAND_UINT)
             {
-                uint_value = (struct ZirUintOperand*) address_property->value;
+                uint_value = (ZirUintOperand*) address_property->value;
             }
             else if (address_property->value->type == ZIR_OPERAND_SYMBOL)
             {
-                struct ZirSymbolOperand *symbol_operand = (struct ZirSymbolOperand*) address_property->value;
+                ZirSymbolOperand *symbol_operand = (ZirSymbolOperand*) address_property->value;
 
-                struct ZenitNesSymbol *symbol = fl_hashtable_get(program->symbols, symbol_operand->symbol->name);
+                ZnesSymbol *symbol = fl_hashtable_get(program->symbols, symbol_operand->symbol->name);
 
-                struct ZirOperand *tmp = zenit_nes_program_get_tmpsym_operand(program, symbol, ZIR_OPERAND_UINT);
+                ZirOperand *tmp = zenit_nes_program_get_tmpsym_operand(program, symbol, ZIR_OPERAND_UINT);
 
                 if (tmp->type == ZIR_OPERAND_UINT)
-                    uint_value = (struct ZirUintOperand*) tmp;
+                    uint_value = (ZirUintOperand*) tmp;
             }
 
             if (uint_value == NULL)
@@ -381,12 +381,12 @@ struct ZenitNesSymbol* zenit_nes_program_reserve_symbol(struct ZenitNesProgram *
 }
 
 /*
-uint16_t zenit_nes_program_emit_label(struct ZenitNesCodeSegment *code)
+uint16_t zenit_nes_program_emit_label(ZnesCodeSegment *code)
 {
     return code->pc + program->base_address;
 }
 
-uint8_t zenit_nes_program_calc_rel_addr(struct ZenitNesCodeSegment *code, uint16_t address)
+uint8_t zenit_nes_program_calc_rel_addr(ZnesCodeSegment *code, uint16_t address)
 {
     if (address <= code->pc + program->base_address)
         return 256 - (code->pc + program->base_address + 2 - address); // 2 is for the 2-byte instruction
@@ -394,7 +394,7 @@ uint8_t zenit_nes_program_calc_rel_addr(struct ZenitNesCodeSegment *code, uint16
     return address - code->pc + program->base_address;
 }
 */
-void zenit_nes_program_emit_abs(struct ZenitNesCodeSegment *code, enum NesOpcode opcode, uint16_t bytes)
+void zenit_nes_program_emit_abs(ZnesCodeSegment *code, ZnesOpcode opcode, uint16_t bytes)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -409,7 +409,7 @@ void zenit_nes_program_emit_abs(struct ZenitNesCodeSegment *code, enum NesOpcode
     code->bytes[code->pc++] = (uint8_t)(bytes >> 8);
 }
 
-void zenit_nes_program_emit_abx(struct ZenitNesCodeSegment *code, enum NesOpcode opcode, uint16_t bytes)
+void zenit_nes_program_emit_abx(ZnesCodeSegment *code, ZnesOpcode opcode, uint16_t bytes)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -424,7 +424,7 @@ void zenit_nes_program_emit_abx(struct ZenitNesCodeSegment *code, enum NesOpcode
     code->bytes[code->pc++] = (uint8_t)(bytes >> 8);
 }
 
-void zenit_nes_program_emit_aby(struct ZenitNesCodeSegment *code, enum NesOpcode opcode, uint16_t bytes)
+void zenit_nes_program_emit_aby(ZnesCodeSegment *code, ZnesOpcode opcode, uint16_t bytes)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -439,7 +439,7 @@ void zenit_nes_program_emit_aby(struct ZenitNesCodeSegment *code, enum NesOpcode
     code->bytes[code->pc++] = (uint8_t)(bytes >> 8);
 }
 
-void zenit_nes_program_emit_imm(struct ZenitNesCodeSegment *code, enum NesOpcode opcode, uint8_t byte)
+void zenit_nes_program_emit_imm(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -453,7 +453,7 @@ void zenit_nes_program_emit_imm(struct ZenitNesCodeSegment *code, enum NesOpcode
     code->bytes[code->pc++] = byte;
 }
 
-void zenit_nes_program_emit_imp(struct ZenitNesCodeSegment *code, enum NesOpcode opcode)
+void zenit_nes_program_emit_imp(ZnesCodeSegment *code, ZnesOpcode opcode)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -466,7 +466,7 @@ void zenit_nes_program_emit_imp(struct ZenitNesCodeSegment *code, enum NesOpcode
     code->bytes[code->pc++] = opcode_hex;
 }
 
-void zenit_nes_program_emit_ind(struct ZenitNesCodeSegment *code, enum NesOpcode opcode, uint16_t bytes)
+void zenit_nes_program_emit_ind(ZnesCodeSegment *code, ZnesOpcode opcode, uint16_t bytes)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -481,7 +481,7 @@ void zenit_nes_program_emit_ind(struct ZenitNesCodeSegment *code, enum NesOpcode
     code->bytes[code->pc++] = (uint8_t)(bytes >> 8);
 }
 
-void zenit_nes_program_emit_inx(struct ZenitNesCodeSegment *code, enum NesOpcode opcode, uint8_t byte)
+void zenit_nes_program_emit_inx(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -495,7 +495,7 @@ void zenit_nes_program_emit_inx(struct ZenitNesCodeSegment *code, enum NesOpcode
     code->bytes[code->pc++] = byte;
 }
 
-void zenit_nes_program_emit_iny(struct ZenitNesCodeSegment *code, enum NesOpcode opcode, uint8_t byte)
+void zenit_nes_program_emit_iny(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -509,7 +509,7 @@ void zenit_nes_program_emit_iny(struct ZenitNesCodeSegment *code, enum NesOpcode
     code->bytes[code->pc++] = byte;
 }
 
-void zenit_nes_program_emit_rel(struct ZenitNesCodeSegment *code, enum NesOpcode opcode, uint8_t byte)
+void zenit_nes_program_emit_rel(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -523,7 +523,7 @@ void zenit_nes_program_emit_rel(struct ZenitNesCodeSegment *code, enum NesOpcode
     code->bytes[code->pc++] = byte;
 }
 
-void zenit_nes_program_emit_zpg(struct ZenitNesCodeSegment *code, enum NesOpcode opcode, uint8_t byte)
+void zenit_nes_program_emit_zpg(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -537,7 +537,7 @@ void zenit_nes_program_emit_zpg(struct ZenitNesCodeSegment *code, enum NesOpcode
     code->bytes[code->pc++] = byte;
 }
 
-void zenit_nes_program_emit_zpx(struct ZenitNesCodeSegment *code, enum NesOpcode opcode, uint8_t byte)
+void zenit_nes_program_emit_zpx(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -551,7 +551,7 @@ void zenit_nes_program_emit_zpx(struct ZenitNesCodeSegment *code, enum NesOpcode
     code->bytes[code->pc++] = byte;
 }
 
-void zenit_nes_program_emit_zpy(struct ZenitNesCodeSegment *code, enum NesOpcode opcode, uint8_t byte)
+void zenit_nes_program_emit_zpy(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {

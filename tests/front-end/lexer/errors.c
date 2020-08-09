@@ -8,8 +8,8 @@
 
 static struct ZenitLexerTest tests[] = {
     // Errors
-    { "123$invalid_id",             (enum ZenitTokenType[]){ T(INTEGER), T(UNKNOWN), T(EOF) } },
-    { "var err = 123$invalid_id;",  (enum ZenitTokenType[]){ T(VAR), T(ID), T(ASSIGN), T(INTEGER), T(UNKNOWN), T(SEMICOLON), T(EOF) } },
+    { "123$invalid_id",             (ZenitTokenType[]){ T(INTEGER), T(UNKNOWN), T(EOF) } },
+    { "var err = 123$invalid_id;",  (ZenitTokenType[]){ T(VAR), T(ID), T(ASSIGN), T(INTEGER), T(UNKNOWN), T(SEMICOLON), T(EOF) } },
 };
 
 void zenit_test_lexer_errors(void)

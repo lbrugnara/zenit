@@ -8,21 +8,21 @@
 
 static struct ZenitLexerTest tests[] = {
     // Punctuation
-    { ";",              (enum ZenitTokenType[]){ T(SEMICOLON), T(EOF) } },
-    { ":",              (enum ZenitTokenType[]){ T(COLON), T(EOF) } },
-    { ",",              (enum ZenitTokenType[]){ T(COMMA), T(EOF) } },
-    { ",,",             (enum ZenitTokenType[]){ T(COMMA), T(COMMA), T(EOF) } },
-    { ";;",             (enum ZenitTokenType[]){ T(SEMICOLON), T(SEMICOLON), T(EOF) } },
-    { ";:;",            (enum ZenitTokenType[]){ T(SEMICOLON), T(COLON), T(SEMICOLON), T(EOF) } },
-    { "{",              (enum ZenitTokenType[]){ T(LBRACE), T(EOF) } },
-    { "}",              (enum ZenitTokenType[]){ T(RBRACE), T(EOF) } },
-    { "{{}}",           (enum ZenitTokenType[]){ T(LBRACE), T(LBRACE), T(RBRACE), T(RBRACE), T(EOF) } },
-    { "[",              (enum ZenitTokenType[]){ T(LBRACKET), T(EOF) } },
-    { "]",              (enum ZenitTokenType[]){ T(RBRACKET), T(EOF) } },
-    { "[[]]",           (enum ZenitTokenType[]){ T(LBRACKET), T(LBRACKET), T(RBRACKET), T(RBRACKET), T(EOF) } },
-    { "(",              (enum ZenitTokenType[]){ T(LPAREN), T(EOF) } },
-    { ")",              (enum ZenitTokenType[]){ T(RPAREN), T(EOF) } },
-    { "(())",           (enum ZenitTokenType[]){ T(LPAREN), T(LPAREN), T(RPAREN), T(RPAREN), T(EOF) } },
+    { ";",              (ZenitTokenType[]){ T(SEMICOLON), T(EOF) } },
+    { ":",              (ZenitTokenType[]){ T(COLON), T(EOF) } },
+    { ",",              (ZenitTokenType[]){ T(COMMA), T(EOF) } },
+    { ",,",             (ZenitTokenType[]){ T(COMMA), T(COMMA), T(EOF) } },
+    { ";;",             (ZenitTokenType[]){ T(SEMICOLON), T(SEMICOLON), T(EOF) } },
+    { ";:;",            (ZenitTokenType[]){ T(SEMICOLON), T(COLON), T(SEMICOLON), T(EOF) } },
+    { "{",              (ZenitTokenType[]){ T(LBRACE), T(EOF) } },
+    { "}",              (ZenitTokenType[]){ T(RBRACE), T(EOF) } },
+    { "{{}}",           (ZenitTokenType[]){ T(LBRACE), T(LBRACE), T(RBRACE), T(RBRACE), T(EOF) } },
+    { "[",              (ZenitTokenType[]){ T(LBRACKET), T(EOF) } },
+    { "]",              (ZenitTokenType[]){ T(RBRACKET), T(EOF) } },
+    { "[[]]",           (ZenitTokenType[]){ T(LBRACKET), T(LBRACKET), T(RBRACKET), T(RBRACKET), T(EOF) } },
+    { "(",              (ZenitTokenType[]){ T(LPAREN), T(EOF) } },
+    { ")",              (ZenitTokenType[]){ T(RPAREN), T(EOF) } },
+    { "(())",           (ZenitTokenType[]){ T(LPAREN), T(LPAREN), T(RPAREN), T(RPAREN), T(EOF) } },
 };
 
 void zenit_test_lexer_punctuation(void)

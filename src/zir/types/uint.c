@@ -5,23 +5,23 @@
 
 static struct TypeMapping {
     char *string;
-    enum ZirUintTypeSize size;
+    ZirUintTypeSize size;
 } type_mappings[] = {
     { "<unknown>",  ZIR_UINT_UNK  },
     { "uint8",      ZIR_UINT_8    },
     { "uint16",     ZIR_UINT_16   },
 };
 
-struct ZirUintType* zir_type_uint_new(enum ZirUintTypeSize size)
+ZirUintType* zir_type_uint_new(ZirUintTypeSize size)
 {
-    struct ZirUintType *type = fl_malloc(sizeof(struct ZirUintType));
+    ZirUintType *type = fl_malloc(sizeof(ZirUintType));
     type->base.typekind = ZIR_TYPE_UINT;
     type->size = size;
 
     return type;
 }
 
-unsigned long zir_type_uint_hash(struct ZirUintType *type)
+unsigned long zir_type_uint_hash(ZirUintType *type)
 {
     static const char *format = "[uint][s:%s]";
 
@@ -37,7 +37,7 @@ unsigned long zir_type_uint_hash(struct ZirUintType *type)
     return hash;
 }
 
-char* zir_type_uint_to_string(struct ZirUintType *type)
+char* zir_type_uint_to_string(ZirUintType *type)
 {
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
     {
@@ -49,18 +49,18 @@ char* zir_type_uint_to_string(struct ZirUintType *type)
     return NULL;
 }
 
-bool zir_type_uint_equals(struct ZirUintType *type_a, struct ZirType *type_b)
+bool zir_type_uint_equals(ZirUintType *type_a, ZirType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
-        return (struct ZirType*) type_a == type_b;
+        return (ZirType*) type_a == type_b;
 
     if (type_b->typekind != ZIR_TYPE_UINT)
         return false;
 
-    return type_a->size == ((struct ZirUintType*) type_b)->size;
+    return type_a->size == ((ZirUintType*) type_b)->size;
 }
 
-bool zir_type_uint_is_assignable_from(struct ZirUintType *target_type, struct ZirType *from_type)
+bool zir_type_uint_is_assignable_from(ZirUintType *target_type, ZirType *from_type)
 {
     if (target_type == NULL || from_type == NULL)
         return false;
@@ -68,13 +68,13 @@ bool zir_type_uint_is_assignable_from(struct ZirUintType *target_type, struct Zi
     if (from_type->typekind != ZIR_TYPE_UINT)
         return false;
 
-    struct ZirUintType *from_uint_type = (struct ZirUintType*) from_type;
+    ZirUintType *from_uint_type = (ZirUintType*) from_type;
 
     // If the "from" size is lesser or equals than the target size, it is ok to implicit cast
     return from_uint_type->size <= target_type->size;
 }
 
-bool zir_type_uint_is_castable_to(struct ZirUintType *uint_type, struct ZirType *target_type)
+bool zir_type_uint_is_castable_to(ZirUintType *uint_type, ZirType *target_type)
 {
     if (target_type == NULL || target_type == NULL)
         return false;
@@ -83,7 +83,7 @@ bool zir_type_uint_is_castable_to(struct ZirUintType *uint_type, struct ZirType 
     return target_type->typekind == ZIR_TYPE_UINT;
 }
 
-size_t zir_type_uint_size(struct ZirUintType *type)
+size_t zir_type_uint_size(ZirUintType *type)
 {
     if (!type)
         return 0;
@@ -103,7 +103,7 @@ size_t zir_type_uint_size(struct ZirUintType *type)
     return 0;
 }
 
-void zir_type_uint_free(struct ZirUintType *type)
+void zir_type_uint_free(ZirUintType *type)
 {
     if (!type)
         return;

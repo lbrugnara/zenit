@@ -2,9 +2,9 @@
 #include "type.h"
 #include "uint.h"
 
-struct ZenitUintTypeNode* zenit_node_type_uint_new(struct ZenitSourceLocation location, enum ZenitUintTypeSize size)
+ZenitUintTypeNode* zenit_node_type_uint_new(ZenitSourceLocation location, ZenitUintTypeSize size)
 {
-    struct ZenitUintTypeNode *uint_type_node = fl_malloc(sizeof(struct ZenitUintTypeNode));
+    ZenitUintTypeNode *uint_type_node = fl_malloc(sizeof(ZenitUintTypeNode));
     uint_type_node->base.base.nodekind = ZENIT_NODE_TYPE_UINT;
     uint_type_node->base.base.location = location;
     uint_type_node->base.typekind = ZENIT_TYPE_UINT;
@@ -13,7 +13,7 @@ struct ZenitUintTypeNode* zenit_node_type_uint_new(struct ZenitSourceLocation lo
     return uint_type_node;
 }
 
-char* zenit_node_type_uint_uid(struct ZenitUintTypeNode *uint_type_node)
+char* zenit_node_type_uint_uid(ZenitUintTypeNode *uint_type_node)
 {
     if (!uint_type_node)
         return NULL;
@@ -27,7 +27,7 @@ char* zenit_node_type_uint_uid(struct ZenitUintTypeNode *uint_type_node)
     return fl_cstring_vdup("%%L%u:C%u_type_uint%zu", uint_type_node->base.base.location.line, uint_type_node->base.base.location.col, size);
 }
 
-char* zenit_node_type_uint_dump(struct ZenitUintTypeNode *type_node, char *output)
+char* zenit_node_type_uint_dump(ZenitUintTypeNode *type_node, char *output)
 {
     char *type_str = zenit_node_type_uint_to_string(type_node);
 
@@ -38,7 +38,7 @@ char* zenit_node_type_uint_dump(struct ZenitUintTypeNode *type_node, char *outpu
     return output;
 }
 
-char* zenit_node_type_uint_to_string(struct ZenitUintTypeNode *uint_type_node)
+char* zenit_node_type_uint_to_string(ZenitUintTypeNode *uint_type_node)
 {
     if (!uint_type_node)
         return NULL;
@@ -52,7 +52,7 @@ char* zenit_node_type_uint_to_string(struct ZenitUintTypeNode *uint_type_node)
     return fl_cstring_dup("<unknown>");
 }
 
-void zenit_node_type_uint_free(struct ZenitUintTypeNode *uint_type_node)
+void zenit_node_type_uint_free(ZenitUintTypeNode *uint_type_node)
 {
     if (!uint_type_node)
         return;

@@ -8,14 +8,14 @@
 
 static struct ZenitLexerTest tests[] = {
     // Identifiers
-    { "id",             (enum ZenitTokenType[]){ T(ID), T(EOF) } },
-    { "name",           (enum ZenitTokenType[]){ T(ID), T(EOF) } },
-    { "identifier",     (enum ZenitTokenType[]){ T(ID), T(EOF) } },
-    { "something",      (enum ZenitTokenType[]){ T(ID), T(EOF) } },
-    { "id123",          (enum ZenitTokenType[]){ T(ID), T(EOF) } },
-    { "name_id",        (enum ZenitTokenType[]){ T(ID), T(EOF) } },
-    { "int8",           (enum ZenitTokenType[]){ T(ID), T(EOF) } },
-    { "int32",          (enum ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "id",             (ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "name",           (ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "identifier",     (ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "something",      (ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "id123",          (ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "name_id",        (ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "int8",           (ZenitTokenType[]){ T(ID), T(EOF) } },
+    { "int32",          (ZenitTokenType[]){ T(ID), T(EOF) } },
 };
 
 void zenit_test_lexer_identifiers(void)

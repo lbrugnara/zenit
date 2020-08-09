@@ -2,16 +2,16 @@
 #include <fllib/Cstring.h>
 #include "property.h"
 
-struct ZirProperty* zir_property_new(char *name, struct ZirOperand *value)
+ZirProperty* zir_property_new(char *name, ZirOperand *value)
 {
-    struct ZirProperty *property = fl_malloc(sizeof(struct ZirProperty));
+    ZirProperty *property = fl_malloc(sizeof(ZirProperty));
     property->name = fl_cstring_dup(name);
     property->value = value;
 
     return property;
 }
 
-void zir_property_free(struct ZirProperty *property)
+void zir_property_free(ZirProperty *property)
 {
     if (!property)
         return;

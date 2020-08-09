@@ -8,40 +8,40 @@
 #include "../symbols/temp.h"
 #include "../symbols/uint.h"
 
-static void emit_zp_to_zp(struct ZenitNesProgram *program, struct ZenitNesSymbol *source_symbol, struct ZenitNesSymbol *nes_symbol, size_t offset)
+static void emit_zp_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;    
 
     if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
     {
-        struct ZenitNesArraySymbol *src_symbol = (struct ZenitNesArraySymbol*) source_symbol;
-        struct ZenitNesArraySymbol *dst_symbol = (struct ZenitNesArraySymbol*) nes_symbol;
+        ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
+        ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->elements); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->elements[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->elements[i];
+            ZnesSymbol *src_elem = src_symbol->elements[i];
+            ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
             emit_zp_to_zp(program, src_elem, dst_elem, 0);
         }
     }
     else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
     {
-        struct ZenitNesStructSymbol *src_symbol = (struct ZenitNesStructSymbol*) source_symbol;
-        struct ZenitNesStructSymbol *dst_symbol = (struct ZenitNesStructSymbol*) nes_symbol;
+        ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
+        ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->members); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->members[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->members[i];
+            ZnesSymbol *src_elem = src_symbol->members[i];
+            ZnesSymbol *dst_elem = dst_symbol->members[i];
 
             emit_zp_to_zp(program, src_elem, dst_elem, 0);
         }
     }
     else
     {
-        struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+        ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
         uint16_t target_address = nes_symbol->address + offset;
 
         // FIXME: fix this suboptimal implementation
@@ -64,40 +64,40 @@ static void emit_zp_to_zp(struct ZenitNesProgram *program, struct ZenitNesSymbol
     }
 }
 
-static void emit_zp_to_code(struct ZenitNesProgram *program, struct ZenitNesSymbol *source_symbol, struct ZenitNesSymbol *nes_symbol, size_t offset)
+static void emit_zp_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
     if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
     {
-        struct ZenitNesArraySymbol *src_symbol = (struct ZenitNesArraySymbol*) source_symbol;
-        struct ZenitNesArraySymbol *dst_symbol = (struct ZenitNesArraySymbol*) nes_symbol;
+        ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
+        ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->elements); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->elements[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->elements[i];
+            ZnesSymbol *src_elem = src_symbol->elements[i];
+            ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
             emit_zp_to_code(program, src_elem, dst_elem, 0);
         }
     }
     else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
     {
-        struct ZenitNesStructSymbol *src_symbol = (struct ZenitNesStructSymbol*) source_symbol;
-        struct ZenitNesStructSymbol *dst_symbol = (struct ZenitNesStructSymbol*) nes_symbol;
+        ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
+        ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->members); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->members[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->members[i];
+            ZnesSymbol *src_elem = src_symbol->members[i];
+            ZnesSymbol *dst_elem = dst_symbol->members[i];
 
             emit_zp_to_code(program, src_elem, dst_elem, 0);
         }
     }
     else
     {
-        struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+        ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
         uint16_t target_address = nes_symbol->address + offset;
 
         // FIXME: fix this suboptimal implementation
@@ -120,40 +120,40 @@ static void emit_zp_to_code(struct ZenitNesProgram *program, struct ZenitNesSymb
     }
 }
 
-static void emit_zp_to_data(struct ZenitNesProgram *program, struct ZenitNesSymbol *source_symbol, struct ZenitNesSymbol *nes_symbol, size_t offset)
+static void emit_zp_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
     if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
     {
-        struct ZenitNesArraySymbol *src_symbol = (struct ZenitNesArraySymbol*) source_symbol;
-        struct ZenitNesArraySymbol *dst_symbol = (struct ZenitNesArraySymbol*) nes_symbol;
+        ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
+        ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->elements); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->elements[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->elements[i];
+            ZnesSymbol *src_elem = src_symbol->elements[i];
+            ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
             emit_zp_to_data(program, src_elem, dst_elem, 0);
         }
     }
     else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
     {
-        struct ZenitNesStructSymbol *src_symbol = (struct ZenitNesStructSymbol*) source_symbol;
-        struct ZenitNesStructSymbol *dst_symbol = (struct ZenitNesStructSymbol*) nes_symbol;
+        ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
+        ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->members); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->members[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->members[i];
+            ZnesSymbol *src_elem = src_symbol->members[i];
+            ZnesSymbol *dst_elem = dst_symbol->members[i];
 
             emit_zp_to_data(program, src_elem, dst_elem, 0);
         }
     }
     else
     {
-        struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+        ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
         uint16_t target_address = nes_symbol->address + offset;
 
         // FIXME: fix this suboptimal implementation
@@ -186,33 +186,33 @@ static void emit_zp_to_data(struct ZenitNesProgram *program, struct ZenitNesSymb
     }
 }
 
-static void emit_data_to_data(struct ZenitNesProgram *program, struct ZenitNesSymbol *source_symbol, struct ZenitNesSymbol *nes_symbol, size_t offset)
+static void emit_data_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
     if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
     {
-        struct ZenitNesArraySymbol *src_symbol = (struct ZenitNesArraySymbol*) source_symbol;
-        struct ZenitNesArraySymbol *dst_symbol = (struct ZenitNesArraySymbol*) nes_symbol;
+        ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
+        ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->elements); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->elements[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->elements[i];
+            ZnesSymbol *src_elem = src_symbol->elements[i];
+            ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
             emit_data_to_data(program, src_elem, dst_elem, 0);
         }
     }
     else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
     {
-        struct ZenitNesStructSymbol *src_symbol = (struct ZenitNesStructSymbol*) source_symbol;
-        struct ZenitNesStructSymbol *dst_symbol = (struct ZenitNesStructSymbol*) nes_symbol;
+        ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
+        ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->members); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->members[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->members[i];
+            ZnesSymbol *src_elem = src_symbol->members[i];
+            ZnesSymbol *dst_elem = dst_symbol->members[i];
 
             emit_data_to_data(program, src_elem, dst_elem, 0);
         }
@@ -237,7 +237,7 @@ static void emit_data_to_data(struct ZenitNesProgram *program, struct ZenitNesSy
         }
         else
         {
-            struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+            ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
             // NOTE: If we are not in static context, we need to copy from one part to the other of th DATA segment using
             // instructions
             // FIXME: fix this suboptimal implementation
@@ -261,40 +261,40 @@ static void emit_data_to_data(struct ZenitNesProgram *program, struct ZenitNesSy
     }
 }
 
-static void emit_data_to_zp(struct ZenitNesProgram *program, struct ZenitNesSymbol *source_symbol, struct ZenitNesSymbol *nes_symbol, size_t offset)
+static void emit_data_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
     if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
     {
-        struct ZenitNesArraySymbol *src_symbol = (struct ZenitNesArraySymbol*) source_symbol;
-        struct ZenitNesArraySymbol *dst_symbol = (struct ZenitNesArraySymbol*) nes_symbol;
+        ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
+        ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->elements); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->elements[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->elements[i];
+            ZnesSymbol *src_elem = src_symbol->elements[i];
+            ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
             emit_data_to_zp(program, src_elem, dst_elem, 0);
         }
     }
     else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
     {
-        struct ZenitNesStructSymbol *src_symbol = (struct ZenitNesStructSymbol*) source_symbol;
-        struct ZenitNesStructSymbol *dst_symbol = (struct ZenitNesStructSymbol*) nes_symbol;
+        ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
+        ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->members); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->members[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->members[i];
+            ZnesSymbol *src_elem = src_symbol->members[i];
+            ZnesSymbol *dst_elem = dst_symbol->members[i];
 
             emit_data_to_zp(program, src_elem, dst_elem, 0);
         }
     }
     else
     {
-        struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+        ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
         uint16_t target_address = nes_symbol->address + offset;
 
         // FIXME: fix this suboptimal implementation
@@ -317,40 +317,40 @@ static void emit_data_to_zp(struct ZenitNesProgram *program, struct ZenitNesSymb
     }
 }
 
-static void emit_data_to_code(struct ZenitNesProgram *program, struct ZenitNesSymbol *source_symbol, struct ZenitNesSymbol *nes_symbol, size_t offset)
+static void emit_data_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
     if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
     {
-        struct ZenitNesArraySymbol *src_symbol = (struct ZenitNesArraySymbol*) source_symbol;
-        struct ZenitNesArraySymbol *dst_symbol = (struct ZenitNesArraySymbol*) nes_symbol;
+        ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
+        ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->elements); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->elements[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->elements[i];
+            ZnesSymbol *src_elem = src_symbol->elements[i];
+            ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
             emit_data_to_code(program, src_elem, dst_elem, 0);
         }
     }
     else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
     {
-        struct ZenitNesStructSymbol *src_symbol = (struct ZenitNesStructSymbol*) source_symbol;
-        struct ZenitNesStructSymbol *dst_symbol = (struct ZenitNesStructSymbol*) nes_symbol;
+        ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
+        ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->members); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->members[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->members[i];
+            ZnesSymbol *src_elem = src_symbol->members[i];
+            ZnesSymbol *dst_elem = dst_symbol->members[i];
 
             emit_data_to_code(program, src_elem, dst_elem, 0);
         }
     }
     else
     {
-        struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+        ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
         uint16_t target_address = nes_symbol->address + offset;
 
         // FIXME: fix this suboptimal implementation
@@ -373,40 +373,40 @@ static void emit_data_to_code(struct ZenitNesProgram *program, struct ZenitNesSy
     }
 }
 
-static void emit_code_to_code(struct ZenitNesProgram *program, struct ZenitNesSymbol *source_symbol, struct ZenitNesSymbol *nes_symbol, size_t offset)
+static void emit_code_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
     if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
     {
-        struct ZenitNesArraySymbol *src_symbol = (struct ZenitNesArraySymbol*) source_symbol;
-        struct ZenitNesArraySymbol *dst_symbol = (struct ZenitNesArraySymbol*) nes_symbol;
+        ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
+        ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->elements); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->elements[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->elements[i];
+            ZnesSymbol *src_elem = src_symbol->elements[i];
+            ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
             emit_code_to_code(program, src_elem, dst_elem, 0);
         }
     }
     else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
     {
-        struct ZenitNesStructSymbol *src_symbol = (struct ZenitNesStructSymbol*) source_symbol;
-        struct ZenitNesStructSymbol *dst_symbol = (struct ZenitNesStructSymbol*) nes_symbol;
+        ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
+        ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->members); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->members[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->members[i];
+            ZnesSymbol *src_elem = src_symbol->members[i];
+            ZnesSymbol *dst_elem = dst_symbol->members[i];
 
             emit_code_to_code(program, src_elem, dst_elem, 0);
         }
     }
     else
     {
-        struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+        ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
         uint16_t target_address = nes_symbol->address + offset;
 
         // FIXME: fix this suboptimal implementation
@@ -429,40 +429,40 @@ static void emit_code_to_code(struct ZenitNesProgram *program, struct ZenitNesSy
     }
 }
 
-static void emit_code_to_zp(struct ZenitNesProgram *program, struct ZenitNesSymbol *source_symbol, struct ZenitNesSymbol *nes_symbol, size_t offset)
+static void emit_code_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
     if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
     {
-        struct ZenitNesArraySymbol *src_symbol = (struct ZenitNesArraySymbol*) source_symbol;
-        struct ZenitNesArraySymbol *dst_symbol = (struct ZenitNesArraySymbol*) nes_symbol;
+        ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
+        ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->elements); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->elements[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->elements[i];
+            ZnesSymbol *src_elem = src_symbol->elements[i];
+            ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
             emit_code_to_zp(program, src_elem, dst_elem, 0);
         }
     }
     else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
     {
-        struct ZenitNesStructSymbol *src_symbol = (struct ZenitNesStructSymbol*) source_symbol;
-        struct ZenitNesStructSymbol *dst_symbol = (struct ZenitNesStructSymbol*) nes_symbol;
+        ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
+        ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->members); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->members[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->members[i];
+            ZnesSymbol *src_elem = src_symbol->members[i];
+            ZnesSymbol *dst_elem = dst_symbol->members[i];
 
             emit_code_to_zp(program, src_elem, dst_elem, 0);
         }
     }
     else
     {
-        struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+        ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
         uint16_t target_address = nes_symbol->address + offset;
 
         // FIXME: fix this suboptimal implementation
@@ -485,40 +485,40 @@ static void emit_code_to_zp(struct ZenitNesProgram *program, struct ZenitNesSymb
     }
 }
 
-static void emit_code_to_data(struct ZenitNesProgram *program, struct ZenitNesSymbol *source_symbol, struct ZenitNesSymbol *nes_symbol, size_t offset)
+static void emit_code_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
     if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
     {
-        struct ZenitNesArraySymbol *src_symbol = (struct ZenitNesArraySymbol*) source_symbol;
-        struct ZenitNesArraySymbol *dst_symbol = (struct ZenitNesArraySymbol*) nes_symbol;
+        ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
+        ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->elements); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->elements[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->elements[i];
+            ZnesSymbol *src_elem = src_symbol->elements[i];
+            ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
             emit_code_to_data(program, src_elem, dst_elem, 0);
         }
     }
     else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
     {
-        struct ZenitNesStructSymbol *src_symbol = (struct ZenitNesStructSymbol*) source_symbol;
-        struct ZenitNesStructSymbol *dst_symbol = (struct ZenitNesStructSymbol*) nes_symbol;
+        ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
+        ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
 
         for (size_t i=0; i < fl_array_length(dst_symbol->members); i++)
         {
-            struct ZenitNesSymbol *src_elem = src_symbol->members[i];
-            struct ZenitNesSymbol *dst_elem = dst_symbol->members[i];
+            ZnesSymbol *src_elem = src_symbol->members[i];
+            ZnesSymbol *dst_elem = dst_symbol->members[i];
 
             emit_code_to_data(program, src_elem, dst_elem, 0);
         }
     }
     else
     {
-        struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+        ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
         uint16_t target_address = nes_symbol->address + offset;
 
         // FIXME: fix this suboptimal implementation
@@ -541,14 +541,14 @@ static void emit_code_to_data(struct ZenitNesProgram *program, struct ZenitNesSy
     }
 }
 
-void zenit_nes_emitter_symbol_store(struct ZenitNesProgram *program, struct ZirSymbolOperand *symbol_operand, struct ZenitNesSymbol *nes_symbol, size_t offset)
+void zenit_nes_emitter_symbol_store(ZnesProgram *program, ZirSymbolOperand *symbol_operand, ZnesSymbol *nes_symbol, size_t offset)
 {
-    struct ZenitNesSymbol *source_symbol = fl_hashtable_get(program->symbols, symbol_operand->symbol->name);
+    ZnesSymbol *source_symbol = fl_hashtable_get(program->symbols, symbol_operand->symbol->name);
 
     // If the source is a temp symbol, we need to "emit" the store in a special way
     if (source_symbol->symkind == ZENIT_NES_SYMBOL_TEMP)
     {
-        zenit_nes_emitter_temp_store(program, (struct ZenitNesTempSymbol*) source_symbol, nes_symbol, offset);
+        zenit_nes_emitter_temp_store(program, (ZnesTempSymbol*) source_symbol, nes_symbol, offset);
         return;
     }
 
@@ -571,7 +571,7 @@ void zenit_nes_emitter_symbol_store(struct ZenitNesProgram *program, struct ZirS
     }
     else if (nes_symbol->segment == ZENIT_NES_SEGMENT_DATA)
     {
-        struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+        ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
 
         if (source_symbol->segment == ZENIT_NES_SEGMENT_DATA)
         {
@@ -588,7 +588,7 @@ void zenit_nes_emitter_symbol_store(struct ZenitNesProgram *program, struct ZirS
     }
     else if (nes_symbol->segment == ZENIT_NES_SEGMENT_CODE)
     {
-        struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+        ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
 
         if (source_symbol->segment == ZENIT_NES_SEGMENT_CODE)
         {

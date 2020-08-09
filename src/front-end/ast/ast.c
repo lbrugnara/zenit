@@ -1,14 +1,14 @@
 #include "ast.h"
 
-struct ZenitAst* zenit_ast_new(struct ZenitNode **decls)
+ZenitAst* zenit_ast_new(ZenitNode **decls)
 {
-    struct ZenitAst *ast = fl_malloc(sizeof(struct ZenitAst));
+    ZenitAst *ast = fl_malloc(sizeof(ZenitAst));
     ast->decls = decls;
 
     return ast;
 }
 
-char* zenit_ast_dump(struct ZenitAst *ast)
+char* zenit_ast_dump(ZenitAst *ast)
 {
     char *output = fl_cstring_dup("(ast");
 
@@ -35,7 +35,7 @@ char* zenit_ast_dump(struct ZenitAst *ast)
  *  Frees the memory of all the declarations and the AST
  *  itself
  */
-void zenit_ast_free(struct ZenitAst *ast)
+void zenit_ast_free(ZenitAst *ast)
 {
     if (!ast)
         return;

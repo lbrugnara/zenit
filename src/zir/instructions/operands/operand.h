@@ -5,40 +5,40 @@
 #include "../../types/type.h"
 
 /*
- * Enum: enum ZirOperandType
- *  Represents the type of operands that can be part of a <struct ZirInstruction> object
+ * Enum: ZirOperandType
+ *  Represents the type of operands that can be part of a <ZirInstruction> object
  */
-enum ZirOperandType {
+typedef enum ZirOperandType {
     ZIR_OPERAND_UINT,
     ZIR_OPERAND_BOOL,
     ZIR_OPERAND_ARRAY,
     ZIR_OPERAND_STRUCT,
     ZIR_OPERAND_SYMBOL,
     ZIR_OPERAND_REFERENCE
-};
+} ZirOperandType;
 
 /*
- * Struct: struct ZirOperand
- *  Represents an operand of a <struct ZirInstruction>
+ * Struct: ZirOperand
+ *  Represents an operand of a <ZirInstruction>
  * 
  * Members:
- *  <enum ZirOperandType> type: The type of operand this object represents
+ *  <ZirOperandType> type: The type of operand this object represents
  */
-struct ZirOperand {
-    enum ZirOperandType type;
-};
+typedef struct ZirOperand {
+    ZirOperandType type;
+} ZirOperand;
 
 /*
  * Function: zir_operand_free
  *  This function frees the memory used by the operand object
  *
  * Parameters:
- *  <struct ZirOperand> *operand: Operand object from where to free some members based on the <enum ZirOperandType>
+ *  <ZirOperand> *operand: Operand object from where to free some members based on the <ZirOperandType>
  *
  * Returns:
  *  <void>: This function does not return a value
  */
-void zir_operand_free(struct ZirOperand *operand);
+void zir_operand_free(ZirOperand *operand);
 
 /*
  * Function: zir_operand_dump
@@ -51,7 +51,7 @@ void zir_operand_free(struct ZirOperand *operand);
  * ===========
  *
  * Parameters:
- *  <struct ZirOperand> *operand: Operand object
+ *  <ZirOperand> *operand: Operand object
  *  <char> *output: Output buffer
  *
  * Returns:
@@ -60,7 +60,7 @@ void zir_operand_free(struct ZirOperand *operand);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_dump(struct ZirOperand *operand, char *output);
+char* zir_operand_dump(ZirOperand *operand, char *output);
 
 /*
  * Function: zir_operand_type_dump
@@ -73,7 +73,7 @@ char* zir_operand_dump(struct ZirOperand *operand, char *output);
  * ===========
  *
  * Parameters:
- *  <struct ZirOperand> *operand: Operand object
+ *  <ZirOperand> *operand: Operand object
  *  <char> *output: Output buffer
  *
  * Returns:
@@ -82,6 +82,6 @@ char* zir_operand_dump(struct ZirOperand *operand, char *output);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_type_dump(struct ZirOperand *operand, char *output);
+char* zir_operand_type_dump(ZirOperand *operand, char *output);
 
 #endif /* ZIR_OPERAND_H */

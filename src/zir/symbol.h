@@ -5,14 +5,14 @@
 #include "types/system.h"
 
 /*
- * Struct: struct ZirSymbol
+ * Struct: ZirSymbol
  *  Represents a symbol of a ZIR program containing the identifier name and
  *  the type information.
  */
-struct ZirSymbol {
+typedef struct ZirSymbol {
     const char *name;
-    struct ZirType *type;
-};
+    ZirType *type;
+} ZirSymbol;
 
 /*
  * Function: zir_symbol_new
@@ -25,13 +25,13 @@ struct ZirSymbol {
  *  temporal - True if the symbol is a temporal object
  *
  * Returns:
- *  struct ZirSymbol* - The new symbol
+ *  ZirSymbol* - The new symbol
  * 
  * Notes:
  *  The object returned by this function must be freed with the <zir_symbol_free> function
  *
  */
-struct ZirSymbol* zir_symbol_new(const char *name, struct ZirType *type);
+ZirSymbol* zir_symbol_new(const char *name, ZirType *type);
 
 /*
  * Function: zir_symbol_free
@@ -43,7 +43,7 @@ struct ZirSymbol* zir_symbol_new(const char *name, struct ZirType *type);
  * Returns:
  *  void - This function does not return a value
  */
-void zir_symbol_free(struct ZirSymbol *symbol);
+void zir_symbol_free(ZirSymbol *symbol);
 
 /*
  * Function: zir_symbol_dump
@@ -51,7 +51,7 @@ void zir_symbol_free(struct ZirSymbol *symbol);
  *  returns a pointer to the -possibly reallocated- output
  *
  * Parameters:
- *  <struct ZirSymbol> *symbol: Symbol object to dump to the output
+ *  <ZirSymbol> *symbol: Symbol object to dump to the output
  *  <char> *output: Pointer to a heap allocated string
  *
  * Returns:
@@ -65,6 +65,6 @@ void zir_symbol_free(struct ZirSymbol *symbol);
  *      output = zir_symbol_dump(symbol, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zir_symbol_dump(struct ZirSymbol *symbol, char *output);
+char* zir_symbol_dump(ZirSymbol *symbol, char *output);
 
 #endif /* ZIR_SYMBOL_H */

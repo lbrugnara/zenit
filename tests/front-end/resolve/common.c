@@ -48,7 +48,7 @@ void zenit_test_resolve_errors(const char *source, struct ResolveTestCase *tests
     struct FlListNode *tmp = fl_list_head(ctx.errors);
     while (tmp != NULL)
     {
-        struct ZenitError *error = (struct ZenitError*) tmp->value;
+        ZenitError *error = (ZenitError*) tmp->value;
 
         fl_vexpect(error->type == tests[i].error, 
             "L%u:%u: %s (%s)",

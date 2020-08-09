@@ -10,7 +10,7 @@
  *  Frees the memory of an error object allocated with the <zenit_context_error> function
  *
  * Parameters:
- * <void> *errorptr: Pointer to a <struct ZenitError> object
+ * <void> *errorptr: Pointer to a <ZenitError> object
  *
  * Returns:
  *  void: This function does not return a value
@@ -21,7 +21,7 @@ static void error_free(void *errorptr)
     if (!errorptr)
         return;
 
-    struct ZenitError *error = (struct ZenitError*)errorptr;
+    ZenitError *error = (ZenitError*)errorptr;
 
     if (error->message)
         fl_cstring_free(error->message);
@@ -31,15 +31,15 @@ static void error_free(void *errorptr)
 
 static void error_add(FlByte **dest, const FlByte *src)
 {
-    *dest = fl_malloc(sizeof(struct ZenitError));
-    memcpy(*dest, src, sizeof(struct ZenitError));
+    *dest = fl_malloc(sizeof(ZenitError));
+    memcpy(*dest, src, sizeof(ZenitError));
 }
 
 /*
  * Function: zenit_context_new
- *  Allocates memory for a <struct ZenitSymtable> object and a <struct ZenitSourceInfo> object
+ *  Allocates memory for a <struct ZenitSymtable> object and a <ZenitSourceInfo> object
  */
-ZenitContext zenit_context_new(enum ZenitSourceType type, const char *input)
+ZenitContext zenit_context_new(ZenitSourceType type, const char *input)
 {
     ZenitContext ctx = { 
         .program = zenit_program_new(),
@@ -54,7 +54,7 @@ ZenitContext zenit_context_new(enum ZenitSourceType type, const char *input)
 /*
  * Function: zenit_context_free
  *  Releases all the memory allocated by the <zenit_context_new> function, the errors
- *  array, and also if present, this function releases the memory of the <struct ZenitAst>
+ *  array, and also if present, this function releases the memory of the <ZenitAst>
  *  object.
  */
 void zenit_context_free(ZenitContext *ctx)
@@ -82,7 +82,7 @@ void zenit_context_free(ZenitContext *ctx)
  *  Initializes the *errors* array if needed and appends a new error object to it. The memory allocated for the *errors*
  *  array and the memory allocated for each error object is freed in the <zenit_context_free> function
  */
-void zenit_context_error(ZenitContext *ctx, struct ZenitSourceLocation location, ZenitErrorType type, const char *message, ...)
+void zenit_context_error(ZenitContext *ctx, ZenitSourceLocation location, ZenitErrorType type, const char *message, ...)
 {
     if (message == NULL)
         return;
@@ -100,7 +100,7 @@ void zenit_context_error(ZenitContext *ctx, struct ZenitSourceLocation location,
     char *formatted_msg = fl_cstring_vadup(message, args);
     va_end(args);
 
-    struct ZenitError error = {
+    ZenitError error = {
         .type = type,
         .location = location,
         .message = formatted_msg
@@ -110,7 +110,7 @@ void zenit_context_error(ZenitContext *ctx, struct ZenitSourceLocation location,
 
     while (tmp != NULL)
     {
-        struct ZenitError *err = (struct ZenitError*) tmp->value;
+        ZenitError *err = (ZenitError*) tmp->value;
 
         if (error.location.filename == err->location.filename 
             && (error.location.line < err->location.line || (error.location.line == err->location.line && error.location.col < err->location.col)))
@@ -134,7 +134,7 @@ void zenit_context_print_errors(ZenitContext *ctx)
 
     while (tmp != NULL)
     {
-        struct ZenitError *error = (struct ZenitError*) tmp->value;
+        ZenitError *error = (ZenitError*) tmp->value;
 
         fprintf(stderr, "%s:%d:%d: %s\n", 
             error->location.filename, 

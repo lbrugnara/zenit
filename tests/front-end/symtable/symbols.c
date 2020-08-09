@@ -24,7 +24,7 @@ void zenit_test_symtable_api(void)
 
     // for (size_t i=0; i < count; i++)
     // {
-    //     struct ZenitSymbol *symbol = zenit_symbol_new(names[i], (struct ZenitTypeInfo*)types + i);
+    //     ZenitSymbol *symbol = zenit_symbol_new(names[i], (struct ZenitTypeInfo*)types + i);
     //     zenit_symtable_add(&table, symbol);
     // }
     
@@ -34,7 +34,7 @@ void zenit_test_symtable_api(void)
     // {
     //     fl_vexpect(zenit_symtable_has(&table, names[i]), "Symbol table must contain symbol \"%s\"", names[i]);
 
-    //     struct ZenitSymbol *symbol = zenit_symtable_get(&table, names[i]);
+    //     ZenitSymbol *symbol = zenit_symtable_get(&table, names[i]);
 
     //     fl_vexpect(flm_cstring_equals(symbol->name, names[i]), "Symbol name must match (%s)", names[i]);
     //     fl_vexpect(symbol->type.elements == types[i].elements, "Symbol elements must match (%zu)", types[i].elements);

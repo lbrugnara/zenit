@@ -1,12 +1,12 @@
 #include <fllib/Cstring.h>
 #include "block.h"
 
-struct ZirBlock* zir_block_new(const char *id, enum ZirBlockType type, struct ZirBlock *parent)
+ZirBlock* zir_block_new(const char *id, ZirBlockType type, ZirBlock *parent)
 {
-    struct ZirBlock *block = fl_malloc(sizeof(struct ZirBlock));
+    ZirBlock *block = fl_malloc(sizeof(ZirBlock));
     block->parent = parent;
-    block->instructions = fl_array_new(sizeof(struct ZirInstruction*), 0);
-    block->children = fl_array_new(sizeof(struct ZirBlock*), 0);
+    block->instructions = fl_array_new(sizeof(ZirInstruction*), 0);
+    block->children = fl_array_new(sizeof(ZirBlock*), 0);
     block->symtable = zir_symtable_new();
     block->temp_counter = 0;
     block->id = fl_cstring_dup(id);
@@ -15,7 +15,7 @@ struct ZirBlock* zir_block_new(const char *id, enum ZirBlockType type, struct Zi
     return block;
 }
 
-void zir_block_free(struct ZirBlock *block)
+void zir_block_free(ZirBlock *block)
 {
     if (!block)
         return;
@@ -46,7 +46,7 @@ void zir_block_free(struct ZirBlock *block)
     fl_free(block);
 }
 
-char* zir_block_dump(struct ZirBlock *block, char *output)
+char* zir_block_dump(ZirBlock *block, char *output)
 {
     if (block->children)
         for (size_t i=0; i < fl_array_length(block->children); i++)

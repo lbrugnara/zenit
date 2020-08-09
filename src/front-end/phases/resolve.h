@@ -18,7 +18,7 @@
  *          should contain the error(s) description
  * 
  * Notes:
- *  This function creates the <struct ZenitSymbol> entries with the information
+ *  This function creates the <ZenitSymbol> entries with the information
  *  present in the symbol definition, and performs some basic checks on user-defined
  *  types
  */

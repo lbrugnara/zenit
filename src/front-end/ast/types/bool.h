@@ -5,38 +5,38 @@
 #include "../../types/bool.h"
 
 /*
- * Struct: struct ZenitBoolTypeNode
+ * Struct: ZenitBoolTypeNode
  *  Represents a boolean type declaration in the source code
  * 
  * Members:
- *  <struct ZenitTypeNode> base: Basic information of the type node object
+ *  <ZenitTypeNode> base: Basic information of the type node object
  */
-struct ZenitBoolTypeNode {
-    struct ZenitTypeNode base;
-};
+typedef struct ZenitBoolTypeNode {
+    ZenitTypeNode base;
+} ZenitBoolTypeNode;
 
 /*
  * Function: zenit_node_type_bool_new
  *  Creates a new AST node that represents a boolean type declaration
  *
  * Parameters:
- *  <struct ZenitSourceLocation> location: Location information about the boolean type declaration
+ *  <ZenitSourceLocation> location: Location information about the boolean type declaration
  * 
  * Returns:
- *  struct ZenitBoolTypeNode*: Boolean type declaration node
+ *  ZenitBoolTypeNode*: Boolean type declaration node
  *
  * Notes:
  *  The object returned by this function must be freed using the
  *  <zenit_node_type_bool_free> function
  */
-struct ZenitBoolTypeNode* zenit_node_type_bool_new(struct ZenitSourceLocation location);
+ZenitBoolTypeNode* zenit_node_type_bool_new(ZenitSourceLocation location);
 
 /*
  * Function: zenit_node_type_bool_uid
  *  Returns a UID for the boolean type declaration node
  *
  * Parameters:
- *  <struct ZenitBoolTypeNode> *bool_type_node: Boolean type declaration node
+ *  <ZenitBoolTypeNode> *bool_type_node: Boolean type declaration node
  *
  * Returns:
  *  char*: UID of the boolean type declaration node
@@ -45,7 +45,7 @@ struct ZenitBoolTypeNode* zenit_node_type_bool_new(struct ZenitSourceLocation lo
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_type_bool_uid(struct ZenitBoolTypeNode *bool_type_node);
+char* zenit_node_type_bool_uid(ZenitBoolTypeNode *bool_type_node);
 
 /*
  * Function: zenit_node_type_bool_dump
@@ -53,7 +53,7 @@ char* zenit_node_type_bool_uid(struct ZenitBoolTypeNode *bool_type_node);
  *  returns a pointer to the -possibly reallocated- output
  *
  * Parameters:
- *  <struct ZenitBoolTypeNode> *type_node: Boolean type declaration node to dump to the output
+ *  <ZenitBoolTypeNode> *type_node: Boolean type declaration node to dump to the output
  *  <char> *output: Pointer to a heap allocated string
  *
  * Returns:
@@ -67,14 +67,14 @@ char* zenit_node_type_bool_uid(struct ZenitBoolTypeNode *bool_type_node);
  *      output = zenit_node_type_bool_dump(bool_type, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_type_bool_dump(struct ZenitBoolTypeNode *type_node, char *output);
+char* zenit_node_type_bool_dump(ZenitBoolTypeNode *type_node, char *output);
 
 /*
  * Function: zenit_node_type_bool_to_string
  *  Returns the string representation of the type declaration
  *
  * Parameters:
- *  <struct ZenitBoolTypeNode> *bool_type_node: The type node object
+ *  <ZenitBoolTypeNode> *bool_type_node: The type node object
  *
  * Returns:
  *  char*: The string representation of the type declaration
@@ -83,18 +83,18 @@ char* zenit_node_type_bool_dump(struct ZenitBoolTypeNode *type_node, char *outpu
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_type_bool_to_string(struct ZenitBoolTypeNode *bool_type_node);
+char* zenit_node_type_bool_to_string(ZenitBoolTypeNode *bool_type_node);
 
 /*
  * Function: zenit_node_type_bool_free
  *  Frees the memory used by the boolean type declaration node
  *
  * Parameters:
- *  <struct ZenitBoolTypeNode> *bool_type_node: Boolean type declaration node
+ *  <ZenitBoolTypeNode> *bool_type_node: Boolean type declaration node
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_node_type_bool_free(struct ZenitBoolTypeNode *bool_type_node);
+void zenit_node_type_bool_free(ZenitBoolTypeNode *bool_type_node);
 
 #endif /* ZENIT_AST_TYPE_BOOL_H */

@@ -7,15 +7,15 @@
 #include "instructions/variable.h"
 
 /*
- * Enum: enum ZirBlockType
+ * Enum: ZirBlockType
  *  Represents the different type of symbol tables
  * 
  */
-enum ZirBlockType {
+typedef enum ZirBlockType {
     ZIR_BLOCK_GLOBAL,
     ZIR_BLOCK_STRUCT,
     ZIR_BLOCK_FUNCTION,
-};
+} ZirBlockType;
 
 /*
  * Struct: zir_block_new
@@ -23,21 +23,21 @@ enum ZirBlockType {
  *  of instructions
  * 
  * Members:
- *  <struct ZirBlock> *parent: Pointer to the parent block
- *  <struct ZirBlock> **children: Set of children blocks
- *  <struct ZirInstruction> **instructions: Set of block instructions
- *  <struct ZirSymtable> symtable: Symbol table of the current block
+ *  <ZirBlock> *parent: Pointer to the parent block
+ *  <ZirBlock> **children: Set of children blocks
+ *  <ZirInstruction> **instructions: Set of block instructions
+ *  <ZirSymtable> symtable: Symbol table of the current block
  * 
  */
-struct ZirBlock {
+typedef struct ZirBlock {
     const char *id;
     struct ZirBlock *parent;
     struct ZirBlock **children;
-    struct ZirInstruction **instructions;
-    struct ZirSymtable symtable;
+    ZirInstruction **instructions;
+    ZirSymtable symtable;
     unsigned long long temp_counter;
-    enum ZirBlockType type;
-};
+    ZirBlockType type;
+} ZirBlock;
 
 /*
  * Function: zir_block_new
@@ -47,26 +47,26 @@ struct ZirBlock {
  *  <>  - 
  *
  * Returns:
- *  <struct ZirBlock>* - The created block object
+ *  <ZirBlock>* - The created block object
  *
  * Notes:
  *  The object returned by this function must be freed using the
  *  <zir_block_free> function
  */
-struct ZirBlock* zir_block_new(const char *id, enum ZirBlockType type, struct ZirBlock *parent);
+ZirBlock* zir_block_new(const char *id, ZirBlockType type, ZirBlock *parent);
 
 /*
  * Function: zir_block_free
  *  Releases the memory of the block object
  *
  * Parameters:
- *  <struct ZirBlock> *block - Block to be freed
+ *  <ZirBlock> *block - Block to be freed
  *
  * Returns:
  *  void - This function does not return a value
  * 
  */
-void zir_block_free(struct ZirBlock *block);
+void zir_block_free(ZirBlock *block);
 
 /*
  * Function: zir_block_dump
@@ -86,6 +86,6 @@ void zir_block_free(struct ZirBlock *block);
  *  char* - *output* pointer
  *
  */
-char* zir_block_dump(struct ZirBlock *block, char *output);
+char* zir_block_dump(ZirBlock *block, char *output);
 
 #endif /* ZIR_BLOCK_H */

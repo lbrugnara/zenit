@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-static const struct NesInstruction opcodes[] = {
+static const ZnesInstruction opcodes[] = {
     [0x00] = { NES_OP_BRK, NES_ADDR_IMM, "BRK" },
     [0x01] = { NES_OP_ORA, NES_ADDR_INX, "ORA" },
     [0x02] = { NES_OP_XXX, NES_ADDR_IMP, "???" },
@@ -261,7 +261,7 @@ static const struct NesInstruction opcodes[] = {
     [0xff] = { NES_OP_XXX, NES_ADDR_IMP, "???" },
 };
 
-uint8_t zenit_nes_opcode_lookup(enum NesOpcode opcode, enum NesAddressMode mode)
+uint8_t zenit_nes_opcode_lookup(ZnesOpcode opcode, ZnesAddressMode mode)
 {
     // FIXME: sort the opcodes or use a better algorithm to find the opcodes
     for (uint8_t i=0; i < 0xff; i++)

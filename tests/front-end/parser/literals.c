@@ -83,7 +83,7 @@ void zenit_test_parser_literal_integer_error(void)
     struct FlListNode *tmp = fl_list_head(ctx.errors);
     while (tmp != NULL)
     {
-        struct ZenitError *error = (struct ZenitError*) tmp->value;
+        ZenitError *error = (ZenitError*) tmp->value;
 
         fl_vexpect(error->location.line == 1 && error->type == ZENIT_ERROR_LARGE_INTEGER, 
             "Expected semantic error: %s at line %u:%u", error->message, error->location.line, error->location.col);

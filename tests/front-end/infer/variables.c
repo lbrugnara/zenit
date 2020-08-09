@@ -44,7 +44,7 @@ void zenit_test_infer_variable_uint(void)
 
         fl_vexpect(zenit_program_has_symbol(ctx.program, test[0]), "Symbol table must contain symbol \"%s\"", test[0]);
 
-        struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test[0]);
+        ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test[0]);
 
         fl_vexpect(flm_cstring_equals(zenit_type_to_string(symbol->type), test[1]), "Symbol %s's type must be %s", test[0], test[1]);
     }
@@ -105,7 +105,7 @@ void zenit_test_infer_variable_reference(void)
 
         fl_vexpect(zenit_program_has_symbol(ctx.program, test[0]), "Symbol table must contain symbol \"%s\"", test[0]);
 
-        struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test[0]);
+        ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test[0]);
 
         fl_vexpect(flm_cstring_equals(zenit_type_to_string(symbol->type), test[1]), "Symbol %s's type must be %s", test[0], test[1]);
     }
@@ -188,7 +188,7 @@ void zenit_test_infer_variable_array(void)
 
         fl_vexpect(zenit_program_has_symbol(ctx.program, test[0]), "Symbol table must contain symbol \"%s\"", test[0]);
 
-        struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test[0]);
+        ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test[0]);
 
         bool equals = flm_cstring_equals(zenit_type_to_string(symbol->type), test[1]);
 

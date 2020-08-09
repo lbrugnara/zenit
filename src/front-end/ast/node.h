@@ -5,10 +5,10 @@
 #include "../types/type.h"
 
 /*
- * Enum: enum ZenitNodeKind 
+ * Enum: ZenitNodeKind 
  *  Types of AST node
  */
-enum ZenitNodeKind {
+typedef enum ZenitNodeKind {
     ZENIT_NODE_UINT,
     ZENIT_NODE_BOOL,
     ZENIT_NODE_IF,
@@ -29,27 +29,27 @@ enum ZenitNodeKind {
     ZENIT_NODE_TYPE_ARRAY,
     ZENIT_NODE_TYPE_REFERENCE,
     ZENIT_NODE_TYPE_STRUCT,
-};
+} ZenitNodeKind;
 
 /*
- * Struct: struct ZenitNode
+ * Struct: ZenitNode
  *  The base node object. All the specific objects are compound with this one
  * 
  * Members:
- *  <enum ZenitNodeKind> type: The specific kind of AST node
- *  <struct ZenitSourceLocation> location: The place in the source code represented by the node
+ *  <ZenitNodeKind> type: The specific kind of AST node
+ *  <ZenitSourceLocation> location: The place in the source code represented by the node
  */
-struct ZenitNode {
-    enum ZenitNodeKind nodekind;
-    struct ZenitSourceLocation location;
-};
+typedef struct ZenitNode {
+    ZenitNodeKind nodekind;
+    ZenitSourceLocation location;
+} ZenitNode;
 
 /*
  * Function: zenit_node_uid
  *  Returns a UID for the node object
  *
  * Parameters:
- *  <struct ZenitNode> *node: Node object
+ *  <ZenitNode> *node: Node object
  *
  * Returns:
  *  <char>*: UID of the node object
@@ -58,7 +58,7 @@ struct ZenitNode {
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function.
  */
-char* zenit_node_uid(struct ZenitNode *node);
+char* zenit_node_uid(ZenitNode *node);
 
 /*
  * Function: zenit_node_dump
@@ -66,7 +66,7 @@ char* zenit_node_uid(struct ZenitNode *node);
  *  returns a pointer to the -possibly reallocated- output
  *
  * Parameters:
- *  <struct ZenitNode> *node: Node object to dump to the output
+ *  <ZenitNode> *node: Node object to dump to the output
  *  <char> *output: Pointer to a heap allocated string
  *
  * Returns:
@@ -80,7 +80,7 @@ char* zenit_node_uid(struct ZenitNode *node);
  *      output = zenit_node_dump(node, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_dump(struct ZenitNode *node, char *output);
+char* zenit_node_dump(ZenitNode *node, char *output);
 
 /*
  * Function: zenit_node_free
@@ -88,15 +88,15 @@ char* zenit_node_dump(struct ZenitNode *node, char *output);
  *  independently of the type of node
  *
  * Parameters:
- *  <struct ZenitNode> *node: Node object to free
+ *  <ZenitNode> *node: Node object to free
  *
  * Returns:
  *  <void>: This function does not return a value
  * 
  * Notes:
- *  All the objects compound with a <struct ZenitNode> object can be
+ *  All the objects compound with a <ZenitNode> object can be
  *  freed using this function
  */
-void zenit_node_free(struct ZenitNode *node);
+void zenit_node_free(ZenitNode *node);
 
 #endif /* ZENIT_AST_NODE_H */

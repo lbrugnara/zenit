@@ -18,13 +18,13 @@ typedef FlHashtable ZirAttributeMap;
 
 #define zir_attribute_map_free(attr_map) do { if (attr_map) fl_hashtable_free(attr_map); } while (0)
 
-#define zir_attribute_map_add(attr_map, attribute) ((struct ZirAttribute*) fl_hashtable_add(attr_map, attribute->name, attribute))
+#define zir_attribute_map_add(attr_map, attribute) ((ZirAttribute*) fl_hashtable_add(attr_map, attribute->name, attribute))
 
 #define zir_attribute_map_keys(attr_map) fl_hashtable_keys(attr_map)
 
-#define zir_attribute_map_values(attr_map) ((struct ZirAttribute**) fl_hashtable_values(attr_map))
+#define zir_attribute_map_values(attr_map) ((ZirAttribute**) fl_hashtable_values(attr_map))
 
-#define zir_attribute_map_get(attr_map, attribute_name) ((struct ZirAttribute*) fl_hashtable_get(attr_map, attribute_name))
+#define zir_attribute_map_get(attr_map, attribute_name) ((ZirAttribute*) fl_hashtable_get(attr_map, attribute_name))
 
 #define zir_attribute_map_length(attr_map) fl_hashtable_length(attr_map)
 

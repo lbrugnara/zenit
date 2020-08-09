@@ -25,7 +25,7 @@ void zenit_test_check_types(const char *source, const char *cases[][2], size_t l
         fl_vexpect(zenit_program_has_symbol(ctx.program, test[0]), 
             "Symbol '%s' must exist in the program", test[0]);
 
-        struct ZenitSymbol *sym = zenit_program_get_symbol(ctx.program, test[0]);
+        ZenitSymbol *sym = zenit_program_get_symbol(ctx.program, test[0]);
 
         fl_vexpect(flm_cstring_equals(test[1], zenit_type_to_string(sym->type)), 
             "Type of '%s' must be '%s'", test[0], test[1]);
@@ -66,7 +66,7 @@ void zenit_test_check_type_errors(const char *source, struct ExpectedError *case
     struct FlListNode *tmp = fl_list_head(ctx.errors);
     while (tmp != NULL)
     {
-        struct ZenitError *error = (struct ZenitError*) tmp->value;
+        ZenitError *error = (ZenitError*) tmp->value;
 
         fl_vexpect(error->type == cases[i].type, 
             cases[i].message, 

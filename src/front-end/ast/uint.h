@@ -6,7 +6,7 @@
 #include "../types/uint.h"
 
 /*
- * Union: union ZenitUintValue
+ * Union: ZenitUintValue
  *  Holds the actual unsigned integer value of the uint literal 
  * 
  * Members:
@@ -14,51 +14,51 @@
  *  <uint16_t> uint16: Holds the uint16_t representation of the uint literal
  * 
  */
-union ZenitUintValue {
+typedef union ZenitUintValue {
     uint8_t uint8;
     uint16_t uint16;
-};
+} ZenitUintValue;
 
 /*
- * Struct: struct ZenitUintNode
+ * Struct: ZenitUintNode
  *  An AST node that represents a uint literal in the source code
  * 
  * Members:
- *  <struct ZenitNode> base: Basic information of the node object
- *  <enum ZenitUintTypeSize> size: The size in bits of the uint literal
- *  <union ZenitUintValue> value: The actual value of the uint literal
+ *  <ZenitNode> base: Basic information of the node object
+ *  <ZenitUintTypeSize> size: The size in bits of the uint literal
+ *  <ZenitUintValue> value: The actual value of the uint literal
  * 
  */
-struct ZenitUintNode {
-    struct ZenitNode base;
-    enum ZenitUintTypeSize size;
-    union ZenitUintValue value;
-};
+typedef struct ZenitUintNode {
+    ZenitNode base;
+    ZenitUintTypeSize size;
+    ZenitUintValue value;
+} ZenitUintNode;
 
 /*
  * Function: zenit_node_uint_new
  *  Creates a new AST node that represents a uint literal
  *
  * Parameters:
- *  <struct ZenitSourceLocation> location: Location information about the uint literal
+ *  <ZenitSourceLocation> location: Location information about the uint literal
  *  <enum ZenitUintTypeSize0> size: The size in bits of the uint literal
- *  <union ZenitUintValue> value: The actual value of the uint literal
+ *  <ZenitUintValue> value: The actual value of the uint literal
  *
  * Returns:
- *  struct ZenitUintNode*: Uint node
+ *  ZenitUintNode*: Uint node
  *
  * Notes:
  *  The object returned by this function must be freed using the
  *  <zenit_node_uint_free> function
  */
-struct ZenitUintNode* zenit_node_uint_new(struct ZenitSourceLocation location, enum ZenitUintTypeSize size, union ZenitUintValue value);
+ZenitUintNode* zenit_node_uint_new(ZenitSourceLocation location, ZenitUintTypeSize size, ZenitUintValue value);
 
 /*
  * Function: zenit_node_uint_uid
  *  Returns a UID for the uint node
  *
  * Parameters:
- *  <struct ZenitUintNode> *uint_node: Uint node
+ *  <ZenitUintNode> *uint_node: Uint node
  *
  * Returns:
  *  char*: UID of the uint node
@@ -67,7 +67,7 @@ struct ZenitUintNode* zenit_node_uint_new(struct ZenitSourceLocation location, e
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_uint_uid(struct ZenitUintNode *uint_node);
+char* zenit_node_uint_uid(ZenitUintNode *uint_node);
 
 /*
  * Function: zenit_node_uint_dump
@@ -75,7 +75,7 @@ char* zenit_node_uint_uid(struct ZenitUintNode *uint_node);
  *  returns a pointer to the -possibly reallocated- output
  *
  * Parameters:
- *  <struct ZenitUintNode> *uint_node: Uint node to dump to the output
+ *  <ZenitUintNode> *uint_node: Uint node to dump to the output
  *  <char> *output: Pointer to a heap allocated string
  *
  * Returns:
@@ -89,18 +89,18 @@ char* zenit_node_uint_uid(struct ZenitUintNode *uint_node);
  *      output = zenit_node_uint_dump(uint, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_uint_dump(struct ZenitUintNode *uint_node, char *output);
+char* zenit_node_uint_dump(ZenitUintNode *uint_node, char *output);
 
 /*
  * Function: zenit_node_uint_free
  *  Frees the memory used by the uint node
  *
  * Parameters:
- *  <struct ZenitUintNode> *uint_node: Uint node
+ *  <ZenitUintNode> *uint_node: Uint node
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_node_uint_free(struct ZenitUintNode *uint_node);
+void zenit_node_uint_free(ZenitUintNode *uint_node);
 
 #endif /* ZENIT_AST_UINT_H */

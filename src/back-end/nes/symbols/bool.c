@@ -2,9 +2,9 @@
 #include "bool.h"
 #include "../../../zir/types/bool.h"
 
-struct ZenitNesBoolSymbol* zenit_nes_symbol_bool_new(const char *name, struct ZirBoolType *zir_bool_type, enum ZenitNesSegment segment, uint16_t address)
+ZnesBoolSymbol* zenit_nes_symbol_bool_new(const char *name, ZirBoolType *zir_bool_type, ZnesSegment segment, uint16_t address)
 {
-    struct ZenitNesBoolSymbol *bool_symbol = fl_malloc(sizeof(struct ZenitNesBoolSymbol));
+    ZnesBoolSymbol *bool_symbol = fl_malloc(sizeof(ZnesBoolSymbol));
     bool_symbol->base.address = address;
     bool_symbol->base.name = name != NULL ? fl_cstring_dup(name) : NULL;
     bool_symbol->base.segment = segment;
@@ -14,7 +14,7 @@ struct ZenitNesBoolSymbol* zenit_nes_symbol_bool_new(const char *name, struct Zi
     return bool_symbol;
 }
 
-void zenit_nes_symbol_bool_free(struct ZenitNesBoolSymbol *symbol)
+void zenit_nes_symbol_bool_free(ZnesBoolSymbol *symbol)
 {
     if (symbol->base.name)
         fl_cstring_free(symbol->base.name);

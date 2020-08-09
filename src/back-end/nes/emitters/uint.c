@@ -1,11 +1,11 @@
 #include "uint.h"
 #include "../symbols/temp.h"
 
-void zenit_nes_emitter_uint_store(struct ZenitNesProgram *program, struct ZirUintOperand *uint_operand, struct ZenitNesSymbol *nes_symbol, size_t offset)
+void zenit_nes_emitter_uint_store(ZnesProgram *program, ZirUintOperand *uint_operand, ZnesSymbol *nes_symbol, size_t offset)
 {
     uint16_t target_address = nes_symbol->address + offset;
 
-    struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+    ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
 
     // NOTE: We use a uint16_t because it can hold all the current uint values
     uint16_t uint_value = 0;

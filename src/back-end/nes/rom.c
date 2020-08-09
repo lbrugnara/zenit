@@ -2,7 +2,7 @@
 #include <fllib/IO.h>
 #include "rom.h"
 
-struct ZenitNesRom* zenit_nes_rom_new(struct ZenitNesProgram *program)
+ZnesRom* zenit_nes_rom_new(ZnesProgram *program)
 {
     //size_t data_size = fl_array_length(program->data.bytes);
     //size_t startup_size = fl_array_length(program->startup.bytes);
@@ -13,10 +13,10 @@ struct ZenitNesRom* zenit_nes_rom_new(struct ZenitNesProgram *program)
     //if (total_size < data_size || total_size < startup_size || total_size < code_size)
     //    return NULL;
 //
-    //if (total_size > sizeof(struct ZenitNesNrom256))
+    //if (total_size > sizeof(ZnesNrom256))
     //    return NULL;    
 
-    struct ZenitNesRom default_rom = {
+    ZnesRom default_rom = {
         .header = {
             .magic = { 0x4E, 0x45, 0x53, 0x1A },
             .prg_rom = 2,
@@ -28,7 +28,7 @@ struct ZenitNesRom* zenit_nes_rom_new(struct ZenitNesProgram *program)
             .flag10 = 0,
             .unused = { 0 }
         },
-        .prg_rom = (struct ZenitNesNrom256) {
+        .prg_rom = (ZnesNrom256) {
             .bank = { 0 },
             .nmi_addr = 0,
             .res_addr = 0,
@@ -37,7 +37,7 @@ struct ZenitNesRom* zenit_nes_rom_new(struct ZenitNesProgram *program)
     };
 
     // First we copy the data segment that actually uses the whole PRG-ROM (on purpose)
-    memcpy(&default_rom.prg_rom, program->data.bytes, sizeof(struct ZenitNesNrom256));
+    memcpy(&default_rom.prg_rom, program->data.bytes, sizeof(ZnesNrom256));
 
     // We need to copy the startup routine, we need to find the space for it
     if (program->startup.pc > 0)
@@ -73,13 +73,13 @@ struct ZenitNesRom* zenit_nes_rom_new(struct ZenitNesProgram *program)
 
     // FIXME: Copy the code segment
 
-    struct ZenitNesRom *rom = fl_malloc(sizeof(struct ZenitNesRom));
-    memcpy(rom, &default_rom, sizeof(struct ZenitNesRom));
+    ZnesRom *rom = fl_malloc(sizeof(ZnesRom));
+    memcpy(rom, &default_rom, sizeof(ZnesRom));
 
     return rom;
 }
 
-void zenit_nes_rom_free(struct ZenitNesRom *rom)
+void zenit_nes_rom_free(ZnesRom *rom)
 {
     if (!rom)
         return;
@@ -87,10 +87,10 @@ void zenit_nes_rom_free(struct ZenitNesRom *rom)
     fl_free(rom);
 }
 
-void zenit_nes_rom_dump(struct ZenitNesRom *rom, const char *filename)
+void zenit_nes_rom_dump(ZnesRom *rom, const char *filename)
 {
     FILE *file = fl_io_file_open(filename, "w+b");
-    fl_io_file_write_bytes(file, sizeof(struct ZenitNesFileHeader), (const FlByte*)&rom->header);
-    fl_io_file_write_bytes(file, sizeof(struct ZenitNesNrom256), (const FlByte*)&rom->prg_rom);
+    fl_io_file_write_bytes(file, sizeof(ZnesFileHeader), (const FlByte*)&rom->header);
+    fl_io_file_write_bytes(file, sizeof(ZnesNrom256), (const FlByte*)&rom->prg_rom);
     fl_io_file_close(file);
 }

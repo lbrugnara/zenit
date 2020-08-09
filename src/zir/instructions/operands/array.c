@@ -5,22 +5,22 @@
 #include "array.h"
 #include "../../types/array.h"
 
-struct ZirArrayOperand* zir_operand_array_new(struct ZirArrayType *type)
+ZirArrayOperand* zir_operand_array_new(ZirArrayType *type)
 {
-    struct ZirArrayOperand *operand = fl_malloc(sizeof(struct ZirArrayOperand));
+    ZirArrayOperand *operand = fl_malloc(sizeof(ZirArrayOperand));
     operand->base.type = ZIR_OPERAND_ARRAY;
-    operand->elements = fl_array_new(sizeof(struct ZirOperand*), 0);
+    operand->elements = fl_array_new(sizeof(ZirOperand*), 0);
     operand->type = type;
 
     return operand;
 }
 
-void zir_operand_array_add_element(struct ZirArrayOperand *array_operand, struct ZirOperand *member_operand)
+void zir_operand_array_add_element(ZirArrayOperand *array_operand, ZirOperand *member_operand)
 {
     array_operand->elements = fl_array_append(array_operand->elements, &member_operand);
 }
 
-void zir_operand_array_free(struct ZirArrayOperand *array_operand)
+void zir_operand_array_free(ZirArrayOperand *array_operand)
 {
     if (!array_operand)
         return;
@@ -33,7 +33,7 @@ void zir_operand_array_free(struct ZirArrayOperand *array_operand)
     fl_free(array_operand);
 }
 
-char* zir_operand_array_dump(struct ZirArrayOperand *array, char *output)
+char* zir_operand_array_dump(ZirArrayOperand *array, char *output)
 {
     fl_cstring_append(&output, "[ ");
     
@@ -45,7 +45,7 @@ char* zir_operand_array_dump(struct ZirArrayOperand *array, char *output)
             if (i > 0)
                 fl_cstring_append(&output, ", ");
 
-            struct ZirOperand *operand = array->elements[i];
+            ZirOperand *operand = array->elements[i];
             output = zir_operand_dump(operand, output);
         }
         fl_cstring_append(&output, " ");
@@ -56,7 +56,7 @@ char* zir_operand_array_dump(struct ZirArrayOperand *array, char *output)
     return output;
 }
 
-char* zir_operand_array_type_dump(struct ZirArrayOperand *array, char *output)
+char* zir_operand_array_type_dump(ZirArrayOperand *array, char *output)
 {
     fl_cstring_vappend(&output, "%s", zir_type_array_to_string(array->type));
     return output;

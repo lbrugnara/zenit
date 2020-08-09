@@ -3,15 +3,15 @@
 #include <fllib/Cstring.h>
 #include "bool.h"
 
-struct ZenitBoolType* zenit_type_bool_new(void)
+ZenitBoolType* zenit_type_bool_new(void)
 {
-    struct ZenitBoolType *type = fl_malloc(sizeof(struct ZenitBoolType));
+    ZenitBoolType *type = fl_malloc(sizeof(ZenitBoolType));
     type->base.typekind = ZENIT_TYPE_BOOL;
 
     return type;
 }
 
-unsigned long zenit_type_bool_hash(struct ZenitBoolType *type)
+unsigned long zenit_type_bool_hash(ZenitBoolType *type)
 {
     char *type_key = "bool";
 
@@ -24,20 +24,20 @@ unsigned long zenit_type_bool_hash(struct ZenitBoolType *type)
     return hash;
 }
 
-char* zenit_type_bool_to_string(struct ZenitBoolType *type)
+char* zenit_type_bool_to_string(ZenitBoolType *type)
 {
     return "bool";
 }
 
-bool zenit_type_bool_equals(struct ZenitBoolType *type_a, struct ZenitType *type_b)
+bool zenit_type_bool_equals(ZenitBoolType *type_a, ZenitType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
-        return (struct ZenitType*) type_a == type_b;
+        return (ZenitType*) type_a == type_b;
 
     return type_b->typekind == ZENIT_TYPE_BOOL;
 }
 
-bool zenit_type_bool_is_assignable_from(struct ZenitBoolType *target_type, struct ZenitType *from_type)
+bool zenit_type_bool_is_assignable_from(ZenitBoolType *target_type, ZenitType *from_type)
 {
     if (target_type == NULL || from_type == NULL)
         return false;
@@ -45,7 +45,7 @@ bool zenit_type_bool_is_assignable_from(struct ZenitBoolType *target_type, struc
     return from_type->typekind == ZENIT_TYPE_BOOL;
 }
 
-bool zenit_type_bool_is_castable_to(struct ZenitBoolType *bool_type, struct ZenitType *target_type)
+bool zenit_type_bool_is_castable_to(ZenitBoolType *bool_type, ZenitType *target_type)
 {
     if (target_type == NULL || target_type == NULL)
         return false;
@@ -54,7 +54,7 @@ bool zenit_type_bool_is_castable_to(struct ZenitBoolType *bool_type, struct Zeni
     return target_type->typekind == ZENIT_TYPE_BOOL;
 }
 
-bool zenit_type_bool_can_unify(struct ZenitBoolType *bool_type, struct ZenitType *type_b)
+bool zenit_type_bool_can_unify(ZenitBoolType *bool_type, ZenitType *type_b)
 {
     if (bool_type == NULL || type_b == NULL)
         return false;
@@ -68,7 +68,7 @@ bool zenit_type_bool_can_unify(struct ZenitBoolType *bool_type, struct ZenitType
     return true;
 }
 
-void zenit_type_bool_free(struct ZenitBoolType *type)
+void zenit_type_bool_free(ZenitBoolType *type)
 {
     if (!type)
         return;

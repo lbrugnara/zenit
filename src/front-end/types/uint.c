@@ -5,23 +5,23 @@
 
 static struct TypeMapping {
     char *string;
-    enum ZenitUintTypeSize size;
+    ZenitUintTypeSize size;
 } type_mappings[] = {
     { "<unknown>",  ZENIT_UINT_UNK  },
     { "uint8",      ZENIT_UINT_8    },
     { "uint16",     ZENIT_UINT_16   },
 };
 
-struct ZenitUintType* zenit_type_uint_new(enum ZenitUintTypeSize size)
+ZenitUintType* zenit_type_uint_new(ZenitUintTypeSize size)
 {
-    struct ZenitUintType *type = fl_malloc(sizeof(struct ZenitUintType));
+    ZenitUintType *type = fl_malloc(sizeof(ZenitUintType));
     type->base.typekind = ZENIT_TYPE_UINT;
     type->size = size;
 
     return type;
 }
 
-enum ZenitUintTypeSize zenit_type_uint_size_from_slice(struct FlSlice *slice)
+ZenitUintTypeSize zenit_type_uint_size_from_slice(struct FlSlice *slice)
 {
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
     {
@@ -33,7 +33,7 @@ enum ZenitUintTypeSize zenit_type_uint_size_from_slice(struct FlSlice *slice)
     return ZENIT_UINT_UNK;
 }
 
-unsigned long zenit_type_uint_hash(struct ZenitUintType *type)
+unsigned long zenit_type_uint_hash(ZenitUintType *type)
 {
     static const char *format = "[uint][s:%s]";
 
@@ -49,7 +49,7 @@ unsigned long zenit_type_uint_hash(struct ZenitUintType *type)
     return hash;
 }
 
-char* zenit_type_uint_to_string(struct ZenitUintType *type)
+char* zenit_type_uint_to_string(ZenitUintType *type)
 {
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
     {
@@ -61,18 +61,18 @@ char* zenit_type_uint_to_string(struct ZenitUintType *type)
     return NULL;
 }
 
-bool zenit_type_uint_equals(struct ZenitUintType *type_a, struct ZenitType *type_b)
+bool zenit_type_uint_equals(ZenitUintType *type_a, ZenitType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
-        return (struct ZenitType*) type_a == type_b;
+        return (ZenitType*) type_a == type_b;
 
     if (type_b->typekind != ZENIT_TYPE_UINT)
         return false;
 
-    return type_a->size == ((struct ZenitUintType*) type_b)->size;
+    return type_a->size == ((ZenitUintType*) type_b)->size;
 }
 
-bool zenit_type_uint_is_assignable_from(struct ZenitUintType *target_type, struct ZenitType *from_type)
+bool zenit_type_uint_is_assignable_from(ZenitUintType *target_type, ZenitType *from_type)
 {
     if (target_type == NULL || from_type == NULL)
         return false;
@@ -80,13 +80,13 @@ bool zenit_type_uint_is_assignable_from(struct ZenitUintType *target_type, struc
     if (from_type->typekind != ZENIT_TYPE_UINT)
         return false;
 
-    struct ZenitUintType *from_uint_type = (struct ZenitUintType*) from_type;
+    ZenitUintType *from_uint_type = (ZenitUintType*) from_type;
 
     // If the "from" size is lesser or equals than the target size, it is ok to implicit cast
     return from_uint_type->size <= target_type->size;
 }
 
-bool zenit_type_uint_is_castable_to(struct ZenitUintType *uint_type, struct ZenitType *target_type)
+bool zenit_type_uint_is_castable_to(ZenitUintType *uint_type, ZenitType *target_type)
 {
     if (target_type == NULL || target_type == NULL)
         return false;
@@ -95,7 +95,7 @@ bool zenit_type_uint_is_castable_to(struct ZenitUintType *uint_type, struct Zeni
     return target_type->typekind == ZENIT_TYPE_UINT;
 }
 
-bool zenit_type_uint_can_unify(struct ZenitUintType *uint_type, struct ZenitType *type_b)
+bool zenit_type_uint_can_unify(ZenitUintType *uint_type, ZenitType *type_b)
 {
     if (uint_type == NULL || type_b == NULL)
         return false;
@@ -109,7 +109,7 @@ bool zenit_type_uint_can_unify(struct ZenitUintType *uint_type, struct ZenitType
     return true;
 }
 
-void zenit_type_uint_free(struct ZenitUintType *type)
+void zenit_type_uint_free(ZenitUintType *type)
 {
     if (!type)
         return;

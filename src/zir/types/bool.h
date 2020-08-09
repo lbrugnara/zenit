@@ -5,15 +5,15 @@
 #include "type.h"
 
 /*
- * Struct: struct ZirBoolType
+ * Struct: ZirBoolType
  *  Represents a boolean type
  * 
  * Members:
- *  <struct ZirType> base: Base type information
+ *  <ZirType> base: Base type information
  */
-struct ZirBoolType {
-    struct ZirType base;
-};
+typedef struct ZirBoolType {
+    ZirType base;
+} ZirBoolType;
 
 /*
  * Function: zir_type_bool_new
@@ -23,32 +23,32 @@ struct ZirBoolType {
  *  This function does not take parameters
  *
  * Returns:
- *  struct ZirBoolType*: Pointer to a a boolean type object
+ *  ZirBoolType*: Pointer to a a boolean type object
  *
  * Notes:
  *  The object returned by this function must be freed using the
  *  <zir_type_bool_free> function
  */
-struct ZirBoolType* zir_type_bool_new(void);
+ZirBoolType* zir_type_bool_new(void);
 
 /*
  * Function: zir_type_bool_hash
  *  Returns a hash that identifies the boolean type object
  *
  * Parameters:
- *  <struct ZirBoolType> *type: Type object
+ *  <ZirBoolType> *type: Type object
  *
  * Returns:
  *  unsigned long: Hash code of the type object
  */
-unsigned long zir_type_bool_hash(struct ZirBoolType *type);
+unsigned long zir_type_bool_hash(ZirBoolType *type);
 
 /*
  * Function: zir_type_bool_to_string
  *  Returns a string representation of the boolean type object
  *
  * Parameters:
- *  <struct ZirBoolType> *type: Type object
+ *  <ZirBoolType> *type: Type object
  *
  * Returns:
  *  char*: String representation of the boolean type
@@ -58,20 +58,20 @@ unsigned long zir_type_bool_hash(struct ZirBoolType *type);
  *  has ownership of it, and it frees the string memory when the function <zir_type_bool_free>
  *  is used to free the memory used by the type object.
  */
-char* zir_type_bool_to_string(struct ZirBoolType *type);
+char* zir_type_bool_to_string(ZirBoolType *type);
 
 /*
  * Function: zir_type_bool_equals
  *  Check if the boolean type *type_a* is equals to the *type_b* object
  *
  * Parameters:
- *  <struct ZirBoolType> *type_a: Boolean type to compare 
- *  <struct ZirType> *type_b: Type to compare against the boolean type
+ *  <ZirBoolType> *type_a: Boolean type to compare 
+ *  <ZirType> *type_b: Type to compare against the boolean type
  *
  * Returns:
  *  bool: *true* if *type_b* is a boolean type equals to *type_a*, otherwise it returns *false*
  */
-bool zir_type_bool_equals(struct ZirBoolType *type_a, struct ZirType *type_b);
+bool zir_type_bool_equals(ZirBoolType *type_a, ZirType *type_b);
 
 /*
  * Function: zir_type_bool_is_assignable_from
@@ -79,26 +79,26 @@ bool zir_type_bool_equals(struct ZirBoolType *type_a, struct ZirType *type_b);
  *  equals to *target_type*
  *
  * Parameters:
- *  <struct ZirBoolType> *target_type: Target boolean type for the assignment
- *  <struct ZirType> *value_type: Source type of the assignment
+ *  <ZirBoolType> *target_type: Target boolean type for the assignment
+ *  <ZirType> *value_type: Source type of the assignment
  *
  * Returns:
  *  bool: *true* if an object of type *value_type* can be assigned to an object with type *target_type*,
  *        otherwise this function returns *false*.
  */
-bool zir_type_bool_is_assignable_from(struct ZirBoolType *target_type, struct ZirType *value_type);
+bool zir_type_bool_is_assignable_from(ZirBoolType *target_type, ZirType *value_type);
 
 /*
  * Function: zir_type_bool_size
  *  Returns the size needed to store an instance of the boolean type (in bytes)
  *
  * Parameters:
- *  <struct ZirBoolType> *type: Boolean type object
+ *  <ZirBoolType> *type: Boolean type object
  *
  * Returns:
  *  size_t: Size needed to store an instance of the boolean type
  */
-size_t zir_type_bool_size(struct ZirBoolType *type);
+size_t zir_type_bool_size(ZirBoolType *type);
 
 /*
  * Function: zir_type_bool_is_castable_to
@@ -106,24 +106,24 @@ size_t zir_type_bool_size(struct ZirBoolType *type);
  *  to *target_type*
  *
  * Parameters:
- *  <struct ZirBoolType> *bool_type: Source type of the cast
- *  <struct ZirType> *target_type: Target type of the cast
+ *  <ZirBoolType> *bool_type: Source type of the cast
+ *  <ZirType> *target_type: Target type of the cast
  *
  * Returns:
  *  bool: *true* if the boolean type can be casted to a *target_type*, otherwise *false*
  */
-bool zir_type_bool_is_castable_to(struct ZirBoolType *bool_type, struct ZirType *target_type);
+bool zir_type_bool_is_castable_to(ZirBoolType *bool_type, ZirType *target_type);
 
 /*
  * Function: zir_type_bool_free
  *  Frees the memory of the boolean type object
  *
  * Parameters:
- *  <struct ZirBoolType> *type: Type object
+ *  <ZirBoolType> *type: Type object
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zir_type_bool_free(struct ZirBoolType *type);
+void zir_type_bool_free(ZirBoolType *type);
 
 #endif /* ZIR_TYPE_BOOL_H */

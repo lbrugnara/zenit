@@ -65,13 +65,13 @@ static char *sync_chars[] = { "//", "/*" };
  *  Returns *true* if there is still input to process
  *
  * Parameters:
- *  <struct ZenitLexer> *lexer: Lexer object
+ *  <ZenitLexer> *lexer: Lexer object
  *
  * Returns:
  *  <bool>: *true* if there is input pending to process
  *
  */
-static inline bool has_input(struct ZenitLexer *lexer)
+static inline bool has_input(ZenitLexer *lexer)
 {
     return lexer->index < lexer->srcinfo->source.length;
 }
@@ -82,13 +82,13 @@ static inline bool has_input(struct ZenitLexer *lexer)
  *  actually consuming it
  *
  * Parameters:
- *  <struct ZenitLexer> *lexer: Lexer object
+ *  <ZenitLexer> *lexer: Lexer object
  *
  * Returns:
  *  <char>: Current character pointed by the lexer's internal pointer
  *
  */
-static inline char peek(struct ZenitLexer *lexer)
+static inline char peek(ZenitLexer *lexer)
 {
     return lexer->srcinfo->source.content[lexer->index];
 }
@@ -100,7 +100,7 @@ static inline char peek(struct ZenitLexer *lexer)
  *  this function returns the NULL character ('\0')
  *
  * Parameters:
- *  <struct ZenitLexer> *lexer: Lexer object
+ *  <ZenitLexer> *lexer: Lexer object
  *  <size_t> index: Offset
  *
  * Returns:
@@ -108,7 +108,7 @@ static inline char peek(struct ZenitLexer *lexer)
  *          or NULL if *index* falls outside of the valid range.
  *
  */
-static inline char peek_at(struct ZenitLexer *lexer, size_t index)
+static inline char peek_at(ZenitLexer *lexer, size_t index)
 {
     if (lexer->index + index >= lexer->srcinfo->source.length)
         return '\0';
@@ -124,14 +124,14 @@ static inline char peek_at(struct ZenitLexer *lexer, size_t index)
  *  is NULL to indicate that is not possible to peek that much number of characters
  *
  * Parameters:
- *  <struct ZenitLexer> *lexer: Lexer object
+ *  <ZenitLexer> *lexer: Lexer object
  *  <size_t> n: Elements to take from the current internal pointer.
  *
  * Returns:
  *  <struct FlSlice>: Slice of characters
  *
  */
-static inline struct FlSlice peek_many(struct ZenitLexer *lexer, size_t n)
+static inline struct FlSlice peek_many(ZenitLexer *lexer, size_t n)
 {
     if (lexer->index + n >= lexer->srcinfo->source.length)
         return (struct FlSlice){ .sequence = NULL };
@@ -147,7 +147,7 @@ static inline struct FlSlice peek_many(struct ZenitLexer *lexer, size_t n)
  *  is NULL to indicate that is not possible to peek that much number of characters
  *
  * Parameters:
- *  <struct ZenitLexer> *lexer: Lexer object
+ *  <ZenitLexer> *lexer: Lexer object
  *  <size_t> offset: Number of elements to skip
  *  <size_t> n: Elements to take from the current internal pointer.
  *
@@ -155,7 +155,7 @@ static inline struct FlSlice peek_many(struct ZenitLexer *lexer, size_t n)
  *  <struct FlSlice>: Slice of characters
  *
  */
-static inline struct FlSlice peek_many_at(struct ZenitLexer *lexer, size_t offset, size_t n)
+static inline struct FlSlice peek_many_at(ZenitLexer *lexer, size_t offset, size_t n)
 {
     if (lexer->index + offset + n >= lexer->srcinfo->source.length)
         return (struct FlSlice){ .sequence = NULL };
@@ -168,13 +168,13 @@ static inline struct FlSlice peek_many_at(struct ZenitLexer *lexer, size_t offse
  *  Returns the current character and increments the internal pointer
  *
  * Parameters:
- *  <struct ZenitLexer> *lexer: Lexer object
+ *  <ZenitLexer> *lexer: Lexer object
  *
  * Returns:
  *  <char>: Character that has been consumed
  *
  */
-static inline char consume(struct ZenitLexer *lexer)
+static inline char consume(ZenitLexer *lexer)
 {
     lexer->srcinfo->location.col++;
     return lexer->srcinfo->source.content[lexer->index++];
@@ -187,14 +187,14 @@ static inline char consume(struct ZenitLexer *lexer)
  *  occurs
  *
  * Parameters:
- *  <struct ZenitLexer> *lexer: Lexer object
+ *  <ZenitLexer> *lexer: Lexer object
  *  <size_t> offset: Number of elements to skip from the current pointer source
  *
  * Returns:
  *  <bool>: *true* if the character (or group of chars) is a synchronization character
  *
  */
-static inline bool is_sync_character(struct ZenitLexer *lexer, size_t offset)
+static inline bool is_sync_character(ZenitLexer *lexer, size_t offset)
 {
     char c = peek_at(lexer, offset);
 
@@ -221,13 +221,13 @@ static inline bool is_sync_character(struct ZenitLexer *lexer, size_t offset)
  *  fetching something that doesn't fall in that category
  *
  * Parameters:
- *  <struct ZenitLexer> *lexer: Lexer object
+ *  <ZenitLexer> *lexer: Lexer object
  *
  * Returns:
  *  <void>: This function does not return a value
  *
  */
-static inline void remove_ws_and_comments(struct ZenitLexer *lexer)
+static inline void remove_ws_and_comments(ZenitLexer *lexer)
 {
     while(has_input(lexer))
     {
@@ -305,20 +305,20 @@ static inline void remove_ws_and_comments(struct ZenitLexer *lexer)
  *  (consumes) *chars* time.
  *
  * Parameters:
- *  <struct ZenitLexer> *lexer: Lexer object
- *  <enum ZenitTokenType> type: Token's type.
+ *  <ZenitLexer> *lexer: Lexer object
+ *  <ZenitTokenType> type: Token's type.
  *  <size_t> n_chars: Number of characters to consume as part of the token.
  *
  * Returns:
- *  <struct ZenitToken>: Token object
+ *  <ZenitToken>: Token object
  *
  */
-static inline struct ZenitToken create_token(struct ZenitLexer *lexer, enum ZenitTokenType type, size_t n_chars)
+static inline ZenitToken create_token(ZenitLexer *lexer, ZenitTokenType type, size_t n_chars)
 {
     // Current pointer position
     FlByte *starts = (FlByte*)lexer->srcinfo->source.content + lexer->index;    
 
-    struct ZenitToken token = { 
+    ZenitToken token = { 
         .type = type,
         .value = fl_slice_new(starts, sizeof(char), 0, n_chars),
         .location = lexer->srcinfo->location
@@ -333,21 +333,21 @@ static inline struct ZenitToken create_token(struct ZenitLexer *lexer, enum Zeni
 
 /* Public API */
 
-struct ZenitLexer zenit_lexer_new(struct ZenitSourceInfo *srcinfo)
+ZenitLexer zenit_lexer_new(ZenitSourceInfo *srcinfo)
 {
-    return (struct ZenitLexer) {
+    return (ZenitLexer) {
         .index = 0,
         .srcinfo = srcinfo
     };
 }
 
-struct ZenitToken* zenit_lexer_tokenize(struct ZenitLexer *lexer)
+ZenitToken* zenit_lexer_tokenize(ZenitLexer *lexer)
 {
-    FlVector *tempvec = flm_vector_new_with(.element_size = sizeof(struct ZenitToken), .capacity = 1000);
+    FlVector *tempvec = flm_vector_new_with(.element_size = sizeof(ZenitToken), .capacity = 1000);
 
     while (has_input(lexer))
     {
-        struct ZenitToken token = zenit_lexer_consume(lexer);
+        ZenitToken token = zenit_lexer_consume(lexer);
 
         if (token.type == ZENIT_TOKEN_EOF)
             break;
@@ -357,19 +357,19 @@ struct ZenitToken* zenit_lexer_tokenize(struct ZenitLexer *lexer)
         remove_ws_and_comments(lexer);
     }
 
-    struct ZenitToken* tokens = fl_vector_to_array(tempvec);
+    ZenitToken* tokens = fl_vector_to_array(tempvec);
 
     fl_vector_free(tempvec);
 
     return tokens;
 }
 
-struct ZenitToken zenit_lexer_consume(struct ZenitLexer *lexer)
+ZenitToken zenit_lexer_consume(ZenitLexer *lexer)
 {
     remove_ws_and_comments(lexer);
 
     if (!has_input(lexer))
-        return (struct ZenitToken){ .type = ZENIT_TOKEN_EOF };
+        return (ZenitToken){ .type = ZENIT_TOKEN_EOF };
 
     while (has_input(lexer))
     {
@@ -457,7 +457,7 @@ struct ZenitToken zenit_lexer_consume(struct ZenitLexer *lexer)
             while (is_number(peek_at(lexer, chars)) || is_alpha(peek_at(lexer, chars)) || peek_at(lexer, chars) == '_' || peek_at(lexer, chars) == '-')
                 chars++;
 
-            struct ZenitToken token = create_token(lexer, ZENIT_TOKEN_ID, chars);
+            ZenitToken token = create_token(lexer, ZENIT_TOKEN_ID, chars);
 
             if (is_reserved_keyword(&token.value, "var"))
                 token.type = ZENIT_TOKEN_VAR;
@@ -490,7 +490,7 @@ struct ZenitToken zenit_lexer_consume(struct ZenitLexer *lexer)
     return create_token(lexer, ZENIT_TOKEN_UNKNOWN, sync_chars);
 }
 
-struct ZenitToken zenit_lexer_peek(struct ZenitLexer *lexer)
+ZenitToken zenit_lexer_peek(ZenitLexer *lexer)
 {
     // Save the lexer state
     unsigned int index = lexer->index;
@@ -500,7 +500,7 @@ struct ZenitToken zenit_lexer_peek(struct ZenitLexer *lexer)
     // Get the next token
     // FIXME: We should buffer consumed tokens, by now
     // for simplicity it is ok to use this
-    struct ZenitToken token = zenit_lexer_consume(lexer);
+    ZenitToken token = zenit_lexer_consume(lexer);
     
     // Restore the lexer state
     lexer->index = index;

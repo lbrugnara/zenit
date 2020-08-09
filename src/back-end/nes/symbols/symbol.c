@@ -9,24 +9,24 @@
 #include "uint.h"
 #include "temp.h"
 
-struct ZenitNesSymbol* zenit_nes_symbol_new(const char *name, struct ZirType *zir_type, enum ZenitNesSegment segment, uint16_t address)
+ZnesSymbol* zenit_nes_symbol_new(const char *name, ZirType *zir_type, ZnesSegment segment, uint16_t address)
 {
     switch (zir_type->typekind)
     {
         case ZIR_TYPE_UINT:
-            return (struct ZenitNesSymbol*) zenit_nes_symbol_uint_new(name, (struct ZirUintType*) zir_type, segment, address);
+            return (ZnesSymbol*) zenit_nes_symbol_uint_new(name, (ZirUintType*) zir_type, segment, address);
 
         case ZIR_TYPE_BOOL:
-            return (struct ZenitNesSymbol*) zenit_nes_symbol_bool_new(name, (struct ZirBoolType*) zir_type, segment, address);
+            return (ZnesSymbol*) zenit_nes_symbol_bool_new(name, (ZirBoolType*) zir_type, segment, address);
 
         case ZIR_TYPE_ARRAY:
-            return (struct ZenitNesSymbol*) zenit_nes_symbol_array_new(name, (struct ZirArrayType*) zir_type, segment, address);
+            return (ZnesSymbol*) zenit_nes_symbol_array_new(name, (ZirArrayType*) zir_type, segment, address);
 
         case ZIR_TYPE_REFERENCE:
-            return (struct ZenitNesSymbol*) zenit_nes_symbol_reference_new(name, (struct ZirReferenceType*) zir_type, segment, address);
+            return (ZnesSymbol*) zenit_nes_symbol_reference_new(name, (ZirReferenceType*) zir_type, segment, address);
 
         case ZIR_TYPE_STRUCT:
-            return (struct ZenitNesSymbol*) zenit_nes_symbol_struct_new(name, (struct ZirStructType*) zir_type, segment, address);
+            return (ZnesSymbol*) zenit_nes_symbol_struct_new(name, (ZirStructType*) zir_type, segment, address);
 
         case ZIR_TYPE_NONE:
             return NULL;
@@ -35,32 +35,32 @@ struct ZenitNesSymbol* zenit_nes_symbol_new(const char *name, struct ZirType *zi
     return NULL;
 }
 
-void zenit_nes_symbol_free(struct ZenitNesSymbol *symbol)
+void zenit_nes_symbol_free(ZnesSymbol *symbol)
 {
     switch (symbol->symkind)
     {
         case ZENIT_NES_SYMBOL_UINT:
-            zenit_nes_symbol_uint_free((struct ZenitNesUintSymbol*) symbol);
+            zenit_nes_symbol_uint_free((ZnesUintSymbol*) symbol);
             break;
 
         case ZENIT_NES_SYMBOL_BOOL:
-            zenit_nes_symbol_bool_free((struct ZenitNesBoolSymbol*) symbol);
+            zenit_nes_symbol_bool_free((ZnesBoolSymbol*) symbol);
             break;
 
         case ZENIT_NES_SYMBOL_ARRAY:
-            zenit_nes_symbol_array_free((struct ZenitNesArraySymbol*) symbol);
+            zenit_nes_symbol_array_free((ZnesArraySymbol*) symbol);
             break;
 
         case ZENIT_NES_SYMBOL_STRUCT:
-            zenit_nes_symbol_struct_free((struct ZenitNesStructSymbol*) symbol);
+            zenit_nes_symbol_struct_free((ZnesStructSymbol*) symbol);
             break;
 
         case ZENIT_NES_SYMBOL_REFERENCE:
-            zenit_nes_symbol_reference_free((struct ZenitNesReferenceSymbol*) symbol);
+            zenit_nes_symbol_reference_free((ZnesReferenceSymbol*) symbol);
             break;
 
         case ZENIT_NES_SYMBOL_TEMP:
-            zenit_nes_symbol_temp_free((struct ZenitNesTempSymbol*) symbol);
+            zenit_nes_symbol_temp_free((ZnesTempSymbol*) symbol);
             break;
 
         default:

@@ -6,84 +6,84 @@
 #include "ast/ast.h"
 
 /*
- * Struct: struct ZenitParser
+ * Struct: ZenitParser
  *  Object to keep track of the parsing process
  */
-struct ZenitParser {
-    struct ZenitLexer lexer;
-};
+typedef struct ZenitParser {
+    ZenitLexer lexer;
+} ZenitParser;
 
 /*
  * Function: zenit_parser_new
  *  Returns a parser object ready to parse the provided source.
  *
  * Parameters:
- *  <struct ZenitSourceInfo> *srcinfo: Object that keeps track of the source information
+ *  <ZenitSourceInfo> *srcinfo: Object that keeps track of the source information
  *
  * Returns:
- *  <struct ZenitParser>: Parser object
+ *  <ZenitParser>: Parser object
  *
  */
-struct ZenitParser zenit_parser_new(struct ZenitSourceInfo *srcinfo);
+ZenitParser zenit_parser_new(ZenitSourceInfo *srcinfo);
 
 /*
  * Function: zenit_parser_peek
  *  Peeks without consuming the next available token
  *
  * Parameters:
- *  <struct ZenitParser> *parser: Parser object
- *  <struct ZenitToken> *token: If not NULL the peeked token is copied to it
+ *  <ZenitParser> *parser: Parser object
+ *  <ZenitToken> *token: If not NULL the peeked token is copied to it
  *
  * Returns:
  *  <void>: This function does not return a value
  *
  */
-void zenit_parser_peek(struct ZenitParser *parser, struct ZenitToken *token);
+void zenit_parser_peek(ZenitParser *parser, ZenitToken *token);
 
 /*
  * Function: zenit_parser_next_is
  *  Returns if the next available token matches with the provided token type
  *
  * Parameters:
- *  <struct ZenitParser> *parser: Parser object
- *  <enum ZenitTokenType> token_type: Expected token type
+ *  <ZenitParser> *parser: Parser object
+ *  <ZenitTokenType> token_type: Expected token type
  * 
  * Returns:
  *  <bool>: *true* if the token type matches, otherwise this function returns *false*.
  * 
  */
-bool zenit_parser_next_is(struct ZenitParser *parser, enum ZenitTokenType token_type);
+bool zenit_parser_next_is(ZenitParser *parser, ZenitTokenType token_type);
 
 /*
  * Function: zenit_parser_consume
  *  Consumes the next available token
  *
  * Parameters:
- *  <struct ZenitParser> *parser: Parser object
+ *  <ZenitParser> *parser: Parser object
  *
  * Returns:
- *  <struct ZenitToken>: The consumed token
+ *  <ZenitToken>: The consumed token
  *
  */
-struct ZenitToken zenit_parser_consume(struct ZenitParser *parser);
+ZenitToken zenit_parser_consume(ZenitParser *parser);
 
 /*
  * Function: zenit_parser_expects
- *  If the type of the next available token matches with the provided <enum ZenitTokenType>
+ *  If the type of the next available token matches with the provided <ZenitTokenType>
  *  the parser consumes the token, if *consumed_token* is not NULL copies the consumed token
  *  to it, and returns *true*. If the type does not match this function returns *false* without
  *  consuming anything.
  *
  * Parameters:
- *  <struct ZenitParser> *parser: Parser object
- *  <enum ZenitTokenType> type: Expected token type
- *  <struct ZenitToken> *consumed_token: If not NULL and the types match, the consumed token will be copied to it
+ *  <ZenitParser> *parser: Parser object
+ *  <ZenitTokenType> type: Expected token type
+ *  <ZenitToken> *consumed_token: If not NULL and the types match, the consumed token will be copied to it
  *
  * Returns:
  *  <bool>: *true* if the next token's type matches the provided type.
  *
  */
-bool zenit_parser_expects(struct ZenitParser *parser, enum ZenitTokenType type, struct ZenitToken *consumed_token);
+bool zenit_parser_expects(ZenitParser *parser, ZenitTokenType type, ZenitToken *consumed_token);
 
 /*
  * Function: zenit_parser_consume_if
@@ -92,25 +92,25 @@ bool zenit_parser_expects(struct ZenitParser *parser, enum ZenitTokenType type, 
  *  remains in the same position and returns false
  *
  * Parameters:
- *  <struct ZenitParser> *parser: Parser object
- *  <enum ZenitTokenType> type: Expected type of the following token
+ *  <ZenitParser> *parser: Parser object
+ *  <ZenitTokenType> type: Expected type of the following token
  *
  * Returns:
  *  <bool>: *true* if the following token matches the *type*, otherwise *false*.
  */
-bool zenit_parser_consume_if(struct ZenitParser *parser, enum ZenitTokenType type);
+bool zenit_parser_consume_if(ZenitParser *parser, ZenitTokenType type);
 
 /*
  * Function: zenit_parser_has_input
  *  Returns *true* if there is pending input to process by the parser
  *
  * Parameters:
- *  <struct ZenitParser> *parser: Parser object
+ *  <ZenitParser> *parser: Parser object
  *
  * Returns:
  *  <bool>: *true* if there is pending input, otherwise *false*.
  *
  */
-bool zenit_parser_has_input(struct ZenitParser *parser);
+bool zenit_parser_has_input(ZenitParser *parser);
 
 #endif /* ZENIT_PARSER_H */

@@ -10,7 +10,7 @@ static void member_free(void *ptr)
     if (!ptr)
         return;
 
-    struct ZirStructOperandMember *member = (struct ZirStructOperandMember*) ptr;
+    ZirStructOperandMember *member = (ZirStructOperandMember*) ptr;
     
     if (member->name)
         fl_cstring_free(member->name);
@@ -18,25 +18,25 @@ static void member_free(void *ptr)
     fl_free(member);
 }
 
-struct ZirStructOperand* zir_operand_struct_new(struct ZirStructType *type)
+ZirStructOperand* zir_operand_struct_new(ZirStructType *type)
 {
-    struct ZirStructOperand *operand = fl_malloc(sizeof(struct ZirStructOperand));
+    ZirStructOperand *operand = fl_malloc(sizeof(ZirStructOperand));
     operand->base.type = ZIR_OPERAND_STRUCT;
-    operand->members = fl_array_new(sizeof(struct ZirOperand*), 0);
+    operand->members = fl_array_new(sizeof(ZirOperand*), 0);
     operand->type = type;
 
     return operand;
 }
 
-void zir_operand_struct_add_member(struct ZirStructOperand *struct_operand, const char *name, struct ZirOperand *member_operand)
+void zir_operand_struct_add_member(ZirStructOperand *struct_operand, const char *name, ZirOperand *member_operand)
 {
-    struct ZirStructOperandMember *member = fl_malloc(sizeof(struct ZirStructOperandMember));
+    ZirStructOperandMember *member = fl_malloc(sizeof(ZirStructOperandMember));
     member->name = fl_cstring_dup(name);
     member->operand = member_operand;
     struct_operand->members = fl_array_append(struct_operand->members, &member);
 }
 
-void zir_operand_struct_free(struct ZirStructOperand *struct_operand)
+void zir_operand_struct_free(ZirStructOperand *struct_operand)
 {
     if (!struct_operand)
         return;
@@ -49,7 +49,7 @@ void zir_operand_struct_free(struct ZirStructOperand *struct_operand)
     fl_free(struct_operand);
 }
 
-char* zir_operand_struct_dump(struct ZirStructOperand *struct_operand, char *output)
+char* zir_operand_struct_dump(ZirStructOperand *struct_operand, char *output)
 {
     fl_cstring_append(&output, "{ ");
     
@@ -61,7 +61,7 @@ char* zir_operand_struct_dump(struct ZirStructOperand *struct_operand, char *out
             if (i > 0)
                 fl_cstring_append(&output, ", ");
 
-            struct ZirStructOperandMember *member = struct_operand->members[i];
+            ZirStructOperandMember *member = struct_operand->members[i];
             fl_cstring_vappend(&output, "%s: ", member->name);
             output = zir_operand_dump(member->operand, output);
         }
@@ -73,7 +73,7 @@ char* zir_operand_struct_dump(struct ZirStructOperand *struct_operand, char *out
     return output;
 }
 
-char* zir_operand_struct_type_dump(struct ZirStructOperand *struct_operand, char *output)
+char* zir_operand_struct_type_dump(ZirStructOperand *struct_operand, char *output)
 {
     fl_cstring_vappend(&output, "%s", zir_type_struct_to_string(struct_operand->type));
     return output;

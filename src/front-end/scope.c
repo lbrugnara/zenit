@@ -1,11 +1,11 @@
 #include <fllib/Cstring.h>
 #include "scope.h"
 
-struct ZenitScope* zenit_scope_new(const char *id, enum ZenitScopeType type, struct ZenitScope *parent)
+ZenitScope* zenit_scope_new(const char *id, ZenitScopeType type, ZenitScope *parent)
 {
-    struct ZenitScope *scope = fl_malloc(sizeof(struct ZenitScope));
+    ZenitScope *scope = fl_malloc(sizeof(ZenitScope));
     scope->parent = parent;
-    scope->children = fl_array_new(sizeof(struct ZenitScope*), 0);
+    scope->children = fl_array_new(sizeof(ZenitScope*), 0);
     scope->symtable = zenit_symtable_new();
     scope->temp_counter = 0;
     scope->id = fl_cstring_dup(id);
@@ -14,7 +14,7 @@ struct ZenitScope* zenit_scope_new(const char *id, enum ZenitScopeType type, str
     return scope;
 }
 
-void zenit_scope_free(struct ZenitScope *scope)
+void zenit_scope_free(ZenitScope *scope)
 {
     if (!scope)
         return;
@@ -35,37 +35,37 @@ void zenit_scope_free(struct ZenitScope *scope)
     fl_free(scope);
 }
 
-bool zenit_scope_has_symbol(struct ZenitScope *scope, const char *symbol_name)
+bool zenit_scope_has_symbol(ZenitScope *scope, const char *symbol_name)
 {
     return zenit_symtable_has(&scope->symtable, symbol_name);
 }
 
-struct ZenitSymbol* zenit_scope_add_symbol(struct ZenitScope *scope, struct ZenitSymbol *symbol)
+ZenitSymbol* zenit_scope_add_symbol(ZenitScope *scope, ZenitSymbol *symbol)
 {
     return zenit_symtable_add(&scope->symtable, symbol);
 }
 
-struct ZenitSymbol* zenit_scope_get_symbol(struct ZenitScope *scope, const char *symbol_name)
+ZenitSymbol* zenit_scope_get_symbol(ZenitScope *scope, const char *symbol_name)
 {
     return zenit_symtable_get(&scope->symtable, symbol_name);
 }
 
-struct ZenitSymbol** zenit_scope_get_symbols(struct ZenitScope *scope, bool include_temporals)
+ZenitSymbol** zenit_scope_get_symbols(ZenitScope *scope, bool include_temporals)
 {
     return zenit_symtable_get_all(&scope->symtable, include_temporals);
 }
 
-struct ZenitSymbol* zenit_scope_remove_symbol(struct ZenitScope *scope, const char *symbol_name)
+ZenitSymbol* zenit_scope_remove_symbol(ZenitScope *scope, const char *symbol_name)
 {
     return zenit_symtable_remove(&scope->symtable, symbol_name);
 }
 
-bool zenit_scope_has_symbols(struct ZenitScope *scope)
+bool zenit_scope_has_symbols(ZenitScope *scope)
 {
     return !zenit_symtable_is_empty(&scope->symtable);
 }
 
-char* zenit_scope_dump(struct ZenitScope *scope, char *output, bool verbose)
+char* zenit_scope_dump(ZenitScope *scope, char *output, bool verbose)
 {
     fl_cstring_append(&output, "(scope ");
 

@@ -2,9 +2,9 @@
 #include <fllib/Cstring.h>
 #include "if.h"
 
-struct ZenitIfNode* zenit_node_if_new(struct ZenitSourceLocation location, struct ZenitNode *condition, struct ZenitNode *then_branch, struct ZenitNode *else_branch)
+ZenitIfNode* zenit_node_if_new(ZenitSourceLocation location, ZenitNode *condition, ZenitNode *then_branch, ZenitNode *else_branch)
 {
-    struct ZenitIfNode *if_node = fl_malloc(sizeof(struct ZenitIfNode));
+    ZenitIfNode *if_node = fl_malloc(sizeof(ZenitIfNode));
     if_node->base.nodekind = ZENIT_NODE_IF;
     if_node->base.location = location;
     if_node->condition = condition;
@@ -14,7 +14,7 @@ struct ZenitIfNode* zenit_node_if_new(struct ZenitSourceLocation location, struc
     return if_node;
 }
 
-char* zenit_node_if_uid(struct ZenitIfNode *if_node)
+char* zenit_node_if_uid(ZenitIfNode *if_node)
 {
     if (!if_node)
         return NULL;
@@ -22,7 +22,7 @@ char* zenit_node_if_uid(struct ZenitIfNode *if_node)
     return fl_cstring_vdup("%%L%u:C%u_if", if_node->base.location.line, if_node->base.location.col);
 }
 
-char* zenit_node_if_dump(struct ZenitIfNode *if_node, char *output)
+char* zenit_node_if_dump(ZenitIfNode *if_node, char *output)
 {
     fl_cstring_append(&output, "(if ");
     output = zenit_node_dump(if_node->condition, output);
@@ -42,7 +42,7 @@ char* zenit_node_if_dump(struct ZenitIfNode *if_node, char *output)
 
 /*
  * Function: zenit_node_if_free
- *  Frees the memory of a <struct ZenitIfNode> object
+ *  Frees the memory of a <ZenitIfNode> object
  *
  * Parameters:
  *  if_node - Node object
@@ -50,7 +50,7 @@ char* zenit_node_if_dump(struct ZenitIfNode *if_node, char *output)
  * Returns:
  *  void - This function does not return a value
  */
-void zenit_node_if_free(struct ZenitIfNode *if_node)
+void zenit_node_if_free(ZenitIfNode *if_node)
 {
     if (!if_node)
         return;

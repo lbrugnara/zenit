@@ -3,49 +3,49 @@
 
 #include <stdbool.h>
 #include "node.h"
-#include "../types/type.h"
+#include "types/type.h"
 
 /*
- * Struct: struct ZenitCastNode
+ * Struct: ZenitCastNode
  *  Represents a cast in the source code
  * 
  * Members:
- *  <struct ZenitNode> base: Basic information of the node object
- *  <struct ZenitTypeNode> *type_decl: The type declaration node associated to the cast expression
- *  <struct ZenitNode> *expression: Pointer to an AST node that represents the expression being casted
+ *  <ZenitNode> base: Basic information of the node object
+ *  <ZenitTypeNode> *type_decl: The type declaration node associated to the cast expression
+ *  <ZenitNode> *expression: Pointer to an AST node that represents the expression being casted
  *  <bool> implicit: Determines if the cast is explicit in the source code or implicit (like an upcast)
  */
-struct ZenitCastNode {
-    struct ZenitNode base;
-    struct ZenitTypeNode *type_decl;
-    struct ZenitNode *expression;
+typedef struct ZenitCastNode {
+    ZenitNode base;
+    ZenitTypeNode *type_decl;
+    ZenitNode *expression;
     bool implicit;
-};
+} ZenitCastNode;
 
 /*
  * Function: zenit_node_cast_new
  *  Creates a new AST node that represents a cast expression
  *
  * Parameters:
- *  <struct ZenitSourceLocation> location: Location information about the cast expression
- *  <struct ZenitNode> *expression: A node that represents the expression being casted
+ *  <ZenitSourceLocation> location: Location information about the cast expression
+ *  <ZenitNode> *expression: A node that represents the expression being casted
  *  <bool> implicit: Determines the type of cast
  *
  * Returns:
- *  struct ZenitCastNode*: Cast node
+ *  ZenitCastNode*: Cast node
  *
  * Notes:
  *  The object returned by this function must be freed using the
  *  <zenit_node_cast_free> function
  */
-struct ZenitCastNode* zenit_node_cast_new(struct ZenitSourceLocation location, struct ZenitNode *expression, bool implicit);
+ZenitCastNode* zenit_node_cast_new(ZenitSourceLocation location, ZenitNode *expression, bool implicit);
 
 /*
  * Function: zenit_node_cast_uid
  *  Returns a UID for the cast node
  *
  * Parameters:
- *  <struct ZenitCastNode> *cast: Cast node
+ *  <ZenitCastNode> *cast: Cast node
  *
  * Returns:
  *  char*: UID of the cast node
@@ -54,7 +54,7 @@ struct ZenitCastNode* zenit_node_cast_new(struct ZenitSourceLocation location, s
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_cast_uid(struct ZenitCastNode *cast);
+char* zenit_node_cast_uid(ZenitCastNode *cast);
 
 /*
  * Function: zenit_node_cast_dump
@@ -62,7 +62,7 @@ char* zenit_node_cast_uid(struct ZenitCastNode *cast);
  *  returns a pointer to the -possibly reallocated- output
  *
  * Parameters:
- *  <struct ZenitCastNode> *cast: Cast node to dump to the output
+ *  <ZenitCastNode> *cast: Cast node to dump to the output
  *  <char> *output: Pointer to a heap allocated string
  *
  * Returns:
@@ -76,18 +76,18 @@ char* zenit_node_cast_uid(struct ZenitCastNode *cast);
  *      output = zenit_node_cast_dump(cast, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_cast_dump(struct ZenitCastNode *cast, char *output);
+char* zenit_node_cast_dump(ZenitCastNode *cast, char *output);
 
 /*
  * Function: zenit_node_cast_free
  *  Frees the memory used by the cast node
  *
  * Parameters:
- *  <struct ZenitCastNode> *cast: Cast node
+ *  <ZenitCastNode> *cast: Cast node
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_node_cast_free(struct ZenitCastNode *cast_node);
+void zenit_node_cast_free(ZenitCastNode *cast_node);
 
 #endif /* ZENIT_AST_CAST_H */

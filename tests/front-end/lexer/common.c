@@ -10,9 +10,9 @@ void zenit_test_lexer_run(struct ZenitLexerTest *tests, size_t count)
     {
         struct ZenitLexerTest test = tests[i];
 
-        struct ZenitSourceInfo *srcinfo = zenit_source_new(ZENIT_SOURCE_STRING, test.source);
-        struct ZenitLexer lexer = zenit_lexer_new(srcinfo);
-        struct ZenitToken *tokens = zenit_lexer_tokenize(&lexer);
+        ZenitSourceInfo *srcinfo = zenit_source_new(ZENIT_SOURCE_STRING, test.source);
+        ZenitLexer lexer = zenit_lexer_new(srcinfo);
+        ZenitToken *tokens = zenit_lexer_tokenize(&lexer);
 
         fl_expect("Tokenization must return a valid array of tokens", tokens != NULL);
 

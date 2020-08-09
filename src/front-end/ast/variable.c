@@ -2,9 +2,9 @@
 #include <fllib/Cstring.h>
 #include "variable.h"
 
-struct ZenitVariableNode* zenit_node_variable_new(struct ZenitSourceLocation location, char *name)
+ZenitVariableNode* zenit_node_variable_new(ZenitSourceLocation location, char *name)
 {
-    struct ZenitVariableNode *var_node = fl_malloc(sizeof(struct ZenitVariableNode));
+    ZenitVariableNode *var_node = fl_malloc(sizeof(ZenitVariableNode));
     var_node->base.nodekind = ZENIT_NODE_VARIABLE;
     var_node->base.location = location;
     var_node->name = name;
@@ -12,7 +12,7 @@ struct ZenitVariableNode* zenit_node_variable_new(struct ZenitSourceLocation loc
     return var_node;
 }
 
-char* zenit_node_variable_uid(struct ZenitVariableNode *variable)
+char* zenit_node_variable_uid(ZenitVariableNode *variable)
 {
     if (!variable)
         return NULL;
@@ -20,19 +20,19 @@ char* zenit_node_variable_uid(struct ZenitVariableNode *variable)
     return fl_cstring_vdup("%%L%u:C%u_var_%s", variable->base.location.line, variable->base.location.col, variable->name);
 }
 
-char* zenit_node_variable_dump(struct ZenitVariableNode *variable, char *output)
+char* zenit_node_variable_dump(ZenitVariableNode *variable, char *output)
 {
     fl_cstring_vappend(&output, "(var %s ", variable->name);
 
     if (variable->type_decl != NULL)
     {
-        output = zenit_node_dump((struct ZenitNode*) variable->type_decl, output);
+        output = zenit_node_dump((ZenitNode*) variable->type_decl, output);
         fl_cstring_append(&output, " ");
     }
 
-    output = zenit_node_dump((struct ZenitNode*) variable->rvalue, output);
+    output = zenit_node_dump((ZenitNode*) variable->rvalue, output);
 
-    struct ZenitAttributeNode **attrs = zenit_attribute_node_map_values(variable->attributes);
+    ZenitAttributeNode **attrs = zenit_attribute_node_map_values(variable->attributes);
     size_t length = fl_array_length(attrs);
     if (length > 0)
     {
@@ -55,7 +55,7 @@ char* zenit_node_variable_dump(struct ZenitVariableNode *variable, char *output)
 
 /*
  * Function: zenit_node_variable_free
- *  Frees the memory of a <struct ZenitVariableNode> object
+ *  Frees the memory of a <ZenitVariableNode> object
  *
  * Parameters:
  *  var_node - Node object
@@ -63,7 +63,7 @@ char* zenit_node_variable_dump(struct ZenitVariableNode *variable, char *output)
  * Returns:
  *  void - This function does not return a value
  */
-void zenit_node_variable_free(struct ZenitVariableNode *var_node)
+void zenit_node_variable_free(ZenitVariableNode *var_node)
 {
     if (!var_node)
         return;
@@ -75,7 +75,7 @@ void zenit_node_variable_free(struct ZenitVariableNode *var_node)
         zenit_node_free(var_node->rvalue);
 
     if (var_node->type_decl)
-        zenit_node_free((struct ZenitNode*) var_node->type_decl);
+        zenit_node_free((ZenitNode*) var_node->type_decl);
 
     zenit_attribute_node_map_free(var_node->attributes);
 

@@ -5,14 +5,14 @@
 #include "types/type.h"
 
 /*
- * Struct: struct ZenitSymbol
+ * Struct: ZenitSymbol
  *  Represents a symbol of the source program containing an identifier name
  *  and the type information.
  */
-struct ZenitSymbol {
+typedef struct ZenitSymbol {
     const char *name;
-    struct ZenitType *type;
-};
+    ZenitType *type;
+} ZenitSymbol;
 
 /*
  * Function: zenit_symbol_new
@@ -24,13 +24,13 @@ struct ZenitSymbol {
  *  type - Type information
  *
  * Returns:
- *  struct ZenitSymbol* - The new symbol
+ *  ZenitSymbol* - The new symbol
  * 
  * Notes:
  *  The object returned by this function must be freed with the <zenit_symbol_free> function
  *
  */
-struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitType *type);
+ZenitSymbol* zenit_symbol_new(const char *name, ZenitType *type);
 
 /*
  * Function: zenit_symbol_free
@@ -42,7 +42,7 @@ struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitType *type);
  * Returns:
  *  void - This function does not return a value
  */
-void zenit_symbol_free(struct ZenitSymbol *symbol);
+void zenit_symbol_free(ZenitSymbol *symbol);
 
 /*
  * Function: zenit_symbol_dump
@@ -50,7 +50,7 @@ void zenit_symbol_free(struct ZenitSymbol *symbol);
  *  returns a pointer to the -possibly reallocated- output
  *
  * Parameters:
- *  <struct ZenitSymbol> *symbol: Symbol object to dump to the output
+ *  <ZenitSymbol> *symbol: Symbol object to dump to the output
  *  <char> *output: Pointer to a heap allocated string
  *
  * Returns:
@@ -64,6 +64,6 @@ void zenit_symbol_free(struct ZenitSymbol *symbol);
  *      output = zenit_symbol_dump(symbol, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_symbol_dump(struct ZenitSymbol *symbol, char *output);
+char* zenit_symbol_dump(ZenitSymbol *symbol, char *output);
 
 #endif /* ZENIT_SYMBOL_H */

@@ -2,9 +2,9 @@
 #include <fllib/Cstring.h>
 #include "variable.h"
 
-struct ZirVariableInstruction* zir_instruction_variable_new(struct ZirOperand *destination, struct ZirOperand *source)
+ZirVariableInstruction* zir_instruction_variable_new(ZirOperand *destination, ZirOperand *source)
 {
-    struct ZirVariableInstruction *instruction = fl_malloc(sizeof(struct ZirVariableInstruction));
+    ZirVariableInstruction *instruction = fl_malloc(sizeof(ZirVariableInstruction));
     instruction->base.type = ZIR_INSTR_VARIABLE;
     instruction->base.destination = destination;
     instruction->source = source;
@@ -12,13 +12,13 @@ struct ZirVariableInstruction* zir_instruction_variable_new(struct ZirOperand *d
     return instruction;
 }
 
-void zir_instruction_variable_free(struct ZirVariableInstruction *instruction)
+void zir_instruction_variable_free(ZirVariableInstruction *instruction)
 {
     zir_attribute_map_free(instruction->attributes);
     fl_free(instruction);
 }
 
-char* zir_instruction_variable_dump(struct ZirVariableInstruction *vardecl, char *output)
+char* zir_instruction_variable_dump(ZirVariableInstruction *vardecl, char *output)
 {
     output = zir_operand_dump(vardecl->base.destination, output);
     fl_cstring_append(&output, " : ");
@@ -34,7 +34,7 @@ char* zir_instruction_variable_dump(struct ZirVariableInstruction *vardecl, char
         size_t attr_count = fl_array_length(attr_names);
         for (size_t i=0; i < attr_count; i++)
         {
-            struct ZirAttribute *attr = zir_attribute_map_get(vardecl->attributes, attr_names[i]);
+            ZirAttribute *attr = zir_attribute_map_get(vardecl->attributes, attr_names[i]);
             fl_cstring_vappend(&output, "#%s", attr->name);
 
             if (zir_property_map_length(attr->properties) == 0)
@@ -46,7 +46,7 @@ char* zir_instruction_variable_dump(struct ZirVariableInstruction *vardecl, char
             size_t prop_count = fl_array_length(prop_names);
             for (size_t j=0; j < prop_count; j++)
             {
-                struct ZirProperty *prop = zir_property_map_get(attr->properties, prop_names[j]);
+                ZirProperty *prop = zir_property_map_get(attr->properties, prop_names[j]);
                 fl_cstring_vappend(&output, "%s:", prop->name);
 
                 output = zir_operand_dump(prop->value, output);

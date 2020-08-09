@@ -1,49 +1,47 @@
 #ifndef ZENIT_AST_PROPERTY_H
 #define ZENIT_AST_PROPERTY_H
 
-
-
 #include "node.h"
 
 /*
- * Struct: struct ZenitPropertyNode
+ * Struct: ZenitPropertyNode
  *  Represents an attribute's property in the source code
  * 
  * Members:
- *  <struct ZenitNode> base: Basic information of the node object
+ *  <ZenitNode> base: Basic information of the node object
  *  <char> *name: The property name
- *  <struct ZenitNode> *value: A node that represents the expression to initialize the property
+ *  <ZenitNode> *value: A node that represents the expression to initialize the property
  */
-struct ZenitPropertyNode {
-    struct ZenitNode base;
+typedef struct ZenitPropertyNode {
+    ZenitNode base;
     char *name;
-    struct ZenitNode *value;
-};
+    ZenitNode *value;
+} ZenitPropertyNode;
 
 /*
  * Function: zenit_node_property_new
  *  Creates a new AST node that represents an attribute's property
  *
  * Parameters:
- *  <struct ZenitSourceLocation> location: Location information about the property
+ *  <ZenitSourceLocation> location: Location information about the property
  *  <char> *name: The property name
- *  <struct ZenitNode> *value: The node that represents the value of the property
+ *  <ZenitNode> *value: The node that represents the value of the property
  *
  * Returns:
- *  struct ZenitPropertyNode*: Property node
+ *  ZenitPropertyNode*: Property node
  *
  * Notes:
  *  The object returned by this function must be freed using the
  *  <zenit_node_property_free> function
  */
-struct ZenitPropertyNode* zenit_node_property_new(struct ZenitSourceLocation location, char *name, struct ZenitNode *value);
+ZenitPropertyNode* zenit_node_property_new(ZenitSourceLocation location, char *name, ZenitNode *value);
 
 /*
  * Function: zenit_node_property_uid
  *  Returns a UID for the property node
  *
  * Parameters:
- *  <struct ZenitPropertyNode> *property: Property node
+ *  <ZenitPropertyNode> *property: Property node
  *
  * Returns:
  *  char*: UID of the property node
@@ -52,7 +50,7 @@ struct ZenitPropertyNode* zenit_node_property_new(struct ZenitSourceLocation loc
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_property_uid(struct ZenitPropertyNode *property);
+char* zenit_node_property_uid(ZenitPropertyNode *property);
 
 /*
  * Function: zenit_node_property_dump
@@ -60,7 +58,7 @@ char* zenit_node_property_uid(struct ZenitPropertyNode *property);
  *  returns a pointer to the -possibly reallocated- output
  *
  * Parameters:
- *  <struct ZenitPropertyNode> *property: Property node to dump to the output
+ *  <ZenitPropertyNode> *property: Property node to dump to the output
  *  <char> *output: Pointer to a heap allocated string
  *
  * Returns:
@@ -74,18 +72,18 @@ char* zenit_node_property_uid(struct ZenitPropertyNode *property);
  *      output = zenit_node_property_dump(property, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_property_dump(struct ZenitPropertyNode *property, char *output);
+char* zenit_node_property_dump(ZenitPropertyNode *property, char *output);
 
 /*
  * Function: zenit_node_property_free
  *  Frees the memory used by the property node
  *
  * Parameters:
- *  <struct ZenitPropertyNode> *property: Property node
+ *  <ZenitPropertyNode> *property: Property node
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_node_property_free(struct ZenitPropertyNode *node);
+void zenit_node_property_free(ZenitPropertyNode *node);
 
 #endif /* ZENIT_AST_T_PROPERTY_H */

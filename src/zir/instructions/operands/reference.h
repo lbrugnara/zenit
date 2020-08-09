@@ -5,20 +5,20 @@
 #include "symbol.h"
 
 /*
- * Struct: struct ZirReferenceOperand
+ * Struct: ZirReferenceOperand
  *  A reference operand contains information about its type and a pointer to a symbol
  *   operand which is the referenced expression
  * 
  * Members:
- *  <struct ZirOperand> base: Basic operand information
- *  <struct ZirReferenceType> *type: The type information of the reference
- *  <struct ZirSymbolOperand> *operand: Pointer to the referenced symbol's operand
+ *  <ZirOperand> base: Basic operand information
+ *  <ZirReferenceType> *type: The type information of the reference
+ *  <ZirSymbolOperand> *operand: Pointer to the referenced symbol's operand
  */
-struct ZirReferenceOperand {
-    struct ZirOperand base;
-    struct ZirReferenceType *type;
-    struct ZirSymbolOperand *operand;
-};
+typedef struct ZirReferenceOperand {
+    ZirOperand base;
+    ZirReferenceType *type;
+    ZirSymbolOperand *operand;
+} ZirReferenceOperand;
 
 /*
  * Function: zir_operand_reference_new
@@ -26,30 +26,30 @@ struct ZirReferenceOperand {
  *  *type* object is the reference's type
  *
  * Parameters:
- *  <struct ZirReferenceType> *type: The type of the reference
- *  <struct ZirSymbolOperand> *operand: The referenced symbol operand
+ *  <ZirReferenceType> *type: The type of the reference
+ *  <ZirSymbolOperand> *operand: The referenced symbol operand
  *
  * Returns:
- *  struct ZirReferenceOperand*: The new reference operand object
+ *  ZirReferenceOperand*: The new reference operand object
  *
  * Notes:
  *  The object returned by this function must be freed using the <zir_operand_reference_free> function.
- *  The reference operand takes ownership of the <struct ZirReferenceType> object, which means it will release
+ *  The reference operand takes ownership of the <ZirReferenceType> object, which means it will release
  *  the type object memory too when <zir_operand_reference_free> is called with the reference operand as argument.
  */
-struct ZirReferenceOperand* zir_operand_reference_new(struct ZirReferenceType *type, struct ZirSymbolOperand *operand);
+ZirReferenceOperand* zir_operand_reference_new(ZirReferenceType *type, ZirSymbolOperand *operand);
 
 /*
  * Function: zir_operand_reference_free
  *  Frees the memory of the reference operand
  *
  * Parameters:
- *  <struct ZirReferenceOperand> *reference_operand: Reference operand object
+ *  <ZirReferenceOperand> *reference_operand: Reference operand object
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zir_operand_reference_free(struct ZirReferenceOperand *reference_operand);
+void zir_operand_reference_free(ZirReferenceOperand *reference_operand);
 
 /*
  * Function: zir_operand_reference_dump
@@ -62,7 +62,7 @@ void zir_operand_reference_free(struct ZirReferenceOperand *reference_operand);
  * ===========
  *
  * Parameters:
- *  <struct ZirReferenceOperand> *reference_operand: Reference operand object
+ *  <ZirReferenceOperand> *reference_operand: Reference operand object
  *  <char> *output: Output buffer
  *
  * Returns:
@@ -71,7 +71,7 @@ void zir_operand_reference_free(struct ZirReferenceOperand *reference_operand);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_reference_dump(struct ZirReferenceOperand *reference_operand, char *output);
+char* zir_operand_reference_dump(ZirReferenceOperand *reference_operand, char *output);
 
 /*
  * Function: zir_operand_reference_type_dump
@@ -84,7 +84,7 @@ char* zir_operand_reference_dump(struct ZirReferenceOperand *reference_operand, 
  * ===========
  *
  * Parameters:
- *  <struct ZirReferenceOperand> *reference_operand: Operand object
+ *  <ZirReferenceOperand> *reference_operand: Operand object
  *  <char> *output: Output buffer
  *
  * Returns:
@@ -93,6 +93,6 @@ char* zir_operand_reference_dump(struct ZirReferenceOperand *reference_operand, 
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_reference_type_dump(struct ZirReferenceOperand *reference_operand, char *output);
+char* zir_operand_reference_type_dump(ZirReferenceOperand *reference_operand, char *output);
 
 #endif /* ZIR_OPERAND_REFERENCE_H */

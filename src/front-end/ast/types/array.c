@@ -2,9 +2,9 @@
 #include "type.h"
 #include "array.h"
 
-struct ZenitArrayTypeNode* zenit_node_type_array_new(struct ZenitSourceLocation location, struct ZenitTypeNode *member_type)
+ZenitArrayTypeNode* zenit_node_type_array_new(ZenitSourceLocation location, ZenitTypeNode *member_type)
 {
-    struct ZenitArrayTypeNode *type_node = fl_malloc(sizeof(struct ZenitArrayTypeNode));
+    ZenitArrayTypeNode *type_node = fl_malloc(sizeof(ZenitArrayTypeNode));
     type_node->base.base.nodekind = ZENIT_NODE_TYPE_ARRAY;
     type_node->base.base.location = location;
     type_node->base.typekind = ZENIT_TYPE_ARRAY;
@@ -13,7 +13,7 @@ struct ZenitArrayTypeNode* zenit_node_type_array_new(struct ZenitSourceLocation 
     return type_node;
 }
 
-char* zenit_node_type_array_uid(struct ZenitArrayTypeNode *type_node)
+char* zenit_node_type_array_uid(ZenitArrayTypeNode *type_node)
 {
     if (!type_node)
         return NULL;
@@ -21,7 +21,7 @@ char* zenit_node_type_array_uid(struct ZenitArrayTypeNode *type_node)
     return fl_cstring_vdup("%%L%u:C%u_type_array", type_node->base.base.location.line, type_node->base.base.location.col);
 }
 
-char* zenit_node_type_array_dump(struct ZenitArrayTypeNode *type_node, char *output)
+char* zenit_node_type_array_dump(ZenitArrayTypeNode *type_node, char *output)
 {
     char *type_str = zenit_node_type_array_to_string(type_node);
 
@@ -32,7 +32,7 @@ char* zenit_node_type_array_dump(struct ZenitArrayTypeNode *type_node, char *out
     return output;
 }
 
-char* zenit_node_type_array_to_string(struct ZenitArrayTypeNode *type_node)
+char* zenit_node_type_array_to_string(ZenitArrayTypeNode *type_node)
 {
     if (type_node == NULL)
         return NULL;
@@ -52,12 +52,12 @@ char* zenit_node_type_array_to_string(struct ZenitArrayTypeNode *type_node)
     return string_value;
 }
 
-void zenit_node_type_array_free(struct ZenitArrayTypeNode *type_node)
+void zenit_node_type_array_free(ZenitArrayTypeNode *type_node)
 {
     if (!type_node)
         return;
 
-    zenit_node_free((struct ZenitNode*) type_node->member_type);
+    zenit_node_free((ZenitNode*) type_node->member_type);
 
     fl_free(type_node);
 }

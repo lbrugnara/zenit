@@ -5,16 +5,16 @@
 #include <fllib/Cstring.h>
 #include "reference.h"
 
-struct ZirReferenceType* zir_type_reference_new(struct ZirType *element)
+ZirReferenceType* zir_type_reference_new(ZirType *element)
 {
-    struct ZirReferenceType *type = fl_malloc(sizeof(struct ZirReferenceType));
+    ZirReferenceType *type = fl_malloc(sizeof(ZirReferenceType));
     type->base.typekind = ZIR_TYPE_REFERENCE;
     type->element = element;
 
     return type;
 }
 
-unsigned long zir_type_reference_hash(struct ZirReferenceType *type)
+unsigned long zir_type_reference_hash(ZirReferenceType *type)
 {
     static const char *format = "[ref][e:%lu]";
 
@@ -30,7 +30,7 @@ unsigned long zir_type_reference_hash(struct ZirReferenceType *type)
     return hash;
 }
 
-char* zir_type_reference_to_string(struct ZirReferenceType *type)
+char* zir_type_reference_to_string(ZirReferenceType *type)
 {
     if (type == NULL)
         return NULL;
@@ -61,20 +61,20 @@ char* zir_type_reference_to_string(struct ZirReferenceType *type)
     return type->base.to_string.value;
 }
 
-bool zir_type_reference_equals(struct ZirReferenceType *type_a, struct ZirType *type_b)
+bool zir_type_reference_equals(ZirReferenceType *type_a, ZirType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
-        return (struct ZirType*) type_a == type_b;
+        return (ZirType*) type_a == type_b;
 
     if (type_b->typekind != ZIR_TYPE_REFERENCE)
         return false;
 
-    struct ZirReferenceType *type_b_ref = (struct ZirReferenceType*) type_b;
+    ZirReferenceType *type_b_ref = (ZirReferenceType*) type_b;
 
     return zir_type_equals(type_a->element, type_b_ref->element);
 }
 
-bool zir_type_reference_is_assignable_from(struct ZirReferenceType *target_type, struct ZirType *from_type)
+bool zir_type_reference_is_assignable_from(ZirReferenceType *target_type, ZirType *from_type)
 {
     if (!target_type || !from_type)
         return false;
@@ -82,12 +82,12 @@ bool zir_type_reference_is_assignable_from(struct ZirReferenceType *target_type,
     if (from_type->typekind != ZIR_TYPE_REFERENCE)
         return false;
 
-    struct ZirReferenceType *ref_from_type = (struct ZirReferenceType*) from_type;
+    ZirReferenceType *ref_from_type = (ZirReferenceType*) from_type;
 
     return zir_type_is_assignable_from(target_type->element, ref_from_type->element);
 }
 
-bool zir_type_reference_is_castable_to(struct ZirReferenceType *reference, struct ZirType *target_type)
+bool zir_type_reference_is_castable_to(ZirReferenceType *reference, ZirType *target_type)
 {
     if (target_type == NULL || target_type == NULL)
         return false;
@@ -97,7 +97,7 @@ bool zir_type_reference_is_castable_to(struct ZirReferenceType *reference, struc
         return true;
 
     if (target_type->typekind == ZIR_TYPE_REFERENCE)
-        return zir_type_is_assignable_from(reference->element, ((struct ZirReferenceType*) target_type)->element);
+        return zir_type_is_assignable_from(reference->element, ((ZirReferenceType*) target_type)->element);
 
     // We can cast a reference to an unsigned integer
     if (target_type->typekind == ZIR_TYPE_UINT)
@@ -106,7 +106,7 @@ bool zir_type_reference_is_castable_to(struct ZirReferenceType *reference, struc
     return false;
 }
 
-size_t zir_type_reference_size(struct ZirReferenceType *type)
+size_t zir_type_reference_size(ZirReferenceType *type)
 {
     if (!type)
         return 0;
@@ -116,7 +116,7 @@ size_t zir_type_reference_size(struct ZirReferenceType *type)
     return 0;
 }
 
-void zir_type_reference_free(struct ZirReferenceType *type)
+void zir_type_reference_free(ZirReferenceType *type)
 {
     if (!type)
         return;

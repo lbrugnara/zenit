@@ -5,28 +5,28 @@
 #include "header.h"
 #include "program.h"
 
-struct ZenitNesNrom128 {
+typedef struct ZnesNrom128 {
     uint8_t bank0[0x4000];
     uint8_t bank1[0x3FFA];
     uint16_t nmi_addr;
     uint16_t res_addr;
     uint16_t irq_addr;
-};
+} ZnesNrom128;
 
-struct ZenitNesNrom256 {
+typedef struct ZnesNrom256 {
     uint8_t bank[0x7FFA];
     uint16_t nmi_addr;
     uint16_t res_addr;
     uint16_t irq_addr;
-};
+} ZnesNrom256;
 
-struct ZenitNesRom {
-    struct ZenitNesFileHeader header;
-    struct ZenitNesNrom256 prg_rom;
-};
+typedef struct ZnesRom {
+    ZnesFileHeader header;
+    ZnesNrom256 prg_rom;
+} ZnesRom;
 
-struct ZenitNesRom* zenit_nes_rom_new(struct ZenitNesProgram *program);
-void zenit_nes_rom_free(struct ZenitNesRom *rom);
-void zenit_nes_rom_dump(struct ZenitNesRom *rom, const char *filename);
+ZnesRom* zenit_nes_rom_new(ZnesProgram *program);
+void zenit_nes_rom_free(ZnesRom *rom);
+void zenit_nes_rom_dump(ZnesRom *rom, const char *filename);
 
 #endif /* NES_ROM_H */

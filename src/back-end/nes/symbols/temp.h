@@ -3,13 +3,14 @@
 
 #include <stdint.h>
 #include "symbol.h"
+#include "../../../zir/instructions/operands/operand.h"
 
-struct ZenitNesTempSymbol {
-    struct ZenitNesSymbol base;
-    struct ZirOperand *source;
-};
+typedef struct ZnesTempSymbol {
+    ZnesSymbol base;
+    ZirOperand *source;
+} ZnesTempSymbol;
 
-struct ZenitNesTempSymbol* zenit_nes_symbol_temp_new(const char *name, struct ZirType *zir_type);
-void zenit_nes_symbol_temp_free(struct ZenitNesTempSymbol *symbol);
+ZnesTempSymbol* zenit_nes_symbol_temp_new(const char *name, ZirType *zir_type);
+void zenit_nes_symbol_temp_free(ZnesTempSymbol *symbol);
 
 #endif /* ZENIT_NES_TEMP_SYMBOL_H */

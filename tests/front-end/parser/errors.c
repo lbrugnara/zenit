@@ -67,7 +67,7 @@ void zenit_test_parser_variable_errors(void)
     struct FlListNode *tmp = fl_list_head(ctx.errors);
     while (tmp != NULL)
     {
-        struct ZenitError *error = (struct ZenitError*) tmp->value;
+        ZenitError *error = (ZenitError*) tmp->value;
 
         fl_vexpect(error->location.line == i && error->type == errors[i],
             "Expected %s error: %s at line %u:%u", errors[i] == error->type ? "syntax" : "large integer", 

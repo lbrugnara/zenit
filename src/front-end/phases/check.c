@@ -3,24 +3,24 @@
 #include "../program.h"
 #include "../symbol.h"
 
-typedef struct ZenitSymbol*(*ZenitTypeChecker)(ZenitContext *ctx, struct ZenitNode *node);
+typedef ZenitSymbol*(*ZenitTypeChecker)(ZenitContext *ctx, ZenitNode *node);
 
 // Visitor functions
-static struct ZenitSymbol* visit_node(ZenitContext *ctx, struct ZenitNode *node);
-static struct ZenitSymbol* visit_uint_node(ZenitContext *ctx, struct ZenitUintNode *uint_node);
-static struct ZenitSymbol* visit_bool_node(ZenitContext *ctx, struct ZenitBoolNode *bool_node);
-static struct ZenitSymbol* visit_variable_node(ZenitContext *ctx, struct ZenitVariableNode *variable_node);
-static struct ZenitSymbol* visit_array_node(ZenitContext *ctx, struct ZenitArrayNode *array_node);
-static struct ZenitSymbol* visit_identifier_node(ZenitContext *ctx, struct ZenitIdentifierNode *id_node);
-static struct ZenitSymbol* visit_reference_node(ZenitContext *ctx, struct ZenitReferenceNode *ref_node);
-static struct ZenitSymbol* visit_cast_node(ZenitContext *ctx, struct ZenitCastNode *cast_node);
-static struct ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, struct ZenitFieldDeclNode *field_node);
-static struct ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, struct ZenitStructDeclNode *struct_node);
-static struct ZenitSymbol* visit_struct_node(ZenitContext *ctx, struct ZenitStructNode *struct_node);
+static ZenitSymbol* visit_node(ZenitContext *ctx, ZenitNode *node);
+static ZenitSymbol* visit_uint_node(ZenitContext *ctx, ZenitUintNode *uint_node);
+static ZenitSymbol* visit_bool_node(ZenitContext *ctx, ZenitBoolNode *bool_node);
+static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *variable_node);
+static ZenitSymbol* visit_array_node(ZenitContext *ctx, ZenitArrayNode *array_node);
+static ZenitSymbol* visit_identifier_node(ZenitContext *ctx, ZenitIdentifierNode *id_node);
+static ZenitSymbol* visit_reference_node(ZenitContext *ctx, ZenitReferenceNode *ref_node);
+static ZenitSymbol* visit_cast_node(ZenitContext *ctx, ZenitCastNode *cast_node);
+static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitFieldDeclNode *field_node);
+static ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, ZenitStructDeclNode *struct_node);
+static ZenitSymbol* visit_struct_node(ZenitContext *ctx, ZenitStructNode *struct_node);
 
 /*
  * Variable: checkers
- *  An array indexed with a <enum ZenitNodeKind> to get a <ZenitTypeChecker> function
+ *  An array indexed with a <ZenitNodeKind> to get a <ZenitTypeChecker> function
  */
 static const ZenitTypeChecker checkers[] = {
     [ZENIT_NODE_UINT]           = (ZenitTypeChecker) &visit_uint_node,
@@ -41,16 +41,16 @@ static const ZenitTypeChecker checkers[] = {
  *
  * Parameters:
  *  <ZenitContext> *ctx - Context object
- *  <struct ZenitCastNode> *cast_node - Node to visit
+ *  <ZenitCastNode> *cast_node - Node to visit
  *
  * Returns:
- *  <struct ZenitSymbol>* - The cast temporal symbol
+ *  <ZenitSymbol>* - The cast temporal symbol
  */
-static struct ZenitSymbol* visit_cast_node(ZenitContext *ctx, struct ZenitCastNode *cast_node)
+static ZenitSymbol* visit_cast_node(ZenitContext *ctx, ZenitCastNode *cast_node)
 {
-    struct ZenitSymbol *symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) cast_node);
+    ZenitSymbol *symbol = zenit_utils_get_tmp_symbol(ctx->program, (ZenitNode*) cast_node);
 
-    struct ZenitSymbol *expr_symbol = visit_node(ctx, cast_node->expression);
+    ZenitSymbol *expr_symbol = visit_node(ctx, cast_node->expression);
 
     // If the cast is implicit, we need to make sure we can up-cast the expression to the requested type
     if ((cast_node->implicit && !zenit_type_is_assignable_from(symbol->type, expr_symbol->type))
@@ -74,14 +74,14 @@ static struct ZenitSymbol* visit_cast_node(ZenitContext *ctx, struct ZenitCastNo
  *
  * Parameters:
  *  <ZenitContext> *ctx - Context object
- *  <struct ZenitUintNode> *uint_node - Node to visit
+ *  <ZenitUintNode> *uint_node - Node to visit
  *
  * Returns:
- *  <struct ZenitSymbol>* - The uint symbol
+ *  <ZenitSymbol>* - The uint symbol
  */
-static struct ZenitSymbol* visit_uint_node(ZenitContext *ctx, struct ZenitUintNode *uint_node)
+static ZenitSymbol* visit_uint_node(ZenitContext *ctx, ZenitUintNode *uint_node)
 {
-    return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) uint_node);
+    return zenit_utils_get_tmp_symbol(ctx->program, (ZenitNode*) uint_node);
 }
 
 /*
@@ -90,14 +90,14 @@ static struct ZenitSymbol* visit_uint_node(ZenitContext *ctx, struct ZenitUintNo
  *
  * Parameters:
  *  <ZenitContext> *ctx - Context object
- *  <struct ZenitBoolNode> *bool_node - Node to visit
+ *  <ZenitBoolNode> *bool_node - Node to visit
  *
  * Returns:
- *  <struct ZenitSymbol>* - The bool symbol
+ *  <ZenitSymbol>* - The bool symbol
  */
-static struct ZenitSymbol* visit_bool_node(ZenitContext *ctx, struct ZenitBoolNode *bool_node)
+static ZenitSymbol* visit_bool_node(ZenitContext *ctx, ZenitBoolNode *bool_node)
 {
-    return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) bool_node);
+    return zenit_utils_get_tmp_symbol(ctx->program, (ZenitNode*) bool_node);
 }
 
 /*
@@ -106,12 +106,12 @@ static struct ZenitSymbol* visit_bool_node(ZenitContext *ctx, struct ZenitBoolNo
  *
  * Parameters:
  *  <ZenitContext> *ctx - Context object
- *  <struct ZenitIdentifierNode> *id_node - Node to visit
+ *  <ZenitIdentifierNode> *id_node - Node to visit
  *
  * Returns:
- *  <struct ZenitSymbol>* - The identifier type information
+ *  <ZenitSymbol>* - The identifier type information
  */
-static struct ZenitSymbol* visit_identifier_node(ZenitContext *ctx, struct ZenitIdentifierNode *id_node)
+static ZenitSymbol* visit_identifier_node(ZenitContext *ctx, ZenitIdentifierNode *id_node)
 {
     return zenit_program_get_symbol(ctx->program, id_node->name);
 }
@@ -122,17 +122,17 @@ static struct ZenitSymbol* visit_identifier_node(ZenitContext *ctx, struct Zenit
  *
  * Parameters:
  *  <ZenitContext> *ctx - Context object
- *  <struct ZenitReferenceNode> *reference_node - Node to visit
+ *  <ZenitReferenceNode> *reference_node - Node to visit
  *
  * Returns:
- *  <struct ZenitSymbol>* - The reference symbol
+ *  <ZenitSymbol>* - The reference symbol
  */
-static struct ZenitSymbol* visit_reference_node(ZenitContext *ctx, struct ZenitReferenceNode *reference_node)
+static ZenitSymbol* visit_reference_node(ZenitContext *ctx, ZenitReferenceNode *reference_node)
 {
-    struct ZenitSymbol *ref_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) reference_node);
-    struct ZenitReferenceType *ref_type = (struct ZenitReferenceType*) ref_symbol->type;
+    ZenitSymbol *ref_symbol = zenit_utils_get_tmp_symbol(ctx->program, (ZenitNode*) reference_node);
+    ZenitReferenceType *ref_type = (ZenitReferenceType*) ref_symbol->type;
 
-    struct ZenitSymbol *expression_symbol = visit_node(ctx, reference_node->expression);
+    ZenitSymbol *expression_symbol = visit_node(ctx, reference_node->expression);
 
     // FIXME: Cannot take a reference to a temporal symbol (temporal expression, primitive, etc)
     // The '%' character is the starting one for temporal symbols, that in this case it is the temporal symbol
@@ -162,21 +162,21 @@ static struct ZenitSymbol* visit_reference_node(ZenitContext *ctx, struct ZenitR
  *
  * Parameters:
  *  <ZenitContext> *ctx - Context object
- *  <struct ZenitArrayNode> *array_node - Node to visit
+ *  <ZenitArrayNode> *array_node - Node to visit
  *
  * Returns:
- *  <struct ZenitSymbol>* - The arrays symbol
+ *  <ZenitSymbol>* - The arrays symbol
  */
-static struct ZenitSymbol* visit_array_node(ZenitContext *ctx, struct ZenitArrayNode *array_node)
+static ZenitSymbol* visit_array_node(ZenitContext *ctx, ZenitArrayNode *array_node)
 {
-    struct ZenitSymbol *array_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) array_node);
-    struct ZenitArrayType *array_type = (struct ZenitArrayType*) array_symbol->type;
+    ZenitSymbol *array_symbol = zenit_utils_get_tmp_symbol(ctx->program, (ZenitNode*) array_node);
+    ZenitArrayType *array_type = (ZenitArrayType*) array_symbol->type;
 
     bool is_valid_type = zenit_program_is_valid_type(ctx->program, array_symbol->type);
 
     for (size_t i=0; i < fl_array_length(array_node->elements); i++)
     {
-        struct ZenitSymbol* element_symbol = visit_node(ctx, array_node->elements[i]);
+        ZenitSymbol* element_symbol = visit_node(ctx, array_node->elements[i]);
 
         // If the type check fails, we add an error only if the array type is defined
         // because if not, we might be targeting a false positive error
@@ -215,18 +215,18 @@ static void visit_attribute_node_map(ZenitContext *ctx, ZenitAttributeNodeMap *a
     const char **names = zenit_attribute_node_map_keys(attributes);
     for (size_t i=0; i < fl_array_length(names); i++)
     {
-        struct ZenitAttributeNode *attr = zenit_attribute_node_map_get(attributes, names[i]);
+        ZenitAttributeNode *attr = zenit_attribute_node_map_get(attributes, names[i]);
 
-        struct ZenitPropertyNode **properties = zenit_property_node_map_values(attr->properties);
+        ZenitPropertyNode **properties = zenit_property_node_map_values(attr->properties);
         for (size_t j=0; j < fl_array_length(properties); j++)
         {
-            struct ZenitPropertyNode *prop = properties[j];
-            struct ZenitSymbol *prop_symbol = zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) prop);
+            ZenitPropertyNode *prop = properties[j];
+            ZenitSymbol *prop_symbol = zenit_utils_get_tmp_symbol(ctx->program, (ZenitNode*) prop);
             visit_node(ctx, prop->value);
 
             if (!zenit_program_is_valid_type(ctx->program, prop_symbol->type))
             {
-                struct ZenitType *type = zenit_program_get_invalid_type_component(ctx->program, prop_symbol->type);
+                ZenitType *type = zenit_program_get_invalid_type_component(ctx->program, prop_symbol->type);
         
                 // Last resort
                 if (type == NULL)
@@ -251,14 +251,14 @@ static void visit_attribute_node_map(ZenitContext *ctx, ZenitAttributeNodeMap *a
  *
  * Parameters:
  *  <ZenitContext> *ctx - Context object
- *  <struct ZenitStructNode> *struct_node - Node to visit
+ *  <ZenitStructNode> *struct_node - Node to visit
  *
  * Returns:
- *  <struct ZenitSymbol>* - The struct symbol with its type information
+ *  <ZenitSymbol>* - The struct symbol with its type information
  */
-static struct ZenitSymbol* visit_struct_node(ZenitContext *ctx, struct ZenitStructNode *struct_node)
+static ZenitSymbol* visit_struct_node(ZenitContext *ctx, ZenitStructNode *struct_node)
 {
-    struct ZenitScope *struct_scope = NULL;
+    ZenitScope *struct_scope = NULL;
     
     if (struct_node->name != NULL)
         struct_scope = zenit_program_get_scope(ctx->program, ZENIT_SCOPE_STRUCT, struct_node->name);
@@ -267,8 +267,8 @@ static struct ZenitSymbol* visit_struct_node(ZenitContext *ctx, struct ZenitStru
     {
         if (struct_node->members[i]->nodekind == ZENIT_NODE_FIELD)
         {
-            struct ZenitFieldNode *field_node = (struct ZenitFieldNode*) struct_node->members[i];
-            struct ZenitSymbol *value_symbol = visit_node(ctx, field_node->value);
+            ZenitFieldNode *field_node = (ZenitFieldNode*) struct_node->members[i];
+            ZenitSymbol *value_symbol = visit_node(ctx, field_node->value);
 
             // NOTE: For unnamed structs, we don't have an scope, and the type of the member should be determined
             // in the inference pass, so it is not necessary to type check it, as it should be equals
@@ -277,7 +277,7 @@ static struct ZenitSymbol* visit_struct_node(ZenitContext *ctx, struct ZenitStru
                 continue;
 
             // NOTE: For named structs we need to type check against the field declaration
-            struct ZenitSymbol *field_decl_symbol = zenit_scope_get_symbol(struct_scope, field_node->name);
+            ZenitSymbol *field_decl_symbol = zenit_scope_get_symbol(struct_scope, field_node->name);
 
             if (field_decl_symbol == NULL)
                 continue; // The resolve pass should have added an error in this case
@@ -298,7 +298,7 @@ static struct ZenitSymbol* visit_struct_node(ZenitContext *ctx, struct ZenitStru
         }
     }
 
-    return zenit_utils_get_tmp_symbol(ctx->program, (struct ZenitNode*) struct_node);
+    return zenit_utils_get_tmp_symbol(ctx->program, (ZenitNode*) struct_node);
 }
 
 /*
@@ -307,12 +307,12 @@ static struct ZenitSymbol* visit_struct_node(ZenitContext *ctx, struct ZenitStru
  *
  * Parameters:
  *  <ZenitContext> *ctx - Context object
- *  <struct ZenitFieldDeclNode> *field_node - Node to visit
+ *  <ZenitFieldDeclNode> *field_node - Node to visit
  *
  * Returns:
- *  <struct ZenitSymbol>* - The field symbol with its type information
+ *  <ZenitSymbol>* - The field symbol with its type information
  */
-static struct ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, struct ZenitFieldDeclNode *field_node)
+static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitFieldDeclNode *field_node)
 {
     return zenit_program_get_symbol(ctx->program, field_node->name);
 }
@@ -323,12 +323,12 @@ static struct ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, struct Zenit
  *
  * Parameters:
  *  <ZenitContext> *ctx - Context object
- *  <struct ZenitStructDeclNode> *struct_node - Node to visit
+ *  <ZenitStructDeclNode> *struct_node - Node to visit
  *
  * Returns:
- *  <struct ZenitSymbol>* - This function returns NULL as there is not symbol associated with the struct declaration
+ *  <ZenitSymbol>* - This function returns NULL as there is not symbol associated with the struct declaration
  */
-static struct ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, struct ZenitStructDeclNode *struct_node)
+static ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, ZenitStructDeclNode *struct_node)
 {
     // Visit the attributes and its properties
     visit_attribute_node_map(ctx, struct_node->attributes);
@@ -350,18 +350,18 @@ static struct ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, struct Zeni
  *
  * Parameters:
  *  <ZenitContext> *ctx - Context object
- *  <struct ZenitVariableNode> *variable_node - Node to visit
+ *  <ZenitVariableNode> *variable_node - Node to visit
  *
  * Returns:
- *  <struct ZenitSymbol>* - The variable symbol
+ *  <ZenitSymbol>* - The variable symbol
  */
-static struct ZenitSymbol* visit_variable_node(ZenitContext *ctx, struct ZenitVariableNode *variable_node)
+static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *variable_node)
 {
     // Visit the attributes
     visit_attribute_node_map(ctx, variable_node->attributes);
 
     // We get the variable's symbol
-    struct ZenitSymbol *symbol = zenit_program_get_symbol(ctx->program, variable_node->name);
+    ZenitSymbol *symbol = zenit_program_get_symbol(ctx->program, variable_node->name);
 
     // Check if the variable's type is native or it is registered in the symbol table
     bool is_valid_type = zenit_program_is_valid_type(ctx->program, symbol->type);
@@ -369,7 +369,7 @@ static struct ZenitSymbol* visit_variable_node(ZenitContext *ctx, struct ZenitVa
     // If the variable type is missing, we add an error
     if (!is_valid_type && variable_node->type_decl != NULL)
     {
-        struct ZenitType *type = zenit_program_get_invalid_type_component(ctx->program, symbol->type);
+        ZenitType *type = zenit_program_get_invalid_type_component(ctx->program, symbol->type);
         
         // Last resort
         if (type == NULL)
@@ -380,7 +380,7 @@ static struct ZenitSymbol* visit_variable_node(ZenitContext *ctx, struct ZenitVa
     }
 
     // We visit the right-hand side expression to do type checking with it
-    struct ZenitSymbol* rhs_symbol = visit_node(ctx, variable_node->rvalue);
+    ZenitSymbol* rhs_symbol = visit_node(ctx, variable_node->rvalue);
     
     // We check types to make sure the assignment is valid, but we do it only if
     // the variable type is valid, because if not, we might be targeting a false-positive
@@ -405,12 +405,12 @@ static struct ZenitSymbol* visit_variable_node(ZenitContext *ctx, struct ZenitVa
  *
  * Parameters:
  *  <ZenitContext> *ctx - Context object
- *  <struct ZenitNode> *node - Node to visit
+ *  <ZenitNode> *node - Node to visit
  *
  * Returns:
- *  <struct ZenitSymbol>* - The symbol tied to the AST node
+ *  <ZenitSymbol>* - The symbol tied to the AST node
  */
-static struct ZenitSymbol* visit_node(ZenitContext *ctx, struct ZenitNode *node)
+static ZenitSymbol* visit_node(ZenitContext *ctx, ZenitNode *node)
 {
     return checkers[node->nodekind](ctx, node);
 }

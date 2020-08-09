@@ -1,60 +1,59 @@
 #ifndef ZENIT_LEXER_H
 #define ZENIT_LEXER_H
 
-
 #include "token.h"
 
 /*
- * Struct: struct ZenitLexer
+ * Struct: ZenitLexer
  *  Object that keeps track of the lexical analysis phase
  *
  * Members:
- *  <struct ZenitSourceInfo> *srcinfo: Object that contains the program's source code
+ *  <ZenitSourceInfo> *srcinfo: Object that contains the program's source code
  *  <unsigned int> index: Used as a pointer to perform the scan's operations
  */
-struct ZenitLexer {
-    struct ZenitSourceInfo *srcinfo;
+typedef struct ZenitLexer {
+    ZenitSourceInfo *srcinfo;
     unsigned int index;
-};
+} ZenitLexer;
 
 /*
  * Function: zenit_lexer_new
- *  Creates a new <struct ZenitLexer> feeded with the provided source object.
+ *  Creates a new <ZenitLexer> feeded with the provided source object.
  *
  * Parameters:
- *  <struct ZenitSourceInfo> *srcinfo: Object that keeps track of source information
+ *  <ZenitSourceInfo> *srcinfo: Object that keeps track of source information
  *
  * Returns:
- *  <struct ZenitLexer>: Object to keep track of the lexical analysis
+ *  <ZenitLexer>: Object to keep track of the lexical analysis
  *
  */
-struct ZenitLexer zenit_lexer_new(struct ZenitSourceInfo *srcinfo);
+ZenitLexer zenit_lexer_new(ZenitSourceInfo *srcinfo);
 
 /*
  * Function: zenit_lexer_consume
  *  Consumes and returns the next available token.
  *
  * Parameters:
- *  <struct ZenitLexer> *lexer: Lexer object
+ *  <ZenitLexer> *lexer: Lexer object
  *
  * Returns:
- *  <struct ZenitToken>: Consumed token
+ *  <ZenitToken>: Consumed token
  *
  */
-struct ZenitToken zenit_lexer_consume(struct ZenitLexer *lexer);
+ZenitToken zenit_lexer_consume(ZenitLexer *lexer);
 
 /*
  * Function: zenit_lexer_peek
  *  Returns the next available token without actually consuming it.
  *
  * Parameters:
- *  <struct ZenitLexer> *lexer: Lexer object
+ *  <ZenitLexer> *lexer: Lexer object
  *
  * Returns:
- *  <struct ZenitToken>: Next available token to consume
+ *  <ZenitToken>: Next available token to consume
  *
  */
-struct ZenitToken zenit_lexer_peek(struct ZenitLexer *lexer);
+ZenitToken zenit_lexer_peek(ZenitLexer *lexer);
 
 /*
  * Function: zenit_lexer_tokenize
@@ -63,12 +62,12 @@ struct ZenitToken zenit_lexer_peek(struct ZenitLexer *lexer);
  *  fllib's <fl_array_free> function 
  *
  * Parameters:
- *  <struct ZenitLexer> *lexer: Object that makes the lexical analysis
+ *  <ZenitLexer> *lexer: Object that makes the lexical analysis
  *
  * Returns:
- *  <struct ZenitToken>*: Array of tokens. Must be freed with the <fl_array_free> function
+ *  <ZenitToken>*: Array of tokens. Must be freed with the <fl_array_free> function
  *
  */
-struct ZenitToken* zenit_lexer_tokenize(struct ZenitLexer *lexer);
+ZenitToken* zenit_lexer_tokenize(ZenitLexer *lexer);
 
 #endif /* ZENIT_LEXER_H */

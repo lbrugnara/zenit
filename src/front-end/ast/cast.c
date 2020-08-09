@@ -2,9 +2,9 @@
 #include <fllib/Cstring.h>
 #include "cast.h"
 
-struct ZenitCastNode* zenit_node_cast_new(struct ZenitSourceLocation location, struct ZenitNode *expression, bool implicit)
+ZenitCastNode* zenit_node_cast_new(ZenitSourceLocation location, ZenitNode *expression, bool implicit)
 {
-    struct ZenitCastNode *cast_node = fl_malloc(sizeof(struct ZenitCastNode));
+    ZenitCastNode *cast_node = fl_malloc(sizeof(ZenitCastNode));
     cast_node->base.nodekind = ZENIT_NODE_CAST;
     cast_node->base.location = location;
     cast_node->implicit = implicit;
@@ -13,7 +13,7 @@ struct ZenitCastNode* zenit_node_cast_new(struct ZenitSourceLocation location, s
     return cast_node;
 }
 
-char* zenit_node_cast_uid(struct ZenitCastNode *cast)
+char* zenit_node_cast_uid(ZenitCastNode *cast)
 {
     if (!cast)
         return NULL;
@@ -23,21 +23,21 @@ char* zenit_node_cast_uid(struct ZenitCastNode *cast)
     return fl_cstring_vdup("%%L%u:C%u_cast", cast->base.location.line, cast->base.location.col);
 }
 
-char* zenit_node_cast_dump(struct ZenitCastNode *cast, char *output)
+char* zenit_node_cast_dump(ZenitCastNode *cast, char *output)
 {
     fl_cstring_append(&output, "(cast ");
 
     output = zenit_node_dump(cast->expression, output);
 
     if (cast->type_decl != NULL)
-        output = zenit_node_dump((struct ZenitNode*) cast->type_decl, output);
+        output = zenit_node_dump((ZenitNode*) cast->type_decl, output);
 
     fl_cstring_append(&output, ")");
 
     return output;
 }
 
-void zenit_node_cast_free(struct ZenitCastNode *cast_node)
+void zenit_node_cast_free(ZenitCastNode *cast_node)
 {
     if (!cast_node)
         return;
@@ -46,7 +46,7 @@ void zenit_node_cast_free(struct ZenitCastNode *cast_node)
         zenit_node_free(cast_node->expression);
 
     if (cast_node->type_decl)
-        zenit_node_free((struct ZenitNode*) cast_node->type_decl);
+        zenit_node_free((ZenitNode*) cast_node->type_decl);
 
     fl_free(cast_node);
 }

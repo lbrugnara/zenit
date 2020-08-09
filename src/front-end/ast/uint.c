@@ -3,9 +3,9 @@
 #include "uint.h"
 #include "../types/uint.h"
 
-struct ZenitUintNode* zenit_node_uint_new(struct ZenitSourceLocation location, enum ZenitUintTypeSize size, union ZenitUintValue value)
+ZenitUintNode* zenit_node_uint_new(ZenitSourceLocation location, ZenitUintTypeSize size, ZenitUintValue value)
 {
-    struct ZenitUintNode *uint_node = fl_malloc(sizeof(struct ZenitUintNode));
+    ZenitUintNode *uint_node = fl_malloc(sizeof(ZenitUintNode));
     uint_node->base.nodekind = ZENIT_NODE_UINT;
     uint_node->base.location = location;
     uint_node->size = size;
@@ -14,7 +14,7 @@ struct ZenitUintNode* zenit_node_uint_new(struct ZenitSourceLocation location, e
     return uint_node;
 }
 
-char* zenit_node_uint_uid(struct ZenitUintNode *uint)
+char* zenit_node_uint_uid(ZenitUintNode *uint)
 {
     if (!uint)
         return NULL;
@@ -22,7 +22,7 @@ char* zenit_node_uint_uid(struct ZenitUintNode *uint)
     return fl_cstring_vdup("%%L%u:C%u_uint", uint->base.location.line, uint->base.location.col);
 }
 
-char* zenit_node_uint_dump(struct ZenitUintNode *uint, char *output)
+char* zenit_node_uint_dump(ZenitUintNode *uint, char *output)
 {
     fl_cstring_append(&output, "(uint");
 
@@ -52,7 +52,7 @@ char* zenit_node_uint_dump(struct ZenitUintNode *uint, char *output)
 
 /*
  * Function: zenit_node_uint_free
- *  Frees the memory of a <struct ZenitUintNode> object
+ *  Frees the memory of a <ZenitUintNode> object
  *
  * Parameters:
  *  uint_node - Node object
@@ -60,7 +60,7 @@ char* zenit_node_uint_dump(struct ZenitUintNode *uint, char *output)
  * Returns:
  *  void - This function does not return a value
  */
-void zenit_node_uint_free(struct ZenitUintNode *uint_node)
+void zenit_node_uint_free(ZenitUintNode *uint_node)
 {
     if (!uint_node)
         return;

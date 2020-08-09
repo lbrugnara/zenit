@@ -3,9 +3,9 @@
 #include "symbol.h"
 #include "instructions/operands/pool.h"
 
-struct ZirProgram* zir_program_new()
+ZirProgram* zir_program_new()
 {
-    struct ZirProgram *program = fl_malloc(sizeof(struct ZirProgram));
+    ZirProgram *program = fl_malloc(sizeof(ZirProgram));
     program->global = zir_block_new("global", ZIR_BLOCK_GLOBAL, NULL);
     program->current = program->global;
     program->operands = zir_operand_pool_new();
@@ -13,7 +13,7 @@ struct ZirProgram* zir_program_new()
     return program;
 }
 
-void zir_program_free(struct ZirProgram *program)
+void zir_program_free(ZirProgram *program)
 {
     if (!program)
         return;
@@ -26,7 +26,7 @@ void zir_program_free(struct ZirProgram *program)
 }
 
 
-bool zir_program_enter_block(struct ZirProgram *program, struct ZirBlock *block)
+bool zir_program_enter_block(ZirProgram *program, ZirBlock *block)
 {
     if (block->parent != program->current)
         return false;
@@ -36,10 +36,10 @@ bool zir_program_enter_block(struct ZirProgram *program, struct ZirBlock *block)
 }
 
 
-void zir_program_push_block(struct ZirProgram *program, enum ZirBlockType type, const char *name)
+void zir_program_push_block(ZirProgram *program, ZirBlockType type, const char *name)
 {
     // First we search for an existent block with the provided type and name    
-    struct ZirBlock *block = zir_program_get_block(program, type, name);
+    ZirBlock *block = zir_program_get_block(program, type, name);
 
     if (block == NULL)
     {
@@ -51,20 +51,20 @@ void zir_program_push_block(struct ZirProgram *program, enum ZirBlockType type, 
     program->current = block;
 }
 
-void zir_program_pop_block(struct ZirProgram *program)
+void zir_program_pop_block(ZirProgram *program)
 {
     program->current = program->current->parent;
 }
 
-bool zir_program_has_block(struct ZirProgram *program, enum ZirBlockType type, const char *name)
+bool zir_program_has_block(ZirProgram *program, ZirBlockType type, const char *name)
 {
-    struct ZirBlock *tmp_block = program->current;
+    ZirBlock *tmp_block = program->current;
     do
     {
         // NOTE: For simplicity we use an array, we could replace this with a hashtable later
         for (size_t i=0; i < fl_array_length(program->current->children); i++)
         {
-            struct ZirBlock *block = program->current->children[i];
+            ZirBlock *block = program->current->children[i];
             if (flm_cstring_equals(block->id, name) && block->type == type)
                 return true;
         }
@@ -77,15 +77,15 @@ bool zir_program_has_block(struct ZirProgram *program, enum ZirBlockType type, c
     return false;
 }
 
-struct ZirBlock* zir_program_get_block(struct ZirProgram *program, enum ZirBlockType type, const char *name)
+ZirBlock* zir_program_get_block(ZirProgram *program, ZirBlockType type, const char *name)
 {
-    struct ZirBlock *tmp_block = program->current;
+    ZirBlock *tmp_block = program->current;
     do
     {
         // NOTE: For simplicity we use an array, we could replace this with a hashtable later
         for (size_t i=0; i < fl_array_length(program->current->children); i++)
         {
-            struct ZirBlock *block = program->current->children[i];
+            ZirBlock *block = program->current->children[i];
             if (flm_cstring_equals(block->id, name) && block->type == type)
                 return block;
         }
@@ -98,18 +98,18 @@ struct ZirBlock* zir_program_get_block(struct ZirProgram *program, enum ZirBlock
     return NULL;
 }
 
-struct ZirSymbol* zir_program_add_symbol(struct ZirProgram *program, struct ZirSymbol *symbol)
+ZirSymbol* zir_program_add_symbol(ZirProgram *program, ZirSymbol *symbol)
 {
     return zir_symtable_add(&program->current->symtable, symbol);
 }
 
-struct ZirInstruction* zir_program_emit(struct ZirProgram *program, struct ZirInstruction *instruction)
+ZirInstruction* zir_program_emit(ZirProgram *program, ZirInstruction *instruction)
 {
     program->current->instructions = fl_array_append(program->current->instructions, &instruction);
     return instruction;
 }
 
-char* zir_program_dump(struct ZirProgram *program)
+char* zir_program_dump(ZirProgram *program)
 {
     return zir_block_dump(program->global, fl_cstring_new(0));
 }

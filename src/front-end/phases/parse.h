@@ -8,7 +8,7 @@
 /*
  * Function: zenit_parse_source
  *  Parses the whole source code and populates the <ZenitContext>
- *  with the resulting <struct ZenitAst> object.
+ *  with the resulting <ZenitAst> object.
  *
  * Parameters:
  *  ctx - Context object

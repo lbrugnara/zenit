@@ -3,51 +3,52 @@
 
 #include <stdint.h>
 #include "operand.h"
+#include "../../types/bool.h"
 
 /*
- * Struct: struct ZirBoolOperand
+ * Struct: ZirBoolOperand
  *  A boolean operand contains information about the type, and value of a boolean object
  * 
  * Members:
- *  <struct ZirOperand> base: Basic operand information
- *  <struct ZirBoolType> *type: The type and size of the boolean object
+ *  <ZirOperand> base: Basic operand information
+ *  <ZirBoolType> *type: The type and size of the boolean object
  *  <bool> value: The value of the boolean object
  */
-struct ZirBoolOperand {
-    struct ZirOperand base;
-    struct ZirBoolType *type;
+typedef struct ZirBoolOperand {
+    ZirOperand base;
+    ZirBoolType *type;
     bool value;
-};
+} ZirBoolOperand;
 
 /*
  * Function: zir_operand_bool_new
  *  Creates a new boolean operand with the provided type, size, and value
  *
  * Parameters:
- *  <struct ZirBoolType> *type: The type of the boolean object
+ *  <ZirBoolType> *type: The type of the boolean object
  *  <bool> value: The value of the boolean object
  *
  * Returns:
- *  struct ZirBoolOperand*: The new boolean operand object
+ *  ZirBoolOperand*: The new boolean operand object
  *
  * Notes:
  *  The object returned by this function must be freed using the <zir_operand_bool_free> function.
- *  The boolean operand takes ownership of the <struct ZirBoolType> object, which means it will release
+ *  The boolean operand takes ownership of the <ZirBoolType> object, which means it will release
  *  the type object memory too when <zir_operand_bool_free> is called with the boolean operand as argument.
  */
-struct ZirBoolOperand* zir_operand_bool_new(struct ZirBoolType *type, bool value);
+ZirBoolOperand* zir_operand_bool_new(ZirBoolType *type, bool value);
 
 /*
  * Function: zir_operand_bool_free
  *  Frees the memory of the boolean operand
  *
  * Parameters:
- *  <struct ZirBoolOperand> *bool_operand: Bool operand object
+ *  <ZirBoolOperand> *bool_operand: Bool operand object
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zir_operand_bool_free(struct ZirBoolOperand *bool_operand);
+void zir_operand_bool_free(ZirBoolOperand *bool_operand);
 
 /*
  * Function: zir_operand_bool_dump
@@ -60,7 +61,7 @@ void zir_operand_bool_free(struct ZirBoolOperand *bool_operand);
  * ===========
  *
  * Parameters:
- *  <struct ZirBoolOperand> *bool_operand: Bool operand object
+ *  <ZirBoolOperand> *bool_operand: Bool operand object
  *  <char> *output: Output buffer
  *
  * Returns:
@@ -69,7 +70,7 @@ void zir_operand_bool_free(struct ZirBoolOperand *bool_operand);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_bool_dump(struct ZirBoolOperand *bool_operand, char *output);
+char* zir_operand_bool_dump(ZirBoolOperand *bool_operand, char *output);
 
 /*
  * Function: zir_operand_bool_type_dump
@@ -82,7 +83,7 @@ char* zir_operand_bool_dump(struct ZirBoolOperand *bool_operand, char *output);
  * ===========
  *
  * Parameters:
- *  <struct ZirBoolOperand> *bool_operand: Operand object
+ *  <ZirBoolOperand> *bool_operand: Operand object
  *  <char> *output: Output buffer
  *
  * Returns:
@@ -91,6 +92,6 @@ char* zir_operand_bool_dump(struct ZirBoolOperand *bool_operand, char *output);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_bool_type_dump(struct ZirBoolOperand *bool_operand, char *output);
+char* zir_operand_bool_type_dump(ZirBoolOperand *bool_operand, char *output);
 
 #endif /* ZIR_OPERAND_BOOL_H */

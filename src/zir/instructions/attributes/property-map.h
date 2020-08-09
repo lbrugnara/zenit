@@ -18,13 +18,13 @@ typedef FlHashtable ZirPropertyMap;
 
 #define zir_property_map_free(property_map) do { if (property_map) fl_hashtable_free(property_map); } while (0)
 
-#define zir_property_map_add(property_map, property) ((struct ZirProperty*) fl_hashtable_add(property_map, property->name, property))
+#define zir_property_map_add(property_map, property) ((ZirProperty*) fl_hashtable_add(property_map, property->name, property))
 
 #define zir_property_map_keys(property_map) fl_hashtable_keys(property_map)
 
-#define zir_property_map_values(property_map) ((struct ZirProperty**) fl_hashtable_values(property_map))
+#define zir_property_map_values(property_map) ((ZirProperty**) fl_hashtable_values(property_map))
 
-#define zir_property_map_get(property_map, property_name) ((struct ZirProperty*) fl_hashtable_get(property_map, property_name))
+#define zir_property_map_get(property_map, property_name) ((ZirProperty*) fl_hashtable_get(property_map, property_name))
 
 #define zir_property_map_length(property_map) fl_hashtable_length(property_map)
 

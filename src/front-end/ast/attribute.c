@@ -1,9 +1,9 @@
 #include <fllib/Cstring.h>
 #include "attribute.h"
 
-struct ZenitAttributeNode* zenit_node_attribute_new(struct ZenitSourceLocation location, char *name)
+ZenitAttributeNode* zenit_node_attribute_new(ZenitSourceLocation location, char *name)
 {
-    struct ZenitAttributeNode *attribute = fl_malloc(sizeof(struct ZenitAttributeNode));
+    ZenitAttributeNode *attribute = fl_malloc(sizeof(ZenitAttributeNode));
     attribute->base.nodekind = ZENIT_NODE_ATTRIBUTE;
     attribute->base.location = location;
     attribute->name = name;
@@ -12,7 +12,7 @@ struct ZenitAttributeNode* zenit_node_attribute_new(struct ZenitSourceLocation l
     return attribute;
 }
 
-char* zenit_node_attribute_uid(struct ZenitAttributeNode *attribute)
+char* zenit_node_attribute_uid(ZenitAttributeNode *attribute)
 {
     if (!attribute)
         return NULL;
@@ -20,11 +20,11 @@ char* zenit_node_attribute_uid(struct ZenitAttributeNode *attribute)
     return fl_cstring_vdup("%%L%u:C%u_attr_%s", attribute->base.location.line, attribute->base.location.col, attribute->name);
 }
 
-char* zenit_node_attribute_dump(struct ZenitAttributeNode *attribute, char *output)
+char* zenit_node_attribute_dump(ZenitAttributeNode *attribute, char *output)
 {
     fl_cstring_vappend(&output, "(attr %s", attribute->name);
 
-    struct ZenitPropertyNode **properties = zenit_property_node_map_values(attribute->properties);
+    ZenitPropertyNode **properties = zenit_property_node_map_values(attribute->properties);
     
     size_t length = fl_array_length(properties);
     if (length > 0)
@@ -45,7 +45,7 @@ char* zenit_node_attribute_dump(struct ZenitAttributeNode *attribute, char *outp
     return output;
 }
 
-void zenit_node_attribute_free(struct ZenitAttributeNode *attribute_node)
+void zenit_node_attribute_free(ZenitAttributeNode *attribute_node)
 {
     if (!attribute_node)
         return;

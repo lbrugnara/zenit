@@ -2,9 +2,9 @@
 #include <fllib/Cstring.h>
 #include "property.h"
 
-struct ZenitPropertyNode* zenit_node_property_new(struct ZenitSourceLocation location, char *name, struct ZenitNode *value)
+ZenitPropertyNode* zenit_node_property_new(ZenitSourceLocation location, char *name, ZenitNode *value)
 {
-    struct ZenitPropertyNode *property = fl_malloc(sizeof(struct ZenitPropertyNode));
+    ZenitPropertyNode *property = fl_malloc(sizeof(ZenitPropertyNode));
     property->base.nodekind = ZENIT_NODE_PROPERTY;
     property->base.location = location;
     property->name = name;
@@ -13,7 +13,7 @@ struct ZenitPropertyNode* zenit_node_property_new(struct ZenitSourceLocation loc
     return property;
 }
 
-char* zenit_node_property_uid(struct ZenitPropertyNode *property)
+char* zenit_node_property_uid(ZenitPropertyNode *property)
 {
     if (!property)
         return NULL;
@@ -21,7 +21,7 @@ char* zenit_node_property_uid(struct ZenitPropertyNode *property)
     return fl_cstring_vdup("%%L%u:C%u_property_%s", property->base.location.line, property->base.location.col, property->name);
 }
 
-char* zenit_node_property_dump(struct ZenitPropertyNode *property, char *output)
+char* zenit_node_property_dump(ZenitPropertyNode *property, char *output)
 {
     fl_cstring_vappend(&output, "(prop %s ", property->name);
     
@@ -32,7 +32,7 @@ char* zenit_node_property_dump(struct ZenitPropertyNode *property, char *output)
     return output;
 }
 
-void zenit_node_property_free(struct ZenitPropertyNode *node)
+void zenit_node_property_free(ZenitPropertyNode *node)
 {
     if (!node)
         return;

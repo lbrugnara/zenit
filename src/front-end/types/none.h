@@ -11,36 +11,36 @@
  *  void: this function does not take parameters
  *
  * Returns:
- *  struct ZenitType*: Pointer to a a none type object
+ *  ZenitType*: Pointer to a a none type object
  *
  * Notes:
  *  The object returned by this function must be freed using the
  *  <zenit_type_none_free> function
  */
-struct ZenitType* zenit_type_none_new(void);
+ZenitType* zenit_type_none_new(void);
 
 /*
  * Function: zenit_type_none_hash
  *  Returns a hash that identifies the none type object
  *
  * Parameters:
- *  <struct ZenitType> *type: Type object
+ *  <ZenitType> *type: Type object
  *
  * Returns:
  *  unsigned long: Hash code of the type object
  */
-unsigned long zenit_type_none_hash(struct ZenitType *type);
+unsigned long zenit_type_none_hash(ZenitType *type);
 
 /*
  * Function: zenit_type_none_free
  *  Frees the memory of the none type object
  *
  * Parameters:
- *  <struct ZenitType> *type: Type object
+ *  <ZenitType> *type: Type object
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_type_none_free(struct ZenitType *type);
+void zenit_type_none_free(ZenitType *type);
 
 #endif /* ZENIT_TYPE_NONE_H */

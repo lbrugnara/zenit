@@ -6,6 +6,6 @@
 #include "../symbols/symbol.h"
 #include "../../../zir/instructions/operands/operand.h"
 
-void zenit_nes_emitter_store(struct ZenitNesProgram *program, struct ZirOperand *operand, struct ZenitNesSymbol *nes_symbol, size_t offset);
+void zenit_nes_emitter_store(ZnesProgram *program, ZirOperand *operand, ZnesSymbol *nes_symbol, size_t offset);
 
 #endif /* ZENIT_NES_EMITTER_H */

@@ -5,7 +5,7 @@
 #include "../symbols/array.h"
 #include "../symbols/temp.h"
 
-void zenit_nes_emitter_array_store(struct ZenitNesProgram *program, struct ZirArrayOperand *array, struct ZenitNesSymbol *nes_symbol, size_t offset)
+void zenit_nes_emitter_array_store(ZnesProgram *program, ZirArrayOperand *array, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (nes_symbol->symkind != ZENIT_NES_SYMBOL_ARRAY)
     {
@@ -14,13 +14,13 @@ void zenit_nes_emitter_array_store(struct ZenitNesProgram *program, struct ZirAr
     }
 
     // The gap comes from the destination
-    struct ZenitNesArraySymbol *array_symbol = (struct ZenitNesArraySymbol*) nes_symbol;
+    ZnesArraySymbol *array_symbol = (ZnesArraySymbol*) nes_symbol;
     size_t gap = array_symbol->base.size / fl_array_length(array_symbol->elements);
 
     for (size_t i=0; i < fl_array_length(array->elements); i++)
     {
-        struct ZenitNesSymbol *element_symbol = array_symbol->elements[i];
-        struct ZirOperand *operand = array->elements[i];
+        ZnesSymbol *element_symbol = array_symbol->elements[i];
+        ZirOperand *operand = array->elements[i];
 
         zenit_nes_emitter_store(program, operand, element_symbol, 0);
     }

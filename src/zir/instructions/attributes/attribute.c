@@ -2,16 +2,16 @@
 #include <fllib/Cstring.h>
 #include "attribute.h"
 
-struct ZirAttribute* zir_attribute_new(char *name)
+ZirAttribute* zir_attribute_new(char *name)
 {
-    struct ZirAttribute *zir_attr = fl_malloc(sizeof(struct ZirAttribute));
+    ZirAttribute *zir_attr = fl_malloc(sizeof(ZirAttribute));
     zir_attr->name = fl_cstring_dup(name);
     zir_attr->properties = zir_property_map_new();
 
     return zir_attr;
 }
 
-void zir_attribute_free(struct ZirAttribute *attribute)
+void zir_attribute_free(ZirAttribute *attribute)
 {
     if (!attribute)
         return;

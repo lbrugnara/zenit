@@ -3,19 +3,19 @@
 #include "type.h"
 #include "struct.h"
 
-struct ZenitStructTypeNode* zenit_node_type_struct_new(struct ZenitSourceLocation location, char *name)
+ZenitStructTypeNode* zenit_node_type_struct_new(ZenitSourceLocation location, char *name)
 {
-    struct ZenitStructTypeNode *type_node = fl_malloc(sizeof(struct ZenitStructTypeNode));
+    ZenitStructTypeNode *type_node = fl_malloc(sizeof(ZenitStructTypeNode));
     type_node->base.base.nodekind = ZENIT_NODE_TYPE_STRUCT;
     type_node->base.base.location = location;
     type_node->base.typekind = ZENIT_TYPE_STRUCT;
     type_node->name = name;
-    type_node->members = fl_array_new(sizeof(struct ZenitTypeNode*), 0);
+    type_node->members = fl_array_new(sizeof(ZenitTypeNode*), 0);
 
     return type_node;
 }
 
-char* zenit_node_type_struct_uid(struct ZenitStructTypeNode *type_node)
+char* zenit_node_type_struct_uid(ZenitStructTypeNode *type_node)
 {
     if (!type_node)
         return NULL;
@@ -23,7 +23,7 @@ char* zenit_node_type_struct_uid(struct ZenitStructTypeNode *type_node)
     return fl_cstring_vdup("%%L%u:C%u_type_struct", type_node->base.base.location.line, type_node->base.base.location.col);
 }
 
-char* zenit_node_type_struct_dump(struct ZenitStructTypeNode *type_node, char *output)
+char* zenit_node_type_struct_dump(ZenitStructTypeNode *type_node, char *output)
 {
     char *type_str = zenit_node_type_struct_to_string(type_node);
 
@@ -34,7 +34,7 @@ char* zenit_node_type_struct_dump(struct ZenitStructTypeNode *type_node, char *o
     return output;
 }
 
-char* zenit_node_type_struct_to_string(struct ZenitStructTypeNode *type_node)
+char* zenit_node_type_struct_to_string(ZenitStructTypeNode *type_node)
 {
     if (type_node == NULL)
         return NULL;
@@ -42,7 +42,7 @@ char* zenit_node_type_struct_to_string(struct ZenitStructTypeNode *type_node)
     return fl_cstring_dup(type_node->name);
 }
 
-void zenit_node_type_struct_free(struct ZenitStructTypeNode *type_node)
+void zenit_node_type_struct_free(ZenitStructTypeNode *type_node)
 {
     if (!type_node)
         return;

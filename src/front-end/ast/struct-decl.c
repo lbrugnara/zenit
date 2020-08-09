@@ -1,20 +1,20 @@
 
 #include <fllib/Array.h>
 #include <fllib/Cstring.h>
-#include "struct_decl.h"
+#include "struct-decl.h"
 
-struct ZenitStructDeclNode* zenit_node_struct_decl_new(struct ZenitSourceLocation location, char *name)
+ZenitStructDeclNode* zenit_node_struct_decl_new(ZenitSourceLocation location, char *name)
 {
-    struct ZenitStructDeclNode *struct_node = fl_malloc(sizeof(struct ZenitStructDeclNode));
+    ZenitStructDeclNode *struct_node = fl_malloc(sizeof(ZenitStructDeclNode));
     struct_node->base.nodekind = ZENIT_NODE_STRUCT_DECL;
     struct_node->base.location = location;
     struct_node->name = name;
-    struct_node->members = fl_array_new(sizeof(struct ZenitNode*), 0);
+    struct_node->members = fl_array_new(sizeof(ZenitNode*), 0);
 
     return struct_node;
 }
 
-char* zenit_node_struct_decl_uid(struct ZenitStructDeclNode *struct_node)
+char* zenit_node_struct_decl_uid(ZenitStructDeclNode *struct_node)
 {
     if (!struct_node)
         return NULL;
@@ -22,7 +22,7 @@ char* zenit_node_struct_decl_uid(struct ZenitStructDeclNode *struct_node)
     return fl_cstring_vdup("%%L%u:C%u_struct_decl_%s", struct_node->base.location.line, struct_node->base.location.col, struct_node->name);
 }
 
-char* zenit_node_struct_decl_dump(struct ZenitStructDeclNode *struct_node, char *output)
+char* zenit_node_struct_decl_dump(ZenitStructDeclNode *struct_node, char *output)
 {
     fl_cstring_vappend(&output, "(struct-decl %s ", struct_node->name);
 
@@ -34,7 +34,7 @@ char* zenit_node_struct_decl_dump(struct ZenitStructDeclNode *struct_node, char 
             fl_cstring_append(&output, " ");
     }
 
-    struct ZenitAttributeNode **attrs = zenit_attribute_node_map_values(struct_node->attributes);
+    ZenitAttributeNode **attrs = zenit_attribute_node_map_values(struct_node->attributes);
 
     length = fl_array_length(attrs);
     if (length > 0)
@@ -58,7 +58,7 @@ char* zenit_node_struct_decl_dump(struct ZenitStructDeclNode *struct_node, char 
 
 /*
  * Function: zenit_node_struct_decl_free
- *  Frees the memory of a <struct ZenitStructDeclNode> object
+ *  Frees the memory of a <ZenitStructDeclNode> object
  *
  * Parameters:
  *  struct_node - Node object
@@ -66,7 +66,7 @@ char* zenit_node_struct_decl_dump(struct ZenitStructDeclNode *struct_node, char 
  * Returns:
  *  void - This function does not return a value
  */
-void zenit_node_struct_decl_free(struct ZenitStructDeclNode *struct_node)
+void zenit_node_struct_decl_free(ZenitStructDeclNode *struct_node)
 {
     if (!struct_node)
         return;

@@ -2,16 +2,16 @@
 #include <fllib/Cstring.h>
 #include "array.h"
 
-struct ZenitArrayType* zenit_type_array_new(struct ZenitType *member_type)
+ZenitArrayType* zenit_type_array_new(ZenitType *member_type)
 {
-    struct ZenitArrayType *type = fl_malloc(sizeof(struct ZenitArrayType));
+    ZenitArrayType *type = fl_malloc(sizeof(ZenitArrayType));
     type->base.typekind = ZENIT_TYPE_ARRAY;
     type->member_type = member_type;
 
     return type;
 }
 
-unsigned long zenit_type_array_hash(struct ZenitArrayType *type)
+unsigned long zenit_type_array_hash(ZenitArrayType *type)
 {
     static const char *format = "[array][e:%lu]";
 
@@ -27,7 +27,7 @@ unsigned long zenit_type_array_hash(struct ZenitArrayType *type)
     return hash;
 }
 
-char* zenit_type_array_to_string(struct ZenitArrayType *type)
+char* zenit_type_array_to_string(ZenitArrayType *type)
 {
     if (type == NULL)
         return NULL;
@@ -64,25 +64,25 @@ char* zenit_type_array_to_string(struct ZenitArrayType *type)
     return type->base.to_string.value;
 }
 
-bool zenit_type_array_equals(struct ZenitArrayType *type_a, struct ZenitType *type_b)
+bool zenit_type_array_equals(ZenitArrayType *type_a, ZenitType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
-        return (struct ZenitType*) type_a == type_b;
+        return (ZenitType*) type_a == type_b;
 
     if (type_b->typekind != ZENIT_TYPE_ARRAY)
         return false;
 
-    struct ZenitArrayType *type_b_array = (struct ZenitArrayType*) type_b;
+    ZenitArrayType *type_b_array = (ZenitArrayType*) type_b;
 
     return type_a->length == type_b_array->length && zenit_type_equals(type_a->member_type, type_b_array->member_type);
 }
 
-bool zenit_type_array_is_assignable_from(struct ZenitArrayType *target_type, struct ZenitType *from_type)
+bool zenit_type_array_is_assignable_from(ZenitArrayType *target_type, ZenitType *from_type)
 {
     if (from_type->typekind != ZENIT_TYPE_ARRAY)
         return false;
 
-    struct ZenitArrayType *array_from_type = (struct ZenitArrayType*) from_type;
+    ZenitArrayType *array_from_type = (ZenitArrayType*) from_type;
 
     if (target_type->length != array_from_type->length)
         return false;
@@ -94,7 +94,7 @@ bool zenit_type_array_is_assignable_from(struct ZenitArrayType *target_type, str
     return zenit_type_is_assignable_from(target_type->member_type, array_from_type->member_type);
 }
 
-bool zenit_type_array_is_castable_to(struct ZenitArrayType *array_type, struct ZenitType *target_type)
+bool zenit_type_array_is_castable_to(ZenitArrayType *array_type, ZenitType *target_type)
 {
     if (array_type == NULL || target_type == NULL)
         return false;
@@ -111,7 +111,7 @@ bool zenit_type_array_is_castable_to(struct ZenitArrayType *array_type, struct Z
     //  - The target type has a different number of elements than the array type
     //  - The number of elements are equals, in that case we should check if we can cast from the array's declared/inferred
     //    type to the target declared/inferred type
-    struct ZenitArrayType *target_array_type = (struct ZenitArrayType*) target_type;
+    ZenitArrayType *target_array_type = (ZenitArrayType*) target_type;
 
     if (array_type->length != target_array_type->length)
         return false;
@@ -119,7 +119,7 @@ bool zenit_type_array_is_castable_to(struct ZenitArrayType *array_type, struct Z
     return zenit_type_is_castable_to(array_type->member_type, target_array_type->member_type);
 }
 
-bool zenit_type_array_can_unify(struct ZenitArrayType *array_type, struct ZenitType *type_b)
+bool zenit_type_array_can_unify(ZenitArrayType *array_type, ZenitType *type_b)
 {
     if (array_type == NULL || type_b == NULL)
         return false;
@@ -133,7 +133,7 @@ bool zenit_type_array_can_unify(struct ZenitArrayType *array_type, struct ZenitT
     if (zenit_type_array_equals(array_type, type_b))
         return true;
 
-    struct ZenitArrayType *arr_type_b = (struct ZenitArrayType*) type_b;
+    ZenitArrayType *arr_type_b = (ZenitArrayType*) type_b;
 
     if (array_type->length != arr_type_b->length)
         return false;
@@ -144,7 +144,7 @@ bool zenit_type_array_can_unify(struct ZenitArrayType *array_type, struct ZenitT
     return true;
 }
 
-void zenit_type_array_free(struct ZenitArrayType *type)
+void zenit_type_array_free(ZenitArrayType *type)
 {
     if (!type)
         return;

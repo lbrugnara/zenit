@@ -4,41 +4,41 @@
 #include "operands/operand.h"
 
 /*
- * Enum: enum ZirInstructionType
+ * Enum: ZirInstructionType
  *  Represents the different type of instructions available in ZIR
  * 
  */
-enum ZirInstructionType {
+typedef enum ZirInstructionType {
     ZIR_INSTR_VARIABLE,
     ZIR_INSTR_CAST,
-};
+} ZirInstructionType;
 
 /*
- * Struct: struct ZirInstruction
+ * Struct: ZirInstruction
  *  Base object that contains basic information between the
  *  different types of instructions
  * 
  * Members:
- *  <enum ZirInstructionType> type: Instruction's internal type
- *  <struct ZirOperand> *destination: The destination operand for the instruction's result
+ *  <ZirInstructionType> type: Instruction's internal type
+ *  <ZirOperand> *destination: The destination operand for the instruction's result
  * 
  */
-struct ZirInstruction {
-    enum ZirInstructionType type;
-    struct ZirOperand *destination;
-};
+typedef struct ZirInstruction {
+    ZirInstructionType type;
+    ZirOperand *destination;
+} ZirInstruction;
 
 /*
  * Function: zir_instruction_free
  *  Releases the memory used by an instruction object
  *
  * Parameters:
- *  <struct ZirInstruction> *instruction: The instruction object to be freed
+ *  <ZirInstruction> *instruction: The instruction object to be freed
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zir_instruction_free(struct ZirInstruction *instruction);
+void zir_instruction_free(ZirInstruction *instruction);
 
 /*
  * Function: zir_instruction_dump
@@ -51,13 +51,13 @@ void zir_instruction_free(struct ZirInstruction *instruction);
  * ===========
  *
  * Parameters:
- *  <struct ZirInstruction> *instruction: Instruction object
+ *  <ZirInstruction> *instruction: Instruction object
  *  <char> *output: Output buffer
  *
  * Returns:
  *  char*: *output* pointer
  *
  */
-char* zir_instruction_dump(struct ZirInstruction *instruction, char *output);
+char* zir_instruction_dump(ZirInstruction *instruction, char *output);
 
 #endif /* ZIR_INSTRUCTION_H */

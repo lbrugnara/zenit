@@ -62,7 +62,7 @@ void zenit_test_generate_ir_variables(void)
     fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
     fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
     
-    struct ZirProgram *program = zenit_generate_zir(&ctx);
+    ZirProgram *program = zenit_generate_zir(&ctx);
 
     fl_expect("ZIR program must compile", program != NULL);
 

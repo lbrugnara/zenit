@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include "symbol.h"
 
-struct ZenitNesUintSymbol {
-    struct ZenitNesSymbol base;
-};
+typedef struct ZnesUintSymbol {
+    ZnesSymbol base;
+} ZnesUintSymbol;
 
-struct ZenitNesUintSymbol* zenit_nes_symbol_uint_new(const char *name, struct ZirUintType *zir_uint_type, enum ZenitNesSegment segment, uint16_t address);
-void zenit_nes_symbol_uint_free(struct ZenitNesUintSymbol *symbol);
+ZnesUintSymbol* zenit_nes_symbol_uint_new(const char *name, ZirUintType *zir_uint_type, ZnesSegment segment, uint16_t address);
+void zenit_nes_symbol_uint_free(ZnesUintSymbol *symbol);
 
 #endif /* ZENIT_NES_UINT_SYMBOL_H */

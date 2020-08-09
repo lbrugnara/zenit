@@ -3,23 +3,23 @@
 #include <fllib/Cstring.h>
 #include "block.h"
 
-struct ZenitBlockNode* zenit_node_block_new(struct ZenitSourceLocation location)
+ZenitBlockNode* zenit_node_block_new(ZenitSourceLocation location)
 {
-    struct ZenitBlockNode *node = fl_malloc(sizeof(struct ZenitBlockNode));
+    ZenitBlockNode *node = fl_malloc(sizeof(ZenitBlockNode));
     node->base.nodekind = ZENIT_NODE_BLOCK;
     node->base.location = location;
-    node->statements = fl_array_new(sizeof(struct ZenitNode*), 0);
+    node->statements = fl_array_new(sizeof(ZenitNode*), 0);
 
     return node;
 }
 
-void zenit_node_block_add_statement(struct ZenitBlockNode *block_node, struct ZenitNode *statement)
+void zenit_node_block_add_statement(ZenitBlockNode *block_node, ZenitNode *statement)
 {
     // Add the node to the statements list
     block_node->statements = fl_array_append(block_node->statements, &statement);
 }
 
-char* zenit_node_block_uid(struct ZenitBlockNode *block_node)
+char* zenit_node_block_uid(ZenitBlockNode *block_node)
 {
     if (!block_node)
         return NULL;
@@ -27,7 +27,7 @@ char* zenit_node_block_uid(struct ZenitBlockNode *block_node)
     return fl_cstring_vdup("%%L%u:C%u_block", block_node->base.location.line, block_node->base.location.col);
 }
 
-char* zenit_node_block_dump(struct ZenitBlockNode *block_node, char *output)
+char* zenit_node_block_dump(ZenitBlockNode *block_node, char *output)
 {
     fl_cstring_append(&output, "(");
 
@@ -53,12 +53,12 @@ char* zenit_node_block_dump(struct ZenitBlockNode *block_node, char *output)
  *  Releases the memory of an array node object
  *
  * Parameters:
- *  <struct ZenitBlockNode> *array: Array node object
+ *  <ZenitBlockNode> *array: Array node object
  *
  * Returns:
  *  <void>: This function does not return a value
  */
-void zenit_node_block_free(struct ZenitBlockNode *array)
+void zenit_node_block_free(ZenitBlockNode *array)
 {
     if (!array)
         return;

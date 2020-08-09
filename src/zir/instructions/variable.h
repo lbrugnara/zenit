@@ -3,52 +3,52 @@
 
 #include "instruction.h"
 #include "operands/symbol.h"
-#include "attributes/attribute_map.h"
+#include "attributes/attribute-map.h"
 
 /*
- * Struct: struct ZirVariableInstruction
+ * Struct: ZirVariableInstruction
  *  Represents a variable declaration instruction
  * 
  * Members:
- *  <struct ZirInstruction> base: Base information
- *  <struct ZirOperand> *source: Represents the right-hand side of the variable declaration
+ *  <ZirInstruction> base: Base information
+ *  <ZirOperand> *source: Represents the right-hand side of the variable declaration
  *  <ZirAttributeMap> *attributes: Attributes of the variable declaration instruction
  * 
  */
-struct ZirVariableInstruction {
-    struct ZirInstruction base;
-    struct ZirOperand *source;
+typedef struct ZirVariableInstruction {
+    ZirInstruction base;
+    ZirOperand *source;
     ZirAttributeMap *attributes;
-};
+} ZirVariableInstruction;
 
 /*
  * Function: zir_instruction_variable_new
  *  Creates a new variable instruction
  *
  * Parameters:
- *  <struct ZirOperand> *destination: The destination of the variable declaration instruction (it represents the var. decl. left-hand side)
- *  <struct ZirOperand> *source: The source operand of the variable declaration instruction (it represents the var. decl. right-hand side)
+ *  <ZirOperand> *destination: The destination of the variable declaration instruction (it represents the var. decl. left-hand side)
+ *  <ZirOperand> *source: The source operand of the variable declaration instruction (it represents the var. decl. right-hand side)
  *
  * Returns:
- *  <struct ZirVariableInstruction>*: The variable declaration instruction
+ *  <ZirVariableInstruction>*: The variable declaration instruction
  *
  * Notes:
  *  The object returned by this function must be freed with the
  *  <zir_instruction_variable_free> function
  */
-struct ZirVariableInstruction* zir_instruction_variable_new(struct ZirOperand *destination, struct ZirOperand *source);
+ZirVariableInstruction* zir_instruction_variable_new(ZirOperand *destination, ZirOperand *source);
 
 /*
  * Function: zir_instruction_variable_free
  *  Releases the memory used by the variable declaration instruction
  *
  * Parameters:
- *  <struct ZirVariableInstruction> *instruction: The instruction object to be freed
+ *  <ZirVariableInstruction> *instruction: The instruction object to be freed
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zir_instruction_variable_free(struct ZirVariableInstruction *instruction);
+void zir_instruction_variable_free(ZirVariableInstruction *instruction);
 
 /*
  * Function: zir_instruction_variable_dump
@@ -68,6 +68,6 @@ void zir_instruction_variable_free(struct ZirVariableInstruction *instruction);
  *  char*: *output* pointer
  *
  */
-char* zir_instruction_variable_dump(struct ZirVariableInstruction *instruction, char *output);
+char* zir_instruction_variable_dump(ZirVariableInstruction *instruction, char *output);
 
 #endif /* ZIR_INSTRUCTION_VARIABLE_H */

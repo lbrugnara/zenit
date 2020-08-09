@@ -63,9 +63,9 @@ void zenit_test_nes_global_vars(void)
     fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
     fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
     
-    struct ZirProgram *zir_program = zenit_generate_zir(&ctx);
+    ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    struct ZenitNesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
     
     fl_expect("Data segment at 0x00 should be 0x1 (a)",                 nes_program->data.bytes[0x00] == 0x1);
     fl_expect("Data segment at 0x01 should be 0x2 (b)",                 nes_program->data.bytes[0x01] == 0x2);
@@ -145,9 +145,9 @@ void zenit_test_nes_global_vars_array(void)
     fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
     fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
     
-    struct ZirProgram *zir_program = zenit_generate_zir(&ctx);
+    ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    struct ZenitNesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
     
     fl_expect("Data segment at 0x00 should be 0xff (a lo)",             nes_program->data.bytes[0x00] == 0xFF);
     fl_expect("Data segment at 0x01 should be 0x01 (a hi)",             nes_program->data.bytes[0x01] == 0x01);
@@ -205,9 +205,9 @@ void zenit_test_nes_global_vars_zp(void)
     fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
     fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
     
-    struct ZirProgram *zir_program = zenit_generate_zir(&ctx);
+    ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    struct ZenitNesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
 
     fl_expect("Data segment at 0x00 should be 0x00 (datavar -bss-)",    nes_program->data.bytes[0x00] == 0x00);
     fl_expect("Data segment at 0x01 should be 0x00 (tempvar -bss-)",    nes_program->data.bytes[0x01] == 0x00);
@@ -346,9 +346,9 @@ void zenit_test_nes_global_vars_data(void)
     fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
     fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
     
-    struct ZirProgram *zir_program = zenit_generate_zir(&ctx);
+    ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    struct ZenitNesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
 
     // datavar = 1
     fl_expect("Data segment at 0x00 should be 0x01 (datavar)",    nes_program->data.bytes[0x00] == 0x01);
@@ -423,9 +423,9 @@ void zenit_test_nes_global_vars_code(void)
     fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
     fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
     
-    struct ZirProgram *zir_program = zenit_generate_zir(&ctx);
+    ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    struct ZenitNesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
 
     fl_expect("Data segment at 0x00 should be 0x00 (datavar -bss-)",    nes_program->data.bytes[0x00] == 0x00);
     fl_expect("Data segment at 0x01 should be 0x00 (tempvar -bss-)",    nes_program->data.bytes[0x01] == 0x00);

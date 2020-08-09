@@ -3,22 +3,22 @@
 #include <fllib/Cstring.h>
 #include "source.h"
 
-static struct ZenitSourceInfo* new_from_file(const char *filename);
-static struct ZenitSourceInfo* new_from_string(const char *content);
+static ZenitSourceInfo* new_from_file(const char *filename);
+static ZenitSourceInfo* new_from_string(const char *content);
 
 /*
  * Function: new_from_file
- *  Reads the content of a file and creates a new <struct ZenitSourceInfo>
+ *  Reads the content of a file and creates a new <ZenitSourceInfo>
  *  object that contains it as the program's source code
  *
  * Parameters:
  *  <const char> *filename: A valid filename with source code
  *
  * Returns:
- *  <struct ZenitSourceInfo>*: Represents the program's source code
+ *  <ZenitSourceInfo>*: Represents the program's source code
  *
  */
-static struct ZenitSourceInfo* new_from_file(const char *filename)
+static ZenitSourceInfo* new_from_file(const char *filename)
 {
     if (!fl_io_file_exists(filename))
         return NULL;
@@ -28,7 +28,7 @@ static struct ZenitSourceInfo* new_from_file(const char *filename)
     if (content == NULL)
         return NULL;
 
-    struct ZenitSourceInfo *srcinfo = new_from_string(content);
+    ZenitSourceInfo *srcinfo = new_from_string(content);
     fl_cstring_free(content);
     srcinfo->location.filename = fl_cstring_dup(filename);
 
@@ -37,22 +37,22 @@ static struct ZenitSourceInfo* new_from_file(const char *filename)
 
 /*
  * Function: new_from_string
- *  Creates a <struct ZenitSourceInfo> object using the *content* parameter
+ *  Creates a <ZenitSourceInfo> object using the *content* parameter
  *  as the program's source code
  *
  * Parameters:
  *  <const char> *content: Program's source code
  *
  * Returns:
- *  <struct ZenitSourceInfo>*: Represents the program's source code
+ *  <ZenitSourceInfo>*: Represents the program's source code
  *
  */
-static struct ZenitSourceInfo* new_from_string(const char *content)
+static ZenitSourceInfo* new_from_string(const char *content)
 {
     if (content == NULL)
         return NULL;
 
-    struct ZenitSourceInfo *srcinfo = fl_malloc(sizeof(struct ZenitSourceInfo));
+    ZenitSourceInfo *srcinfo = fl_malloc(sizeof(ZenitSourceInfo));
 
     srcinfo->source.content = fl_cstring_dup(content);
     srcinfo->source.length = strlen(content);
@@ -66,12 +66,12 @@ static struct ZenitSourceInfo* new_from_string(const char *content)
 
 /*
  * Function: zenit_source_new
- *  Creates a <struct ZenitSourceInfo> object reading it from a file or by
+ *  Creates a <ZenitSourceInfo> object reading it from a file or by
  *  directly using the *input* parameter. The treatment of the *input*
  *  parameter depends on the origin or *type* of the program's code
  *
  */
-struct ZenitSourceInfo* zenit_source_new(enum ZenitSourceType type, const char *input)
+ZenitSourceInfo* zenit_source_new(ZenitSourceType type, const char *input)
 {
     if (type == ZENIT_SOURCE_FILE)
         return new_from_file(input);
@@ -89,7 +89,7 @@ struct ZenitSourceInfo* zenit_source_new(enum ZenitSourceType type, const char *
  *  source code and the filename, if present.
  *
  */
-void zenit_source_free(struct ZenitSourceInfo *srcinfo)
+void zenit_source_free(ZenitSourceInfo *srcinfo)
 {
     if (!srcinfo)
         return;

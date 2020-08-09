@@ -66,13 +66,13 @@ void zenit_test_nes_rom(void)
     fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
     fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
     
-    struct ZirProgram *zir_program = zenit_generate_zir(&ctx);
+    ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    struct ZenitNesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
 
     fl_expect("NES program must be valid", nes_program != NULL);
 
-    struct ZenitNesRom *nes_rom = zenit_nes_rom_new(nes_program);
+    ZnesRom *nes_rom = zenit_nes_rom_new(nes_program);
 
     fl_expect("NES ROM must be valid", nes_rom != NULL);
 
@@ -82,7 +82,7 @@ void zenit_test_nes_rom(void)
 
     bool data_equals = memcmp(data, nes_rom->prg_rom.bank, sizeof(data) / sizeof(data[0])) == 0;
     bool startup_equals = memcmp(startup, nes_rom->prg_rom.bank + sizeof(data) / sizeof(data[0]), sizeof(startup) / sizeof(startup[0])) == 0;
-    // It's a "hack", we compare the 3 x uint16_t that are the nmi_addr, res_addr, and irq_addr that are placed at the end of the struct ZenitNesNrom256
+    // It's a "hack", we compare the 3 x uint16_t that are the nmi_addr, res_addr, and irq_addr that are placed at the end of the ZnesNrom256
     bool vectors_equals = memcmp(vectors, nes_rom->prg_rom.bank + sizeof(nes_rom->prg_rom.bank), sizeof(vectors) / sizeof(vectors[0])) == 0;
 
     fl_expect("DATA segment must be equals to the precomputed value", data_equals);

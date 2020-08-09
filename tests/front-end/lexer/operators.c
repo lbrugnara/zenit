@@ -8,8 +8,8 @@
 
 static struct ZenitLexerTest tests[] = {
     // Assignment
-    { "=",              (enum ZenitTokenType[]){ T(ASSIGN), T(EOF) } },
-    { "&",              (enum ZenitTokenType[]){ T(AMPERSAND), T(EOF) } },
+    { "=",              (ZenitTokenType[]){ T(ASSIGN), T(EOF) } },
+    { "&",              (ZenitTokenType[]){ T(AMPERSAND), T(EOF) } },
 };
 
 void zenit_test_lexer_operators(void)

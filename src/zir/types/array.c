@@ -5,16 +5,16 @@
 #include <fllib/Cstring.h>
 #include "array.h"
 
-struct ZirArrayType* zir_type_array_new(struct ZirType *member_type)
+ZirArrayType* zir_type_array_new(ZirType *member_type)
 {
-    struct ZirArrayType *type = fl_malloc(sizeof(struct ZirArrayType));
+    ZirArrayType *type = fl_malloc(sizeof(ZirArrayType));
     type->base.typekind = ZIR_TYPE_ARRAY;
     type->member_type = member_type;
 
     return type;
 }
 
-unsigned long zir_type_array_hash(struct ZirArrayType *type)
+unsigned long zir_type_array_hash(ZirArrayType *type)
 {
     static const char *format = "[array][e:%lu]";
 
@@ -30,7 +30,7 @@ unsigned long zir_type_array_hash(struct ZirArrayType *type)
     return hash;
 }
 
-char* zir_type_array_to_string(struct ZirArrayType *type)
+char* zir_type_array_to_string(ZirArrayType *type)
 {
     if (type == NULL)
         return NULL;
@@ -67,25 +67,25 @@ char* zir_type_array_to_string(struct ZirArrayType *type)
     return type->base.to_string.value;
 }
 
-bool zir_type_array_equals(struct ZirArrayType *type_a, struct ZirType *type_b)
+bool zir_type_array_equals(ZirArrayType *type_a, ZirType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
-        return (struct ZirType*) type_a == type_b;
+        return (ZirType*) type_a == type_b;
 
     if (type_b->typekind != ZIR_TYPE_ARRAY)
         return false;
 
-    struct ZirArrayType *type_b_array = (struct ZirArrayType*) type_b;
+    ZirArrayType *type_b_array = (ZirArrayType*) type_b;
 
     return type_a->length == type_b_array->length && zir_type_equals(type_a->member_type, type_b_array->member_type);
 }
 
-bool zir_type_array_is_assignable_from(struct ZirArrayType *target_type, struct ZirType *from_type)
+bool zir_type_array_is_assignable_from(ZirArrayType *target_type, ZirType *from_type)
 {
     if (from_type->typekind != ZIR_TYPE_ARRAY)
         return false;
 
-    struct ZirArrayType *array_from_type = (struct ZirArrayType*) from_type;
+    ZirArrayType *array_from_type = (ZirArrayType*) from_type;
 
     if (target_type->length != array_from_type->length)
         return false;
@@ -97,7 +97,7 @@ bool zir_type_array_is_assignable_from(struct ZirArrayType *target_type, struct 
     return zir_type_is_assignable_from(target_type->member_type, array_from_type->member_type);
 }
 
-bool zir_type_array_is_castable_to(struct ZirArrayType *array_type, struct ZirType *target_type)
+bool zir_type_array_is_castable_to(ZirArrayType *array_type, ZirType *target_type)
 {
     if (array_type == NULL || target_type == NULL)
         return false;
@@ -114,7 +114,7 @@ bool zir_type_array_is_castable_to(struct ZirArrayType *array_type, struct ZirTy
     //  - The target type has a different number of elements than the array type
     //  - The number of elements are equals, in that case we should check if we can cast from the array's declared/inferred
     //    type to the target declared/inferred type
-    struct ZirArrayType *target_array_type = (struct ZirArrayType*) target_type;
+    ZirArrayType *target_array_type = (ZirArrayType*) target_type;
 
     if (array_type->length != target_array_type->length)
         return false;
@@ -122,7 +122,7 @@ bool zir_type_array_is_castable_to(struct ZirArrayType *array_type, struct ZirTy
     return zir_type_is_castable_to(array_type->member_type, target_array_type->member_type);
 }
 
-size_t zir_type_array_size(struct ZirArrayType *type)
+size_t zir_type_array_size(ZirArrayType *type)
 {
     if (!type)
         return 0;
@@ -130,7 +130,7 @@ size_t zir_type_array_size(struct ZirArrayType *type)
     return type->length * zir_type_size(type->member_type);
 }
 
-void zir_type_array_free(struct ZirArrayType *type)
+void zir_type_array_free(ZirArrayType *type)
 {
     if (!type)
         return;

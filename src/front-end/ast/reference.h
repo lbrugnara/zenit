@@ -4,41 +4,41 @@
 #include "node.h"
 
 /*
- * Struct: struct ZenitReferenceNode
+ * Struct: ZenitReferenceNode
  *  Represents taking an expression's address (reference operator)
  * 
  * Members:
- *  <struct ZenitNode> base: Basic information of the node object
- *  <struct ZenitNode> *expression: The expression to take its address from
+ *  <ZenitNode> base: Basic information of the node object
+ *  <ZenitNode> *expression: The expression to take its address from
  */
-struct ZenitReferenceNode {
-    struct ZenitNode base;
-    struct ZenitNode *expression;
-};
+typedef struct ZenitReferenceNode {
+    ZenitNode base;
+    ZenitNode *expression;
+} ZenitReferenceNode;
 
 /*
  * Function: zenit_node_reference_new
  *  Creates a new AST node that represents a reference expression
  *
  * Parameters:
- *  <struct ZenitSourceLocation> location: Location information about the reference expression
- *  <struct ZenitNode> *expression: A node that represents the expression being referenced
+ *  <ZenitSourceLocation> location: Location information about the reference expression
+ *  <ZenitNode> *expression: A node that represents the expression being referenced
  *
  * Returns:
- *  struct ZenitReferenceNode*: Reference node
+ *  ZenitReferenceNode*: Reference node
  *
  * Notes:
  *  The object returned by this function must be freed using the
  *  <zenit_node_reference_free> function
  */
-struct ZenitReferenceNode* zenit_node_reference_new(struct ZenitSourceLocation location, struct ZenitNode *expression);
+ZenitReferenceNode* zenit_node_reference_new(ZenitSourceLocation location, ZenitNode *expression);
 
 /*
  * Function: zenit_node_reference_uid
  *  Returns a UID for the reference node
  *
  * Parameters:
- *  <struct ZenitReferenceNode> *reference: Reference node
+ *  <ZenitReferenceNode> *reference: Reference node
  *
  * Returns:
  *  char*: UID of the reference node
@@ -47,7 +47,7 @@ struct ZenitReferenceNode* zenit_node_reference_new(struct ZenitSourceLocation l
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_reference_uid(struct ZenitReferenceNode *reference);
+char* zenit_node_reference_uid(ZenitReferenceNode *reference);
 
 /*
  * Function: zenit_node_reference_dump
@@ -55,7 +55,7 @@ char* zenit_node_reference_uid(struct ZenitReferenceNode *reference);
  *  returns a pointer to the -possibly reallocated- output
  *
  * Parameters:
- *  <struct ZenitReferenceNode> *reference: Reference node to dump to the output
+ *  <ZenitReferenceNode> *reference: Reference node to dump to the output
  *  <char> *output: Pointer to a heap allocated string
  *
  * Returns:
@@ -69,18 +69,18 @@ char* zenit_node_reference_uid(struct ZenitReferenceNode *reference);
  *      output = zenit_node_reference_dump(reference, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_reference_dump(struct ZenitReferenceNode *reference, char *output);
+char* zenit_node_reference_dump(ZenitReferenceNode *reference, char *output);
 
 /*
  * Function: zenit_node_reference_free
  *  Frees the memory used by the reference node
  *
  * Parameters:
- *  <struct ZenitReferenceNode> *reference: Reference node
+ *  <ZenitReferenceNode> *reference: Reference node
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_node_reference_free(struct ZenitReferenceNode *ref_node);
+void zenit_node_reference_free(ZenitReferenceNode *ref_node);
 
 #endif /* ZENIT_AST_REFERENCE_H */

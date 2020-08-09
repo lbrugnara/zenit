@@ -17,13 +17,13 @@ typedef FlHashtable ZenitAttributeNodeMap;
 
 #define zenit_attribute_node_map_free(mapptr) do { if (mapptr) fl_hashtable_free(mapptr); } while (0)
 
-#define zenit_attribute_node_map_add(mapptr, attr) ((struct ZenitAttributeNode*) fl_hashtable_add(mapptr, attr->name, attr))
+#define zenit_attribute_node_map_add(mapptr, attr) ((ZenitAttributeNode*) fl_hashtable_add(mapptr, attr->name, attr))
 
 #define zenit_attribute_node_map_keys(mapptr) fl_hashtable_keys(mapptr)
 
-#define zenit_attribute_node_map_values(mapptr) ((struct ZenitAttributeNode**) fl_hashtable_values(mapptr))
+#define zenit_attribute_node_map_values(mapptr) ((ZenitAttributeNode**) fl_hashtable_values(mapptr))
 
-#define zenit_attribute_node_map_get(mapptr, attrname) ((struct ZenitAttributeNode*) fl_hashtable_get(mapptr, attrname))
+#define zenit_attribute_node_map_get(mapptr, attrname) ((ZenitAttributeNode*) fl_hashtable_get(mapptr, attrname))
 
 #define zenit_attribute_node_map_length(mapptr) fl_hashtable_length(mapptr)
 

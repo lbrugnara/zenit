@@ -3,64 +3,65 @@
 
 #include <stdint.h>
 #include "operand.h"
+#include "../../types/uint.h"
 
 /*
- * Union: union ZirUintValue
+ * Union: ZirUintValue
  *  Holds the value of a ZIR uint operand
  * 
  * Members:
  *  <uint8_t> uint8: Holds a 1 byte uint
  *  <uint16_t> uint16: Holds a 2 bytes uint
  */
-union ZirUintValue {
+typedef union ZirUintValue {
     uint8_t uint8;
     uint16_t uint16;
-};
+} ZirUintValue;
 
 /*
- * Struct: struct ZirUintOperand
+ * Struct: ZirUintOperand
  *  A uint operand contains information about the type, size, and value of a uint object
  * 
  * Members:
- *  <struct ZirOperand> base: Basic operand information
- *  <struct ZirUintType> *type: The type and size of the uint object
+ *  <ZirOperand> base: Basic operand information
+ *  <ZirUintType> *type: The type and size of the uint object
  *  <struct ZirUintValue> value: The value of the uint object
  */
-struct ZirUintOperand {
-    struct ZirOperand base;
-    struct ZirUintType *type;
-    union ZirUintValue value;
-};
+typedef struct ZirUintOperand {
+    ZirOperand base;
+    ZirUintType *type;
+    ZirUintValue value;
+} ZirUintOperand;
 
 /*
  * Function: zir_operand_uint_new
  *  Creates a new uint operand with the provided type, size, and value
  *
  * Parameters:
- *  <struct ZirUintType> *type: The type and size of the uint object
+ *  <ZirUintType> *type: The type and size of the uint object
  *  <struct ZirUintValue> value: The value of the uint object
  *
  * Returns:
- *  struct ZirUintOperand*: The new uint operand object
+ *  ZirUintOperand*: The new uint operand object
  *
  * Notes:
  *  The object returned by this function must be freed using the <zir_operand_uint_free> function.
- *  The uint operand takes ownership of the <struct ZirUintType> object, which means it will release
+ *  The uint operand takes ownership of the <ZirUintType> object, which means it will release
  *  the type object memory too when <zir_operand_uint_free> is called with the uint operand as argument.
  */
-struct ZirUintOperand* zir_operand_uint_new(struct ZirUintType *type, union ZirUintValue value);
+ZirUintOperand* zir_operand_uint_new(ZirUintType *type, ZirUintValue value);
 
 /*
  * Function: zir_operand_uint_free
  *  Frees the memory of the uint operand
  *
  * Parameters:
- *  <struct ZirUintOperand> *uint_operand: Uint operand object
+ *  <ZirUintOperand> *uint_operand: Uint operand object
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zir_operand_uint_free(struct ZirUintOperand *uint_operand);
+void zir_operand_uint_free(ZirUintOperand *uint_operand);
 
 /*
  * Function: zir_operand_uint_dump
@@ -73,7 +74,7 @@ void zir_operand_uint_free(struct ZirUintOperand *uint_operand);
  * ===========
  *
  * Parameters:
- *  <struct ZirUintOperand> *uint_operand: Uint operand object
+ *  <ZirUintOperand> *uint_operand: Uint operand object
  *  <char> *output: Output buffer
  *
  * Returns:
@@ -82,7 +83,7 @@ void zir_operand_uint_free(struct ZirUintOperand *uint_operand);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_uint_dump(struct ZirUintOperand *uint_operand, char *output);
+char* zir_operand_uint_dump(ZirUintOperand *uint_operand, char *output);
 
 /*
  * Function: zir_operand_uint_type_dump
@@ -95,7 +96,7 @@ char* zir_operand_uint_dump(struct ZirUintOperand *uint_operand, char *output);
  * ===========
  *
  * Parameters:
- *  <struct ZirUintOperand> *uint_operand: Operand object
+ *  <ZirUintOperand> *uint_operand: Operand object
  *  <char> *output: Output buffer
  *
  * Returns:
@@ -104,6 +105,6 @@ char* zir_operand_uint_dump(struct ZirUintOperand *uint_operand, char *output);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_uint_type_dump(struct ZirUintOperand *uint_operand, char *output);
+char* zir_operand_uint_type_dump(ZirUintOperand *uint_operand, char *output);
 
 #endif /* ZIR_OPERAND_UINT_H */

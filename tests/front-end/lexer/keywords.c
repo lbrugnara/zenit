@@ -8,10 +8,10 @@
 
 static struct ZenitLexerTest tests[] = {
     // Keywords
-    { "var",            (enum ZenitTokenType[]){ T(VAR), T(EOF) }       },
-    { "cast",           (enum ZenitTokenType[]){ T(CAST), T(EOF) }      },
-    { "struct",         (enum ZenitTokenType[]){ T(STRUCT), T(EOF) }    },
-    { "if",             (enum ZenitTokenType[]){ T(IF), T(EOF) }        },
+    { "var",            (ZenitTokenType[]){ T(VAR), T(EOF) }       },
+    { "cast",           (ZenitTokenType[]){ T(CAST), T(EOF) }      },
+    { "struct",         (ZenitTokenType[]){ T(STRUCT), T(EOF) }    },
+    { "if",             (ZenitTokenType[]){ T(IF), T(EOF) }        },
 };
 
 void zenit_test_lexer_keywords(void)

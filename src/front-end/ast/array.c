@@ -3,23 +3,23 @@
 #include <fllib/Cstring.h>
 #include "array.h"
 
-struct ZenitArrayNode* zenit_node_array_new(struct ZenitSourceLocation location)
+ZenitArrayNode* zenit_node_array_new(ZenitSourceLocation location)
 {
-    struct ZenitArrayNode *node = fl_malloc(sizeof(struct ZenitArrayNode));
+    ZenitArrayNode *node = fl_malloc(sizeof(ZenitArrayNode));
     node->base.nodekind = ZENIT_NODE_ARRAY;
     node->base.location = location;
-    node->elements = fl_array_new(sizeof(struct ZenitNode*), 0);
+    node->elements = fl_array_new(sizeof(ZenitNode*), 0);
 
     return node;
 }
 
-void zenit_node_array_add_child(struct ZenitArrayNode *array, struct ZenitNode *element)
+void zenit_node_array_add_child(ZenitArrayNode *array, ZenitNode *element)
 {
     // Add the node to the elements list
     array->elements = fl_array_append(array->elements, &element);
 }
 
-char* zenit_node_array_uid(struct ZenitArrayNode *array)
+char* zenit_node_array_uid(ZenitArrayNode *array)
 {
     if (!array)
         return NULL;
@@ -27,7 +27,7 @@ char* zenit_node_array_uid(struct ZenitArrayNode *array)
     return fl_cstring_vdup("%%L%u:C%u_array", array->base.location.line, array->base.location.col);
 }
 
-char* zenit_node_array_dump(struct ZenitArrayNode *array, char *output)
+char* zenit_node_array_dump(ZenitArrayNode *array, char *output)
 {
     fl_cstring_append(&output, "(array");
 
@@ -54,12 +54,12 @@ char* zenit_node_array_dump(struct ZenitArrayNode *array, char *output)
  *  Releases the memory of an array node object
  *
  * Parameters:
- *  <struct ZenitArrayNode> *array: Array node object
+ *  <ZenitArrayNode> *array: Array node object
  *
  * Returns:
  *  <void>: This function does not return a value
  */
-void zenit_node_array_free(struct ZenitArrayNode *array)
+void zenit_node_array_free(ZenitArrayNode *array)
 {
     if (!array)
         return;

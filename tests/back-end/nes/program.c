@@ -65,9 +65,9 @@ void zenit_test_nes_program(void)
     fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
     fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
     
-    struct ZirProgram *zir_program = zenit_generate_zir(&ctx);
+    ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    struct ZenitNesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
 
     fl_expect("NES program must be valid", nes_program != NULL);
 

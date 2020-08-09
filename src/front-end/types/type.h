@@ -4,23 +4,23 @@
 #include <fllib/Slice.h>
 
 /*
- * Enum: enum ZenitTypeKind
+ * Enum: ZenitTypeKind
  *  Enumerates all the native type supported by Zenit
  *  including some special values that the compiler
  *  uses internally
  *
  */
-enum ZenitTypeKind {
+typedef enum ZenitTypeKind {
     ZENIT_TYPE_NONE,
     ZENIT_TYPE_UINT,
     ZENIT_TYPE_BOOL,
     ZENIT_TYPE_ARRAY,
     ZENIT_TYPE_STRUCT,
     ZENIT_TYPE_REFERENCE,
-};
+} ZenitTypeKind;
 
 /*
- * Struct: struct ZenitTypeString
+ * Struct: ZenitTypeString
  *  Contains a version of the string representation of a type object
  * 
  * Members:
@@ -28,41 +28,41 @@ enum ZenitTypeKind {
  *  <char> *: String value
  * 
  */
-struct ZenitTypeString {
+typedef struct ZenitTypeString {
     unsigned long version;
     char *value;
-};
+} ZenitTypeString;
 
 /*
- * Struct: struct ZenitType
+ * Struct: ZenitType
  *  It is the "base type" of all the Zenit type objects that contains
  *  information that is shared between all the different types
  * 
  * Members:
- *  <enum ZenitTypeKind> typekind: The native kind of this type
- *  <struct ZenitTypeString> to_string: String representation of the type
+ *  <ZenitTypeKind> typekind: The native kind of this type
+ *  <ZenitTypeString> to_string: String representation of the type
  * 
  * Notes:
  *  The *to_string* property is populated when a call to the function zenit_type_to_string occurs (or to any of its
  *  specializations) and shouldn't be directly manipulated
  * 
  */
-struct ZenitType {
-    enum ZenitTypeKind typekind;
-    struct ZenitTypeString to_string;
-};
+typedef struct ZenitType {
+    ZenitTypeKind typekind;
+    ZenitTypeString to_string;
+} ZenitType;
 
 /*
  * Function: zenit_type_hash
  *  Return a hash number for the current version of the type information object
  *
  * Parameters:
- *  <struct ZenitType> *type: Type object
+ *  <ZenitType> *type: Type object
  *
  * Returns:
  *  <unsigned long>: Hash of the type object
  */
-unsigned long zenit_type_hash(struct ZenitType *type);
+unsigned long zenit_type_hash(ZenitType *type);
 
 /*
  * Function: zenit_type_from_slice
@@ -72,48 +72,48 @@ unsigned long zenit_type_hash(struct ZenitType *type);
  *  <struct FlSlice> *slice: Sequence of bytes to match against the different system types
  *
  * Returns:
- *  <enum ZenitTypeKind>: The type that matches the sequence of bytes
+ *  <ZenitTypeKind>: The type that matches the sequence of bytes
  */
-enum ZenitTypeKind zenit_type_from_slice(struct FlSlice *slice);
+ZenitTypeKind zenit_type_from_slice(struct FlSlice *slice);
 
 /*
  * Function: zenit_type_to_string
  *  Returns a string representation of the type.
  *
  * Parameters:
- *  <struct ZenitType> *type: Type object.
+ *  <ZenitType> *type: Type object.
  *
  * Returns:
  *  <char>*: String representation of the *type* object
  */
-char* zenit_type_to_string(struct ZenitType *type);
+char* zenit_type_to_string(ZenitType *type);
 
 /*
  * Function: zenit_type_equals
  *  Compares *type_a* and *type_b* to know if they are equals
  *
  * Parameters:
- *  <struct ZenitType> *type_a: Object to compare
- *  <struct ZenitType> *type_b: Object to compare
+ *  <ZenitType> *type_a: Object to compare
+ *  <ZenitType> *type_b: Object to compare
  *
  * Returns:
  *  <bool>: *true* if the objects are equals, otherwise *false*.
  */
-bool zenit_type_equals(struct ZenitType *type_a, struct ZenitType *type_b);
+bool zenit_type_equals(ZenitType *type_a, ZenitType *type_b);
 
 /*
  * Function: zenit_type_can_unify
  *  Checks if the type *type_a* can be unified with the type *type_b*
  *
  * Parameters:
- *  <struct ZenitUintType> *type_a: Type object
- *  <struct ZenitType> *type_b: Type object
+ *  <ZenitUintType> *type_a: Type object
+ *  <ZenitType> *type_b: Type object
  *
  * Returns:
  *  bool: *true* if the types can be unified, which means they can both be represented by an ancestor
  *        or enclosing -base- type, otherwise *false*.
  */
-bool zenit_type_can_unify(struct ZenitType *type_a, struct ZenitType *type_b);
+bool zenit_type_can_unify(ZenitType *type_a, ZenitType *type_b);
 
 /*
  * Function: zenit_type_is_assignable_from
@@ -121,13 +121,13 @@ bool zenit_type_can_unify(struct ZenitType *type_a, struct ZenitType *type_b);
  *  by the *value_type* object
  *
  * Parameters:
- *  <struct ZenitType> *target_type: Target type of the assignment
- *  <struct ZenitType> *value_type: Source type of the assignment
+ *  <ZenitType> *target_type: Target type of the assignment
+ *  <ZenitType> *value_type: Source type of the assignment
  *
  * Returns:
  *  <bool>: *true* if *target_type* accepts the *value_type*, otherwise, *false*.
  */
-bool zenit_type_is_assignable_from(struct ZenitType *target_type, struct ZenitType *value_type);
+bool zenit_type_is_assignable_from(ZenitType *target_type, ZenitType *value_type);
 
 /*
  * Function: zenit_type_is_castable_to
@@ -135,20 +135,20 @@ bool zenit_type_is_assignable_from(struct ZenitType *target_type, struct ZenitTy
  *  the *target_cast_type*
  *
  * Parameters:
- *  <struct ZenitType> *source_type: Original type object
- *  <struct ZenitType> *target_cast_type: Destination type object
+ *  <ZenitType> *source_type: Original type object
+ *  <ZenitType> *target_cast_type: Destination type object
  *
  * Returns:
  *  <bool>: *true* if the source type can be casted to the target type, otherwise, *false*.
  */
-bool zenit_type_is_castable_to(struct ZenitType *source_type, struct ZenitType *target_cast_type);
+bool zenit_type_is_castable_to(ZenitType *source_type, ZenitType *target_cast_type);
 
 /*
  * Function: zenit_type_fre
  *  Frees the memory allocated in the type object
  *
  * Parameters:
- *  <struct ZenitType> *type: Type object to be freed
+ *  <ZenitType> *type: Type object to be freed
  *
  * Returns:
  *  void: This function does not return a value
@@ -156,6 +156,6 @@ bool zenit_type_is_castable_to(struct ZenitType *source_type, struct ZenitType *
  * Notes:
  *  This function accepts any "descendant" of the "base" type information struct
  */
-void zenit_type_free(struct ZenitType *type);
+void zenit_type_free(ZenitType *type);
 
 #endif /* ZENIT_TYPE_H */

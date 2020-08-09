@@ -3,16 +3,16 @@
 #include <fllib/Cstring.h>
 #include "reference.h"
 
-struct ZenitReferenceType* zenit_type_reference_new(struct ZenitType *element)
+ZenitReferenceType* zenit_type_reference_new(ZenitType *element)
 {
-    struct ZenitReferenceType *type = fl_malloc(sizeof(struct ZenitReferenceType));
+    ZenitReferenceType *type = fl_malloc(sizeof(ZenitReferenceType));
     type->base.typekind = ZENIT_TYPE_REFERENCE;
     type->element = element;
 
     return type;
 }
 
-unsigned long zenit_type_reference_hash(struct ZenitReferenceType *type)
+unsigned long zenit_type_reference_hash(ZenitReferenceType *type)
 {
     static const char *format = "[ref][e:%lu]";
 
@@ -28,7 +28,7 @@ unsigned long zenit_type_reference_hash(struct ZenitReferenceType *type)
     return hash;
 }
 
-char* zenit_type_reference_to_string(struct ZenitReferenceType *type)
+char* zenit_type_reference_to_string(ZenitReferenceType *type)
 {
     if (type == NULL)
         return NULL;
@@ -59,20 +59,20 @@ char* zenit_type_reference_to_string(struct ZenitReferenceType *type)
     return type->base.to_string.value;
 }
 
-bool zenit_type_reference_equals(struct ZenitReferenceType *type_a, struct ZenitType *type_b)
+bool zenit_type_reference_equals(ZenitReferenceType *type_a, ZenitType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
-        return (struct ZenitType*) type_a == type_b;
+        return (ZenitType*) type_a == type_b;
 
     if (type_b->typekind != ZENIT_TYPE_REFERENCE)
         return false;
 
-    struct ZenitReferenceType *type_b_ref = (struct ZenitReferenceType*) type_b;
+    ZenitReferenceType *type_b_ref = (ZenitReferenceType*) type_b;
 
     return zenit_type_equals(type_a->element, type_b_ref->element);
 }
 
-bool zenit_type_reference_is_assignable_from(struct ZenitReferenceType *target_type, struct ZenitType *from_type)
+bool zenit_type_reference_is_assignable_from(ZenitReferenceType *target_type, ZenitType *from_type)
 {
     if (!target_type || !from_type)
         return false;
@@ -80,12 +80,12 @@ bool zenit_type_reference_is_assignable_from(struct ZenitReferenceType *target_t
     if (from_type->typekind != ZENIT_TYPE_REFERENCE)
         return false;
 
-    struct ZenitReferenceType *ref_from_type = (struct ZenitReferenceType*) from_type;
+    ZenitReferenceType *ref_from_type = (ZenitReferenceType*) from_type;
 
     return zenit_type_is_assignable_from(target_type->element, ref_from_type->element);
 }
 
-bool zenit_type_reference_is_castable_to(struct ZenitReferenceType *reference, struct ZenitType *target_type)
+bool zenit_type_reference_is_castable_to(ZenitReferenceType *reference, ZenitType *target_type)
 {
     if (target_type == NULL || target_type == NULL)
         return false;
@@ -95,7 +95,7 @@ bool zenit_type_reference_is_castable_to(struct ZenitReferenceType *reference, s
         return true;
 
     if (target_type->typekind == ZENIT_TYPE_REFERENCE)
-        return zenit_type_is_assignable_from(reference->element, ((struct ZenitReferenceType*) target_type)->element);
+        return zenit_type_is_assignable_from(reference->element, ((ZenitReferenceType*) target_type)->element);
 
     // We can cast a reference to an unsigned integer
     if (target_type->typekind == ZENIT_TYPE_UINT)
@@ -104,7 +104,7 @@ bool zenit_type_reference_is_castable_to(struct ZenitReferenceType *reference, s
     return false;
 }
 
-bool zenit_type_reference_can_unify(struct ZenitReferenceType *ref_type, struct ZenitType *type_b)
+bool zenit_type_reference_can_unify(ZenitReferenceType *ref_type, ZenitType *type_b)
 {
     if (ref_type == NULL || type_b == NULL)
         return false;
@@ -118,12 +118,12 @@ bool zenit_type_reference_can_unify(struct ZenitReferenceType *ref_type, struct 
     if (zenit_type_reference_equals(ref_type, type_b))
         return true;
 
-    struct ZenitReferenceType *ref_type_b = (struct ZenitReferenceType*) type_b;
+    ZenitReferenceType *ref_type_b = (ZenitReferenceType*) type_b;
 
     return zenit_type_can_unify(ref_type->element, ref_type_b->element);
 }
 
-void zenit_type_reference_free(struct ZenitReferenceType *type)
+void zenit_type_reference_free(ZenitReferenceType *type)
 {
     if (!type)
         return;

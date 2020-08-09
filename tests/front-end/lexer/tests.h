@@ -5,7 +5,7 @@
 
 struct ZenitLexerTest {
     const char *source;
-    enum ZenitTokenType *tokens;
+    ZenitTokenType *tokens;
 };
 
 void zenit_test_lexer_run(struct ZenitLexerTest *tests, size_t count);

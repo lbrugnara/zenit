@@ -1,15 +1,14 @@
 #ifndef ZENIT_TOKEN_H
 #define ZENIT_TOKEN_H
 
-
 #include <fllib/Slice.h>
 #include "source.h"
 
 /*
- * Enum: enum ZenitTokenType 
+ * Enum: ZenitTokenType 
  *  The set of Zenit's token types
  */
-enum ZenitTokenType {
+typedef enum ZenitTokenType {
     ZENIT_TOKEN_UNKNOWN,    
 
     // Types
@@ -42,25 +41,25 @@ enum ZenitTokenType {
     // Special tokens
     ZENIT_TOKEN_HASH,
     ZENIT_TOKEN_EOF,
-};
+} ZenitTokenType;
 
 /*
- * Struct: struct ZenitToken 
+ * Struct: ZenitToken 
  *  Represents a token entity
  */
-struct ZenitToken {
-    enum ZenitTokenType type;
+typedef struct ZenitToken {
+    ZenitTokenType type;
     struct FlSlice value;
-    struct ZenitSourceLocation location;
-};
+    ZenitSourceLocation location;
+} ZenitToken;
 
 /*
  * Function: zenit_token_print
  *  Returns a pointer to string that prints the friendly version
- *  of the enum <enum ZenitTokenType> value
+ *  of the enum <ZenitTokenType> value
  *
  * Parameters:
- *  <enum ZenitTokenType> type: enumeration value
+ *  <ZenitTokenType> type: enumeration value
  *
  * Returns:
  *  <const char>*: String pointer
@@ -69,6 +68,6 @@ struct ZenitToken {
  *  The pointer returned by this function does not need to be
  *  freed
  */
-const char* zenit_token_print(enum ZenitTokenType type);
+const char* zenit_token_print(ZenitTokenType type);
 
 #endif /* ZENIT_TOKEN_H */

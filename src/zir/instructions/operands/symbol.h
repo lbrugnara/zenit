@@ -5,44 +5,44 @@
 #include "../../symbol.h"
 
 /*
- * Struct: struct ZirSymbolOperand
+ * Struct: ZirSymbolOperand
  *  A symbol operand contains a reference to a symbol object
  * 
  * Members:
- *  <struct ZirOperand> base: Basic operand information
- *  <struct ZirSymbol> *symbol: The symbol object
+ *  <ZirOperand> base: Basic operand information
+ *  <ZirSymbol> *symbol: The symbol object
  */
-struct ZirSymbolOperand {
-    struct ZirOperand base;
-    struct ZirSymbol *symbol;
-};
+typedef struct ZirSymbolOperand {
+    ZirOperand base;
+    ZirSymbol *symbol;
+} ZirSymbolOperand;
 
 /*
  * Function: zir_operand_symbol_new
  *  Creates a new symbol operand object
  *
  * Parameters:
- *  <struct ZirSymbol> *symbol: The symbol object
+ *  <ZirSymbol> *symbol: The symbol object
  *
  * Returns:
- *  struct ZirSymbolOperand*: The new symbol operand object
+ *  ZirSymbolOperand*: The new symbol operand object
  *
  * Notes:
  *  The object returned by this function must be freed using the <zir_operand_symbol_free> function.
  */
-struct ZirSymbolOperand* zir_operand_symbol_new(struct ZirSymbol *symbol);
+ZirSymbolOperand* zir_operand_symbol_new(ZirSymbol *symbol);
 
 /*
  * Function: zir_operand_symbol_free
  *  Frees the memory of the symbol operand
  *
  * Parameters:
- *  <struct ZirSymbolOperand> *symbol_operand: Symbol operand object
+ *  <ZirSymbolOperand> *symbol_operand: Symbol operand object
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zir_operand_symbol_free(struct ZirSymbolOperand *symbol_operand);
+void zir_operand_symbol_free(ZirSymbolOperand *symbol_operand);
 
 /*
  * Function: zir_operand_symbol_dump
@@ -55,7 +55,7 @@ void zir_operand_symbol_free(struct ZirSymbolOperand *symbol_operand);
  * ===========
  *
  * Parameters:
- *  <struct ZirSymbolOperand> *symbol_operand: Symbol operand object
+ *  <ZirSymbolOperand> *symbol_operand: Symbol operand object
  *  <char> *output: Output buffer
  *
  * Returns:
@@ -64,7 +64,7 @@ void zir_operand_symbol_free(struct ZirSymbolOperand *symbol_operand);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_symbol_dump(struct ZirSymbolOperand *symbol_operand, char *output);
+char* zir_operand_symbol_dump(ZirSymbolOperand *symbol_operand, char *output);
 
 /*
  * Function: zir_operand_symbol_type_dump
@@ -77,7 +77,7 @@ char* zir_operand_symbol_dump(struct ZirSymbolOperand *symbol_operand, char *out
  * ===========
  *
  * Parameters:
- *  <struct ZirSymbolOperand> *symbol_operand: Operand object
+ *  <ZirSymbolOperand> *symbol_operand: Operand object
  *  <char> *output: Output buffer
  *
  * Returns:
@@ -86,6 +86,6 @@ char* zir_operand_symbol_dump(struct ZirSymbolOperand *symbol_operand, char *out
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_symbol_type_dump(struct ZirSymbolOperand *symbol_operand, char *output);
+char* zir_operand_symbol_type_dump(ZirSymbolOperand *symbol_operand, char *output);
 
 #endif /* ZIR_OPERAND_SYMBOL_H */

@@ -8,7 +8,7 @@ static void member_free(void *ptr)
     if (!ptr)
         return;
 
-    struct ZirStructTypeMember *member = (struct ZirStructTypeMember*) ptr;
+    ZirStructTypeMember *member = (ZirStructTypeMember*) ptr;
 
     if (member->name)
         fl_cstring_free(member->name);
@@ -18,9 +18,9 @@ static void member_free(void *ptr)
     fl_free(member);
 }
 
-struct ZirStructType* zir_type_struct_new(char *name)
+ZirStructType* zir_type_struct_new(char *name)
 {
-    struct ZirStructType *type = fl_malloc(sizeof(struct ZirStructType));
+    ZirStructType *type = fl_malloc(sizeof(ZirStructType));
     type->base.typekind = ZIR_TYPE_STRUCT;
     type->name = name != NULL ? fl_cstring_dup(name) : NULL; // If NULL is an anonymous struct
     type->members = fl_list_new_args((struct FlListArgs) {
@@ -30,9 +30,9 @@ struct ZirStructType* zir_type_struct_new(char *name)
     return type;
 }
 
-void zir_type_struct_add_member(struct ZirStructType *struct_type, const char *name, struct ZirType *member_type)
+void zir_type_struct_add_member(ZirStructType *struct_type, const char *name, ZirType *member_type)
 {
-    struct ZirStructTypeMember *member = fl_malloc(sizeof(struct ZirStructTypeMember));
+    ZirStructTypeMember *member = fl_malloc(sizeof(ZirStructTypeMember));
 
     member->name = fl_cstring_dup(name);
     member->type = member_type;
@@ -40,12 +40,12 @@ void zir_type_struct_add_member(struct ZirStructType *struct_type, const char *n
     fl_list_append(struct_type->members, member);
 }
 
-struct ZirStructTypeMember* zir_type_struct_get_member(struct ZirStructType *struct_type, const char *name)
+ZirStructTypeMember* zir_type_struct_get_member(ZirStructType *struct_type, const char *name)
 {
     struct FlListNode *tmp = fl_list_head(struct_type->members);
     while (tmp != NULL)
     {
-        struct ZirStructTypeMember *member = (struct ZirStructTypeMember*) tmp->value;
+        ZirStructTypeMember *member = (ZirStructTypeMember*) tmp->value;
         
         if (flm_cstring_equals(name, member->name))
             return member;
@@ -56,7 +56,7 @@ struct ZirStructTypeMember* zir_type_struct_get_member(struct ZirStructType *str
     return NULL;
 }
 
-unsigned long zir_type_struct_hash(struct ZirStructType *type)
+unsigned long zir_type_struct_hash(ZirStructType *type)
 {
     static const char *format = "[struct][n:%s]";
 
@@ -79,7 +79,7 @@ unsigned long zir_type_struct_hash(struct ZirStructType *type)
  *  allocated string, but we benefit from the <type_string_mapping_pool> variable
  *  to reuse strings.
  */
-char* zir_type_struct_to_string(struct ZirStructType *type)
+char* zir_type_struct_to_string(ZirStructType *type)
 {
     if (type == NULL)
         return NULL;
@@ -111,7 +111,7 @@ char* zir_type_struct_to_string(struct ZirStructType *type)
         struct FlListNode *tmp = fl_list_head(type->members);
         while (tmp != NULL)
         {
-            struct ZirStructTypeMember *member = (struct ZirStructTypeMember*) tmp->value;
+            ZirStructTypeMember *member = (ZirStructTypeMember*) tmp->value;
             fl_cstring_vappend(&string_value, "%s: %s", member->name, member->type ? zir_type_to_string(member->type) : "<unknown>");
 
             tmp = tmp->next;
@@ -132,7 +132,7 @@ char* zir_type_struct_to_string(struct ZirStructType *type)
     return type->base.to_string.value;
 }
 
-bool zir_type_struct_structurally_equals(struct ZirStructType *type_a, struct ZirStructType *type_b)
+bool zir_type_struct_structurally_equals(ZirStructType *type_a, ZirStructType *type_b)
 {
     if (fl_list_length(type_a->members) != fl_list_length(type_b->members))
         return false;
@@ -141,13 +141,13 @@ bool zir_type_struct_structurally_equals(struct ZirStructType *type_a, struct Zi
 
     while (a_node)
     {
-        struct ZirStructTypeMember *a_member = (struct ZirStructTypeMember*) a_node->value;
+        ZirStructTypeMember *a_member = (ZirStructTypeMember*) a_node->value;
 
         struct FlListNode *b_node = fl_list_head(type_b->members);
         bool a_exists_in_b = false;
         while (b_node)
         {
-            struct ZirStructTypeMember *b_member = (struct ZirStructTypeMember*) b_node->value;
+            ZirStructTypeMember *b_member = (ZirStructTypeMember*) b_node->value;
 
             if (flm_cstring_equals(a_member->name, b_member->name))
             {
@@ -155,7 +155,7 @@ bool zir_type_struct_structurally_equals(struct ZirStructType *type_a, struct Zi
                 if (a_member->type->typekind != ZIR_TYPE_STRUCT || b_member->type->typekind != ZIR_TYPE_STRUCT)
                     equals = zir_type_equals(a_member->type, b_member->type);
                 else
-                    equals = zir_type_struct_structurally_equals((struct ZirStructType*) a_member->type, (struct ZirStructType*) b_member->type);
+                    equals = zir_type_struct_structurally_equals((ZirStructType*) a_member->type, (ZirStructType*) b_member->type);
                 
                 if (equals)
                 {
@@ -176,15 +176,15 @@ bool zir_type_struct_structurally_equals(struct ZirStructType *type_a, struct Zi
     return true;
 }
 
-bool zir_type_struct_equals(struct ZirStructType *type_a, struct ZirType *type_b)
+bool zir_type_struct_equals(ZirStructType *type_a, ZirType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
-        return (struct ZirType*) type_a == type_b;
+        return (ZirType*) type_a == type_b;
 
     if (type_b->typekind != ZIR_TYPE_STRUCT)
         return false;
 
-    struct ZirStructType *type_b_struct = (struct ZirStructType*) type_b;
+    ZirStructType *type_b_struct = (ZirStructType*) type_b;
     
     if (type_a->name != NULL && type_b_struct->name != NULL)
         return flm_cstring_equals(type_a->name, type_b_struct->name);
@@ -195,7 +195,7 @@ bool zir_type_struct_equals(struct ZirStructType *type_a, struct ZirType *type_b
     return zir_type_struct_structurally_equals(type_a, type_b_struct);
 }
 
-bool zir_type_struct_is_assignable_from(struct ZirStructType *target_type, struct ZirType *from_type)
+bool zir_type_struct_is_assignable_from(ZirStructType *target_type, ZirType *from_type)
 {
     if (!target_type || !from_type)
         return false;
@@ -203,7 +203,7 @@ bool zir_type_struct_is_assignable_from(struct ZirStructType *target_type, struc
     if (from_type->typekind != ZIR_TYPE_STRUCT)
         return false;
 
-    struct ZirStructType *struct_from_type = (struct ZirStructType*) from_type;
+    ZirStructType *struct_from_type = (ZirStructType*) from_type;
 
     if (target_type->name != NULL && struct_from_type->name != NULL)
         return flm_cstring_equals(target_type->name, struct_from_type->name);
@@ -212,7 +212,7 @@ bool zir_type_struct_is_assignable_from(struct ZirStructType *target_type, struc
     return zir_type_struct_structurally_equals(target_type, struct_from_type);
 }
 
-bool zir_type_struct_is_castable_to(struct ZirStructType *struct_type, struct ZirType *target_type)
+bool zir_type_struct_is_castable_to(ZirStructType *struct_type, ZirType *target_type)
 {
     if (struct_type == NULL || target_type == NULL)
         return false;
@@ -221,10 +221,10 @@ bool zir_type_struct_is_castable_to(struct ZirStructType *struct_type, struct Zi
         return false;
 
     // If we can assign the struct to a target type instance, we can cast to it too
-    return zir_type_is_assignable_from(target_type, (struct ZirType*) struct_type);
+    return zir_type_is_assignable_from(target_type, (ZirType*) struct_type);
 }
 
-size_t zir_type_struct_size(struct ZirStructType *type)
+size_t zir_type_struct_size(ZirStructType *type)
 {
     if (!type)
         return 0;
@@ -234,7 +234,7 @@ size_t zir_type_struct_size(struct ZirStructType *type)
     struct FlListNode *tmp = fl_list_head(type->members);
     while (tmp != NULL)
     {
-        struct ZirStructTypeMember *member = (struct ZirStructTypeMember*) tmp->value;
+        ZirStructTypeMember *member = (ZirStructTypeMember*) tmp->value;
         struct_size += zir_type_size(member->type);
         tmp = tmp->next;
     }
@@ -242,7 +242,7 @@ size_t zir_type_struct_size(struct ZirStructType *type)
     return struct_size;
 }
 
-void zir_type_struct_free(struct ZirStructType *type)
+void zir_type_struct_free(ZirStructType *type)
 {
     if (!type)
         return;

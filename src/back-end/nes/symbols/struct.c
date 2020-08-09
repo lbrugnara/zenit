@@ -4,23 +4,23 @@
 #include "struct.h"
 #include "../../../zir/types/struct.h"
 
-struct ZenitNesStructSymbol* zenit_nes_symbol_struct_new(const char *name, struct ZirStructType *zir_struct_type, enum ZenitNesSegment segment, uint16_t address)
+ZnesStructSymbol* zenit_nes_symbol_struct_new(const char *name, ZirStructType *zir_struct_type, ZnesSegment segment, uint16_t address)
 {
-    struct ZenitNesStructSymbol *struct_symbol = fl_malloc(sizeof(struct ZenitNesStructSymbol));
+    ZnesStructSymbol *struct_symbol = fl_malloc(sizeof(ZnesStructSymbol));
     struct_symbol->base.address = address;
     struct_symbol->base.name = name != NULL ? fl_cstring_dup(name) : NULL;
     struct_symbol->base.segment = segment;
     struct_symbol->base.symkind = ZENIT_NES_SYMBOL_STRUCT;
     struct_symbol->base.size = zir_type_struct_size(zir_struct_type);
-    struct_symbol->members = fl_array_new(sizeof(struct ZenitNesSymbol*), 0);
+    struct_symbol->members = fl_array_new(sizeof(ZnesSymbol*), 0);
     
     size_t members_offset = 0;
     struct FlListNode *zir_node = fl_list_head(zir_struct_type->members);
     while (zir_node)
     {
-        struct ZirStructTypeMember *zir_member = (struct ZirStructTypeMember*) zir_node->value;
+        ZirStructTypeMember *zir_member = (ZirStructTypeMember*) zir_node->value;
 
-        struct ZenitNesSymbol *member_symbol = zenit_nes_symbol_new(zir_member->name, zir_member->type, segment, address + members_offset);
+        ZnesSymbol *member_symbol = zenit_nes_symbol_new(zir_member->name, zir_member->type, segment, address + members_offset);
         struct_symbol->members = fl_array_append(struct_symbol->members, &member_symbol);
 
         members_offset = zir_type_size(zir_member->type);
@@ -31,7 +31,7 @@ struct ZenitNesStructSymbol* zenit_nes_symbol_struct_new(const char *name, struc
     return struct_symbol;
 }
 
-void zenit_nes_symbol_struct_free(struct ZenitNesStructSymbol *struct_symbol)
+void zenit_nes_symbol_struct_free(ZnesStructSymbol *struct_symbol)
 {
     if (struct_symbol->base.name)
         fl_cstring_free(struct_symbol->base.name);

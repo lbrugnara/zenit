@@ -5,7 +5,7 @@
 #include "type.h"
 #include "context.h"
 
-enum ZenitTypeKind zenit_type_from_slice(struct FlSlice *slice)
+ZenitTypeKind zenit_type_from_slice(struct FlSlice *slice)
 {
     if (flm_cstring_equals_n("uint", (const char*) slice->sequence, 4))
         return ZENIT_TYPE_UINT;
@@ -16,7 +16,7 @@ enum ZenitTypeKind zenit_type_from_slice(struct FlSlice *slice)
     return ZENIT_TYPE_STRUCT;
 }
 
-unsigned long zenit_type_hash(struct ZenitType *type)
+unsigned long zenit_type_hash(ZenitType *type)
 {
     if (!type)
         return ULONG_MAX;
@@ -24,19 +24,19 @@ unsigned long zenit_type_hash(struct ZenitType *type)
     switch (type->typekind)
     {
         case ZENIT_TYPE_STRUCT:
-            return zenit_type_struct_hash((struct ZenitStructType*) type);
+            return zenit_type_struct_hash((ZenitStructType*) type);
         
         case ZENIT_TYPE_REFERENCE:
-            return zenit_type_reference_hash((struct ZenitReferenceType*) type);
+            return zenit_type_reference_hash((ZenitReferenceType*) type);
         
         case ZENIT_TYPE_ARRAY:
-            return zenit_type_array_hash((struct ZenitArrayType*) type);
+            return zenit_type_array_hash((ZenitArrayType*) type);
         
         case ZENIT_TYPE_UINT:
-            return zenit_type_uint_hash((struct ZenitUintType*) type);
+            return zenit_type_uint_hash((ZenitUintType*) type);
 
         case ZENIT_TYPE_BOOL:
-            return zenit_type_bool_hash((struct ZenitBoolType*) type);
+            return zenit_type_bool_hash((ZenitBoolType*) type);
         
         case ZENIT_TYPE_NONE:
             return zenit_type_none_hash(type);
@@ -45,7 +45,7 @@ unsigned long zenit_type_hash(struct ZenitType *type)
     return 0;
 }
 
-char* zenit_type_to_string(struct ZenitType *type)
+char* zenit_type_to_string(ZenitType *type)
 {
     if (!type)
         return NULL;
@@ -62,19 +62,19 @@ char* zenit_type_to_string(struct ZenitType *type)
     switch (type->typekind)
     {
         case ZENIT_TYPE_STRUCT:
-            return zenit_type_struct_to_string((struct ZenitStructType*) type);
+            return zenit_type_struct_to_string((ZenitStructType*) type);
         
         case ZENIT_TYPE_REFERENCE:
-            return zenit_type_reference_to_string((struct ZenitReferenceType*) type);
+            return zenit_type_reference_to_string((ZenitReferenceType*) type);
         
         case ZENIT_TYPE_ARRAY:
-            return zenit_type_array_to_string((struct ZenitArrayType*) type);
+            return zenit_type_array_to_string((ZenitArrayType*) type);
         
         case ZENIT_TYPE_UINT:
-            return zenit_type_uint_to_string((struct ZenitUintType*) type);
+            return zenit_type_uint_to_string((ZenitUintType*) type);
 
         case ZENIT_TYPE_BOOL:
-            return zenit_type_bool_to_string((struct ZenitBoolType*) type);
+            return zenit_type_bool_to_string((ZenitBoolType*) type);
         
         case ZENIT_TYPE_NONE:
             return "<unknown>";
@@ -83,7 +83,7 @@ char* zenit_type_to_string(struct ZenitType *type)
     return NULL;
 }
 
-bool zenit_type_equals(struct ZenitType *type_a, struct ZenitType *type_b)
+bool zenit_type_equals(ZenitType *type_a, ZenitType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
         return type_a == type_b;
@@ -91,19 +91,19 @@ bool zenit_type_equals(struct ZenitType *type_a, struct ZenitType *type_b)
     switch (type_a->typekind)
     {
         case ZENIT_TYPE_STRUCT:
-            return zenit_type_struct_equals((struct ZenitStructType*) type_a, type_b);
+            return zenit_type_struct_equals((ZenitStructType*) type_a, type_b);
         
         case ZENIT_TYPE_REFERENCE:
-            return zenit_type_reference_equals((struct ZenitReferenceType*) type_a, type_b);
+            return zenit_type_reference_equals((ZenitReferenceType*) type_a, type_b);
         
         case ZENIT_TYPE_ARRAY:
-            return zenit_type_array_equals((struct ZenitArrayType*) type_a, type_b);
+            return zenit_type_array_equals((ZenitArrayType*) type_a, type_b);
         
         case ZENIT_TYPE_UINT:
-            return zenit_type_uint_equals((struct ZenitUintType*) type_a, type_b);
+            return zenit_type_uint_equals((ZenitUintType*) type_a, type_b);
 
         case ZENIT_TYPE_BOOL:
-            return zenit_type_bool_equals((struct ZenitBoolType*) type_a, type_b);
+            return zenit_type_bool_equals((ZenitBoolType*) type_a, type_b);
         
         case ZENIT_TYPE_NONE:
             return type_b->typekind == ZENIT_TYPE_NONE;
@@ -112,7 +112,7 @@ bool zenit_type_equals(struct ZenitType *type_a, struct ZenitType *type_b)
     return false;
 }
 
-bool zenit_type_can_unify(struct ZenitType *type_a, struct ZenitType *type_b)
+bool zenit_type_can_unify(ZenitType *type_a, ZenitType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
         return false;
@@ -123,25 +123,25 @@ bool zenit_type_can_unify(struct ZenitType *type_a, struct ZenitType *type_b)
             return type_b->typekind != ZENIT_TYPE_NONE;
 
         case ZENIT_TYPE_STRUCT:
-            return zenit_type_struct_can_unify((struct ZenitStructType*) type_a, type_b);
+            return zenit_type_struct_can_unify((ZenitStructType*) type_a, type_b);
         
         case ZENIT_TYPE_REFERENCE:
-            return zenit_type_reference_can_unify((struct ZenitReferenceType*) type_a, type_b);
+            return zenit_type_reference_can_unify((ZenitReferenceType*) type_a, type_b);
         
         case ZENIT_TYPE_ARRAY:
-            return zenit_type_array_can_unify((struct ZenitArrayType*) type_a, type_b);
+            return zenit_type_array_can_unify((ZenitArrayType*) type_a, type_b);
         
         case ZENIT_TYPE_UINT:
-            return zenit_type_uint_can_unify((struct ZenitUintType*) type_a, type_b);
+            return zenit_type_uint_can_unify((ZenitUintType*) type_a, type_b);
 
         case ZENIT_TYPE_BOOL:
-            return zenit_type_bool_can_unify((struct ZenitBoolType*) type_a, type_b);
+            return zenit_type_bool_can_unify((ZenitBoolType*) type_a, type_b);
     }
     
     return false;
 }
 
-bool zenit_type_is_assignable_from(struct ZenitType *target_type, struct ZenitType *from_type)
+bool zenit_type_is_assignable_from(ZenitType *target_type, ZenitType *from_type)
 {
     if (target_type == NULL || from_type == NULL)
         return false;
@@ -152,25 +152,25 @@ bool zenit_type_is_assignable_from(struct ZenitType *target_type, struct ZenitTy
             return from_type->typekind != ZENIT_TYPE_NONE;
 
         case ZENIT_TYPE_STRUCT:
-            return zenit_type_struct_is_assignable_from((struct ZenitStructType*) target_type, from_type);
+            return zenit_type_struct_is_assignable_from((ZenitStructType*) target_type, from_type);
         
         case ZENIT_TYPE_REFERENCE:
-            return zenit_type_reference_is_assignable_from((struct ZenitReferenceType*) target_type, from_type);
+            return zenit_type_reference_is_assignable_from((ZenitReferenceType*) target_type, from_type);
         
         case ZENIT_TYPE_ARRAY:
-            return zenit_type_array_is_assignable_from((struct ZenitArrayType*) target_type, from_type);
+            return zenit_type_array_is_assignable_from((ZenitArrayType*) target_type, from_type);
         
         case ZENIT_TYPE_UINT:
-            return zenit_type_uint_is_assignable_from((struct ZenitUintType*) target_type, from_type);
+            return zenit_type_uint_is_assignable_from((ZenitUintType*) target_type, from_type);
 
         case ZENIT_TYPE_BOOL:
-            return zenit_type_bool_is_assignable_from((struct ZenitBoolType*) target_type, from_type);
+            return zenit_type_bool_is_assignable_from((ZenitBoolType*) target_type, from_type);
     }
     
     return false;
 }
 
-bool zenit_type_is_castable_to(struct ZenitType *source_type, struct ZenitType *target_type)
+bool zenit_type_is_castable_to(ZenitType *source_type, ZenitType *target_type)
 {
     // We can cast from or to NULL objects...
     if (source_type == NULL || target_type == NULL)
@@ -183,19 +183,19 @@ bool zenit_type_is_castable_to(struct ZenitType *source_type, struct ZenitType *
     switch (source_type->typekind)
     {
         case ZENIT_TYPE_STRUCT:
-            return zenit_type_struct_is_castable_to((struct ZenitStructType*) source_type, target_type);
+            return zenit_type_struct_is_castable_to((ZenitStructType*) source_type, target_type);
         
         case ZENIT_TYPE_REFERENCE:
-            return zenit_type_reference_is_castable_to((struct ZenitReferenceType*) source_type, target_type);
+            return zenit_type_reference_is_castable_to((ZenitReferenceType*) source_type, target_type);
         
         case ZENIT_TYPE_ARRAY:
-            return zenit_type_array_is_castable_to((struct ZenitArrayType*) source_type, target_type);
+            return zenit_type_array_is_castable_to((ZenitArrayType*) source_type, target_type);
         
         case ZENIT_TYPE_UINT:
-            return zenit_type_uint_is_castable_to((struct ZenitUintType*) source_type, target_type);
+            return zenit_type_uint_is_castable_to((ZenitUintType*) source_type, target_type);
 
         case ZENIT_TYPE_BOOL:
-            return zenit_type_bool_is_castable_to((struct ZenitBoolType*) source_type, target_type);
+            return zenit_type_bool_is_castable_to((ZenitBoolType*) source_type, target_type);
 
         case ZENIT_TYPE_NONE: // Mute warning
             break;
@@ -204,7 +204,7 @@ bool zenit_type_is_castable_to(struct ZenitType *source_type, struct ZenitType *
     return false;
 }
 
-void zenit_type_free(struct ZenitType *type)
+void zenit_type_free(ZenitType *type)
 {
     if (!type)
         return;
@@ -212,23 +212,23 @@ void zenit_type_free(struct ZenitType *type)
     switch (type->typekind)
     {
         case ZENIT_TYPE_STRUCT:
-            zenit_type_struct_free((struct ZenitStructType*) type);
+            zenit_type_struct_free((ZenitStructType*) type);
             break;
 
         case ZENIT_TYPE_REFERENCE:
-            zenit_type_reference_free((struct ZenitReferenceType*) type);
+            zenit_type_reference_free((ZenitReferenceType*) type);
             break;
 
         case ZENIT_TYPE_ARRAY:
-            zenit_type_array_free((struct ZenitArrayType*) type);
+            zenit_type_array_free((ZenitArrayType*) type);
             break;
 
         case ZENIT_TYPE_UINT:
-            zenit_type_uint_free((struct ZenitUintType*) type);
+            zenit_type_uint_free((ZenitUintType*) type);
             break;
 
         case ZENIT_TYPE_BOOL:
-            zenit_type_bool_free((struct ZenitBoolType*) type);
+            zenit_type_bool_free((ZenitBoolType*) type);
             break;
 
         case ZENIT_TYPE_NONE:

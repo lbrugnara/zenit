@@ -2,9 +2,9 @@
 #include "symtable.h"
 #include "symbol.h"
 
-struct ZirSymtable zir_symtable_new(void)
+ZirSymtable zir_symtable_new(void)
 {
-    return (struct ZirSymtable) {
+    return (ZirSymtable) {
         .names = fl_list_new_args((struct FlListArgs) {
             .value_allocator = fl_container_allocator_string,
             .value_cleaner = fl_container_cleaner_pointer
@@ -20,7 +20,7 @@ struct ZirSymtable zir_symtable_new(void)
     };
 }
 
-void zir_symtable_free(struct ZirSymtable *symtable)
+void zir_symtable_free(ZirSymtable *symtable)
 {
     if (!symtable)
         return;
@@ -32,37 +32,37 @@ void zir_symtable_free(struct ZirSymtable *symtable)
         fl_list_free(symtable->names);
 }
 
-struct ZirSymbol* zir_symtable_add(struct ZirSymtable *symtable, struct ZirSymbol *symbol)
+ZirSymbol* zir_symtable_add(ZirSymtable *symtable, ZirSymbol *symbol)
 {
     fl_list_append(symtable->names, symbol->name);
     fl_hashtable_add(symtable->symbols, symbol->name, symbol);
     return symbol;
 }
 
-bool zir_symtable_has(struct ZirSymtable *symtable, const char *symbol_name)
+bool zir_symtable_has(ZirSymtable *symtable, const char *symbol_name)
 {
     return fl_hashtable_has_key(symtable->symbols, symbol_name);
 }
 
-struct ZirSymbol* zir_symtable_get(struct ZirSymtable *symtable, const char *symbol_name)
+ZirSymbol* zir_symtable_get(ZirSymtable *symtable, const char *symbol_name)
 {
-    return (struct ZirSymbol*)fl_hashtable_get(symtable->symbols, symbol_name);
+    return (ZirSymbol*)fl_hashtable_get(symtable->symbols, symbol_name);
 }
 
-struct ZirSymbol** zir_symtable_get_all(struct ZirSymtable *symtable)
+ZirSymbol** zir_symtable_get_all(ZirSymtable *symtable)
 {
     struct FlListNode *tmp = fl_list_head(symtable->names);
 
     if (tmp == NULL)
         return NULL;
 
-    struct ZirSymbol **symbols = fl_array_new(sizeof(struct ZirSymbol*), 0);
+    ZirSymbol **symbols = fl_array_new(sizeof(ZirSymbol*), 0);
 
     while (tmp)
     {
         char *name = (char*) tmp->value;
 
-        struct ZirSymbol *symbol = zir_symtable_get(symtable, name);
+        ZirSymbol *symbol = zir_symtable_get(symtable, name);
         symbols = fl_array_append(symbols, &symbol);
 
         tmp = tmp->next;
@@ -71,7 +71,7 @@ struct ZirSymbol** zir_symtable_get_all(struct ZirSymtable *symtable)
     return symbols;
 }
 
-char* zir_symtable_dump(struct ZirSymtable *symtable, char *output)
+char* zir_symtable_dump(ZirSymtable *symtable, char *output)
 {
     struct FlListNode *tmp = fl_list_head(symtable->names);
 
@@ -83,7 +83,7 @@ char* zir_symtable_dump(struct ZirSymtable *symtable, char *output)
     {
         char *name = (char*) tmp->value;
 
-        struct ZirSymbol *symbol = zir_symtable_get(symtable, name);
+        ZirSymbol *symbol = zir_symtable_get(symtable, name);
 
         if (started)
             fl_cstring_append(&output, ", ");

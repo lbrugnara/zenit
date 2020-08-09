@@ -3,9 +3,9 @@
 #include "reference.h"
 #include "../types/reference.h"
 
-struct ZenitReferenceNode* zenit_node_reference_new(struct ZenitSourceLocation location, struct ZenitNode *expression)
+ZenitReferenceNode* zenit_node_reference_new(ZenitSourceLocation location, ZenitNode *expression)
 {
-    struct ZenitReferenceNode *ref_node = fl_malloc(sizeof(struct ZenitReferenceNode));
+    ZenitReferenceNode *ref_node = fl_malloc(sizeof(ZenitReferenceNode));
     ref_node->base.nodekind = ZENIT_NODE_REFERENCE;
     ref_node->base.location = location;
     ref_node->expression = expression;
@@ -13,7 +13,7 @@ struct ZenitReferenceNode* zenit_node_reference_new(struct ZenitSourceLocation l
     return ref_node;
 }
 
-char* zenit_node_reference_uid(struct ZenitReferenceNode *reference)
+char* zenit_node_reference_uid(ZenitReferenceNode *reference)
 {
     if (!reference)
         return NULL;
@@ -28,7 +28,7 @@ char* zenit_node_reference_uid(struct ZenitReferenceNode *reference)
     return id;
 }
 
-char* zenit_node_reference_dump(struct ZenitReferenceNode *reference, char *output)
+char* zenit_node_reference_dump(ZenitReferenceNode *reference, char *output)
 {
     fl_cstring_append(&output, "(ref ");
 
@@ -41,7 +41,7 @@ char* zenit_node_reference_dump(struct ZenitReferenceNode *reference, char *outp
 
 /*
  * Function: zenit_node_reference_free
- *  Releases the memory of the <struct ZenitReferenceNode> object
+ *  Releases the memory of the <ZenitReferenceNode> object
  *
  * Parameters:
  *  ref_node - Object to be freed.
@@ -49,7 +49,7 @@ char* zenit_node_reference_dump(struct ZenitReferenceNode *reference, char *outp
  * Returns:
  *  void - This function does not return a value
  */
-void zenit_node_reference_free(struct ZenitReferenceNode *ref_node)
+void zenit_node_reference_free(ZenitReferenceNode *ref_node)
 {
     if (!ref_node)
         return;

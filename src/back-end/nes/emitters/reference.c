@@ -2,10 +2,10 @@
 
 #include "../symbols/temp.h"
 
-void zenit_nes_emitter_reference_store(struct ZenitNesProgram *program, struct ZirReferenceOperand *reference_operand, struct ZenitNesSymbol *nes_symbol, size_t offset)
+void zenit_nes_emitter_reference_store(ZnesProgram *program, ZirReferenceOperand *reference_operand, ZnesSymbol *nes_symbol, size_t offset)
 {
     uint16_t target_address = nes_symbol->address + offset;
-    struct ZenitNesSymbol *ref_op_symbol = fl_hashtable_get(program->symbols, reference_operand->operand->symbol->name);
+    ZnesSymbol *ref_op_symbol = fl_hashtable_get(program->symbols, reference_operand->operand->symbol->name);
 
     if (ref_op_symbol->symkind == ZENIT_NES_SYMBOL_TEMP)
         ref_op_symbol = zenit_nes_program_get_tmpsym_symbol(program, ref_op_symbol);
@@ -13,7 +13,7 @@ void zenit_nes_emitter_reference_store(struct ZenitNesProgram *program, struct Z
     if (ref_op_symbol == NULL)
         return;
 
-    struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+    ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
 
     if (nes_symbol->segment == ZENIT_NES_SEGMENT_ZP)
     {

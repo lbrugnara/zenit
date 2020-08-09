@@ -4,15 +4,15 @@
 #include "symtable.h"
 
 /*
- * Enum: enum ZenitScopeType
+ * Enum: ZenitScopeType
  *  Represents the different type of scopes
  * 
  */
-enum ZenitScopeType {
+typedef enum ZenitScopeType {
     ZENIT_SCOPE_GLOBAL,
     ZENIT_SCOPE_STRUCT,
     ZENIT_SCOPE_FUNCTION,
-};
+} ZenitScopeType;
 
 
 /*
@@ -20,20 +20,20 @@ enum ZenitScopeType {
  *  Represents a scope in the program
  * 
  * Members:
- *  <struct ZenitScope> *parent: Pointer to the parent scope
- *  <struct ZenitScope> **children: Array of pointers to the scope's children
+ *  <ZenitScope> *parent: Pointer to the parent scope
+ *  <ZenitScope> **children: Array of pointers to the scope's children
  *  <struct ZenitSymtable> symtable: Symbol table of the current scope
  *  <unsigned long long> temp_counter: Counter for temporal symbols names
  * 
  */
-struct ZenitScope {
+typedef struct ZenitScope {
     const char *id;
     struct ZenitScope *parent;
     struct ZenitScope **children;
     unsigned long long temp_counter;
     struct ZenitSymtable symtable;
-    enum ZenitScopeType type;
-};
+    ZenitScopeType type;
+} ZenitScope;
 
 /*
  * Function: zenit_scope_new
@@ -41,47 +41,47 @@ struct ZenitScope {
  *
  * Parameters:
  *  <const char> *id: Id of the scope object
- *  <enum ZenitScopeType> type: Type of symbol table for this scope
- *  <struct ZenitScope> *parent: Pointer to a parent scope
+ *  <ZenitScopeType> type: Type of symbol table for this scope
+ *  <ZenitScope> *parent: Pointer to a parent scope
  *
  * Returns:
- *  <struct ZenitScope>*: The created scope object
+ *  <ZenitScope>*: The created scope object
  *
  * Notes:
  *  The object returned by this function must be freed using the
  *  <zenit_scope_free> function
  */
-struct ZenitScope* zenit_scope_new(const char *id, enum ZenitScopeType type, struct ZenitScope *parent);
+ZenitScope* zenit_scope_new(const char *id, ZenitScopeType type, ZenitScope *parent);
 
 /*
  * Function: zenit_scope_free
  *  Releases the memory of the scope object
  *
  * Parameters:
- *  <struct ZenitScope> *scope: Scope to be freed
+ *  <ZenitScope> *scope: Scope to be freed
  *
  * Returns:
  *  <void>: This function does not return a value
  * 
  */
-void zenit_scope_free(struct ZenitScope *scope);
+void zenit_scope_free(ZenitScope *scope);
 
 /*
  * Function: zenit_scope_add_symbol
  *  Adds a new symbol to the scope object
  *
  * Parameters:
- *  <struct ZenitScope> *scope: Scope object
- *  <struct ZenitSymbol> *symbol: Target symbol to be added to the scope
+ *  <ZenitScope> *scope: Scope object
+ *  <ZenitSymbol> *symbol: Target symbol to be added to the scope
  *
  * Returns:
- *  struct ZenitSymbol*: Pointer to the added symbol 
+ *  ZenitSymbol*: Pointer to the added symbol 
  *
  * Notes:
  *  The scope object takes ownership of the symbol, which means that the memory of the symbol
  *  object will be freed when the scope is freed.
  */
-struct ZenitSymbol* zenit_scope_add_symbol(struct ZenitScope *scope, struct ZenitSymbol *symbol);
+ZenitSymbol* zenit_scope_add_symbol(ZenitScope *scope, ZenitSymbol *symbol);
 
 /*
  * Function: zenit_scope_has_symbol
@@ -89,66 +89,66 @@ struct ZenitSymbol* zenit_scope_add_symbol(struct ZenitScope *scope, struct Zeni
  *  variable within the current scope.
  *
  * Parameters:
- *  <struct ZenitScope> *scope: Scope object
+ *  <ZenitScope> *scope: Scope object
  *  <const char> *symbol_name: Name of the target symbol
  *
  * Returns:
  *  bool: *true* if a symbol with the requested name exists within the scope, otherwise *false*.
  */
-bool zenit_scope_has_symbol(struct ZenitScope *scope, const char *symbol_name);
+bool zenit_scope_has_symbol(ZenitScope *scope, const char *symbol_name);
 
 /*
  * Function: zenit_scope_get_symbol
  *  Returns (if it exists) the symbol with name equals to *symbol_name* within the current scope
  *
  * Parameters:
- *  <struct ZenitScope> *scope: Scope object
+ *  <ZenitScope> *scope: Scope object
  *  <const char> *symbol_name: Name of the target symbol
  *
  * Returns:
- *  struct ZenitSymbol*: Symbol matching with the provided name, otherwise <NULL>
+ *  ZenitSymbol*: Symbol matching with the provided name, otherwise <NULL>
  */
-struct ZenitSymbol* zenit_scope_get_symbol(struct ZenitScope *scope, const char *symbol_name);
+ZenitSymbol* zenit_scope_get_symbol(ZenitScope *scope, const char *symbol_name);
 
 /*
  * Function: zenit_program_remove_symbol
  *  Removes from the scope -if it exists- a symbol with the name equals to the string *symbol_name*
  *
  * Parameters:
- *  <struct ZenitScope> *scope: Scope object
+ *  <ZenitScope> *scope: Scope object
  *  <const char> *symbol_name: Name of the symbol to remove
  *
  * Returns:
- *  struct ZenitSymbol*: Symbol removed from the scope if it exists, otherwise this function returns <NULL>
+ *  ZenitSymbol*: Symbol removed from the scope if it exists, otherwise this function returns <NULL>
  *
  * Notes:
  *  The scope loses ownership of the symbol object, which means that the caller is in charge of freeing the
  *  symbol's memory.
  */
-struct ZenitSymbol* zenit_scope_remove_symbol(struct ZenitScope *scope, const char *symbol_name);
+ZenitSymbol* zenit_scope_remove_symbol(ZenitScope *scope, const char *symbol_name);
 
 /*
  * Function: zenit_scope_get_symbols
  *  Returns an array containing all the symbols in the current scope.
  *
  * Parameters:
- *  <struct ZenitScope> *scope: Scope object
+ *  <ZenitScope> *scope: Scope object
  *  <bool> include_temporals: If *true*, the temporal symbols within the scope are added to the output array. 
  *
  * Returns:
- *  struct ZenitSymbol**:  Array to a pointer of <struct ZenitSymbol> objects
+ *  ZenitSymbol**:  Array to a pointer of <ZenitSymbol> objects
  *
  * Notes:
  *  The array returned by this function must be freed with the <fl_array_free> function
  */
-struct ZenitSymbol** zenit_scope_get_symbols(struct ZenitScope *scope, bool include_temporals);
+ZenitSymbol** zenit_scope_get_symbols(ZenitScope *scope, bool include_temporals);
 
 /*
  * Function: zenit_scope_has_symbols
  *  Returns *true* or *false* based on if the scope has symbols or not
  *
  * Parameters:
- *  <struct ZenitScope> *scope: Scope object
+ *  <ZenitScope> *scope: Scope object
  *
  * Returns:
  *  bool: *true* if the scope contains symbols, otherwise it returns *false*
@@ -156,7 +156,7 @@ struct ZenitSymbol** zenit_scope_get_symbols(struct ZenitScope *scope, bool incl
  * Notes:
  *  This function does take into account the temporal symbols too
  */
-bool zenit_scope_has_symbols(struct ZenitScope *scope);
+bool zenit_scope_has_symbols(ZenitScope *scope);
 
 /*
  * Function: zenit_scope_dump
@@ -164,7 +164,7 @@ bool zenit_scope_has_symbols(struct ZenitScope *scope);
  *  returns a pointer to the -possibly reallocated- output
  *
  * Parameters:
- *  <struct ZenitScope> *scope: Scope object to dump to the output
+ *  <ZenitScope> *scope: Scope object to dump to the output
  *  <char> *output: Pointer to a heap allocated string
  *  <bool> verbose: If true, the temporal symbols are added to the output, otherwise they are ignored
  *
@@ -179,6 +179,6 @@ bool zenit_scope_has_symbols(struct ZenitScope *scope);
  *      output = zenit_scope_dump(scope, output, verbose);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_scope_dump(struct ZenitScope *scope, char *output, bool verbose);
+char* zenit_scope_dump(ZenitScope *scope, char *output, bool verbose);
 
 #endif /* ZENIT_SCOPE_H */

@@ -1,13 +1,13 @@
 #include <fllib/Cstring.h>
 #include "symbol.h"
 
-struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitType *type)
+ZenitSymbol* zenit_symbol_new(const char *name, ZenitType *type)
 {
     flm_assert(name != NULL, "Symbol name cannot be NULL");
     flm_assert(type != NULL, "Type information cannot be NULL");
 
 
-    struct ZenitSymbol *symbol = fl_malloc(sizeof(struct ZenitSymbol));
+    ZenitSymbol *symbol = fl_malloc(sizeof(ZenitSymbol));
 
     symbol->name = fl_cstring_dup(name);
     symbol->type = type;
@@ -15,7 +15,7 @@ struct ZenitSymbol* zenit_symbol_new(const char *name, struct ZenitType *type)
     return symbol;
 }
 
-void zenit_symbol_free(struct ZenitSymbol *symbol)
+void zenit_symbol_free(ZenitSymbol *symbol)
 {
     if (!symbol)
         return;
@@ -26,7 +26,7 @@ void zenit_symbol_free(struct ZenitSymbol *symbol)
     fl_free(symbol);
 }
 
-char* zenit_symbol_dump(struct ZenitSymbol *symbol, char *output)
+char* zenit_symbol_dump(ZenitSymbol *symbol, char *output)
 {
     fl_cstring_vappend(&output, "(symbol %s %s)", symbol->name, zenit_type_to_string(symbol->type));
     return output;

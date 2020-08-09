@@ -12,11 +12,11 @@
 #include "../symbols/temp.h"
 #include "../symbols/bool.h"
 
-void zenit_nes_emitter_bool_store(struct ZenitNesProgram *program, struct ZirBoolOperand *bool_operand, struct ZenitNesSymbol *nes_symbol, size_t offset)
+void zenit_nes_emitter_bool_store(ZnesProgram *program, ZirBoolOperand *bool_operand, ZnesSymbol *nes_symbol, size_t offset)
 {
     uint16_t target_address = nes_symbol->address + offset;
 
-    struct ZenitNesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
+    ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
 
     uint8_t bool_value = bool_operand->value ? 0x1 : 0x0;
 

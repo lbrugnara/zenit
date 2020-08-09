@@ -30,7 +30,7 @@ static const char *TokenTypeString[] = {
     [ZENIT_TOKEN_EOF]           = "EOF",
 };
 
-const char* zenit_token_print(enum ZenitTokenType type)
+const char* zenit_token_print(ZenitTokenType type)
 {
     if (type < 0 || type > ZENIT_TOKEN_EOF)
         return "<invalid token>";

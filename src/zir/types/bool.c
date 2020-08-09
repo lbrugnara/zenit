@@ -2,15 +2,15 @@
 #include <fllib/Cstring.h>
 #include "bool.h"
 
-struct ZirBoolType* zir_type_bool_new(void)
+ZirBoolType* zir_type_bool_new(void)
 {
-    struct ZirBoolType *type = fl_malloc(sizeof(struct ZirBoolType));
+    ZirBoolType *type = fl_malloc(sizeof(ZirBoolType));
     type->base.typekind = ZIR_TYPE_BOOL;
 
     return type;
 }
 
-unsigned long zir_type_bool_hash(struct ZirBoolType *type)
+unsigned long zir_type_bool_hash(ZirBoolType *type)
 {
     const char *type_key = "[bool]";
     unsigned long hash = 5381;
@@ -22,20 +22,20 @@ unsigned long zir_type_bool_hash(struct ZirBoolType *type)
     return hash;
 }
 
-char* zir_type_bool_to_string(struct ZirBoolType *type)
+char* zir_type_bool_to_string(ZirBoolType *type)
 {
     return "bool";
 }
 
-bool zir_type_bool_equals(struct ZirBoolType *type_a, struct ZirType *type_b)
+bool zir_type_bool_equals(ZirBoolType *type_a, ZirType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
-        return (struct ZirType*) type_a == type_b;
+        return (ZirType*) type_a == type_b;
 
     return type_b->typekind == ZIR_TYPE_BOOL;
 }
 
-bool zir_type_bool_is_assignable_from(struct ZirBoolType *target_type, struct ZirType *from_type)
+bool zir_type_bool_is_assignable_from(ZirBoolType *target_type, ZirType *from_type)
 {
     if (target_type == NULL || from_type == NULL)
         return false;
@@ -43,7 +43,7 @@ bool zir_type_bool_is_assignable_from(struct ZirBoolType *target_type, struct Zi
     return from_type->typekind == ZIR_TYPE_BOOL;
 }
 
-bool zir_type_bool_is_castable_to(struct ZirBoolType *bool_type, struct ZirType *target_type)
+bool zir_type_bool_is_castable_to(ZirBoolType *bool_type, ZirType *target_type)
 {
     if (target_type == NULL || target_type == NULL)
         return false;
@@ -52,7 +52,7 @@ bool zir_type_bool_is_castable_to(struct ZirBoolType *bool_type, struct ZirType 
     return target_type->typekind == ZIR_TYPE_BOOL;
 }
 
-size_t zir_type_bool_size(struct ZirBoolType *type)
+size_t zir_type_bool_size(ZirBoolType *type)
 {
     if (!type)
         return 0;
@@ -60,7 +60,7 @@ size_t zir_type_bool_size(struct ZirBoolType *type)
     return 1;
 }
 
-void zir_type_bool_free(struct ZirBoolType *type)
+void zir_type_bool_free(ZirBoolType *type)
 {
     if (!type)
         return;

@@ -8,13 +8,13 @@
 #include "../../zir/symtable.h"
 #include "../../zir/instructions/operands/operand.h"
 
-typedef void(*ZirBlockVisitor)(struct ZirBlock *block, struct ZenitNesProgram *program);
-static void visit_block(struct ZirBlock *block, struct ZenitNesProgram *program);
+typedef void(*ZirBlockVisitor)(ZirBlock *block, ZnesProgram *program);
+static void visit_block(ZirBlock *block, ZnesProgram *program);
 
-typedef void(*ZirInstructionVisitor)(struct ZirInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
-static void visit_instruction(struct ZirInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
-static void visit_variable_instruction(struct ZirVariableInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
-static void visit_cast_instruction(struct ZirCastInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program);
+typedef void(*ZirInstructionVisitor)(ZirInstruction *instruction, ZirBlock *block, ZnesProgram *program);
+static void visit_instruction(ZirInstruction *instruction, ZirBlock *block, ZnesProgram *program);
+static void visit_variable_instruction(ZirVariableInstruction *instruction, ZirBlock *block, ZnesProgram *program);
+static void visit_cast_instruction(ZirCastInstruction *instruction, ZirBlock *block, ZnesProgram *program);
 
 static const ZirInstructionVisitor instruction_visitors[] = {
     [ZIR_INSTR_VARIABLE]   = (ZirInstructionVisitor) &visit_variable_instruction,
@@ -27,18 +27,18 @@ static const ZirInstructionVisitor instruction_visitors[] = {
  *  into the destination operand (the temporal variable)
  *
  * Parameters:
- *  <struct ZirCastInstruction> *instruction: ZIR instruction
- *  <struct ZirBlock> *block: The current block where the ZIR instruction comes from
- *  <struct ZenitNesProgram> *program: The NES program being built
+ *  <ZirCastInstruction> *instruction: ZIR instruction
+ *  <ZirBlock> *block: The current block where the ZIR instruction comes from
+ *  <ZnesProgram> *program: The NES program being built
  *
  * Returns:
  *  void: This function does not return a value
  * 
  */
-static void visit_cast_instruction(struct ZirCastInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program)
+static void visit_cast_instruction(ZirCastInstruction *instruction, ZirBlock *block, ZnesProgram *program)
 {
-    struct ZirSymbol *zir_symbol = ((struct ZirSymbolOperand*) instruction->base.destination)->symbol;
-    struct ZenitNesSymbol *nes_symbol = zenit_nes_program_reserve_symbol(program, block, NULL, zir_symbol);
+    ZirSymbol *zir_symbol = ((ZirSymbolOperand*) instruction->base.destination)->symbol;
+    ZnesSymbol *nes_symbol = zenit_nes_program_reserve_symbol(program, block, NULL, zir_symbol);
     
     zenit_nes_emitter_store(program, instruction->source, nes_symbol, 0);
 }
@@ -49,48 +49,48 @@ static void visit_cast_instruction(struct ZirCastInstruction *instruction, struc
  *  is the place where the variable is being stored.
  *
  * Parameters:
- *  <struct ZirVariableInstruction> *instruction: ZIR instruction
- *  <struct ZirBlock> *block: The current block where the ZIR instruction comes from
- *  <struct ZenitNesProgram> *program: The NES program being built
+ *  <ZirVariableInstruction> *instruction: ZIR instruction
+ *  <ZirBlock> *block: The current block where the ZIR instruction comes from
+ *  <ZnesProgram> *program: The NES program being built
  *
  * Returns:
  *  void: This function does not return a value
  * 
  */
-static void visit_variable_instruction(struct ZirVariableInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program)
+static void visit_variable_instruction(ZirVariableInstruction *instruction, ZirBlock *block, ZnesProgram *program)
 {
-    struct ZirSymbol *zir_symbol = ((struct ZirSymbolOperand*) instruction->base.destination)->symbol;
-    struct ZenitNesSymbol *nes_symbol = zenit_nes_program_reserve_symbol(program, block, instruction->attributes, zir_symbol);
+    ZirSymbol *zir_symbol = ((ZirSymbolOperand*) instruction->base.destination)->symbol;
+    ZnesSymbol *nes_symbol = zenit_nes_program_reserve_symbol(program, block, instruction->attributes, zir_symbol);
 
     zenit_nes_emitter_store(program, instruction->source, nes_symbol, 0);
 }
 
-static void visit_instruction(struct ZirInstruction *instruction, struct ZirBlock *block, struct ZenitNesProgram *program)
+static void visit_instruction(ZirInstruction *instruction, ZirBlock *block, ZnesProgram *program)
 {
     instruction_visitors[instruction->type](instruction, block, program);
 }
 
-static void visit_block(struct ZirBlock *block, struct ZenitNesProgram *program)
+static void visit_block(ZirBlock *block, ZnesProgram *program)
 {
     size_t instr_count = fl_array_length(block->instructions);
 
     for (size_t i=0; i < instr_count; i++)
     {
-        struct ZirInstruction *instr = block->instructions[i];
+        ZirInstruction *instr = block->instructions[i];
         visit_instruction(instr, block, program);
     }
 }
 
-struct ZenitNesProgram* zenit_nes_generate_program(struct ZirProgram *zir_program)
+ZnesProgram* zenit_nes_generate_program(ZirProgram *zir_program)
 {
     if (!zir_program)
         return NULL;
 
     // Create the program object
-    struct ZenitNesProgram *nes_program = zenit_nes_program_new();
+    ZnesProgram *nes_program = zenit_nes_program_new();
 
     // Start visiting the ZIR program
-    struct ZirBlock *zir_block = zir_program->current;
+    ZirBlock *zir_block = zir_program->current;
     visit_block(zir_block, nes_program);
 
     return nes_program;
