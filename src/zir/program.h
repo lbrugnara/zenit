@@ -9,7 +9,7 @@
  *  Represents a ZIR program
  * 
  * Members:
- *  <ZirBlock> *global: A pointer to the global block or block
+ *  <ZirBlock> *global: A pointer to the global block
  *  <ZirBlock> *current: A pointer to the current block
  *  <ZirOperandPool> *operands: Keeps track of the operands. (Work as a root aggregate for operand objects)
  */
