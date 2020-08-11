@@ -103,4 +103,17 @@ char* zir_block_dump(ZirBlock *block, char *output);
  */
 size_t zir_block_get_ip(ZirBlock *block);
 
+/*
+ * Function: zir_block_has_symbol
+ *  Returns true if a symbol with the provided name exists in the block
+ *
+ * Parameters:
+ *  block - The block object
+ *  name - The symbol name to be found
+ *
+ * Returns:
+ *  bool - *true* if the symbol exists, otherwise it returns *false*.
+ */
+bool zir_block_has_symbol(ZirBlock *block, const char *name);
+
 #endif /* ZIR_BLOCK_H */

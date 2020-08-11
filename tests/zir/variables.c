@@ -76,3 +76,44 @@ void zenit_test_generate_ir_variables(void)
     fl_cstring_free(codegen);
     zir_program_free(program);
 }
+
+void zenit_test_generate_ir_variables_clash(void)
+{
+    const char *zenit_source = 
+        "{ var a = 1; var x = a; }"             "\n"
+        "{ var a = 2; var y = a; }"             "\n"
+        "{ { { var a = 3; var z = a; } } }"     "\n"
+    ;
+
+    const char *zir_src = 
+        "@a : uint8 = 1"                                        "\n"
+        "@x : uint8 = @a"                                       "\n"
+
+        "@a_$l2c3 : uint8 = 2"                                  "\n"
+        "@y : uint8 = @a_$l2c3"                                 "\n"
+
+        "@a_$l3c7 : uint8 = 3"                                  "\n"
+        "@z : uint8 = @a_$l3c7"                                 "\n"
+    ;
+
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
+
+    fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
+    fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
+    fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
+    fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
+    
+    ZirProgram *program = zenit_generate_zir(&ctx);
+
+    fl_expect("ZIR program must compile", program != NULL);
+
+    // At this point we can free the Zenit context, from now on, everything should work only with ZIR objects
+    zenit_context_free(&ctx);
+    
+    char *codegen = zir_program_dump(program);
+
+    fl_expect("Generated IR must be equals to the hand-written version", flm_cstring_equals(codegen, zir_src));
+    
+    fl_cstring_free(codegen);
+    zir_program_free(program);
+}

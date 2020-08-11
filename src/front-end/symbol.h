@@ -11,6 +11,7 @@
  */
 typedef struct ZenitSymbol {
     const char *name;
+    const char *mangled_name;
     ZenitType *type;
 } ZenitSymbol;
 
@@ -21,16 +22,20 @@ typedef struct ZenitSymbol {
  *
  * Parameters:
  *  name - Symbol name
+ *  mangled_name - Mangled symbol name (unique). Expects to be a heap-allocated string
  *  type - Type information
  *
  * Returns:
  *  ZenitSymbol* - The new symbol
  * 
  * Notes:
- *  The object returned by this function must be freed with the <zenit_symbol_free> function
+ *  -   The object returned by this function must be freed using the <zenit_symbol_free> function
+ *   -   The ZenitSymbol object takes ownership of the <mangled_name> object, which means it will release
+ *      the <mangled_name> memory when the <zenit_symbol_free> function is called with the ZenitSymbol object 
+ *      as an argument.
  *
  */
-ZenitSymbol* zenit_symbol_new(const char *name, ZenitType *type);
+ZenitSymbol* zenit_symbol_new(const char *name, char *mangled_name, ZenitType *type);
 
 /*
  * Function: zenit_symbol_free

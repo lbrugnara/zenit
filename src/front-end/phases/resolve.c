@@ -490,7 +490,7 @@ static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitFieldDeclNode 
     }
 
     // Create and insert the symbol in the table
-    return zenit_program_add_symbol(ctx->program, zenit_symbol_new(field_node->name, type));
+    return zenit_program_add_symbol(ctx->program, zenit_symbol_new(field_node->name, zenit_utils_mangle_name(field_node->name, &field_node->base.location), type));
 }
 
 /*
@@ -630,7 +630,7 @@ static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *va
         type = zenit_type_ctx_new_none(ctx->types);
     }
 
-    ZenitSymbol *symbol = zenit_symbol_new(variable_node->name, type);
+    ZenitSymbol *symbol = zenit_symbol_new(variable_node->name, zenit_utils_mangle_name(variable_node->name, &variable_node->base.location), type);
 
     // Create and insert the symbol in the table
     return zenit_program_add_symbol(ctx->program, symbol);

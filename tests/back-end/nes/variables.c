@@ -551,3 +551,43 @@ void zenit_test_nes_global_vars_code(void)
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }
+
+void zenit_test_nes_global_var_name_clash(void)
+{
+    const char *zenit_source = 
+        "{ var a = 2; var x = a; }"                             "\n"
+        "{ var a = 3; var y = a; }"                             "\n"
+        "{ #[NES(address: 0x00)] var a = 4; var z = a; }"         "\n"
+    ;
+
+    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
+
+    fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
+    fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
+    fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
+    fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
+    
+    ZirProgram *zir_program = zenit_generate_zir(&ctx);
+
+    ZnesProgram *nes_program = znes_generate_program(zir_program);
+
+    fl_expect("Data segment at 0x00 should be 0x02 (a)",                nes_program->data.bytes[0x00] == 0x02);
+    fl_expect("Data segment at 0x01 should be 0x02 (x)",                nes_program->data.bytes[0x01] == 0x02);
+    fl_expect("Data segment at 0x02 should be 0x03 (a_$l2c3)",          nes_program->data.bytes[0x02] == 0x03);
+    fl_expect("Data segment at 0x03 should be 0x03 (y)",                nes_program->data.bytes[0x03] == 0x03);
+    // a = 4;
+    fl_expect("Startup routine at 0x00 should be 0xA9 (LDA)",           nes_program->startup.bytes[0x00] == 0xA9);
+    fl_expect("Startup routine at 0x01 should be 0x01 (#$04)",          nes_program->startup.bytes[0x01] == 0x04);
+    fl_expect("Startup routine at 0x02 should be 0x85 (STA)",           nes_program->startup.bytes[0x02] == 0x85);
+    fl_expect("Startup routine at 0x03 should be 0x00 ($00)",           nes_program->startup.bytes[0x03] == 0x00);
+    // z = a;
+    fl_expect("Startup routine at 0x04 should be 0xA5 (LDA)",           nes_program->startup.bytes[0x04] == 0xA5);
+    fl_expect("Startup routine at 0x05 should be 0x00 ($00)",           nes_program->startup.bytes[0x05] == 0x00);
+    fl_expect("Startup routine at 0x06 should be 0x8D (STA)",           nes_program->startup.bytes[0x06] == 0x8D);
+    fl_expect("Startup routine at 0x07 should be 0x04 ($8004 lo)",      nes_program->startup.bytes[0x07] == 0x04);
+    fl_expect("Startup routine at 0x08 should be 0x80 ($8004 hi)",      nes_program->startup.bytes[0x08] == 0x80);
+
+    znes_program_free(nes_program);
+    zir_program_free(zir_program);
+    zenit_context_free(&ctx);
+}

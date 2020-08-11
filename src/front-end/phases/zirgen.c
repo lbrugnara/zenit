@@ -79,6 +79,28 @@ static ZirSymbol* new_temp_symbol(ZirProgram *program, ZirType *type)
     return zir_symbol;
 }
 
+static ZirSymbol* import_zir_symbol_from_zenit_symbol(ZirProgram *program, ZenitSymbol *zenit_symbol, ZenitSourceLocation *loc)
+{
+    ZirSymbol *zir_symbol = NULL;
+    if (zir_block_has_symbol(program->current, zenit_symbol->name))
+    {
+        // Because ZIR does not have use block for Zenit nested blocks (ZENIT_SCOPE_BLOCK), there can be 
+        // clash of names, in that case we resolve it using the line and column number of the Zenit symbol
+        zir_symbol = zir_symbol_new(zenit_symbol->mangled_name, new_zir_type_from_zenit_type(program, zenit_symbol->type));
+    }
+    else
+    {
+        zir_symbol = zir_symbol_new(zenit_symbol->name, new_zir_type_from_zenit_type(program, zenit_symbol->type));
+    }
+
+    if (zir_symbol == NULL)
+        return NULL;
+
+    zir_symbol = zir_program_add_symbol(program, zir_symbol);
+
+    return zir_symbol;
+}
+
 /*
  * Function: new_zir_type_from_zenit_type
  *  Converts a Zenit type object to its counterpart's ZIR type 
@@ -237,21 +259,19 @@ static ZirOperand* visit_cast_node(ZenitContext *ctx, ZirProgram *program, Zenit
     if (zenit_cast->implicit)
         return visit_node(ctx, program, zenit_cast->expression);
 
-    ZirOperand *source = visit_node(ctx, program, zenit_cast->expression);
-
     ZenitSymbol *zenit_cast_symbol = zenit_utils_get_tmp_symbol(ctx->program, (ZenitNode*) zenit_cast);
     
     // We use a temporal symbol for the cast's destination. We copy the type informaton from the Zenit cast's object type information
     ZirSymbol *temp_symbol = new_temp_symbol(program, new_zir_type_from_zenit_type(program, zenit_cast_symbol->type));
 
-    // Now, we need to get the source operand of the cast, and for that we need to visit the casted expression
+    // The destination operand is the temporal symbol created above
     ZirOperand *destination = (ZirOperand*) zir_operand_pool_new_symbol(program->operands, temp_symbol);
 
-    // We create the cast instruction with the temporal symbol as the destination operand
-    ZirCastInstr *cast_instr = zir_cast_instr_new(destination, source);
+    // Now, we need to get the source operand of the cast, and for that we need to visit the casted expression
+    ZirOperand *source = visit_node(ctx, program, zenit_cast->expression);
 
-    // We add the instruction to the program, and we return the destination operand
-    return zir_program_emit(program, (ZirInstr*) cast_instr)->destination;
+    // We create the cast instruction and we add it to the program. Finally, we return the destination operand.
+    return zir_program_emit(program, (ZirInstr*) zir_cast_instr_new(destination, source))->destination;
 }
 
 /*
@@ -352,7 +372,7 @@ static ZirOperand* visit_reference_node(ZenitContext *ctx, ZirProgram *program, 
 
 /*
  * Function: visit_identifier_node
- *  Returns a symbol operand for the identifier
+ *  Returns a symbol operand for the identifier. The symbol must exist
  *
  * Parameters:
  *  <ZenitContext> *ctx: Context object
@@ -368,7 +388,15 @@ static ZirOperand* visit_identifier_node(ZenitContext *ctx, ZirProgram *program,
     ZenitSymbol *zenit_symbol = zenit_program_get_symbol(ctx->program, zenit_id->name);
 
     // We retrieve the symbol from the symbol table
-    ZirSymbol *zir_symbol = zir_symtable_get(&program->current->symtable, zenit_id->name);
+    ZirSymbol *zir_symbol = NULL;
+    if (zir_symtable_has(&program->current->symtable, zenit_symbol->mangled_name))
+    {
+        zir_symbol = zir_symtable_get(&program->current->symtable, zenit_symbol->mangled_name);
+    }
+    else
+    {
+        zir_symbol = zir_symtable_get(&program->current->symtable, zenit_symbol->name);
+    }
 
     assert_or_return(ctx, zir_symbol != NULL, zenit_id->base.location, "ZIR symbol does not exist");
 
@@ -406,6 +434,18 @@ static ZirOperand* visit_array_node(ZenitContext *ctx, ZirProgram *program, Zeni
     return (ZirOperand*) zir_array;
 }
 
+/*
+ * Function: visit_struct_node
+ *  This function creates an struct operand.
+ *
+ * Parameters:
+ *  <ZenitContext> *ctx: Context object
+ *  <ZirProgram> *program: ZIR program
+ *  <ZenitFieldDeclNode> *zenit_struct: The struct literal node
+ *
+ * Returns:
+ *  ZirOperand*: The struct operand
+ */
 static ZirOperand* visit_struct_node(ZenitContext *ctx, ZirProgram *program, ZenitStructNode *zenit_struct)
 {
     ZenitSymbol *zenit_struct_symbol = zenit_utils_get_tmp_symbol(ctx->program, (ZenitNode*) zenit_struct);
@@ -447,9 +487,7 @@ static ZirOperand* visit_field_decl_node(ZenitContext *ctx, ZirProgram *program,
     ZenitSymbol *zenit_symbol = zenit_program_get_symbol(ctx->program, zenit_field->name);
 
     // We add a new symbol in the current block.   
-    ZirSymbol *zir_symbol = zir_symbol_new(zenit_field->name, new_zir_type_from_zenit_type(program, zenit_symbol->type));    
-    zir_symbol = zir_program_add_symbol(program, zir_symbol);
-
+    ZirSymbol *zir_symbol = import_zir_symbol_from_zenit_symbol(program, zenit_symbol, &zenit_field->base.location);
     assert_or_return(ctx, zir_symbol != NULL, zenit_field->base.location, "Could not create ZIR symbol");
 
     return NULL;
@@ -457,8 +495,8 @@ static ZirOperand* visit_field_decl_node(ZenitContext *ctx, ZirProgram *program,
 
 /*
  * Function: visit_struct_decl_node
- *  This function simply checks if the <convert_zenit_scope_to_zir_block> function has added the ZIR block that identifies
- *  the struct declaration
+ *  This function checks if the <convert_zenit_scope_to_zir_block> function has added the ZIR block that identifies
+ *  the struct declaration, and after that it visits all the members to populate the block with their information
  *
  * Parameters:
  *  <ZenitContext> *ctx: Context object
@@ -506,24 +544,24 @@ static ZirOperand* visit_struct_decl_node(ZenitContext *ctx, ZirProgram *program
 static ZirOperand* visit_variable_node(ZenitContext *ctx, ZirProgram *program, ZenitVariableNode *zenit_variable)
 {
     ZenitSymbol *zenit_symbol = zenit_program_get_symbol(ctx->program, zenit_variable->name);
-    
-    ZirSymbol *zir_symbol = zir_symbol_new(zenit_variable->name, new_zir_type_from_zenit_type(program, zenit_symbol->type));
-    
-    zir_symbol = zir_program_add_symbol(program, zir_symbol);
 
+    ZirSymbol *zir_symbol = import_zir_symbol_from_zenit_symbol(program, zenit_symbol, &zenit_variable->base.location);
     assert_or_return(ctx, zir_symbol != NULL, zenit_variable->base.location, "Could not create ZIR symbol");
 
-    // The destination operand is a symbol operand
+    // The destination operand is a symbol operand (the created ZIR symbol)
     ZirOperand *lhs = (ZirOperand*) zir_operand_pool_new_symbol(program->operands, zir_symbol);
+
     // The source operand is the one we get from the visit to the <ZenitVariableNode>'s value
     ZirOperand *rhs = visit_node(ctx, program, zenit_variable->rvalue);
 
     // Create the variable declaration instruction with the source and destination operands
-    ZirVariableInstr *zir_varinst = zir_variable_instr_new(lhs, rhs);
-    zir_varinst->attributes = zenit_attr_map_to_zir_attr_map(ctx, program, zenit_variable->attributes);
+    ZirVariableInstr *var_instr = zir_variable_instr_new(lhs, rhs);
 
-    // We add the variable definition instruction to the program and finally return the destination operand
-    return zir_program_emit(program, (ZirInstr*) zir_varinst)->destination;
+    // Convert the Zenit attributes to ZIR attributes
+    var_instr->attributes = zenit_attr_map_to_zir_attr_map(ctx, program, zenit_variable->attributes);
+
+    // Add the variable instruction to the program and finally return the destination operand
+    return zir_program_emit(program, (ZirInstr*) var_instr)->destination;
 }
 
 static ZirOperand* visit_if_node(ZenitContext *ctx, ZirProgram *program, ZenitIfNode *if_node)

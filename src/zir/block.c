@@ -70,3 +70,9 @@ size_t zir_block_get_ip(ZirBlock *block)
 {
     return fl_array_length(block->instructions);
 }
+
+bool zir_block_has_symbol(ZirBlock *block, const char *name)
+{
+    // NOTE: Should we search in the parent here?
+    return zir_symtable_has(&block->symtable, name);
+}

@@ -119,6 +119,11 @@ static ZenitType* get_type_from_type_declaration(ZenitContext *ctx, ZenitTypeNod
     return type;
 }
 
+static inline char* zenit_utils_mangle_name(char *name, ZenitSourceLocation *location)
+{
+    return fl_cstring_vdup("%s_$l%uc%u", name, location->line, location->col);
+}
+
 static inline ZenitSymbol* zenit_utils_new_tmp_symbol(ZenitProgram *program, ZenitNode *node, ZenitType *type)
 {
     char *name = zenit_node_uid(node);
@@ -128,7 +133,7 @@ static inline ZenitSymbol* zenit_utils_new_tmp_symbol(ZenitProgram *program, Zen
         return NULL;
     }
 
-    ZenitSymbol *symbol = zenit_symbol_new(name, type);
+    ZenitSymbol *symbol = zenit_symbol_new(name, zenit_utils_mangle_name(name, &node->location), type);
     
     ZenitSymbol *result = zenit_program_add_symbol(program, symbol);
 
