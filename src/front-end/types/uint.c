@@ -12,7 +12,7 @@ static struct TypeMapping {
     { "uint16",     ZENIT_UINT_16   },
 };
 
-ZenitUintType* zenit_type_uint_new(ZenitUintTypeSize size)
+ZenitUintType* zenit_uint_type_new(ZenitUintTypeSize size)
 {
     ZenitUintType *type = fl_malloc(sizeof(ZenitUintType));
     type->base.typekind = ZENIT_TYPE_UINT;
@@ -21,7 +21,7 @@ ZenitUintType* zenit_type_uint_new(ZenitUintTypeSize size)
     return type;
 }
 
-ZenitUintTypeSize zenit_type_uint_size_from_slice(struct FlSlice *slice)
+ZenitUintTypeSize zenit_uint_type_size_from_slice(struct FlSlice *slice)
 {
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
     {
@@ -33,12 +33,12 @@ ZenitUintTypeSize zenit_type_uint_size_from_slice(struct FlSlice *slice)
     return ZENIT_UINT_UNK;
 }
 
-unsigned long zenit_type_uint_hash(ZenitUintType *type)
+unsigned long zenit_uint_type_hash(ZenitUintType *type)
 {
     static const char *format = "[uint][s:%s]";
 
     char type_key[256] = { 0 };
-    snprintf(type_key, 256, format, zenit_type_uint_to_string(type));
+    snprintf(type_key, 256, format, zenit_uint_type_to_string(type));
 
     unsigned long hash = 5381;
     FlByte c;
@@ -49,7 +49,7 @@ unsigned long zenit_type_uint_hash(ZenitUintType *type)
     return hash;
 }
 
-char* zenit_type_uint_to_string(ZenitUintType *type)
+char* zenit_uint_type_to_string(ZenitUintType *type)
 {
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
     {
@@ -61,7 +61,7 @@ char* zenit_type_uint_to_string(ZenitUintType *type)
     return NULL;
 }
 
-bool zenit_type_uint_equals(ZenitUintType *type_a, ZenitType *type_b)
+bool zenit_uint_type_equals(ZenitUintType *type_a, ZenitType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
         return (ZenitType*) type_a == type_b;
@@ -72,7 +72,7 @@ bool zenit_type_uint_equals(ZenitUintType *type_a, ZenitType *type_b)
     return type_a->size == ((ZenitUintType*) type_b)->size;
 }
 
-bool zenit_type_uint_is_assignable_from(ZenitUintType *target_type, ZenitType *from_type)
+bool zenit_uint_type_is_assignable_from(ZenitUintType *target_type, ZenitType *from_type)
 {
     if (target_type == NULL || from_type == NULL)
         return false;
@@ -86,7 +86,7 @@ bool zenit_type_uint_is_assignable_from(ZenitUintType *target_type, ZenitType *f
     return from_uint_type->size <= target_type->size;
 }
 
-bool zenit_type_uint_is_castable_to(ZenitUintType *uint_type, ZenitType *target_type)
+bool zenit_uint_type_is_castable_to(ZenitUintType *uint_type, ZenitType *target_type)
 {
     if (target_type == NULL || target_type == NULL)
         return false;
@@ -95,7 +95,7 @@ bool zenit_type_uint_is_castable_to(ZenitUintType *uint_type, ZenitType *target_
     return target_type->typekind == ZENIT_TYPE_UINT;
 }
 
-bool zenit_type_uint_can_unify(ZenitUintType *uint_type, ZenitType *type_b)
+bool zenit_uint_type_can_unify(ZenitUintType *uint_type, ZenitType *type_b)
 {
     if (uint_type == NULL || type_b == NULL)
         return false;
@@ -109,7 +109,7 @@ bool zenit_type_uint_can_unify(ZenitUintType *uint_type, ZenitType *type_b)
     return true;
 }
 
-void zenit_type_uint_free(ZenitUintType *type)
+void zenit_uint_type_free(ZenitUintType *type)
 {
     if (!type)
         return;

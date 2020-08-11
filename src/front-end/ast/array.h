@@ -17,7 +17,7 @@ typedef struct ZenitArrayNode {
 } ZenitArrayNode;
 
 /*
- * Function: zenit_node_array_new
+ * Function: zenit_array_node_new
  *  Creates a new AST node that represents an array literal
  *
  * Parameters:
@@ -28,12 +28,12 @@ typedef struct ZenitArrayNode {
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zenit_node_array_free> function
+ *  <zenit_array_node_free> function
  */
-ZenitArrayNode* zenit_node_array_new(ZenitSourceLocation location);
+ZenitArrayNode* zenit_array_node_new(ZenitSourceLocation location);
 
 /*
- * Function: zenit_node_array_uid
+ * Function: zenit_array_node_uid
  *  Returns a UID for the array node
  *
  * Parameters:
@@ -46,10 +46,10 @@ ZenitArrayNode* zenit_node_array_new(ZenitSourceLocation location);
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_array_uid(ZenitArrayNode *array);
+char* zenit_array_node_uid(ZenitArrayNode *array);
 
 /*
- * Function: zenit_node_array_add_child
+ * Function: zenit_array_node_add_child
  *  Adds an AST node to the set of children of the array node
  *
  * Parameters:
@@ -63,10 +63,10 @@ char* zenit_node_array_uid(ZenitArrayNode *array);
  *  The array node takes ownership of the element node, which means that the caller does not need to
  *  free the memory of the *element* object.
  */
-void zenit_node_array_add_child(ZenitArrayNode *array, ZenitNode *element);
+void zenit_array_node_add_child(ZenitArrayNode *array, ZenitNode *element);
 
 /*
- * Function: zenit_node_array_dump
+ * Function: zenit_array_node_dump
  *  Appends a dump of the array node to the output pointer, and
  *  returns a pointer to the -possibly reallocated- output
  *
@@ -82,13 +82,13 @@ void zenit_node_array_add_child(ZenitArrayNode *array, ZenitNode *element);
  *  a pointer to the new location in case the memory is reallocated or
  *  to the old location in case the pointer does not need to be modified. Either
  *  way, it is safe to use the function as:
- *      output = zenit_node_array_dump(array, output);
+ *      output = zenit_array_node_dump(array, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_array_dump(ZenitArrayNode *array, char *output);
+char* zenit_array_node_dump(ZenitArrayNode *array, char *output);
 
 /*
- * Function: zenit_node_array_free
+ * Function: zenit_array_node_free
  *  Frees the memory used by the array node and its children
  *
  * Parameters:
@@ -97,6 +97,6 @@ char* zenit_node_array_dump(ZenitArrayNode *array, char *output);
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_node_array_free(ZenitArrayNode *array);
+void zenit_array_node_free(ZenitArrayNode *array);
 
 #endif /* ZENIT_AST_ARRAY_H */

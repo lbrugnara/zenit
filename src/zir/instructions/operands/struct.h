@@ -26,7 +26,7 @@ typedef struct ZirStructOperand {
 } ZirStructOperand;
 
 /*
- * Function: zir_operand_struct_new
+ * Function: zir_struct_operand_new
  *  Creates a new struct operand object with an empty set of members. The *type* object represents
  *  the type of the struct operand
  *
@@ -37,14 +37,14 @@ typedef struct ZirStructOperand {
  *  ZirStructOperand*: The new struct operand object
  *
  * Notes:
- *  The object returned by this function must be freed using the <zir_operand_struct_free> function.
+ *  The object returned by this function must be freed using the <zir_struct_operand_free> function.
  *  The struct operand takes ownership of the <ZirStructType> object, which means it will release
- *  the type object memory too when <zir_operand_struct_free> is called with the struct operand as argument.
+ *  the type object memory too when <zir_struct_operand_free> is called with the struct operand as argument.
  */
-ZirStructOperand* zir_operand_struct_new(ZirStructType *type);
+ZirStructOperand* zir_struct_operand_new(ZirStructType *type);
 
 /*
- * Function: zir_operand_struct_add_member
+ * Function: zir_struct_operand_add_member
  *  Adds the *member_operand* object to the list of members of the struct operand
  *
  * Parameters:
@@ -55,10 +55,10 @@ ZirStructOperand* zir_operand_struct_new(ZirStructType *type);
  * Returns:
  *  void: This function does not return a value
  */
-void zir_operand_struct_add_member(ZirStructOperand *struct_operand, const char *name, ZirOperand *operand);
+void zir_struct_operand_add_member(ZirStructOperand *struct_operand, const char *name, ZirOperand *operand);
 
 /*
- * Function: zir_operand_struct_free
+ * Function: zir_struct_operand_free
  *  Frees the memory of the struct operand
  *
  * Parameters:
@@ -67,16 +67,16 @@ void zir_operand_struct_add_member(ZirStructOperand *struct_operand, const char 
  * Returns:
  *  void: This function does not return a value
  */
-void zir_operand_struct_free(ZirStructOperand *struct_operand);
+void zir_struct_operand_free(ZirStructOperand *struct_operand);
 
 /*
- * Function: zir_operand_struct_dump
+ * Function: zir_struct_operand_dump
  *  Dumps the string representation of the struct operand to the *output* pointer. Because
  *  the *output* pointer can be modified this function returns the same pointer, so
  *  it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_operand_struct_dump(struct_operand, output);
+ *  output = zir_struct_operand_dump(struct_operand, output);
  * ===========
  *
  * Parameters:
@@ -89,16 +89,16 @@ void zir_operand_struct_free(ZirStructOperand *struct_operand);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_struct_dump(ZirStructOperand *struct_operand, char *output);
+char* zir_struct_operand_dump(ZirStructOperand *struct_operand, char *output);
 
 /*
- * Function: zir_operand_struct_type_dump
+ * Function: zir_struct_operand_type_dump
  *  Dumps the string representation of the type of the struct operand to the *output* 
  *  pointer. Because the *output* pointer can be modified this function returns 
  *  the same pointer, so it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_operand_struct_type_dump(struct_operand, output);
+ *  output = zir_struct_operand_type_dump(struct_operand, output);
  * ===========
  *
  * Parameters:
@@ -111,6 +111,6 @@ char* zir_operand_struct_dump(ZirStructOperand *struct_operand, char *output);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_struct_type_dump(ZirStructOperand *struct_operand, char *output);
+char* zir_struct_operand_type_dump(ZirStructOperand *struct_operand, char *output);
 
 #endif /* ZIR_OPERAND_STRUCT_H */

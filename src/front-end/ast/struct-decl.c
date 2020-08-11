@@ -3,7 +3,7 @@
 #include <fllib/Cstring.h>
 #include "struct-decl.h"
 
-ZenitStructDeclNode* zenit_node_struct_decl_new(ZenitSourceLocation location, char *name)
+ZenitStructDeclNode* zenit_struct_decl_node_new(ZenitSourceLocation location, char *name)
 {
     ZenitStructDeclNode *struct_node = fl_malloc(sizeof(ZenitStructDeclNode));
     struct_node->base.nodekind = ZENIT_NODE_STRUCT_DECL;
@@ -14,7 +14,7 @@ ZenitStructDeclNode* zenit_node_struct_decl_new(ZenitSourceLocation location, ch
     return struct_node;
 }
 
-char* zenit_node_struct_decl_uid(ZenitStructDeclNode *struct_node)
+char* zenit_struct_decl_node_uid(ZenitStructDeclNode *struct_node)
 {
     if (!struct_node)
         return NULL;
@@ -22,7 +22,7 @@ char* zenit_node_struct_decl_uid(ZenitStructDeclNode *struct_node)
     return fl_cstring_vdup("%%L%u:C%u_struct_decl_%s", struct_node->base.location.line, struct_node->base.location.col, struct_node->name);
 }
 
-char* zenit_node_struct_decl_dump(ZenitStructDeclNode *struct_node, char *output)
+char* zenit_struct_decl_node_dump(ZenitStructDeclNode *struct_node, char *output)
 {
     fl_cstring_vappend(&output, "(struct-decl %s ", struct_node->name);
 
@@ -43,7 +43,7 @@ char* zenit_node_struct_decl_dump(ZenitStructDeclNode *struct_node, char *output
 
         for (size_t i=0; i < length; i++)
         {
-            output = zenit_node_attribute_dump(attrs[i], output);
+            output = zenit_attribute_node_dump(attrs[i], output);
             if (i != length - 1)
                 fl_cstring_append(&output, " ");
         }
@@ -57,7 +57,7 @@ char* zenit_node_struct_decl_dump(ZenitStructDeclNode *struct_node, char *output
 }
 
 /*
- * Function: zenit_node_struct_decl_free
+ * Function: zenit_struct_decl_node_free
  *  Frees the memory of a <ZenitStructDeclNode> object
  *
  * Parameters:
@@ -66,7 +66,7 @@ char* zenit_node_struct_decl_dump(ZenitStructDeclNode *struct_node, char *output
  * Returns:
  *  void - This function does not return a value
  */
-void zenit_node_struct_decl_free(ZenitStructDeclNode *struct_node)
+void zenit_struct_decl_node_free(ZenitStructDeclNode *struct_node)
 {
     if (!struct_node)
         return;

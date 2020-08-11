@@ -338,7 +338,7 @@ static ZenitSymbol* visit_array_node(ZenitContext *ctx, ZenitArrayNode *array_no
         {   
             // NOTE: the ZenitVariableNode structure changes, but we don't need to worry about its UID changing because of that
             // as the variables are always accessed by its name, and not by the UID
-            ZenitCastNode *cast_node = zenit_node_cast_new(array_node->elements[i]->location, array_node->elements[i], true);
+            ZenitCastNode *cast_node = zenit_cast_node_new(array_node->elements[i]->location, array_node->elements[i], true);
             array_node->elements[i] = (ZenitNode*) cast_node;
 
             zenit_utils_new_tmp_symbol(ctx->program, (ZenitNode*) cast_node, zenit_type_ctx_copy_type(ctx->types, array_type->member_type));
@@ -486,7 +486,7 @@ static ZenitSymbol* visit_unnamed_struct_node(ZenitContext *ctx, ZenitStructNode
         if (struct_node->members[i]->nodekind == ZENIT_NODE_FIELD)
         {
             ZenitFieldNode *field_node = (ZenitFieldNode*) struct_node->members[i];
-            ZenitStructTypeMember *field_member = zenit_type_struct_get_member((ZenitStructType*) struct_symbol->type, field_node->name);
+            ZenitStructTypeMember *field_member = zenit_struct_type_get_member((ZenitStructType*) struct_symbol->type, field_node->name);
 
             if (struct_name != NULL)
             {
@@ -625,7 +625,7 @@ static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *va
     {   
         // NOTE: the ZenitVariableNode structure changes, but we don't need to worry about its UID changing because
         // the variables are always accessed by its name, and not by the UID
-        ZenitCastNode *cast_node = zenit_node_cast_new(variable_node->rvalue->location, variable_node->rvalue, true);
+        ZenitCastNode *cast_node = zenit_cast_node_new(variable_node->rvalue->location, variable_node->rvalue, true);
         variable_node->rvalue = (ZenitNode*) cast_node;
 
         zenit_utils_new_tmp_symbol(ctx->program, (ZenitNode*) cast_node, zenit_type_ctx_copy_type(ctx->types, symbol->type));
@@ -638,7 +638,7 @@ static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *va
 static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node, ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
     // Enter to the if's scope
-    char *if_uid = zenit_node_if_uid(if_node);
+    char *if_uid = zenit_if_node_uid(if_node);
     zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_uid);
 
     // We create a temporary bool type for the condition (no worries about freeing its memory,
@@ -654,7 +654,7 @@ static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node, Zenit
     {   
         // NOTE: the ZenitVariableNode structure changes, but we don't need to worry about its UID changing because
         // the variables are always accessed by its name, and not by the UID
-        ZenitCastNode *cast_node = zenit_node_cast_new(if_node->condition->location, if_node->condition, true);
+        ZenitCastNode *cast_node = zenit_cast_node_new(if_node->condition->location, if_node->condition, true);
         if_node->condition = (ZenitNode*) cast_node;
 
         zenit_utils_new_tmp_symbol(ctx->program, (ZenitNode*) cast_node, bool_type);
@@ -677,7 +677,7 @@ static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node, Zenit
 
 static ZenitSymbol* visit_block_node(ZenitContext *ctx, ZenitBlockNode *block_node, ZenitType **ctx_type, enum InferenceKind infer_kind)
 {
-    char *block_uid = zenit_node_block_uid(block_node);
+    char *block_uid = zenit_block_node_uid(block_node);
 
     zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_uid);
 

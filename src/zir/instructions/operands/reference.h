@@ -21,7 +21,7 @@ typedef struct ZirReferenceOperand {
 } ZirReferenceOperand;
 
 /*
- * Function: zir_operand_reference_new
+ * Function: zir_reference_operand_new
  *  Creates a new reference operand object that references the symbol pointed by the symbol operand. The
  *  *type* object is the reference's type
  *
@@ -33,14 +33,14 @@ typedef struct ZirReferenceOperand {
  *  ZirReferenceOperand*: The new reference operand object
  *
  * Notes:
- *  The object returned by this function must be freed using the <zir_operand_reference_free> function.
+ *  The object returned by this function must be freed using the <zir_reference_operand_free> function.
  *  The reference operand takes ownership of the <ZirReferenceType> object, which means it will release
- *  the type object memory too when <zir_operand_reference_free> is called with the reference operand as argument.
+ *  the type object memory too when <zir_reference_operand_free> is called with the reference operand as argument.
  */
-ZirReferenceOperand* zir_operand_reference_new(ZirReferenceType *type, ZirSymbolOperand *operand);
+ZirReferenceOperand* zir_reference_operand_new(ZirReferenceType *type, ZirSymbolOperand *operand);
 
 /*
- * Function: zir_operand_reference_free
+ * Function: zir_reference_operand_free
  *  Frees the memory of the reference operand
  *
  * Parameters:
@@ -49,16 +49,16 @@ ZirReferenceOperand* zir_operand_reference_new(ZirReferenceType *type, ZirSymbol
  * Returns:
  *  void: This function does not return a value
  */
-void zir_operand_reference_free(ZirReferenceOperand *reference_operand);
+void zir_reference_operand_free(ZirReferenceOperand *reference_operand);
 
 /*
- * Function: zir_operand_reference_dump
+ * Function: zir_reference_operand_dump
  *  Dumps the string representation of the reference operand to the *output* pointer. Because
  *  the *output* pointer can be modified this function returns the same pointer, so
  *  it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_operand_reference_dump(reference_operand, output);
+ *  output = zir_reference_operand_dump(reference_operand, output);
  * ===========
  *
  * Parameters:
@@ -71,16 +71,16 @@ void zir_operand_reference_free(ZirReferenceOperand *reference_operand);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_reference_dump(ZirReferenceOperand *reference_operand, char *output);
+char* zir_reference_operand_dump(ZirReferenceOperand *reference_operand, char *output);
 
 /*
- * Function: zir_operand_reference_type_dump
+ * Function: zir_reference_operand_type_dump
  *  Dumps the string representation of the type of the reference operand to the *output* 
  *  pointer. Because the *output* pointer can be modified this function returns 
  *  the same pointer, so it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_operand_reference_type_dump(reference_operand, output);
+ *  output = zir_reference_operand_type_dump(reference_operand, output);
  * ===========
  *
  * Parameters:
@@ -93,6 +93,6 @@ char* zir_operand_reference_dump(ZirReferenceOperand *reference_operand, char *o
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_reference_type_dump(ZirReferenceOperand *reference_operand, char *output);
+char* zir_reference_operand_type_dump(ZirReferenceOperand *reference_operand, char *output);
 
 #endif /* ZIR_OPERAND_REFERENCE_H */

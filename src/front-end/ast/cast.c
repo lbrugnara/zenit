@@ -2,7 +2,7 @@
 #include <fllib/Cstring.h>
 #include "cast.h"
 
-ZenitCastNode* zenit_node_cast_new(ZenitSourceLocation location, ZenitNode *expression, bool implicit)
+ZenitCastNode* zenit_cast_node_new(ZenitSourceLocation location, ZenitNode *expression, bool implicit)
 {
     ZenitCastNode *cast_node = fl_malloc(sizeof(ZenitCastNode));
     cast_node->base.nodekind = ZENIT_NODE_CAST;
@@ -13,7 +13,7 @@ ZenitCastNode* zenit_node_cast_new(ZenitSourceLocation location, ZenitNode *expr
     return cast_node;
 }
 
-char* zenit_node_cast_uid(ZenitCastNode *cast)
+char* zenit_cast_node_uid(ZenitCastNode *cast)
 {
     if (!cast)
         return NULL;
@@ -23,7 +23,7 @@ char* zenit_node_cast_uid(ZenitCastNode *cast)
     return fl_cstring_vdup("%%L%u:C%u_cast", cast->base.location.line, cast->base.location.col);
 }
 
-char* zenit_node_cast_dump(ZenitCastNode *cast, char *output)
+char* zenit_cast_node_dump(ZenitCastNode *cast, char *output)
 {
     fl_cstring_append(&output, "(cast ");
 
@@ -37,7 +37,7 @@ char* zenit_node_cast_dump(ZenitCastNode *cast, char *output)
     return output;
 }
 
-void zenit_node_cast_free(ZenitCastNode *cast_node)
+void zenit_cast_node_free(ZenitCastNode *cast_node)
 {
     if (!cast_node)
         return;

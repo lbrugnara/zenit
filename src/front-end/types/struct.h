@@ -35,7 +35,7 @@ typedef struct ZenitStructType {
 } ZenitStructType;
 
 /*
- * Function: zenit_type_struct_new
+ * Function: zenit_struct_type_new
  *  Returns a new instance of a struct type
  *
  * Parameters:
@@ -46,12 +46,12 @@ typedef struct ZenitStructType {
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zenit_type_struct_free> function
+ *  <zenit_struct_type_free> function
  */
-ZenitStructType* zenit_type_struct_new(char *name);
+ZenitStructType* zenit_struct_type_new(char *name);
 
 /*
- * Function: zenit_type_struct_add_member
+ * Function: zenit_struct_type_add_member
  * 
  *  Adds a member to the list of members of the struct type
  *
@@ -63,10 +63,10 @@ ZenitStructType* zenit_type_struct_new(char *name);
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_type_struct_add_member(ZenitStructType *struct_type, const char *name, ZenitType *member_type);
+void zenit_struct_type_add_member(ZenitStructType *struct_type, const char *name, ZenitType *member_type);
 
 /*
- * Function: zenit_type_struct_get_member
+ * Function: zenit_struct_type_get_member
  *  Returns -if it exists- the struct type member matching its name with the provided *name*.
  *
  * Parameters:
@@ -76,10 +76,10 @@ void zenit_type_struct_add_member(ZenitStructType *struct_type, const char *name
  * Returns:
  *  ZenitStructTypeMember*: The struct type member or NULL if it doesn't exist
  */
-ZenitStructTypeMember* zenit_type_struct_get_member(ZenitStructType *struct_type, const char *name);
+ZenitStructTypeMember* zenit_struct_type_get_member(ZenitStructType *struct_type, const char *name);
 
 /*
- * Function: zenit_type_struct_hash
+ * Function: zenit_struct_type_hash
  *  Returns a hash that identifies the struct type object
  *
  * Parameters:
@@ -88,10 +88,10 @@ ZenitStructTypeMember* zenit_type_struct_get_member(ZenitStructType *struct_type
  * Returns:
  *  unsigned long: Hash code of the type object
  */
-unsigned long zenit_type_struct_hash(ZenitStructType *type);
+unsigned long zenit_struct_type_hash(ZenitStructType *type);
 
 /*
- * Function: zenit_type_struct_to_string
+ * Function: zenit_struct_type_to_string
  *  Returns a string representation of the struct type object
  *
  * Parameters:
@@ -102,13 +102,13 @@ unsigned long zenit_type_struct_hash(ZenitStructType *type);
  *
  * Notes:
  *  The string returned by this function MUST NOT be freed by the caller, the type object
- *  has ownership of it, and it frees the string memory when the function <zenit_type_struct_free>
+ *  has ownership of it, and it frees the string memory when the function <zenit_struct_type_free>
  *  is used to free the memory used by the type object.
  */
-char* zenit_type_struct_to_string(ZenitStructType *type);
+char* zenit_struct_type_to_string(ZenitStructType *type);
 
 /*
- * Function: zenit_type_struct_equals
+ * Function: zenit_struct_type_equals
  *  Check if the struct type *type_a* is equals to the *type_b* object
  *
  * Parameters:
@@ -118,10 +118,10 @@ char* zenit_type_struct_to_string(ZenitStructType *type);
  * Returns:
  *  bool: *true* if *type_b* is a struct type equals to *type_a*, otherwise it returns *false*
  */
-bool zenit_type_struct_equals(ZenitStructType *type_a, ZenitType *type_b);
+bool zenit_struct_type_equals(ZenitStructType *type_a, ZenitType *type_b);
 
 /*
- * Function: zenit_type_struct_structurally_equals
+ * Function: zenit_struct_type_structurally_equals
  *  Check if the struct type *type_a* is structurally equals to the struct type *type_b*
  *
  * Parameters:
@@ -131,10 +131,10 @@ bool zenit_type_struct_equals(ZenitStructType *type_a, ZenitType *type_b);
  * Returns:
  *  bool: *true* if structs typs *type_a* and *type_b* are structurally equals
  */
-bool zenit_type_struct_structurally_equals(ZenitStructType *type_a, ZenitStructType *type_b);
+bool zenit_struct_type_structurally_equals(ZenitStructType *type_a, ZenitStructType *type_b);
 
 /*
- * Function: zenit_type_struct_is_assignable_from
+ * Function: zenit_struct_type_is_assignable_from
  *  Checks if an object with type equals to *value_type* can be assigned to an object with a struct type
  *  equals to *target_type*
  *
@@ -146,10 +146,10 @@ bool zenit_type_struct_structurally_equals(ZenitStructType *type_a, ZenitStructT
  *  bool: *true* if an object of type *value_type* can be assigned to an object with type *target_type*,
  *        otherwise this function returns *false*.
  */
-bool zenit_type_struct_is_assignable_from(ZenitStructType *target_type, ZenitType *value_type);
+bool zenit_struct_type_is_assignable_from(ZenitStructType *target_type, ZenitType *value_type);
 
 /*
- * Function: zenit_type_struct_is_castable_to
+ * Function: zenit_struct_type_is_castable_to
  *  Checks if an object with a struct type equals to *struct_type* can be casted to an object of type equals
  *  to *target_type*
  *
@@ -160,10 +160,10 @@ bool zenit_type_struct_is_assignable_from(ZenitStructType *target_type, ZenitTyp
  * Returns:
  *  bool: *true* if the struct type can be casted to a *target_type*, otherwise *false*
  */
-bool zenit_type_struct_is_castable_to(ZenitStructType *struct_type, ZenitType *target_type);
+bool zenit_struct_type_is_castable_to(ZenitStructType *struct_type, ZenitType *target_type);
 
 /*
- * Function: zenit_type_struct_can_unify
+ * Function: zenit_struct_type_can_unify
  *  Checks if the struct type object can be unified with the type represented by *type_b*
  *
  * Parameters:
@@ -174,10 +174,10 @@ bool zenit_type_struct_is_castable_to(ZenitStructType *struct_type, ZenitType *t
  *  bool: *true* if the types can be unified, which means they can both be represented by an ancestor
  *        or enclosing -base- type, otherwise *false*.
  */
-bool zenit_type_struct_can_unify(ZenitStructType *struct_type, ZenitType *type_b);
+bool zenit_struct_type_can_unify(ZenitStructType *struct_type, ZenitType *type_b);
 
 /*
- * Function: zenit_type_struct_free
+ * Function: zenit_struct_type_free
  *  Frees the memory of the struct type object
  *
  * Parameters:
@@ -186,6 +186,6 @@ bool zenit_type_struct_can_unify(ZenitStructType *struct_type, ZenitType *type_b
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_type_struct_free(ZenitStructType *type);
+void zenit_struct_type_free(ZenitStructType *type);
 
 #endif /* ZENIT_TYPE_STRUCT_H */

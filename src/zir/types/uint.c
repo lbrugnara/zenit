@@ -12,7 +12,7 @@ static struct TypeMapping {
     { "uint16",     ZIR_UINT_16   },
 };
 
-ZirUintType* zir_type_uint_new(ZirUintTypeSize size)
+ZirUintType* zir_uint_type_new(ZirUintTypeSize size)
 {
     ZirUintType *type = fl_malloc(sizeof(ZirUintType));
     type->base.typekind = ZIR_TYPE_UINT;
@@ -21,12 +21,12 @@ ZirUintType* zir_type_uint_new(ZirUintTypeSize size)
     return type;
 }
 
-unsigned long zir_type_uint_hash(ZirUintType *type)
+unsigned long zir_uint_type_hash(ZirUintType *type)
 {
     static const char *format = "[uint][s:%s]";
 
     char type_key[256] = { 0 };
-    snprintf(type_key, 256, format, zir_type_uint_to_string(type));
+    snprintf(type_key, 256, format, zir_uint_type_to_string(type));
 
     unsigned long hash = 5381;
     FlByte c;
@@ -37,7 +37,7 @@ unsigned long zir_type_uint_hash(ZirUintType *type)
     return hash;
 }
 
-char* zir_type_uint_to_string(ZirUintType *type)
+char* zir_uint_type_to_string(ZirUintType *type)
 {
     for (size_t i=0; i < sizeof(type_mappings) / sizeof(type_mappings[0]); i++)
     {
@@ -49,7 +49,7 @@ char* zir_type_uint_to_string(ZirUintType *type)
     return NULL;
 }
 
-bool zir_type_uint_equals(ZirUintType *type_a, ZirType *type_b)
+bool zir_uint_type_equals(ZirUintType *type_a, ZirType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
         return (ZirType*) type_a == type_b;
@@ -60,7 +60,7 @@ bool zir_type_uint_equals(ZirUintType *type_a, ZirType *type_b)
     return type_a->size == ((ZirUintType*) type_b)->size;
 }
 
-bool zir_type_uint_is_assignable_from(ZirUintType *target_type, ZirType *from_type)
+bool zir_uint_type_is_assignable_from(ZirUintType *target_type, ZirType *from_type)
 {
     if (target_type == NULL || from_type == NULL)
         return false;
@@ -74,7 +74,7 @@ bool zir_type_uint_is_assignable_from(ZirUintType *target_type, ZirType *from_ty
     return from_uint_type->size <= target_type->size;
 }
 
-bool zir_type_uint_is_castable_to(ZirUintType *uint_type, ZirType *target_type)
+bool zir_uint_type_is_castable_to(ZirUintType *uint_type, ZirType *target_type)
 {
     if (target_type == NULL || target_type == NULL)
         return false;
@@ -83,7 +83,7 @@ bool zir_type_uint_is_castable_to(ZirUintType *uint_type, ZirType *target_type)
     return target_type->typekind == ZIR_TYPE_UINT;
 }
 
-size_t zir_type_uint_size(ZirUintType *type)
+size_t zir_uint_type_size(ZirUintType *type)
 {
     if (!type)
         return 0;
@@ -103,7 +103,7 @@ size_t zir_type_uint_size(ZirUintType *type)
     return 0;
 }
 
-void zir_type_uint_free(ZirUintType *type)
+void zir_uint_type_free(ZirUintType *type)
 {
     if (!type)
         return;

@@ -35,7 +35,7 @@ typedef struct ZirStructType {
 } ZirStructType;
 
 /*
- * Function: zir_type_struct_new
+ * Function: zir_struct_type_new
  *  Returns a new instance of a struct type
  *
  * Parameters:
@@ -46,12 +46,12 @@ typedef struct ZirStructType {
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zir_type_struct_free> function
+ *  <zir_struct_type_free> function
  */
-ZirStructType* zir_type_struct_new(char *name);
+ZirStructType* zir_struct_type_new(char *name);
 
 /*
- * Function: zir_type_struct_add_member
+ * Function: zir_struct_type_add_member
  * 
  *  Adds a member to the list of members of the struct type
  *
@@ -63,10 +63,10 @@ ZirStructType* zir_type_struct_new(char *name);
  * Returns:
  *  void: This function does not return a value
  */
-void zir_type_struct_add_member(ZirStructType *struct_type, const char *name, ZirType *member_type);
+void zir_struct_type_add_member(ZirStructType *struct_type, const char *name, ZirType *member_type);
 
 /*
- * Function: zir_type_struct_get_member
+ * Function: zir_struct_type_get_member
  *  Returns -if it exists- the struct type member matching its name with the provided *name*.
  *
  * Parameters:
@@ -76,10 +76,10 @@ void zir_type_struct_add_member(ZirStructType *struct_type, const char *name, Zi
  * Returns:
  *  ZirStructTypeMember*: The struct type member or NULL if it doesn't exist
  */
-ZirStructTypeMember* zir_type_struct_get_member(ZirStructType *struct_type, const char *name);
+ZirStructTypeMember* zir_struct_type_get_member(ZirStructType *struct_type, const char *name);
 
 /*
- * Function: zir_type_struct_hash
+ * Function: zir_struct_type_hash
  *  Returns a hash that identifies the struct type object
  *
  * Parameters:
@@ -88,10 +88,10 @@ ZirStructTypeMember* zir_type_struct_get_member(ZirStructType *struct_type, cons
  * Returns:
  *  unsigned long: Hash code of the type object
  */
-unsigned long zir_type_struct_hash(ZirStructType *type);
+unsigned long zir_struct_type_hash(ZirStructType *type);
 
 /*
- * Function: zir_type_struct_to_string
+ * Function: zir_struct_type_to_string
  *  Returns a string representation of the struct type object
  *
  * Parameters:
@@ -102,13 +102,13 @@ unsigned long zir_type_struct_hash(ZirStructType *type);
  *
  * Notes:
  *  The string returned by this function MUST NOT be freed by the caller, the type object
- *  has ownership of it, and it frees the string memory when the function <zir_type_struct_free>
+ *  has ownership of it, and it frees the string memory when the function <zir_struct_type_free>
  *  is used to free the memory used by the type object.
  */
-char* zir_type_struct_to_string(ZirStructType *type);
+char* zir_struct_type_to_string(ZirStructType *type);
 
 /*
- * Function: zir_type_struct_equals
+ * Function: zir_struct_type_equals
  *  Check if the struct type *type_a* is equals to the *type_b* object
  *
  * Parameters:
@@ -118,10 +118,10 @@ char* zir_type_struct_to_string(ZirStructType *type);
  * Returns:
  *  bool: *true* if *type_b* is a struct type equals to *type_a*, otherwise it returns *false*
  */
-bool zir_type_struct_equals(ZirStructType *type_a, ZirType *type_b);
+bool zir_struct_type_equals(ZirStructType *type_a, ZirType *type_b);
 
 /*
- * Function: zir_type_struct_structurally_equals
+ * Function: zir_struct_type_structurally_equals
  *  Check if the struct type *type_a* is structurally equals to the struct type *type_b*
  *
  * Parameters:
@@ -131,10 +131,10 @@ bool zir_type_struct_equals(ZirStructType *type_a, ZirType *type_b);
  * Returns:
  *  bool: *true* if structs typs *type_a* and *type_b* are structurally equals
  */
-bool zir_type_struct_structurally_equals(ZirStructType *type_a, ZirStructType *type_b);
+bool zir_struct_type_structurally_equals(ZirStructType *type_a, ZirStructType *type_b);
 
 /*
- * Function: zir_type_struct_is_assignable_from
+ * Function: zir_struct_type_is_assignable_from
  *  Checks if an object with type equals to *value_type* can be assigned to an object with a struct type
  *  equals to *target_type*
  *
@@ -146,10 +146,10 @@ bool zir_type_struct_structurally_equals(ZirStructType *type_a, ZirStructType *t
  *  bool: *true* if an object of type *value_type* can be assigned to an object with type *target_type*,
  *        otherwise this function returns *false*.
  */
-bool zir_type_struct_is_assignable_from(ZirStructType *target_type, ZirType *value_type);
+bool zir_struct_type_is_assignable_from(ZirStructType *target_type, ZirType *value_type);
 
 /*
- * Function: zir_type_struct_is_castable_to
+ * Function: zir_struct_type_is_castable_to
  *  Checks if an object with a struct type equals to *struct_type* can be casted to an object of type equals
  *  to *target_type*
  *
@@ -160,10 +160,10 @@ bool zir_type_struct_is_assignable_from(ZirStructType *target_type, ZirType *val
  * Returns:
  *  bool: *true* if the struct type can be casted to a *target_type*, otherwise *false*
  */
-bool zir_type_struct_is_castable_to(ZirStructType *struct_type, ZirType *target_type);
+bool zir_struct_type_is_castable_to(ZirStructType *struct_type, ZirType *target_type);
 
 /*
- * Function: zir_type_struct_size
+ * Function: zir_struct_type_size
  *  Returns the size needed to store an instance of the struct type (in bytes)
  *
  * Parameters:
@@ -172,10 +172,10 @@ bool zir_type_struct_is_castable_to(ZirStructType *struct_type, ZirType *target_
  * Returns:
  *  size_t: Size needed to store an instance of the struct type
  */
-size_t zir_type_struct_size(ZirStructType *type);
+size_t zir_struct_type_size(ZirStructType *type);
 
 /*
- * Function: zir_type_struct_free
+ * Function: zir_struct_type_free
  *  Frees the memory of the struct type object
  *
  * Parameters:
@@ -184,6 +184,6 @@ size_t zir_type_struct_size(ZirStructType *type);
  * Returns:
  *  void: This function does not return a value
  */
-void zir_type_struct_free(ZirStructType *type);
+void zir_struct_type_free(ZirStructType *type);
 
 #endif /* ZIR_TYPE_STRUCT_H */

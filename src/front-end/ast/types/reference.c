@@ -2,7 +2,7 @@
 #include "type.h"
 #include "reference.h"
 
-ZenitReferenceTypeNode* zenit_node_type_reference_new(ZenitSourceLocation location, ZenitTypeNode *element_type)
+ZenitReferenceTypeNode* zenit_reference_type_node_new(ZenitSourceLocation location, ZenitTypeNode *element_type)
 {
     ZenitReferenceTypeNode *type_node = fl_malloc(sizeof(ZenitReferenceTypeNode));
     type_node->base.base.nodekind = ZENIT_NODE_TYPE_REFERENCE;
@@ -13,7 +13,7 @@ ZenitReferenceTypeNode* zenit_node_type_reference_new(ZenitSourceLocation locati
     return type_node;
 }
 
-char* zenit_node_type_reference_uid(ZenitReferenceTypeNode *type_node)
+char* zenit_reference_type_node_uid(ZenitReferenceTypeNode *type_node)
 {
     if (!type_node)
         return NULL;
@@ -21,9 +21,9 @@ char* zenit_node_type_reference_uid(ZenitReferenceTypeNode *type_node)
     return fl_cstring_vdup("%%L%u:C%u_type_reference", type_node->base.base.location.line, type_node->base.base.location.col);
 }
 
-char* zenit_node_type_reference_dump(ZenitReferenceTypeNode *type_node, char *output)
+char* zenit_reference_type_node_dump(ZenitReferenceTypeNode *type_node, char *output)
 {
-    char *type_str = zenit_node_type_reference_to_string(type_node);
+    char *type_str = zenit_reference_type_node_to_string(type_node);
 
     fl_cstring_vappend(&output, "(type %s)", type_str);
 
@@ -32,7 +32,7 @@ char* zenit_node_type_reference_dump(ZenitReferenceTypeNode *type_node, char *ou
     return output;
 }
 
-char* zenit_node_type_reference_to_string(ZenitReferenceTypeNode *type_node)
+char* zenit_reference_type_node_to_string(ZenitReferenceTypeNode *type_node)
 {
     if (type_node == NULL)
         return NULL;
@@ -44,7 +44,7 @@ char* zenit_node_type_reference_to_string(ZenitReferenceTypeNode *type_node)
     return to_string;
 }
 
-void zenit_node_type_reference_free(ZenitReferenceTypeNode *type_node)
+void zenit_reference_type_node_free(ZenitReferenceTypeNode *type_node)
 {
     if (!type_node)
         return;

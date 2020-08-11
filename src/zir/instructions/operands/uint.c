@@ -3,7 +3,7 @@
 #include "uint.h"
 #include "../../types/uint.h"
 
-ZirUintOperand* zir_operand_uint_new(ZirUintType *type, ZirUintValue value)
+ZirUintOperand* zir_uint_operand_new(ZirUintType *type, ZirUintValue value)
 {
     ZirUintOperand *uint = fl_malloc(sizeof(ZirUintOperand));
     uint->base.type = ZIR_OPERAND_UINT;
@@ -13,18 +13,18 @@ ZirUintOperand* zir_operand_uint_new(ZirUintType *type, ZirUintValue value)
     return uint;
 }
 
-void zir_operand_uint_free(ZirUintOperand *uint)
+void zir_uint_operand_free(ZirUintOperand *uint)
 {
     if (!uint)
         return;
 
     if (uint->type)
-        zir_type_uint_free(uint->type);
+        zir_uint_type_free(uint->type);
 
     fl_free(uint);
 }
 
-char* zir_operand_uint_dump(ZirUintOperand *uint, char *output)
+char* zir_uint_operand_dump(ZirUintOperand *uint, char *output)
 {
     switch (uint->type->size)
     {
@@ -48,8 +48,8 @@ char* zir_operand_uint_dump(ZirUintOperand *uint, char *output)
     return output;
 }
 
-char* zir_operand_uint_type_dump(ZirUintOperand *uint, char *output)
+char* zir_uint_operand_type_dump(ZirUintOperand *uint, char *output)
 {
-    fl_cstring_vappend(&output, "%s", zir_type_uint_to_string(uint->type));
+    fl_cstring_vappend(&output, "%s", zir_uint_type_to_string(uint->type));
     return output;
 }

@@ -6,7 +6,7 @@
 
 /*
  * Enum: ZirOperandType
- *  Represents the type of operands that can be part of a <ZirInstruction> object
+ *  Represents the type of operands that can be part of a <ZirInstr> object
  */
 typedef enum ZirOperandType {
     ZIR_OPERAND_UINT,
@@ -19,7 +19,7 @@ typedef enum ZirOperandType {
 
 /*
  * Struct: ZirOperand
- *  Represents an operand of a <ZirInstruction>
+ *  Represents an operand of a <ZirInstr>
  * 
  * Members:
  *  <ZirOperandType> type: The type of operand this object represents

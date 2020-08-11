@@ -28,7 +28,7 @@ typedef struct ZenitUintType {
 } ZenitUintType;
 
 /*
- * Function: zenit_type_uint_new
+ * Function: zenit_uint_type_new
  *  Returns a new instance of a uint type
  *
  * Parameters:
@@ -39,12 +39,12 @@ typedef struct ZenitUintType {
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zenit_type_uint_free> function
+ *  <zenit_uint_type_free> function
  */
-ZenitUintType* zenit_type_uint_new(ZenitUintTypeSize size);
+ZenitUintType* zenit_uint_type_new(ZenitUintTypeSize size);
 
 /*
- * Function: zenit_type_uint_size_from_slice
+ * Function: zenit_uint_type_size_from_slice
  *  Returns the size of a uint encoded in its name that is contained in a slice of bytes
  *  representing a string
  *
@@ -54,10 +54,10 @@ ZenitUintType* zenit_type_uint_new(ZenitUintTypeSize size);
  * Returns:
  *  ZenitUintTypeSize: The size of the uint encoded in the slice
  */
-ZenitUintTypeSize zenit_type_uint_size_from_slice(struct FlSlice *slice);
+ZenitUintTypeSize zenit_uint_type_size_from_slice(struct FlSlice *slice);
 
 /*
- * Function: zenit_type_uint_hash
+ * Function: zenit_uint_type_hash
  *  Returns a hash that identifies the uint type object
  *
  * Parameters:
@@ -66,10 +66,10 @@ ZenitUintTypeSize zenit_type_uint_size_from_slice(struct FlSlice *slice);
  * Returns:
  *  unsigned long: Hash code of the type object
  */
-unsigned long zenit_type_uint_hash(ZenitUintType *type);
+unsigned long zenit_uint_type_hash(ZenitUintType *type);
 
 /*
- * Function: zenit_type_uint_to_string
+ * Function: zenit_uint_type_to_string
  *  Returns a string representation of the uint type object
  *
  * Parameters:
@@ -80,13 +80,13 @@ unsigned long zenit_type_uint_hash(ZenitUintType *type);
  *
  * Notes:
  *  The string returned by this function MUST NOT be freed by the caller, the type object
- *  has ownership of it, and it frees the string memory when the function <zenit_type_uint_free>
+ *  has ownership of it, and it frees the string memory when the function <zenit_uint_type_free>
  *  is used to free the memory used by the type object.
  */
-char* zenit_type_uint_to_string(ZenitUintType *type);
+char* zenit_uint_type_to_string(ZenitUintType *type);
 
 /*
- * Function: zenit_type_uint_equals
+ * Function: zenit_uint_type_equals
  *  Check if the uint type *type_a* is equals to the *type_b* object
  *
  * Parameters:
@@ -96,10 +96,10 @@ char* zenit_type_uint_to_string(ZenitUintType *type);
  * Returns:
  *  bool: *true* if *type_b* is a uint type equals to *type_a*, otherwise it returns *false*
  */
-bool zenit_type_uint_equals(ZenitUintType *type_a, ZenitType *type_b);
+bool zenit_uint_type_equals(ZenitUintType *type_a, ZenitType *type_b);
 
 /*
- * Function: zenit_type_uint_is_assignable_from
+ * Function: zenit_uint_type_is_assignable_from
  *  Checks if an object with type equals to *value_type* can be assigned to an object with a uint type
  *  equals to *target_type*
  *
@@ -111,10 +111,10 @@ bool zenit_type_uint_equals(ZenitUintType *type_a, ZenitType *type_b);
  *  bool: *true* if an object of type *value_type* can be assigned to an object with type *target_type*,
  *        otherwise this function returns *false*.
  */
-bool zenit_type_uint_is_assignable_from(ZenitUintType *target_type, ZenitType *value_type);
+bool zenit_uint_type_is_assignable_from(ZenitUintType *target_type, ZenitType *value_type);
 
 /*
- * Function: zenit_type_uint_is_castable_to
+ * Function: zenit_uint_type_is_castable_to
  *  Checks if an object with a uint type equals to *uint_type* can be casted to an object of type equals
  *  to *target_type*
  *
@@ -125,10 +125,10 @@ bool zenit_type_uint_is_assignable_from(ZenitUintType *target_type, ZenitType *v
  * Returns:
  *  bool: *true* if the uint type can be casted to a *target_type*, otherwise *false*
  */
-bool zenit_type_uint_is_castable_to(ZenitUintType *uint_type, ZenitType *target_type);
+bool zenit_uint_type_is_castable_to(ZenitUintType *uint_type, ZenitType *target_type);
 
 /*
- * Function: zenit_type_uint_can_unify
+ * Function: zenit_uint_type_can_unify
  *  Checks if the uint type object can be unified with the type represented by *type_b*
  *
  * Parameters:
@@ -139,10 +139,10 @@ bool zenit_type_uint_is_castable_to(ZenitUintType *uint_type, ZenitType *target_
  *  bool: *true* if the types can be unified, which means they can both be represented by an ancestor
  *        or enclosing -base- type, otherwise *false*.
  */
-bool zenit_type_uint_can_unify(ZenitUintType *uint_type, ZenitType *type_b);
+bool zenit_uint_type_can_unify(ZenitUintType *uint_type, ZenitType *type_b);
 
 /*
- * Function: zenit_type_uint_free
+ * Function: zenit_uint_type_free
  *  Frees the memory of the uint type object
  *
  * Parameters:
@@ -151,6 +151,6 @@ bool zenit_type_uint_can_unify(ZenitUintType *uint_type, ZenitType *type_b);
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_type_uint_free(ZenitUintType *type);
+void zenit_uint_type_free(ZenitUintType *type);
 
 #endif /* ZENIT_TYPE_UINT_H */

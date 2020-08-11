@@ -3,7 +3,7 @@
 #include "type.h"
 #include "struct.h"
 
-ZenitStructTypeNode* zenit_node_type_struct_new(ZenitSourceLocation location, char *name)
+ZenitStructTypeNode* zenit_struct_type_node_new(ZenitSourceLocation location, char *name)
 {
     ZenitStructTypeNode *type_node = fl_malloc(sizeof(ZenitStructTypeNode));
     type_node->base.base.nodekind = ZENIT_NODE_TYPE_STRUCT;
@@ -15,7 +15,7 @@ ZenitStructTypeNode* zenit_node_type_struct_new(ZenitSourceLocation location, ch
     return type_node;
 }
 
-char* zenit_node_type_struct_uid(ZenitStructTypeNode *type_node)
+char* zenit_struct_type_node_uid(ZenitStructTypeNode *type_node)
 {
     if (!type_node)
         return NULL;
@@ -23,9 +23,9 @@ char* zenit_node_type_struct_uid(ZenitStructTypeNode *type_node)
     return fl_cstring_vdup("%%L%u:C%u_type_struct", type_node->base.base.location.line, type_node->base.base.location.col);
 }
 
-char* zenit_node_type_struct_dump(ZenitStructTypeNode *type_node, char *output)
+char* zenit_struct_type_node_dump(ZenitStructTypeNode *type_node, char *output)
 {
-    char *type_str = zenit_node_type_struct_to_string(type_node);
+    char *type_str = zenit_struct_type_node_to_string(type_node);
 
     fl_cstring_vappend(&output, "(type %s)", type_str);
 
@@ -34,7 +34,7 @@ char* zenit_node_type_struct_dump(ZenitStructTypeNode *type_node, char *output)
     return output;
 }
 
-char* zenit_node_type_struct_to_string(ZenitStructTypeNode *type_node)
+char* zenit_struct_type_node_to_string(ZenitStructTypeNode *type_node)
 {
     if (type_node == NULL)
         return NULL;
@@ -42,7 +42,7 @@ char* zenit_node_type_struct_to_string(ZenitStructTypeNode *type_node)
     return fl_cstring_dup(type_node->name);
 }
 
-void zenit_node_type_struct_free(ZenitStructTypeNode *type_node)
+void zenit_struct_type_node_free(ZenitStructTypeNode *type_node)
 {
     if (!type_node)
         return;

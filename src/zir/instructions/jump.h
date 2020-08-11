@@ -7,52 +7,52 @@
 #include "../types/type.h"
 
 /*
- * Struct: ZirJumpInstruction
+ * Struct: ZirJumpInstr
  *  The jump instruction changes the program's IP applying the *destination* operand as an offset
  * 
  * Members:
- *  <ZirInstruction> base: Basic information of the instruction
+ *  <ZirInstr> base: Basic information of the instruction
  */
-typedef struct ZirJumpInstruction {
-    ZirInstruction base;
-} ZirJumpInstruction;
+typedef struct ZirJumpInstr {
+    ZirInstr base;
+} ZirJumpInstr;
 
 /*
- * Function: zir_instruction_jump_new
+ * Function: zir_jump_instr_new
  *  Creates and returns a new jump instruction
  *
  * Parameters:
  *  <ZirOperand> *destination: The destination operand of the jump instruction
  *
  * Returns:
- *  <ZirJumpInstruction>*: Jump instruction object
+ *  <ZirJumpInstr>*: Jump instruction object
  *
  * Notes:
  *  The object returned by this function must be freed with the
- *  <zir_instruction_jump_free> function
+ *  <zir_jump_instr_free> function
  */
-ZirJumpInstruction* zir_instruction_jump_new(ZirOperand *destination);
+ZirJumpInstr* zir_jump_instr_new(ZirOperand *destination);
 
 /*
- * Function: zir_instruction_jump_free
+ * Function: zir_jump_instr_free
  *  Releases the memory used by the jump instruction object
  *
  * Parameters:
- *  <ZirJumpInstruction> *instruction: The jump instruction object to be freed
+ *  <ZirJumpInstr> *instruction: The jump instruction object to be freed
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zir_instruction_jump_free(ZirJumpInstruction *instruction);
+void zir_jump_instr_free(ZirJumpInstr *instruction);
 
 /*
- * Function: zir_instruction_jump_dump
+ * Function: zir_jump_instr_dump
  *  Dumps the string representation of the instruction to the *output* pointer. Because
  *  the *output* pointer can be modified this function returns the same pointer, so
  *  it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_instruction_jump_dump(instruction, output);
+ *  output = zir_jump_instr_dump(instruction, output);
  * ===========
  *
  * Parameters:
@@ -63,6 +63,6 @@ void zir_instruction_jump_free(ZirJumpInstruction *instruction);
  *  char*: *output* pointer
  *
  */
-char* zir_instruction_jump_dump(ZirJumpInstruction *instruction, char *output);
+char* zir_jump_instr_dump(ZirJumpInstr *instruction, char *output);
 
 #endif /* ZIR_INSTRUCTION_JUMP_H */

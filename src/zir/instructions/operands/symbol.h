@@ -18,7 +18,7 @@ typedef struct ZirSymbolOperand {
 } ZirSymbolOperand;
 
 /*
- * Function: zir_operand_symbol_new
+ * Function: zir_symbol_operand_new
  *  Creates a new symbol operand object
  *
  * Parameters:
@@ -28,12 +28,12 @@ typedef struct ZirSymbolOperand {
  *  ZirSymbolOperand*: The new symbol operand object
  *
  * Notes:
- *  The object returned by this function must be freed using the <zir_operand_symbol_free> function.
+ *  The object returned by this function must be freed using the <zir_symbol_operand_free> function.
  */
-ZirSymbolOperand* zir_operand_symbol_new(ZirSymbol *symbol);
+ZirSymbolOperand* zir_symbol_operand_new(ZirSymbol *symbol);
 
 /*
- * Function: zir_operand_symbol_free
+ * Function: zir_symbol_operand_free
  *  Frees the memory of the symbol operand
  *
  * Parameters:
@@ -42,16 +42,16 @@ ZirSymbolOperand* zir_operand_symbol_new(ZirSymbol *symbol);
  * Returns:
  *  void: This function does not return a value
  */
-void zir_operand_symbol_free(ZirSymbolOperand *symbol_operand);
+void zir_symbol_operand_free(ZirSymbolOperand *symbol_operand);
 
 /*
- * Function: zir_operand_symbol_dump
+ * Function: zir_symbol_operand_dump
  *  Dumps the string representation of the symbol operand to the *output* pointer. Because
  *  the *output* pointer can be modified this function returns the same pointer, so
  *  it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_operand_symbol_dump(symbol_operand, output);
+ *  output = zir_symbol_operand_dump(symbol_operand, output);
  * ===========
  *
  * Parameters:
@@ -64,16 +64,16 @@ void zir_operand_symbol_free(ZirSymbolOperand *symbol_operand);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_symbol_dump(ZirSymbolOperand *symbol_operand, char *output);
+char* zir_symbol_operand_dump(ZirSymbolOperand *symbol_operand, char *output);
 
 /*
- * Function: zir_operand_symbol_type_dump
+ * Function: zir_symbol_operand_type_dump
  *  Dumps the string representation of the type of the symbol operand to the *output* 
  *  pointer. Because the *output* pointer can be modified this function returns 
  *  the same pointer, so it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_operand_symbol_type_dump(symbol_operand, output);
+ *  output = zir_symbol_operand_type_dump(symbol_operand, output);
  * ===========
  *
  * Parameters:
@@ -86,6 +86,6 @@ char* zir_operand_symbol_dump(ZirSymbolOperand *symbol_operand, char *output);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_symbol_type_dump(ZirSymbolOperand *symbol_operand, char *output);
+char* zir_symbol_operand_type_dump(ZirSymbolOperand *symbol_operand, char *output);
 
 #endif /* ZIR_OPERAND_SYMBOL_H */

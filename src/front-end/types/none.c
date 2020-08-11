@@ -3,7 +3,7 @@
 #include <fllib/Cstring.h>
 #include "none.h"
 
-ZenitType* zenit_type_none_new(void)
+ZenitType* zenit_none_type_new(void)
 {
     ZenitType *type = fl_malloc(sizeof(ZenitType));
     type->typekind = ZENIT_TYPE_NONE;
@@ -11,7 +11,7 @@ ZenitType* zenit_type_none_new(void)
     return type;
 }
 
-unsigned long zenit_type_none_hash(ZenitType *type)
+unsigned long zenit_none_type_hash(ZenitType *type)
 {
     unsigned long hash = 5381;
     FlByte c;
@@ -23,7 +23,7 @@ unsigned long zenit_type_none_hash(ZenitType *type)
     return hash;
 }
 
-void zenit_type_none_free(ZenitType *type)
+void zenit_none_type_free(ZenitType *type)
 {
     if (!type)
         return;

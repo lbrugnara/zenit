@@ -5,7 +5,7 @@
 #include <fllib/Cstring.h>
 #include "reference.h"
 
-ZirReferenceType* zir_type_reference_new(ZirType *element)
+ZirReferenceType* zir_reference_type_new(ZirType *element)
 {
     ZirReferenceType *type = fl_malloc(sizeof(ZirReferenceType));
     type->base.typekind = ZIR_TYPE_REFERENCE;
@@ -14,7 +14,7 @@ ZirReferenceType* zir_type_reference_new(ZirType *element)
     return type;
 }
 
-unsigned long zir_type_reference_hash(ZirReferenceType *type)
+unsigned long zir_reference_type_hash(ZirReferenceType *type)
 {
     static const char *format = "[ref][e:%lu]";
 
@@ -30,12 +30,12 @@ unsigned long zir_type_reference_hash(ZirReferenceType *type)
     return hash;
 }
 
-char* zir_type_reference_to_string(ZirReferenceType *type)
+char* zir_reference_type_to_string(ZirReferenceType *type)
 {
     if (type == NULL)
         return NULL;
 
-    unsigned long type_hash = zir_type_reference_hash(type);
+    unsigned long type_hash = zir_reference_type_hash(type);
 
     if (type->base.to_string.value == NULL)
     {
@@ -61,7 +61,7 @@ char* zir_type_reference_to_string(ZirReferenceType *type)
     return type->base.to_string.value;
 }
 
-bool zir_type_reference_equals(ZirReferenceType *type_a, ZirType *type_b)
+bool zir_reference_type_equals(ZirReferenceType *type_a, ZirType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
         return (ZirType*) type_a == type_b;
@@ -74,7 +74,7 @@ bool zir_type_reference_equals(ZirReferenceType *type_a, ZirType *type_b)
     return zir_type_equals(type_a->element, type_b_ref->element);
 }
 
-bool zir_type_reference_is_assignable_from(ZirReferenceType *target_type, ZirType *from_type)
+bool zir_reference_type_is_assignable_from(ZirReferenceType *target_type, ZirType *from_type)
 {
     if (!target_type || !from_type)
         return false;
@@ -87,13 +87,13 @@ bool zir_type_reference_is_assignable_from(ZirReferenceType *target_type, ZirTyp
     return zir_type_is_assignable_from(target_type->element, ref_from_type->element);
 }
 
-bool zir_type_reference_is_castable_to(ZirReferenceType *reference, ZirType *target_type)
+bool zir_reference_type_is_castable_to(ZirReferenceType *reference, ZirType *target_type)
 {
     if (target_type == NULL || target_type == NULL)
         return false;
 
     // Cast between the same types are valid
-    if (zir_type_reference_equals(reference, target_type))
+    if (zir_reference_type_equals(reference, target_type))
         return true;
 
     if (target_type->typekind == ZIR_TYPE_REFERENCE)
@@ -106,7 +106,7 @@ bool zir_type_reference_is_castable_to(ZirReferenceType *reference, ZirType *tar
     return false;
 }
 
-size_t zir_type_reference_size(ZirReferenceType *type)
+size_t zir_reference_type_size(ZirReferenceType *type)
 {
     if (!type)
         return 0;
@@ -116,7 +116,7 @@ size_t zir_type_reference_size(ZirReferenceType *type)
     return 0;
 }
 
-void zir_type_reference_free(ZirReferenceType *type)
+void zir_reference_type_free(ZirReferenceType *type)
 {
     if (!type)
         return;

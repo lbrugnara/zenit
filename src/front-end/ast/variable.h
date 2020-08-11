@@ -27,7 +27,7 @@ typedef struct ZenitVariableNode {
 } ZenitVariableNode;
 
 /*
- * Function: zenit_node_variable_new
+ * Function: zenit_variable_node_new
  *  Creates a new AST node that represents a variable declaration
  *
  * Parameters:
@@ -39,12 +39,12 @@ typedef struct ZenitVariableNode {
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zenit_node_variable_free> function
+ *  <zenit_variable_node_free> function
  */
-ZenitVariableNode* zenit_node_variable_new(ZenitSourceLocation location, char *name);
+ZenitVariableNode* zenit_variable_node_new(ZenitSourceLocation location, char *name);
 
 /*
- * Function: zenit_node_variable_uid
+ * Function: zenit_variable_node_uid
  *  Returns a UID for the variable declaration node
  *
  * Parameters:
@@ -57,10 +57,10 @@ ZenitVariableNode* zenit_node_variable_new(ZenitSourceLocation location, char *n
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_variable_uid(ZenitVariableNode *variable);
+char* zenit_variable_node_uid(ZenitVariableNode *variable);
 
 /*
- * Function: zenit_node_variable_dump
+ * Function: zenit_variable_node_dump
  *  Appends a dump of the variable declaration node to the output pointer, and
  *  returns a pointer to the -possibly reallocated- output
  *
@@ -76,13 +76,13 @@ char* zenit_node_variable_uid(ZenitVariableNode *variable);
  *  a pointer to the new location in case the memory is reallocated or
  *  to the old location in case the pointer does not need to be modified. Either
  *  way, it is safe to use the function as:
- *      output = zenit_node_variable_dump(variable, output);
+ *      output = zenit_variable_node_dump(variable, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_variable_dump(ZenitVariableNode *variable, char *output);
+char* zenit_variable_node_dump(ZenitVariableNode *variable, char *output);
 
 /*
- * Function: zenit_node_variable_free
+ * Function: zenit_variable_node_free
  *  Frees the memory used by the variable declaration node
  *
  * Parameters:
@@ -91,6 +91,6 @@ char* zenit_node_variable_dump(ZenitVariableNode *variable, char *output);
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_node_variable_free(ZenitVariableNode *var_node);
+void zenit_variable_node_free(ZenitVariableNode *var_node);
 
 #endif /* ZENIT_AST_VARIABLE_H */

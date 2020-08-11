@@ -2,7 +2,7 @@
 #include <fllib/Cstring.h>
 #include "bool.h"
 
-ZirBoolType* zir_type_bool_new(void)
+ZirBoolType* zir_bool_type_new(void)
 {
     ZirBoolType *type = fl_malloc(sizeof(ZirBoolType));
     type->base.typekind = ZIR_TYPE_BOOL;
@@ -10,7 +10,7 @@ ZirBoolType* zir_type_bool_new(void)
     return type;
 }
 
-unsigned long zir_type_bool_hash(ZirBoolType *type)
+unsigned long zir_bool_type_hash(ZirBoolType *type)
 {
     const char *type_key = "[bool]";
     unsigned long hash = 5381;
@@ -22,12 +22,12 @@ unsigned long zir_type_bool_hash(ZirBoolType *type)
     return hash;
 }
 
-char* zir_type_bool_to_string(ZirBoolType *type)
+char* zir_bool_type_to_string(ZirBoolType *type)
 {
     return "bool";
 }
 
-bool zir_type_bool_equals(ZirBoolType *type_a, ZirType *type_b)
+bool zir_bool_type_equals(ZirBoolType *type_a, ZirType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
         return (ZirType*) type_a == type_b;
@@ -35,7 +35,7 @@ bool zir_type_bool_equals(ZirBoolType *type_a, ZirType *type_b)
     return type_b->typekind == ZIR_TYPE_BOOL;
 }
 
-bool zir_type_bool_is_assignable_from(ZirBoolType *target_type, ZirType *from_type)
+bool zir_bool_type_is_assignable_from(ZirBoolType *target_type, ZirType *from_type)
 {
     if (target_type == NULL || from_type == NULL)
         return false;
@@ -43,7 +43,7 @@ bool zir_type_bool_is_assignable_from(ZirBoolType *target_type, ZirType *from_ty
     return from_type->typekind == ZIR_TYPE_BOOL;
 }
 
-bool zir_type_bool_is_castable_to(ZirBoolType *bool_type, ZirType *target_type)
+bool zir_bool_type_is_castable_to(ZirBoolType *bool_type, ZirType *target_type)
 {
     if (target_type == NULL || target_type == NULL)
         return false;
@@ -52,7 +52,7 @@ bool zir_type_bool_is_castable_to(ZirBoolType *bool_type, ZirType *target_type)
     return target_type->typekind == ZIR_TYPE_BOOL;
 }
 
-size_t zir_type_bool_size(ZirBoolType *type)
+size_t zir_bool_type_size(ZirBoolType *type)
 {
     if (!type)
         return 0;
@@ -60,7 +60,7 @@ size_t zir_type_bool_size(ZirBoolType *type)
     return 1;
 }
 
-void zir_type_bool_free(ZirBoolType *type)
+void zir_bool_type_free(ZirBoolType *type)
 {
     if (!type)
         return;

@@ -18,7 +18,7 @@ static void member_free(void *ptr)
     fl_free(member);
 }
 
-ZirStructOperand* zir_operand_struct_new(ZirStructType *type)
+ZirStructOperand* zir_struct_operand_new(ZirStructType *type)
 {
     ZirStructOperand *operand = fl_malloc(sizeof(ZirStructOperand));
     operand->base.type = ZIR_OPERAND_STRUCT;
@@ -28,7 +28,7 @@ ZirStructOperand* zir_operand_struct_new(ZirStructType *type)
     return operand;
 }
 
-void zir_operand_struct_add_member(ZirStructOperand *struct_operand, const char *name, ZirOperand *member_operand)
+void zir_struct_operand_add_member(ZirStructOperand *struct_operand, const char *name, ZirOperand *member_operand)
 {
     ZirStructOperandMember *member = fl_malloc(sizeof(ZirStructOperandMember));
     member->name = fl_cstring_dup(name);
@@ -36,7 +36,7 @@ void zir_operand_struct_add_member(ZirStructOperand *struct_operand, const char 
     struct_operand->members = fl_array_append(struct_operand->members, &member);
 }
 
-void zir_operand_struct_free(ZirStructOperand *struct_operand)
+void zir_struct_operand_free(ZirStructOperand *struct_operand)
 {
     if (!struct_operand)
         return;
@@ -44,12 +44,12 @@ void zir_operand_struct_free(ZirStructOperand *struct_operand)
     fl_array_free_each_pointer(struct_operand->members, member_free);
 
     if (struct_operand->type)
-        zir_type_struct_free(struct_operand->type);
+        zir_struct_type_free(struct_operand->type);
 
     fl_free(struct_operand);
 }
 
-char* zir_operand_struct_dump(ZirStructOperand *struct_operand, char *output)
+char* zir_struct_operand_dump(ZirStructOperand *struct_operand, char *output)
 {
     fl_cstring_append(&output, "{ ");
     
@@ -73,9 +73,9 @@ char* zir_operand_struct_dump(ZirStructOperand *struct_operand, char *output)
     return output;
 }
 
-char* zir_operand_struct_type_dump(ZirStructOperand *struct_operand, char *output)
+char* zir_struct_operand_type_dump(ZirStructOperand *struct_operand, char *output)
 {
-    fl_cstring_vappend(&output, "%s", zir_type_struct_to_string(struct_operand->type));
+    fl_cstring_vappend(&output, "%s", zir_struct_type_to_string(struct_operand->type));
     return output;
 }
 

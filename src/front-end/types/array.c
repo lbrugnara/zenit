@@ -2,7 +2,7 @@
 #include <fllib/Cstring.h>
 #include "array.h"
 
-ZenitArrayType* zenit_type_array_new(ZenitType *member_type)
+ZenitArrayType* zenit_array_type_new(ZenitType *member_type)
 {
     ZenitArrayType *type = fl_malloc(sizeof(ZenitArrayType));
     type->base.typekind = ZENIT_TYPE_ARRAY;
@@ -11,7 +11,7 @@ ZenitArrayType* zenit_type_array_new(ZenitType *member_type)
     return type;
 }
 
-unsigned long zenit_type_array_hash(ZenitArrayType *type)
+unsigned long zenit_array_type_hash(ZenitArrayType *type)
 {
     static const char *format = "[array][e:%lu]";
 
@@ -27,12 +27,12 @@ unsigned long zenit_type_array_hash(ZenitArrayType *type)
     return hash;
 }
 
-char* zenit_type_array_to_string(ZenitArrayType *type)
+char* zenit_array_type_to_string(ZenitArrayType *type)
 {
     if (type == NULL)
         return NULL;
 
-    unsigned long type_hash = zenit_type_array_hash(type);
+    unsigned long type_hash = zenit_array_type_hash(type);
 
     if (type->base.to_string.value == NULL)
     {
@@ -64,7 +64,7 @@ char* zenit_type_array_to_string(ZenitArrayType *type)
     return type->base.to_string.value;
 }
 
-bool zenit_type_array_equals(ZenitArrayType *type_a, ZenitType *type_b)
+bool zenit_array_type_equals(ZenitArrayType *type_a, ZenitType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
         return (ZenitType*) type_a == type_b;
@@ -77,7 +77,7 @@ bool zenit_type_array_equals(ZenitArrayType *type_a, ZenitType *type_b)
     return type_a->length == type_b_array->length && zenit_type_equals(type_a->member_type, type_b_array->member_type);
 }
 
-bool zenit_type_array_is_assignable_from(ZenitArrayType *target_type, ZenitType *from_type)
+bool zenit_array_type_is_assignable_from(ZenitArrayType *target_type, ZenitType *from_type)
 {
     if (from_type->typekind != ZENIT_TYPE_ARRAY)
         return false;
@@ -94,7 +94,7 @@ bool zenit_type_array_is_assignable_from(ZenitArrayType *target_type, ZenitType 
     return zenit_type_is_assignable_from(target_type->member_type, array_from_type->member_type);
 }
 
-bool zenit_type_array_is_castable_to(ZenitArrayType *array_type, ZenitType *target_type)
+bool zenit_array_type_is_castable_to(ZenitArrayType *array_type, ZenitType *target_type)
 {
     if (array_type == NULL || target_type == NULL)
         return false;
@@ -104,7 +104,7 @@ bool zenit_type_array_is_castable_to(ZenitArrayType *array_type, ZenitType *targ
         return false;
 
     // If target_type is the same type of the array type, we are ok to cast    
-    if (zenit_type_array_equals(array_type, target_type))
+    if (zenit_array_type_equals(array_type, target_type))
         return true;    
 
     // If we reached this point, it means that:
@@ -119,7 +119,7 @@ bool zenit_type_array_is_castable_to(ZenitArrayType *array_type, ZenitType *targ
     return zenit_type_is_castable_to(array_type->member_type, target_array_type->member_type);
 }
 
-bool zenit_type_array_can_unify(ZenitArrayType *array_type, ZenitType *type_b)
+bool zenit_array_type_can_unify(ZenitArrayType *array_type, ZenitType *type_b)
 {
     if (array_type == NULL || type_b == NULL)
         return false;
@@ -130,7 +130,7 @@ bool zenit_type_array_can_unify(ZenitArrayType *array_type, ZenitType *type_b)
     if (type_b->typekind != ZENIT_TYPE_ARRAY)
         return false;
 
-    if (zenit_type_array_equals(array_type, type_b))
+    if (zenit_array_type_equals(array_type, type_b))
         return true;
 
     ZenitArrayType *arr_type_b = (ZenitArrayType*) type_b;
@@ -144,7 +144,7 @@ bool zenit_type_array_can_unify(ZenitArrayType *array_type, ZenitType *type_b)
     return true;
 }
 
-void zenit_type_array_free(ZenitArrayType *type)
+void zenit_array_type_free(ZenitArrayType *type)
 {
     if (!type)
         return;

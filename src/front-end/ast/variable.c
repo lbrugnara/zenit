@@ -2,7 +2,7 @@
 #include <fllib/Cstring.h>
 #include "variable.h"
 
-ZenitVariableNode* zenit_node_variable_new(ZenitSourceLocation location, char *name)
+ZenitVariableNode* zenit_variable_node_new(ZenitSourceLocation location, char *name)
 {
     ZenitVariableNode *var_node = fl_malloc(sizeof(ZenitVariableNode));
     var_node->base.nodekind = ZENIT_NODE_VARIABLE;
@@ -12,7 +12,7 @@ ZenitVariableNode* zenit_node_variable_new(ZenitSourceLocation location, char *n
     return var_node;
 }
 
-char* zenit_node_variable_uid(ZenitVariableNode *variable)
+char* zenit_variable_node_uid(ZenitVariableNode *variable)
 {
     if (!variable)
         return NULL;
@@ -20,7 +20,7 @@ char* zenit_node_variable_uid(ZenitVariableNode *variable)
     return fl_cstring_vdup("%%L%u:C%u_var_%s", variable->base.location.line, variable->base.location.col, variable->name);
 }
 
-char* zenit_node_variable_dump(ZenitVariableNode *variable, char *output)
+char* zenit_variable_node_dump(ZenitVariableNode *variable, char *output)
 {
     fl_cstring_vappend(&output, "(var %s ", variable->name);
 
@@ -40,7 +40,7 @@ char* zenit_node_variable_dump(ZenitVariableNode *variable, char *output)
 
         for (size_t i=0; i < length; i++)
         {
-            output = zenit_node_attribute_dump(attrs[i], output);
+            output = zenit_attribute_node_dump(attrs[i], output);
 
             if (i != length - 1)
                 fl_cstring_append(&output, " ");
@@ -54,7 +54,7 @@ char* zenit_node_variable_dump(ZenitVariableNode *variable, char *output)
 }
 
 /*
- * Function: zenit_node_variable_free
+ * Function: zenit_variable_node_free
  *  Frees the memory of a <ZenitVariableNode> object
  *
  * Parameters:
@@ -63,7 +63,7 @@ char* zenit_node_variable_dump(ZenitVariableNode *variable, char *output)
  * Returns:
  *  void - This function does not return a value
  */
-void zenit_node_variable_free(ZenitVariableNode *var_node)
+void zenit_variable_node_free(ZenitVariableNode *var_node)
 {
     if (!var_node)
         return;

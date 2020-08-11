@@ -1,7 +1,7 @@
 #include <fllib/Cstring.h>
 #include "temp.h"
 
-ZnesTempSymbol* znes_symbol_temp_new(const char *name, ZirType *zir_type)
+ZnesTempSymbol* znes_temp_symbol_new(const char *name, ZirType *zir_type)
 {
     // We need to get the symbol size to make sure it fits
     size_t symbol_size = zir_type->typekind == ZIR_TYPE_REFERENCE ? 2 /*bytes*/ : zir_type_size(zir_type);
@@ -17,7 +17,7 @@ ZnesTempSymbol* znes_symbol_temp_new(const char *name, ZirType *zir_type)
     return temp_symbol;
 }
 
-void znes_symbol_temp_free(ZnesTempSymbol *symbol)
+void znes_temp_symbol_free(ZnesTempSymbol *symbol)
 {
     if (symbol->base.name)
         fl_cstring_free(symbol->base.name);

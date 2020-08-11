@@ -2,9 +2,9 @@
 #include <fllib/Cstring.h>
 #include "variable.h"
 
-ZirVariableInstruction* zir_instruction_variable_new(ZirOperand *destination, ZirOperand *source)
+ZirVariableInstr* zir_variable_instr_new(ZirOperand *destination, ZirOperand *source)
 {
-    ZirVariableInstruction *instruction = fl_malloc(sizeof(ZirVariableInstruction));
+    ZirVariableInstr *instruction = fl_malloc(sizeof(ZirVariableInstr));
     instruction->base.type = ZIR_INSTR_VARIABLE;
     instruction->base.destination = destination;
     instruction->source = source;
@@ -12,13 +12,13 @@ ZirVariableInstruction* zir_instruction_variable_new(ZirOperand *destination, Zi
     return instruction;
 }
 
-void zir_instruction_variable_free(ZirVariableInstruction *instruction)
+void zir_variable_instr_free(ZirVariableInstr *instruction)
 {
     zir_attribute_map_free(instruction->attributes);
     fl_free(instruction);
 }
 
-char* zir_instruction_variable_dump(ZirVariableInstruction *vardecl, char *output)
+char* zir_variable_instr_dump(ZirVariableInstr *vardecl, char *output)
 {
     output = zir_operand_dump(vardecl->base.destination, output);
     fl_cstring_append(&output, " : ");

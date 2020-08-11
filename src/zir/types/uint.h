@@ -29,7 +29,7 @@ typedef struct ZirUintType {
 } ZirUintType;
 
 /*
- * Function: zir_type_uint_new
+ * Function: zir_uint_type_new
  *  Returns a new instance of a uint type
  *
  * Parameters:
@@ -40,12 +40,12 @@ typedef struct ZirUintType {
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zir_type_uint_free> function
+ *  <zir_uint_type_free> function
  */
-ZirUintType* zir_type_uint_new(ZirUintTypeSize size);
+ZirUintType* zir_uint_type_new(ZirUintTypeSize size);
 
 /*
- * Function: zir_type_uint_hash
+ * Function: zir_uint_type_hash
  *  Returns a hash that identifies the uint type object
  *
  * Parameters:
@@ -54,10 +54,10 @@ ZirUintType* zir_type_uint_new(ZirUintTypeSize size);
  * Returns:
  *  unsigned long: Hash code of the type object
  */
-unsigned long zir_type_uint_hash(ZirUintType *type);
+unsigned long zir_uint_type_hash(ZirUintType *type);
 
 /*
- * Function: zir_type_uint_to_string
+ * Function: zir_uint_type_to_string
  *  Returns a string representation of the uint type object
  *
  * Parameters:
@@ -68,13 +68,13 @@ unsigned long zir_type_uint_hash(ZirUintType *type);
  *
  * Notes:
  *  The string returned by this function MUST NOT be freed by the caller, the type object
- *  has ownership of it, and it frees the string memory when the function <zir_type_uint_free>
+ *  has ownership of it, and it frees the string memory when the function <zir_uint_type_free>
  *  is used to free the memory used by the type object.
  */
-char* zir_type_uint_to_string(ZirUintType *type);
+char* zir_uint_type_to_string(ZirUintType *type);
 
 /*
- * Function: zir_type_uint_equals
+ * Function: zir_uint_type_equals
  *  Check if the uint type *type_a* is equals to the *type_b* object
  *
  * Parameters:
@@ -84,10 +84,10 @@ char* zir_type_uint_to_string(ZirUintType *type);
  * Returns:
  *  bool: *true* if *type_b* is a uint type equals to *type_a*, otherwise it returns *false*
  */
-bool zir_type_uint_equals(ZirUintType *type_a, ZirType *type_b);
+bool zir_uint_type_equals(ZirUintType *type_a, ZirType *type_b);
 
 /*
- * Function: zir_type_uint_is_assignable_from
+ * Function: zir_uint_type_is_assignable_from
  *  Checks if an object with type equals to *value_type* can be assigned to an object with a uint type
  *  equals to *target_type*
  *
@@ -99,10 +99,10 @@ bool zir_type_uint_equals(ZirUintType *type_a, ZirType *type_b);
  *  bool: *true* if an object of type *value_type* can be assigned to an object with type *target_type*,
  *        otherwise this function returns *false*.
  */
-bool zir_type_uint_is_assignable_from(ZirUintType *target_type, ZirType *value_type);
+bool zir_uint_type_is_assignable_from(ZirUintType *target_type, ZirType *value_type);
 
 /*
- * Function: zir_type_uint_size
+ * Function: zir_uint_type_size
  *  Returns the size needed to store an instance of the uint type (in bytes)
  *
  * Parameters:
@@ -111,10 +111,10 @@ bool zir_type_uint_is_assignable_from(ZirUintType *target_type, ZirType *value_t
  * Returns:
  *  size_t: Size needed to store an instance of the uint type
  */
-size_t zir_type_uint_size(ZirUintType *type);
+size_t zir_uint_type_size(ZirUintType *type);
 
 /*
- * Function: zir_type_uint_is_castable_to
+ * Function: zir_uint_type_is_castable_to
  *  Checks if an object with a uint type equals to *uint_type* can be casted to an object of type equals
  *  to *target_type*
  *
@@ -125,10 +125,10 @@ size_t zir_type_uint_size(ZirUintType *type);
  * Returns:
  *  bool: *true* if the uint type can be casted to a *target_type*, otherwise *false*
  */
-bool zir_type_uint_is_castable_to(ZirUintType *uint_type, ZirType *target_type);
+bool zir_uint_type_is_castable_to(ZirUintType *uint_type, ZirType *target_type);
 
 /*
- * Function: zir_type_uint_free
+ * Function: zir_uint_type_free
  *  Frees the memory of the uint type object
  *
  * Parameters:
@@ -137,6 +137,6 @@ bool zir_type_uint_is_castable_to(ZirUintType *uint_type, ZirType *target_type);
  * Returns:
  *  void: This function does not return a value
  */
-void zir_type_uint_free(ZirUintType *type);
+void zir_uint_type_free(ZirUintType *type);
 
 #endif /* ZIR_TYPE_UINT_H */

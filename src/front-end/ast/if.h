@@ -21,7 +21,7 @@ typedef struct ZenitIfNode {
 } ZenitIfNode;
 
 /*
- * Function: zenit_node_if_new
+ * Function: zenit_if_node_new
  *  Creates a new AST node that represents an if statement
  *
  * Parameters:
@@ -35,12 +35,12 @@ typedef struct ZenitIfNode {
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zenit_node_if_free> function
+ *  <zenit_if_node_free> function
  */
-ZenitIfNode* zenit_node_if_new(ZenitSourceLocation location, ZenitNode *condition, ZenitNode *then_branch, ZenitNode *else_branch);
+ZenitIfNode* zenit_if_node_new(ZenitSourceLocation location, ZenitNode *condition, ZenitNode *then_branch, ZenitNode *else_branch);
 
 /*
- * Function: zenit_node_if_uid
+ * Function: zenit_if_node_uid
  *  Returns a UID for the if statement node
  *
  * Parameters:
@@ -53,10 +53,10 @@ ZenitIfNode* zenit_node_if_new(ZenitSourceLocation location, ZenitNode *conditio
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_if_uid(ZenitIfNode *if_node);
+char* zenit_if_node_uid(ZenitIfNode *if_node);
 
 /*
- * Function: zenit_node_if_dump
+ * Function: zenit_if_node_dump
  *  Appends a dump of the if statement node to the output pointer, and
  *  returns a pointer to the -possibly reallocated- output
  *
@@ -72,13 +72,13 @@ char* zenit_node_if_uid(ZenitIfNode *if_node);
  *  a pointer to the new location in case the memory is reallocated or
  *  to the old location in case the pointer does not need to be modified. Either
  *  way, it is safe to use the function as:
- *      output = zenit_node_if_dump(if_node, output);
+ *      output = zenit_if_node_dump(if_node, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_if_dump(ZenitIfNode *if_node, char *output);
+char* zenit_if_node_dump(ZenitIfNode *if_node, char *output);
 
 /*
- * Function: zenit_node_if_free
+ * Function: zenit_if_node_free
  *  Frees the memory used by the if statement node
  *
  * Parameters:
@@ -87,6 +87,6 @@ char* zenit_node_if_dump(ZenitIfNode *if_node, char *output);
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_node_if_free(ZenitIfNode *if_node);
+void zenit_if_node_free(ZenitIfNode *if_node);
 
 #endif /* ZENIT_AST_IF_H */

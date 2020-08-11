@@ -5,7 +5,7 @@
 #include "array.h"
 #include "../../types/array.h"
 
-ZirArrayOperand* zir_operand_array_new(ZirArrayType *type)
+ZirArrayOperand* zir_array_operand_new(ZirArrayType *type)
 {
     ZirArrayOperand *operand = fl_malloc(sizeof(ZirArrayOperand));
     operand->base.type = ZIR_OPERAND_ARRAY;
@@ -15,12 +15,12 @@ ZirArrayOperand* zir_operand_array_new(ZirArrayType *type)
     return operand;
 }
 
-void zir_operand_array_add_element(ZirArrayOperand *array_operand, ZirOperand *member_operand)
+void zir_array_operand_add_element(ZirArrayOperand *array_operand, ZirOperand *member_operand)
 {
     array_operand->elements = fl_array_append(array_operand->elements, &member_operand);
 }
 
-void zir_operand_array_free(ZirArrayOperand *array_operand)
+void zir_array_operand_free(ZirArrayOperand *array_operand)
 {
     if (!array_operand)
         return;
@@ -28,12 +28,12 @@ void zir_operand_array_free(ZirArrayOperand *array_operand)
     fl_array_free(array_operand->elements);
 
     if (array_operand->type)
-        zir_type_array_free(array_operand->type);
+        zir_array_type_free(array_operand->type);
 
     fl_free(array_operand);
 }
 
-char* zir_operand_array_dump(ZirArrayOperand *array, char *output)
+char* zir_array_operand_dump(ZirArrayOperand *array, char *output)
 {
     fl_cstring_append(&output, "[ ");
     
@@ -56,9 +56,9 @@ char* zir_operand_array_dump(ZirArrayOperand *array, char *output)
     return output;
 }
 
-char* zir_operand_array_type_dump(ZirArrayOperand *array, char *output)
+char* zir_array_operand_type_dump(ZirArrayOperand *array, char *output)
 {
-    fl_cstring_vappend(&output, "%s", zir_type_array_to_string(array->type));
+    fl_cstring_vappend(&output, "%s", zir_array_type_to_string(array->type));
     return output;
 }
 

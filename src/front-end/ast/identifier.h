@@ -17,7 +17,7 @@ typedef struct ZenitIdentifierNode {
 } ZenitIdentifierNode;
 
 /*
- * Function: zenit_node_identifier_new
+ * Function: zenit_identifier_node_new
  *  Creates a new AST node that represents an identifier
  *
  * Parameters:
@@ -29,12 +29,12 @@ typedef struct ZenitIdentifierNode {
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zenit_node_identifier_free> function
+ *  <zenit_identifier_node_free> function
  */
-ZenitIdentifierNode* zenit_node_identifier_new(ZenitSourceLocation location, char *name);
+ZenitIdentifierNode* zenit_identifier_node_new(ZenitSourceLocation location, char *name);
 
 /*
- * Function: zenit_node_identifier_uid
+ * Function: zenit_identifier_node_uid
  *  Returns a UID for the identifier node
  *
  * Parameters:
@@ -47,10 +47,10 @@ ZenitIdentifierNode* zenit_node_identifier_new(ZenitSourceLocation location, cha
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_identifier_uid(ZenitIdentifierNode *identifier);
+char* zenit_identifier_node_uid(ZenitIdentifierNode *identifier);
 
 /*
- * Function: zenit_node_identifier_dump
+ * Function: zenit_identifier_node_dump
  *  Appends a dump of the identifier node to the output pointer, and
  *  returns a pointer to the -possibly reallocated- output
  *
@@ -66,13 +66,13 @@ char* zenit_node_identifier_uid(ZenitIdentifierNode *identifier);
  *  a pointer to the new location in case the memory is reallocated or
  *  to the old location in case the pointer does not need to be modified. Either
  *  way, it is safe to use the function as:
- *      output = zenit_node_identifier_dump(identifier, output);
+ *      output = zenit_identifier_node_dump(identifier, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_identifier_dump(ZenitIdentifierNode *identifier, char *output);
+char* zenit_identifier_node_dump(ZenitIdentifierNode *identifier, char *output);
 
 /*
- * Function: zenit_node_identifier_free
+ * Function: zenit_identifier_node_free
  *  Frees the memory used by the identifier node
  *
  * Parameters:
@@ -81,6 +81,6 @@ char* zenit_node_identifier_dump(ZenitIdentifierNode *identifier, char *output);
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_node_identifier_free(ZenitIdentifierNode *identifier_node);
+void zenit_identifier_node_free(ZenitIdentifierNode *identifier_node);
 
 #endif /* ZENIT_AST_IDENTIFIER_H */

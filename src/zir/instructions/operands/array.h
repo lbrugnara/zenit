@@ -21,7 +21,7 @@ typedef struct ZirArrayOperand {
 } ZirArrayOperand;
 
 /*
- * Function: zir_operand_array_new
+ * Function: zir_array_operand_new
  *  Creates a new array operand object with an empty set of elements. The *type* object represents
  *  the type of each array member
  *
@@ -32,14 +32,14 @@ typedef struct ZirArrayOperand {
  *  ZirArrayOperand*: The new array operand object
  *
  * Notes:
- *  The object returned by this function must be freed using the <zir_operand_array_free> function.
+ *  The object returned by this function must be freed using the <zir_array_operand_free> function.
  *  The array operand takes ownership of the <ZirArrayType> object, which means it will release
- *  the type object memory too when <zir_operand_array_free> is called with the array operand as argument.
+ *  the type object memory too when <zir_array_operand_free> is called with the array operand as argument.
  */
-ZirArrayOperand* zir_operand_array_new(ZirArrayType *type);
+ZirArrayOperand* zir_array_operand_new(ZirArrayType *type);
 
 /*
- * Function: zir_operand_array_add_element
+ * Function: zir_array_operand_add_element
  *  Adds the *member_operand* object to the list of members of the array operand
  *
  * Parameters:
@@ -49,10 +49,10 @@ ZirArrayOperand* zir_operand_array_new(ZirArrayType *type);
  * Returns:
  *  void: This function does not return a value
  */
-void zir_operand_array_add_element(ZirArrayOperand *array_operand, ZirOperand *operand);
+void zir_array_operand_add_element(ZirArrayOperand *array_operand, ZirOperand *operand);
 
 /*
- * Function: zir_operand_array_free
+ * Function: zir_array_operand_free
  *  Frees the memory of the array operand
  *
  * Parameters:
@@ -61,16 +61,16 @@ void zir_operand_array_add_element(ZirArrayOperand *array_operand, ZirOperand *o
  * Returns:
  *  void: This function does not return a value
  */
-void zir_operand_array_free(ZirArrayOperand *array_operand);
+void zir_array_operand_free(ZirArrayOperand *array_operand);
 
 /*
- * Function: zir_operand_array_dump
+ * Function: zir_array_operand_dump
  *  Dumps the string representation of the array operand to the *output* pointer. Because
  *  the *output* pointer can be modified this function returns the same pointer, so
  *  it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_operand_array_dump(array_operand, output);
+ *  output = zir_array_operand_dump(array_operand, output);
  * ===========
  *
  * Parameters:
@@ -83,16 +83,16 @@ void zir_operand_array_free(ZirArrayOperand *array_operand);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_array_dump(ZirArrayOperand *array_operand, char *output);
+char* zir_array_operand_dump(ZirArrayOperand *array_operand, char *output);
 
 /*
- * Function: zir_operand_array_type_dump
+ * Function: zir_array_operand_type_dump
  *  Dumps the string representation of the type of the array operand to the *output* 
  *  pointer. Because the *output* pointer can be modified this function returns 
  *  the same pointer, so it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_operand_array_type_dump(array_operand, output);
+ *  output = zir_array_operand_type_dump(array_operand, output);
  * ===========
  *
  * Parameters:
@@ -105,6 +105,6 @@ char* zir_operand_array_dump(ZirArrayOperand *array_operand, char *output);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_array_type_dump(ZirArrayOperand *array_operand, char *output);
+char* zir_array_operand_type_dump(ZirArrayOperand *array_operand, char *output);
 
 #endif /* ZIR_OPERAND_ARRAY_H */

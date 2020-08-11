@@ -21,7 +21,7 @@ typedef struct ZirBoolOperand {
 } ZirBoolOperand;
 
 /*
- * Function: zir_operand_bool_new
+ * Function: zir_bool_operand_new
  *  Creates a new boolean operand with the provided type, size, and value
  *
  * Parameters:
@@ -32,14 +32,14 @@ typedef struct ZirBoolOperand {
  *  ZirBoolOperand*: The new boolean operand object
  *
  * Notes:
- *  The object returned by this function must be freed using the <zir_operand_bool_free> function.
+ *  The object returned by this function must be freed using the <zir_bool_operand_free> function.
  *  The boolean operand takes ownership of the <ZirBoolType> object, which means it will release
- *  the type object memory too when <zir_operand_bool_free> is called with the boolean operand as argument.
+ *  the type object memory too when <zir_bool_operand_free> is called with the boolean operand as argument.
  */
-ZirBoolOperand* zir_operand_bool_new(ZirBoolType *type, bool value);
+ZirBoolOperand* zir_bool_operand_new(ZirBoolType *type, bool value);
 
 /*
- * Function: zir_operand_bool_free
+ * Function: zir_bool_operand_free
  *  Frees the memory of the boolean operand
  *
  * Parameters:
@@ -48,16 +48,16 @@ ZirBoolOperand* zir_operand_bool_new(ZirBoolType *type, bool value);
  * Returns:
  *  void: This function does not return a value
  */
-void zir_operand_bool_free(ZirBoolOperand *bool_operand);
+void zir_bool_operand_free(ZirBoolOperand *bool_operand);
 
 /*
- * Function: zir_operand_bool_dump
+ * Function: zir_bool_operand_dump
  *  Dumps the string representation of the boolean operand to the *output* pointer. Because
  *  the *output* pointer can be modified this function returns the same pointer, so
  *  it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_operand_bool_dump(bool_operand, output);
+ *  output = zir_bool_operand_dump(bool_operand, output);
  * ===========
  *
  * Parameters:
@@ -70,16 +70,16 @@ void zir_operand_bool_free(ZirBoolOperand *bool_operand);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_bool_dump(ZirBoolOperand *bool_operand, char *output);
+char* zir_bool_operand_dump(ZirBoolOperand *bool_operand, char *output);
 
 /*
- * Function: zir_operand_bool_type_dump
+ * Function: zir_bool_operand_type_dump
  *  Dumps the string representation of the type of the boolean operand to the *output* 
  *  pointer. Because the *output* pointer can be modified this function returns 
  *  the same pointer, so it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_operand_bool_type_dump(bool_operand, output);
+ *  output = zir_bool_operand_type_dump(bool_operand, output);
  * ===========
  *
  * Parameters:
@@ -92,6 +92,6 @@ char* zir_operand_bool_dump(ZirBoolOperand *bool_operand, char *output);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_bool_type_dump(ZirBoolOperand *bool_operand, char *output);
+char* zir_bool_operand_type_dump(ZirBoolOperand *bool_operand, char *output);
 
 #endif /* ZIR_OPERAND_BOOL_H */

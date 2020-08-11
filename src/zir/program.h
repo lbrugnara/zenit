@@ -135,13 +135,13 @@ ZirSymbol* zir_program_add_symbol(ZirProgram *program, ZirSymbol *symbol);
  *
  * Parameters:
  *  <ZirProgram> *program - Program object
- *  <ZirInstruction> *instruction - Instruction to be added
+ *  <ZirInstr> *instruction - Instruction to be added
  * 
  * Returns:
- *  <ZirInstruction>* - Added instruction
+ *  <ZirInstr>* - Added instruction
  * 
  */
-ZirInstruction* zir_program_emit(ZirProgram *program, ZirInstruction *instruction);
+ZirInstr* zir_program_emit(ZirProgram *program, ZirInstr *instruction);
 
 /*
  * Function: zir_program_dump

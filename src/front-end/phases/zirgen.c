@@ -112,32 +112,32 @@ static inline ZirType* new_zir_type_from_zenit_type(ZirProgram *program, ZenitTy
                 break;
         }
 
-        return (ZirType*) zir_type_uint_new(size);
+        return (ZirType*) zir_uint_type_new(size);
     }
 
     if (zenit_type->typekind == ZENIT_TYPE_BOOL)
     {
-        return (ZirType*) zir_type_bool_new();
+        return (ZirType*) zir_bool_type_new();
     }
 
     if (zenit_type->typekind == ZENIT_TYPE_REFERENCE)
     {
         ZenitReferenceType *zenit_ref = (ZenitReferenceType*) zenit_type;
         ZirType *zir_element_type = new_zir_type_from_zenit_type(program, zenit_ref->element);
-        return (ZirType*) zir_type_reference_new(zir_element_type);
+        return (ZirType*) zir_reference_type_new(zir_element_type);
     }
 
     if (zenit_type->typekind == ZENIT_TYPE_STRUCT)
     {
         ZenitStructType *zenit_struct = (ZenitStructType*) zenit_type;
-        ZirStructType *zir_struct_type = zir_type_struct_new(zenit_struct->name);
+        ZirStructType *zir_struct_type = zir_struct_type_new(zenit_struct->name);
 
         struct FlListNode *zenit_node = fl_list_head(zenit_struct->members);
 
         while (zenit_node)
         {
             ZenitStructTypeMember *zenit_member = (ZenitStructTypeMember*) zenit_node->value;
-            zir_type_struct_add_member(zir_struct_type, zenit_member->name, new_zir_type_from_zenit_type(program, zenit_member->type));
+            zir_struct_type_add_member(zir_struct_type, zenit_member->name, new_zir_type_from_zenit_type(program, zenit_member->type));
             zenit_node = zenit_node->next;
         }
 
@@ -148,14 +148,14 @@ static inline ZirType* new_zir_type_from_zenit_type(ZirProgram *program, ZenitTy
     {
         ZenitArrayType *zenit_array = (ZenitArrayType*) zenit_type;
         
-        ZirArrayType *zir_array = zir_type_array_new(new_zir_type_from_zenit_type(program, zenit_array->member_type));
+        ZirArrayType *zir_array = zir_array_type_new(new_zir_type_from_zenit_type(program, zenit_array->member_type));
         zir_array->length = zenit_array->length;
         
         return (ZirType*) zir_array;
     }
 
     if (zenit_type->typekind == ZENIT_TYPE_NONE)
-        return zir_type_none_new();
+        return zir_none_type_new();
 
     return NULL;
 }
@@ -248,10 +248,10 @@ static ZirOperand* visit_cast_node(ZenitContext *ctx, ZirProgram *program, Zenit
     ZirOperand *destination = (ZirOperand*) zir_operand_pool_new_symbol(program->operands, temp_symbol);
 
     // We create the cast instruction with the temporal symbol as the destination operand
-    ZirCastInstruction *cast_instr = zir_instruction_cast_new(destination, source);
+    ZirCastInstr *cast_instr = zir_cast_instr_new(destination, source);
 
     // We add the instruction to the program, and we return the destination operand
-    return zir_program_emit(program, (ZirInstruction*) cast_instr)->destination;
+    return zir_program_emit(program, (ZirInstr*) cast_instr)->destination;
 }
 
 /*
@@ -400,7 +400,7 @@ static ZirOperand* visit_array_node(ZenitContext *ctx, ZirProgram *program, Zeni
     for (size_t i=0; i < fl_array_length(zenit_array->elements); i++)
     {
         ZirOperand *zir_operand = visit_node(ctx, program, zenit_array->elements[i]);
-        zir_operand_array_add_element(zir_array, zir_operand);
+        zir_array_operand_add_element(zir_array, zir_operand);
     }
 
     return (ZirOperand*) zir_array;
@@ -422,7 +422,7 @@ static ZirOperand* visit_struct_node(ZenitContext *ctx, ZirProgram *program, Zen
         {
             ZenitFieldNode *field_node = (ZenitFieldNode*) member_node;
             ZirOperand *field_operand = visit_node(ctx, program, field_node->value);
-            zir_operand_struct_add_member(struct_operand, field_node->name, field_operand);
+            zir_struct_operand_add_member(struct_operand, field_node->name, field_operand);
         }
     }
 
@@ -519,16 +519,16 @@ static ZirOperand* visit_variable_node(ZenitContext *ctx, ZirProgram *program, Z
     ZirOperand *rhs = visit_node(ctx, program, zenit_variable->rvalue);
 
     // Create the variable declaration instruction with the source and destination operands
-    ZirVariableInstruction *zir_varinst = zir_instruction_variable_new(lhs, rhs);
+    ZirVariableInstr *zir_varinst = zir_variable_instr_new(lhs, rhs);
     zir_varinst->attributes = zenit_attr_map_to_zir_attr_map(ctx, program, zenit_variable->attributes);
 
     // We add the variable definition instruction to the program and finally return the destination operand
-    return zir_program_emit(program, (ZirInstruction*) zir_varinst)->destination;
+    return zir_program_emit(program, (ZirInstr*) zir_varinst)->destination;
 }
 
 static ZirOperand* visit_if_node(ZenitContext *ctx, ZirProgram *program, ZenitIfNode *if_node)
 {
-    char *if_uid = zenit_node_if_uid(if_node);
+    char *if_uid = zenit_if_node_uid(if_node);
     zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_uid);
 
     // We need to visit the condition expression to get the operand
@@ -536,9 +536,9 @@ static ZirOperand* visit_if_node(ZenitContext *ctx, ZirProgram *program, ZenitIf
 
     // TODO: WE ARE USING UINT FOR THE JUMP, WE SHOULD UPDATE THIS AS THE TYPES IN ZIR CHANGE
     // Emit the if-false instruction using the current instruction pointer, we will adjust it later
-    ZirUintOperand *uint = zir_operand_pool_new_uint(program->operands, zir_type_uint_new(ZIR_UINT_16), (ZirUintValue){ .uint16 = 0 });
-    ZirIfFalseInstruction *if_false_instr = zir_instruction_if_false_new((ZirOperand*) uint, condition_operand);
-    zir_program_emit(program, (ZirInstruction*) if_false_instr);
+    ZirUintOperand *uint = zir_operand_pool_new_uint(program->operands, zir_uint_type_new(ZIR_UINT_16), (ZirUintValue){ .uint16 = 0 });
+    ZirIfFalseInstr *if_false_instr = zir_if_false_instr_new((ZirOperand*) uint, condition_operand);
+    zir_program_emit(program, (ZirInstr*) if_false_instr);
 
     // Get the IP at the if-false instruction
     size_t if_instr_ip = zir_block_get_ip(program->current);
@@ -569,9 +569,9 @@ static ZirOperand* visit_if_node(ZenitContext *ctx, ZirProgram *program, ZenitIf
     {
         // If there is an "else" branch, emit a jump with a label that will need to be backpatched to skip the else when the if-false falls
         // through the "then" branch
-        ZirUintOperand *uint = zir_operand_pool_new_uint(program->operands, zir_type_uint_new(ZIR_UINT_16), (ZirUintValue){ .uint16 = 0 });
-        ZirJumpInstruction *jump_instr = zir_instruction_jump_new((ZirOperand*) uint);
-        zir_program_emit(program, (ZirInstruction*) jump_instr);
+        ZirUintOperand *uint = zir_operand_pool_new_uint(program->operands, zir_uint_type_new(ZIR_UINT_16), (ZirUintValue){ .uint16 = 0 });
+        ZirJumpInstr *jump_instr = zir_jump_instr_new((ZirOperand*) uint);
+        zir_program_emit(program, (ZirInstr*) jump_instr);
 
         // Similar to what we did with the if-false instruction, we save the IP at the jump place to calculate the offset
         size_t jump_inst_ip = zir_block_get_ip(program->current);
@@ -617,7 +617,7 @@ unaddressable_jump:
 static ZirOperand* visit_block_node(ZenitContext *ctx, ZirProgram *program, ZenitBlockNode *block_node)
 {
     // Enter to the Zenit scope
-    char *block_uid = zenit_node_block_uid(block_node);
+    char *block_uid = zenit_block_node_uid(block_node);
     zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_uid);
 
     // Generate ZIR instructions for each Zenit statement
@@ -697,7 +697,7 @@ static void convert_zenit_scope_to_zir_block(ZenitScope *scope, ZirBlock *block)
 /*
  * Function: zenit_generate_zir
  *  We just iterate over the declarations visiting each node to populate the <ZirProgram>
- *  with <ZirInstruction>s
+ *  with <ZirInstr>s
  */
 ZirProgram* zenit_generate_zir(ZenitContext *ctx)
 {

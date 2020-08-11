@@ -10,7 +10,7 @@ typedef struct ZnesTempSymbol {
     ZirOperand *source;
 } ZnesTempSymbol;
 
-ZnesTempSymbol* znes_symbol_temp_new(const char *name, ZirType *zir_type);
-void znes_symbol_temp_free(ZnesTempSymbol *symbol);
+ZnesTempSymbol* znes_temp_symbol_new(const char *name, ZirType *zir_type);
+void znes_temp_symbol_free(ZnesTempSymbol *symbol);
 
 #endif /* ZNES_TEMP_SYMBOL_H */

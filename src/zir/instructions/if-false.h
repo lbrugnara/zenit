@@ -7,21 +7,21 @@
 #include "../types/type.h"
 
 /*
- * Struct: ZirIfFalseInstruction
+ * Struct: ZirIfFalseInstr
  *  The if-false instruction uses the *destination* operand to calculate the next jump if the 
  *  *source* operand is a non-truthy value. Otherwise, the execution of the program must flow normally
  * 
  * Members:
- *  <ZirInstruction> base: Basic information of the instruction
+ *  <ZirInstr> base: Basic information of the instruction
  *  <ZirOperand> *source: The source operand of the if-false instruction
  */
-typedef struct ZirIfFalseInstruction {
-    ZirInstruction base;
+typedef struct ZirIfFalseInstr {
+    ZirInstr base;
     ZirOperand *source;
-} ZirIfFalseInstruction;
+} ZirIfFalseInstr;
 
 /*
- * Function: zir_instruction_if_false_new
+ * Function: zir_if_false_instr_new
  *  Creates and returns a new if-false instruction
  *
  * Parameters:
@@ -29,34 +29,34 @@ typedef struct ZirIfFalseInstruction {
  *  <ZirOperand> *source: The source operand of the if-false instruction
  *
  * Returns:
- *  <ZirIfFalseInstruction>*: If-true instruction object
+ *  <ZirIfFalseInstr>*: If-true instruction object
  *
  * Notes:
  *  The object returned by this function must be freed with the
- *  <zir_instruction_if_false_free> function
+ *  <zir_if_false_instr_free> function
  */
-ZirIfFalseInstruction* zir_instruction_if_false_new(ZirOperand *destination, ZirOperand *source);
+ZirIfFalseInstr* zir_if_false_instr_new(ZirOperand *destination, ZirOperand *source);
 
 /*
- * Function: zir_instruction_if_false_free
+ * Function: zir_if_false_instr_free
  *  Releases the memory used by the if-false instruction object
  *
  * Parameters:
- *  <ZirIfFalseInstruction> *instruction: The if-false instruction object to be freed
+ *  <ZirIfFalseInstr> *instruction: The if-false instruction object to be freed
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zir_instruction_if_false_free(ZirIfFalseInstruction *instruction);
+void zir_if_false_instr_free(ZirIfFalseInstr *instruction);
 
 /*
- * Function: zir_instruction_if_false_dump
+ * Function: zir_if_false_instr_dump
  *  Dumps the string representation of the instruction to the *output* pointer. Because
  *  the *output* pointer can be modified this function returns the same pointer, so
  *  it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_instruction_if_false_dump(instruction, output);
+ *  output = zir_if_false_instr_dump(instruction, output);
  * ===========
  *
  * Parameters:
@@ -67,6 +67,6 @@ void zir_instruction_if_false_free(ZirIfFalseInstruction *instruction);
  *  char*: *output* pointer
  *
  */
-char* zir_instruction_if_false_dump(ZirIfFalseInstruction *instruction, char *output);
+char* zir_if_false_instr_dump(ZirIfFalseInstr *instruction, char *output);
 
 #endif /* ZIR_INSTRUCTION_IF_TRUE_H */

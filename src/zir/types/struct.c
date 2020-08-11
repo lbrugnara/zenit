@@ -18,7 +18,7 @@ static void member_free(void *ptr)
     fl_free(member);
 }
 
-ZirStructType* zir_type_struct_new(char *name)
+ZirStructType* zir_struct_type_new(char *name)
 {
     ZirStructType *type = fl_malloc(sizeof(ZirStructType));
     type->base.typekind = ZIR_TYPE_STRUCT;
@@ -30,7 +30,7 @@ ZirStructType* zir_type_struct_new(char *name)
     return type;
 }
 
-void zir_type_struct_add_member(ZirStructType *struct_type, const char *name, ZirType *member_type)
+void zir_struct_type_add_member(ZirStructType *struct_type, const char *name, ZirType *member_type)
 {
     ZirStructTypeMember *member = fl_malloc(sizeof(ZirStructTypeMember));
 
@@ -40,7 +40,7 @@ void zir_type_struct_add_member(ZirStructType *struct_type, const char *name, Zi
     fl_list_append(struct_type->members, member);
 }
 
-ZirStructTypeMember* zir_type_struct_get_member(ZirStructType *struct_type, const char *name)
+ZirStructTypeMember* zir_struct_type_get_member(ZirStructType *struct_type, const char *name)
 {
     struct FlListNode *tmp = fl_list_head(struct_type->members);
     while (tmp != NULL)
@@ -56,7 +56,7 @@ ZirStructTypeMember* zir_type_struct_get_member(ZirStructType *struct_type, cons
     return NULL;
 }
 
-unsigned long zir_type_struct_hash(ZirStructType *type)
+unsigned long zir_struct_type_hash(ZirStructType *type)
 {
     static const char *format = "[struct][n:%s]";
 
@@ -79,12 +79,12 @@ unsigned long zir_type_struct_hash(ZirStructType *type)
  *  allocated string, but we benefit from the <type_string_mapping_pool> variable
  *  to reuse strings.
  */
-char* zir_type_struct_to_string(ZirStructType *type)
+char* zir_struct_type_to_string(ZirStructType *type)
 {
     if (type == NULL)
         return NULL;
 
-    unsigned long type_hash = zir_type_struct_hash(type);
+    unsigned long type_hash = zir_struct_type_hash(type);
 
     if (type->base.to_string.value == NULL)
     {
@@ -132,7 +132,7 @@ char* zir_type_struct_to_string(ZirStructType *type)
     return type->base.to_string.value;
 }
 
-bool zir_type_struct_structurally_equals(ZirStructType *type_a, ZirStructType *type_b)
+bool zir_struct_type_structurally_equals(ZirStructType *type_a, ZirStructType *type_b)
 {
     if (fl_list_length(type_a->members) != fl_list_length(type_b->members))
         return false;
@@ -155,7 +155,7 @@ bool zir_type_struct_structurally_equals(ZirStructType *type_a, ZirStructType *t
                 if (a_member->type->typekind != ZIR_TYPE_STRUCT || b_member->type->typekind != ZIR_TYPE_STRUCT)
                     equals = zir_type_equals(a_member->type, b_member->type);
                 else
-                    equals = zir_type_struct_structurally_equals((ZirStructType*) a_member->type, (ZirStructType*) b_member->type);
+                    equals = zir_struct_type_structurally_equals((ZirStructType*) a_member->type, (ZirStructType*) b_member->type);
                 
                 if (equals)
                 {
@@ -176,7 +176,7 @@ bool zir_type_struct_structurally_equals(ZirStructType *type_a, ZirStructType *t
     return true;
 }
 
-bool zir_type_struct_equals(ZirStructType *type_a, ZirType *type_b)
+bool zir_struct_type_equals(ZirStructType *type_a, ZirType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
         return (ZirType*) type_a == type_b;
@@ -192,10 +192,10 @@ bool zir_type_struct_equals(ZirStructType *type_a, ZirType *type_b)
         return false;
 
     // Structural equality
-    return zir_type_struct_structurally_equals(type_a, type_b_struct);
+    return zir_struct_type_structurally_equals(type_a, type_b_struct);
 }
 
-bool zir_type_struct_is_assignable_from(ZirStructType *target_type, ZirType *from_type)
+bool zir_struct_type_is_assignable_from(ZirStructType *target_type, ZirType *from_type)
 {
     if (!target_type || !from_type)
         return false;
@@ -209,10 +209,10 @@ bool zir_type_struct_is_assignable_from(ZirStructType *target_type, ZirType *fro
         return flm_cstring_equals(target_type->name, struct_from_type->name);
 
     // Structural equality (we can safely convert between struturally equals objects)
-    return zir_type_struct_structurally_equals(target_type, struct_from_type);
+    return zir_struct_type_structurally_equals(target_type, struct_from_type);
 }
 
-bool zir_type_struct_is_castable_to(ZirStructType *struct_type, ZirType *target_type)
+bool zir_struct_type_is_castable_to(ZirStructType *struct_type, ZirType *target_type)
 {
     if (struct_type == NULL || target_type == NULL)
         return false;
@@ -224,7 +224,7 @@ bool zir_type_struct_is_castable_to(ZirStructType *struct_type, ZirType *target_
     return zir_type_is_assignable_from(target_type, (ZirType*) struct_type);
 }
 
-size_t zir_type_struct_size(ZirStructType *type)
+size_t zir_struct_type_size(ZirStructType *type)
 {
     if (!type)
         return 0;
@@ -242,7 +242,7 @@ size_t zir_type_struct_size(ZirStructType *type)
     return struct_size;
 }
 
-void zir_type_struct_free(ZirStructType *type)
+void zir_struct_type_free(ZirStructType *type)
 {
     if (!type)
         return;

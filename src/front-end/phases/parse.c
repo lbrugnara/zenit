@@ -179,7 +179,7 @@ static ZenitTypeNode* parse_type_array_declaration(ZenitParser *parser, ZenitCon
 
     ZenitTypeNode *member_type = parse_type_declaration(parser, ctx, allow_partial_types);
 
-    ZenitArrayTypeNode *array_type_decl = zenit_node_type_array_new(bracket_token.location, member_type);
+    ZenitArrayTypeNode *array_type_decl = zenit_array_type_node_new(bracket_token.location, member_type);
 
     array_type_decl->auto_length = auto_length;
     array_type_decl->length = length;
@@ -194,7 +194,7 @@ static ZenitTypeNode* parse_type_reference_declaration(ZenitParser *parser, Zeni
 
     ZenitTypeNode *element_type = parse_type_declaration(parser, ctx, allow_partial_types);
 
-    return (ZenitTypeNode*) zenit_node_type_reference_new(amp_token.location, element_type);
+    return (ZenitTypeNode*) zenit_reference_type_node_new(amp_token.location, element_type);
 }
 
 /*
@@ -233,16 +233,16 @@ static ZenitTypeNode* parse_type_declaration(ZenitParser *parser, ZenitContext *
 
     if (zenit_type == ZENIT_TYPE_UINT)
     {
-        ZenitUintTypeSize size = zenit_type_uint_size_from_slice(&type_token.value);
-        return (ZenitTypeNode*) zenit_node_type_uint_new(type_token.location, size);
+        ZenitUintTypeSize size = zenit_uint_type_size_from_slice(&type_token.value);
+        return (ZenitTypeNode*) zenit_uint_type_node_new(type_token.location, size);
     }
     else if (zenit_type == ZENIT_TYPE_BOOL)
     {
-        return (ZenitTypeNode*) zenit_node_type_bool_new(type_token.location);
+        return (ZenitTypeNode*) zenit_bool_type_node_new(type_token.location);
     }
     else if (zenit_type == ZENIT_TYPE_STRUCT)
     {
-        return (ZenitTypeNode*) zenit_node_type_struct_new(type_token.location, token_to_string(&type_token));
+        return (ZenitTypeNode*) zenit_struct_type_node_new(type_token.location, token_to_string(&type_token));
     }
     
     zenit_context_error(ctx, type_token.location, ZENIT_ERROR_INTERNAL, "Unhandled type");
@@ -314,7 +314,7 @@ static ZenitNode* parse_integer_literal(ZenitParser *parser, ZenitContext *ctx)
     ZenitUintValue value;
     assert_or_return(ctx, parse_uint_value(ctx, &number_token, &size, &value), ZENIT_ERROR_INTERNAL, NULL);
 
-    ZenitUintNode *primitive_node = zenit_node_uint_new(number_token.location, size, value);
+    ZenitUintNode *primitive_node = zenit_uint_node_new(number_token.location, size, value);
 
     assert_or_return(ctx, primitive_node != NULL, ZENIT_ERROR_INTERNAL, NULL);
 
@@ -343,7 +343,7 @@ static ZenitNode* parse_boolean_literal(ZenitParser *parser, ZenitContext *ctx)
 
     bool value = fl_slice_equals_sequence(&bool_token.value, (const FlByte * const) "true", 4);
 
-    return (ZenitNode*) zenit_node_bool_new(bool_token.location, value);
+    return (ZenitNode*) zenit_bool_node_new(bool_token.location, value);
 }
 
 /*
@@ -392,7 +392,7 @@ static ZenitNode* parse_array_literal(ZenitParser *parser, ZenitContext *ctx)
     consume_or_return(ctx, parser, ZENIT_TOKEN_LBRACKET, &lbracket_token);
 
     // Allocate memory for the array node and fill the basic information
-    ZenitArrayNode *array = zenit_node_array_new(lbracket_token.location);
+    ZenitArrayNode *array = zenit_array_node_new(lbracket_token.location);
 
     assert_or_return(ctx, array != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize an array initializer node");
 
@@ -405,7 +405,7 @@ static ZenitNode* parse_array_literal(ZenitParser *parser, ZenitContext *ctx)
         assert_or_goto(ctx, expression != NULL, ZENIT_ERROR_INTERNAL, NULL, on_bad_expression_value);
 
         // Add the node to the elements list
-        zenit_node_array_add_child(array, expression);
+        zenit_array_node_add_child(array, expression);
 
         // If the next token IS NOT a right bracket, it MUST be a comma (even a trailing comma)
         if (!zenit_parser_next_is(parser, ZENIT_TOKEN_RBRACKET))
@@ -420,7 +420,7 @@ static ZenitNode* parse_array_literal(ZenitParser *parser, ZenitContext *ctx)
     // Cleanup code for error conditions
     on_bad_expression_value:
     on_missing_bracket:
-        zenit_node_array_free(array);
+        zenit_array_node_free(array);
 
     return NULL;
 }
@@ -448,7 +448,7 @@ static ZenitNode* parse_reference_expression(ZenitParser *parser, ZenitContext *
     ZenitNode *expression = parse_expression(parser, ctx);
     assert_or_return(ctx, expression != NULL, ZENIT_ERROR_INTERNAL, NULL);
 
-    ZenitReferenceNode *reference = zenit_node_reference_new(amp_token.location, expression);
+    ZenitReferenceNode *reference = zenit_reference_node_new(amp_token.location, expression);
     assert_or_goto(ctx, reference != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize a reference node", on_reference_new_error);
 
     // Success
@@ -476,7 +476,7 @@ static ZenitNode* parse_reference_expression(ZenitParser *parser, ZenitContext *
  */
 static ZenitNode* parse_identifier(ZenitParser *parser, ZenitContext *ctx, ZenitToken *id_token)
 {
-    ZenitIdentifierNode *identifier = zenit_node_identifier_new(id_token->location, token_to_string(id_token));
+    ZenitIdentifierNode *identifier = zenit_identifier_node_new(id_token->location, token_to_string(id_token));
 
     assert_or_return(ctx, identifier != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize an identifier node");
     assert_or_goto(ctx, identifier->name != NULL && identifier->name[0] != '\0', ZENIT_ERROR_INTERNAL, "Identifier name cannot be empty", on_error);
@@ -515,7 +515,7 @@ static ZenitNode* parse_struct_field(ZenitParser *parser, ZenitContext *ctx)
 
     assert_or_return(ctx, value != NULL, ZENIT_ERROR_INTERNAL, NULL);
 
-    ZenitFieldNode *field_node = zenit_node_field_new(field_name.location, token_to_string(&field_name));
+    ZenitFieldNode *field_node = zenit_field_node_new(field_name.location, token_to_string(&field_name));
 
     assert_or_return(ctx, field_node != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize struct field node");
 
@@ -544,7 +544,7 @@ static ZenitNode* parse_struct_literal(ZenitParser *parser, ZenitContext *ctx)
     ZenitToken brace_token;
     consume_or_return(ctx, parser, ZENIT_TOKEN_LBRACE, &brace_token);
 
-    ZenitStructNode *struct_node = zenit_node_struct_new(brace_token.location, NULL);
+    ZenitStructNode *struct_node = zenit_struct_node_new(brace_token.location, NULL);
 
     assert_or_return(ctx, struct_node != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize a struct node");
 
@@ -595,7 +595,7 @@ static ZenitNode* parse_struct_literal(ZenitParser *parser, ZenitContext *ctx)
     return (ZenitNode*) struct_node;
 
     // Errors...
-    on_error: zenit_node_struct_free(struct_node);
+    on_error: zenit_struct_node_free(struct_node);
 
     return NULL;
 }
@@ -678,7 +678,7 @@ static ZenitNode* parse_cast_expression(ZenitParser *parser, ZenitContext *ctx)
     ZenitNode *expression = parse_expression(parser, ctx);
     assert_or_return(ctx, expression != NULL, ZENIT_ERROR_INTERNAL, NULL);
 
-    ZenitCastNode *cast_node = zenit_node_cast_new(cast_token.location, expression, false);
+    ZenitCastNode *cast_node = zenit_cast_node_new(cast_token.location, expression, false);
 
     if (zenit_parser_consume_if(parser, ZENIT_TOKEN_COLON))
     {
@@ -691,7 +691,7 @@ static ZenitNode* parse_cast_expression(ZenitParser *parser, ZenitContext *ctx)
     // Success
     return (ZenitNode*)cast_node;
 
-    on_error: zenit_node_cast_free(cast_node);
+    on_error: zenit_cast_node_free(cast_node);
 
     return NULL;
 }
@@ -803,7 +803,7 @@ static ZenitNode* parse_block(ZenitParser *parser, ZenitContext *ctx)
     ZenitToken lbrace_token;
     consume_or_return(ctx, parser, ZENIT_TOKEN_LBRACE, &lbrace_token);
 
-    ZenitBlockNode *block_node = zenit_node_block_new(lbrace_token.location);
+    ZenitBlockNode *block_node = zenit_block_node_new(lbrace_token.location);
 
     while (zenit_parser_has_input(parser) && !zenit_parser_next_is(parser, ZENIT_TOKEN_RBRACE))
     {
@@ -811,14 +811,14 @@ static ZenitNode* parse_block(ZenitParser *parser, ZenitContext *ctx)
 
         assert_or_goto(ctx, statement != NULL, ZENIT_ERROR_INTERNAL, NULL, on_error);
 
-        zenit_node_block_add_statement(block_node, statement);
+        zenit_block_node_add_statement(block_node, statement);
     }
 
     consume_or_goto(ctx, parser, ZENIT_TOKEN_RBRACE, NULL, on_error);
 
     return (ZenitNode*) block_node;
 
-    on_error:    zenit_node_block_free(block_node);
+    on_error:    zenit_block_node_free(block_node);
 
     return NULL;
 }
@@ -868,7 +868,7 @@ static ZenitNode* parse_if_statement(ZenitParser *parser, ZenitContext *ctx)
         assert_or_goto(ctx, else_branch != NULL, ZENIT_ERROR_INTERNAL, NULL, on_else_branch_error);
     }
 
-    ZenitIfNode *if_node = zenit_node_if_new(if_token.location, condition, then_branch, else_branch);
+    ZenitIfNode *if_node = zenit_if_node_new(if_token.location, condition, then_branch, else_branch);
     assert_or_goto(ctx, if_node != NULL, ZENIT_ERROR_INTERNAL, "Could not create if node", on_if_node_error);
 
     return (ZenitNode*) if_node;
@@ -952,7 +952,7 @@ static ZenitNode* parse_variable_declaration(ZenitParser *parser, ZenitContext *
     }
     
     // Allocate the memory and the base information
-    ZenitVariableNode *var_node = zenit_node_variable_new(var_token.location, token_to_string(&name_token));
+    ZenitVariableNode *var_node = zenit_variable_node_new(var_token.location, token_to_string(&name_token));
 
     assert_or_return(ctx, var_node != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize a variable node");
 
@@ -979,7 +979,7 @@ static ZenitNode* parse_variable_declaration(ZenitParser *parser, ZenitContext *
     return (ZenitNode*) var_node;
 
     // Cleanup code for error conditions
-    on_error: zenit_node_variable_free(var_node);
+    on_error: zenit_variable_node_free(var_node);
 
     return NULL;
 }
@@ -1023,7 +1023,7 @@ static ZenitNode* parse_field_declaration(ZenitParser *parser, ZenitContext *ctx
     }
     
     // Allocate the memory and the base information
-    ZenitFieldDeclNode *field_node = zenit_node_field_decl_new(name_token.location, token_to_string(&name_token));
+    ZenitFieldDeclNode *field_node = zenit_field_decl_node_new(name_token.location, token_to_string(&name_token));
 
     assert_or_return(ctx, field_node != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize a field declaration node");
 
@@ -1040,7 +1040,7 @@ static ZenitNode* parse_field_declaration(ZenitParser *parser, ZenitContext *ctx
     return (ZenitNode*) field_node;
 
     // Cleanup code for error conditions
-    on_error: zenit_node_field_decl_free(field_node);
+    on_error: zenit_field_decl_node_free(field_node);
 
     return NULL;
 }
@@ -1086,7 +1086,7 @@ static ZenitNode* parse_struct_declaration(ZenitParser *parser, ZenitContext *ct
     }
 
     // Allocate the memory and the base information
-    ZenitStructDeclNode *struct_node = zenit_node_struct_decl_new(struct_token.location, token_to_string(&name_token));
+    ZenitStructDeclNode *struct_node = zenit_struct_decl_node_new(struct_token.location, token_to_string(&name_token));
 
     assert_or_return(ctx, struct_node != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize a struct declaration node");
 
@@ -1112,7 +1112,7 @@ static ZenitNode* parse_struct_declaration(ZenitParser *parser, ZenitContext *ct
     return (ZenitNode*) struct_node;
 
     // Cleanup code for error conditions
-    on_error: zenit_node_struct_decl_free(struct_node);
+    on_error: zenit_struct_decl_node_free(struct_node);
 
     return NULL;
 }
@@ -1144,7 +1144,7 @@ static ZenitNode* parse_attribute_declaration(ZenitParser *parser, ZenitContext 
     consume_or_return(ctx, parser, ZENIT_TOKEN_ID, &name_token);
     
     // At this point we create the attribute node
-    ZenitAttributeNode *attribute = zenit_node_attribute_new(hash_token.location, token_to_string(&name_token));    
+    ZenitAttributeNode *attribute = zenit_attribute_node_new(hash_token.location, token_to_string(&name_token));    
 
     assert_or_return(ctx, attribute != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize an attribute node");
 
@@ -1164,7 +1164,7 @@ static ZenitNode* parse_attribute_declaration(ZenitParser *parser, ZenitContext 
             assert_or_goto(ctx, value != NULL, ZENIT_ERROR_INTERNAL, NULL, on_parsing_error);
 
             // Create the property and add it to the attribute's properties map
-            ZenitPropertyNode *property = zenit_node_property_new(prop_name.location, token_to_string(&prop_name), value);
+            ZenitPropertyNode *property = zenit_property_node_new(prop_name.location, token_to_string(&prop_name), value);
 
             if (property != NULL)
             {

@@ -9,7 +9,7 @@ typedef struct ZnesArraySymbol {
     ZnesSymbol **elements;
 } ZnesArraySymbol;
 
-ZnesArraySymbol* znes_symbol_array_new(const char *name, ZirArrayType *zir_array_type, ZnesSegment segment, uint16_t address);
-void znes_symbol_array_free(ZnesArraySymbol *array_symbol);
+ZnesArraySymbol* znes_array_symbol_new(const char *name, ZirArrayType *zir_array_type, ZnesSegment segment, uint16_t address);
+void znes_array_symbol_free(ZnesArraySymbol *array_symbol);
 
 #endif /* ZNES_ARRAY_SYMBOL_H */

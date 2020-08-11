@@ -276,7 +276,7 @@ static inline bool reserve_temp_symbol(ZnesProgram *program, ZnesSymbol **nes_sy
     if (!program || !nes_symbol || !zir_symbol)
         return false;
 
-    *nes_symbol = (ZnesSymbol*) znes_symbol_temp_new(zir_symbol->name, zir_symbol->type);
+    *nes_symbol = (ZnesSymbol*) znes_temp_symbol_new(zir_symbol->name, zir_symbol->type);
     fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
 
     return true;

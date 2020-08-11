@@ -414,7 +414,7 @@ static ZenitSymbol* visit_unnamed_struct_node(ZenitContext *ctx, ZenitStructNode
             ZenitFieldNode *field_node = (ZenitFieldNode*) struct_node->members[i];
             ZenitSymbol *value_symbol = visit_node(ctx, field_node->value, pass);
 
-            zenit_type_struct_add_member(struct_type, field_node->name, 
+            zenit_struct_type_add_member(struct_type, field_node->name, 
                 value_symbol != NULL 
                     ? zenit_type_ctx_copy_type(ctx->types, value_symbol->type) 
                     : zenit_type_ctx_new_none(ctx->types));
@@ -561,7 +561,7 @@ static ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, ZenitStructDeclNod
             continue; // An error ocurred on the field decl node
 
         // We register the field in the struct type
-        zenit_type_struct_add_member(struct_type, field_symbol->name, field_symbol->type);
+        zenit_struct_type_add_member(struct_type, field_symbol->name, field_symbol->type);
     }
 
     // We pop the scope and continue
@@ -638,7 +638,7 @@ static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *va
 
 static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node, enum ResolvePass pass)
 {
-    char *if_uid = zenit_node_if_uid(if_node);
+    char *if_uid = zenit_if_node_uid(if_node);
 
     zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_uid);
 
@@ -657,7 +657,7 @@ static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node, enum 
 
 static ZenitSymbol* visit_block_node(ZenitContext *ctx, ZenitBlockNode *block_node, enum ResolvePass pass)
 {
-    char *block_uid = zenit_node_block_uid(block_node);
+    char *block_uid = zenit_block_node_uid(block_node);
 
     zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_uid);
 

@@ -3,7 +3,7 @@
 #include <fllib/Cstring.h>
 #include "reference.h"
 
-ZenitReferenceType* zenit_type_reference_new(ZenitType *element)
+ZenitReferenceType* zenit_reference_type_new(ZenitType *element)
 {
     ZenitReferenceType *type = fl_malloc(sizeof(ZenitReferenceType));
     type->base.typekind = ZENIT_TYPE_REFERENCE;
@@ -12,7 +12,7 @@ ZenitReferenceType* zenit_type_reference_new(ZenitType *element)
     return type;
 }
 
-unsigned long zenit_type_reference_hash(ZenitReferenceType *type)
+unsigned long zenit_reference_type_hash(ZenitReferenceType *type)
 {
     static const char *format = "[ref][e:%lu]";
 
@@ -28,12 +28,12 @@ unsigned long zenit_type_reference_hash(ZenitReferenceType *type)
     return hash;
 }
 
-char* zenit_type_reference_to_string(ZenitReferenceType *type)
+char* zenit_reference_type_to_string(ZenitReferenceType *type)
 {
     if (type == NULL)
         return NULL;
 
-    unsigned long type_hash = zenit_type_reference_hash(type);
+    unsigned long type_hash = zenit_reference_type_hash(type);
 
     if (type->base.to_string.value == NULL)
     {
@@ -59,7 +59,7 @@ char* zenit_type_reference_to_string(ZenitReferenceType *type)
     return type->base.to_string.value;
 }
 
-bool zenit_type_reference_equals(ZenitReferenceType *type_a, ZenitType *type_b)
+bool zenit_reference_type_equals(ZenitReferenceType *type_a, ZenitType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
         return (ZenitType*) type_a == type_b;
@@ -72,7 +72,7 @@ bool zenit_type_reference_equals(ZenitReferenceType *type_a, ZenitType *type_b)
     return zenit_type_equals(type_a->element, type_b_ref->element);
 }
 
-bool zenit_type_reference_is_assignable_from(ZenitReferenceType *target_type, ZenitType *from_type)
+bool zenit_reference_type_is_assignable_from(ZenitReferenceType *target_type, ZenitType *from_type)
 {
     if (!target_type || !from_type)
         return false;
@@ -85,13 +85,13 @@ bool zenit_type_reference_is_assignable_from(ZenitReferenceType *target_type, Ze
     return zenit_type_is_assignable_from(target_type->element, ref_from_type->element);
 }
 
-bool zenit_type_reference_is_castable_to(ZenitReferenceType *reference, ZenitType *target_type)
+bool zenit_reference_type_is_castable_to(ZenitReferenceType *reference, ZenitType *target_type)
 {
     if (target_type == NULL || target_type == NULL)
         return false;
 
     // Cast between the same types are valid
-    if (zenit_type_reference_equals(reference, target_type))
+    if (zenit_reference_type_equals(reference, target_type))
         return true;
 
     if (target_type->typekind == ZENIT_TYPE_REFERENCE)
@@ -104,7 +104,7 @@ bool zenit_type_reference_is_castable_to(ZenitReferenceType *reference, ZenitTyp
     return false;
 }
 
-bool zenit_type_reference_can_unify(ZenitReferenceType *ref_type, ZenitType *type_b)
+bool zenit_reference_type_can_unify(ZenitReferenceType *ref_type, ZenitType *type_b)
 {
     if (ref_type == NULL || type_b == NULL)
         return false;
@@ -115,7 +115,7 @@ bool zenit_type_reference_can_unify(ZenitReferenceType *ref_type, ZenitType *typ
     if (type_b->typekind != ZENIT_TYPE_REFERENCE)
         return false;
 
-    if (zenit_type_reference_equals(ref_type, type_b))
+    if (zenit_reference_type_equals(ref_type, type_b))
         return true;
 
     ZenitReferenceType *ref_type_b = (ZenitReferenceType*) type_b;
@@ -123,7 +123,7 @@ bool zenit_type_reference_can_unify(ZenitReferenceType *ref_type, ZenitType *typ
     return zenit_type_can_unify(ref_type->element, ref_type_b->element);
 }
 
-void zenit_type_reference_free(ZenitReferenceType *type)
+void zenit_reference_type_free(ZenitReferenceType *type)
 {
     if (!type)
         return;

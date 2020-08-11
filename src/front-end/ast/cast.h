@@ -23,7 +23,7 @@ typedef struct ZenitCastNode {
 } ZenitCastNode;
 
 /*
- * Function: zenit_node_cast_new
+ * Function: zenit_cast_node_new
  *  Creates a new AST node that represents a cast expression
  *
  * Parameters:
@@ -36,12 +36,12 @@ typedef struct ZenitCastNode {
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zenit_node_cast_free> function
+ *  <zenit_cast_node_free> function
  */
-ZenitCastNode* zenit_node_cast_new(ZenitSourceLocation location, ZenitNode *expression, bool implicit);
+ZenitCastNode* zenit_cast_node_new(ZenitSourceLocation location, ZenitNode *expression, bool implicit);
 
 /*
- * Function: zenit_node_cast_uid
+ * Function: zenit_cast_node_uid
  *  Returns a UID for the cast node
  *
  * Parameters:
@@ -54,10 +54,10 @@ ZenitCastNode* zenit_node_cast_new(ZenitSourceLocation location, ZenitNode *expr
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_cast_uid(ZenitCastNode *cast);
+char* zenit_cast_node_uid(ZenitCastNode *cast);
 
 /*
- * Function: zenit_node_cast_dump
+ * Function: zenit_cast_node_dump
  *  Appends a dump of the cast node to the output pointer, and
  *  returns a pointer to the -possibly reallocated- output
  *
@@ -73,13 +73,13 @@ char* zenit_node_cast_uid(ZenitCastNode *cast);
  *  a pointer to the new location in case the memory is reallocated or
  *  to the old location in case the pointer does not need to be modified. Either
  *  way, it is safe to use the function as:
- *      output = zenit_node_cast_dump(cast, output);
+ *      output = zenit_cast_node_dump(cast, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_cast_dump(ZenitCastNode *cast, char *output);
+char* zenit_cast_node_dump(ZenitCastNode *cast, char *output);
 
 /*
- * Function: zenit_node_cast_free
+ * Function: zenit_cast_node_free
  *  Frees the memory used by the cast node
  *
  * Parameters:
@@ -88,6 +88,6 @@ char* zenit_node_cast_dump(ZenitCastNode *cast, char *output);
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_node_cast_free(ZenitCastNode *cast_node);
+void zenit_cast_node_free(ZenitCastNode *cast_node);
 
 #endif /* ZENIT_AST_CAST_H */

@@ -13,22 +13,22 @@ unsigned long zir_type_hash(ZirType *type)
     switch (type->typekind)
     {
         case ZIR_TYPE_UINT:
-            return zir_type_uint_hash((ZirUintType*) type);
+            return zir_uint_type_hash((ZirUintType*) type);
 
         case ZIR_TYPE_BOOL:
-            return zir_type_bool_hash((ZirBoolType*) type);
+            return zir_bool_type_hash((ZirBoolType*) type);
 
         case ZIR_TYPE_STRUCT:
-            return zir_type_struct_hash((ZirStructType*) type);
+            return zir_struct_type_hash((ZirStructType*) type);
         
         case ZIR_TYPE_REFERENCE:
-            return zir_type_reference_hash((ZirReferenceType*) type);
+            return zir_reference_type_hash((ZirReferenceType*) type);
         
         case ZIR_TYPE_ARRAY:
-            return zir_type_array_hash((ZirArrayType*) type);
+            return zir_array_type_hash((ZirArrayType*) type);
         
         case ZIR_TYPE_NONE:
-            return zir_type_none_hash(type);
+            return zir_none_type_hash(type);
     }
 
     return 0;
@@ -52,19 +52,19 @@ char* zir_type_to_string(ZirType *type)
     switch (type->typekind)
     {
         case ZIR_TYPE_UINT:
-            return zir_type_uint_to_string((ZirUintType*) type);
+            return zir_uint_type_to_string((ZirUintType*) type);
             
         case ZIR_TYPE_BOOL:
-            return zir_type_bool_to_string((ZirBoolType*) type);
+            return zir_bool_type_to_string((ZirBoolType*) type);
 
         case ZIR_TYPE_STRUCT:
-            return zir_type_struct_to_string((ZirStructType*) type);
+            return zir_struct_type_to_string((ZirStructType*) type);
         
         case ZIR_TYPE_REFERENCE:
-            return zir_type_reference_to_string((ZirReferenceType*) type);
+            return zir_reference_type_to_string((ZirReferenceType*) type);
         
         case ZIR_TYPE_ARRAY:
-            return zir_type_array_to_string((ZirArrayType*) type);
+            return zir_array_type_to_string((ZirArrayType*) type);
         
         case ZIR_TYPE_NONE:
             return "<unknown>";
@@ -81,19 +81,19 @@ bool zir_type_equals(ZirType *type_a, ZirType *type_b)
     switch (type_a->typekind)
     {
         case ZIR_TYPE_UINT:
-            return zir_type_uint_equals((ZirUintType*) type_a, type_b);
+            return zir_uint_type_equals((ZirUintType*) type_a, type_b);
 
         case ZIR_TYPE_BOOL:
-            return zir_type_bool_equals((ZirBoolType*) type_a, type_b);
+            return zir_bool_type_equals((ZirBoolType*) type_a, type_b);
 
         case ZIR_TYPE_STRUCT:
-            return zir_type_struct_equals((ZirStructType*) type_a, type_b);
+            return zir_struct_type_equals((ZirStructType*) type_a, type_b);
         
         case ZIR_TYPE_REFERENCE:
-            return zir_type_reference_equals((ZirReferenceType*) type_a, type_b);
+            return zir_reference_type_equals((ZirReferenceType*) type_a, type_b);
         
         case ZIR_TYPE_ARRAY:
-            return zir_type_array_equals((ZirArrayType*) type_a, type_b);
+            return zir_array_type_equals((ZirArrayType*) type_a, type_b);
         
         case ZIR_TYPE_NONE:
             return type_b->typekind == ZIR_TYPE_NONE;
@@ -113,19 +113,19 @@ bool zir_type_is_assignable_from(ZirType *target_type, ZirType *from_type)
             return from_type->typekind != ZIR_TYPE_NONE;
         
         case ZIR_TYPE_UINT:
-            return zir_type_uint_is_assignable_from((ZirUintType*) target_type, from_type);
+            return zir_uint_type_is_assignable_from((ZirUintType*) target_type, from_type);
 
         case ZIR_TYPE_BOOL:
-            return zir_type_bool_is_assignable_from((ZirBoolType*) target_type, from_type);
+            return zir_bool_type_is_assignable_from((ZirBoolType*) target_type, from_type);
 
         case ZIR_TYPE_STRUCT:
-            return zir_type_struct_is_assignable_from((ZirStructType*) target_type, from_type);
+            return zir_struct_type_is_assignable_from((ZirStructType*) target_type, from_type);
         
         case ZIR_TYPE_REFERENCE:
-            return zir_type_reference_is_assignable_from((ZirReferenceType*) target_type, from_type);
+            return zir_reference_type_is_assignable_from((ZirReferenceType*) target_type, from_type);
         
         case ZIR_TYPE_ARRAY:
-            return zir_type_array_is_assignable_from((ZirArrayType*) target_type, from_type);
+            return zir_array_type_is_assignable_from((ZirArrayType*) target_type, from_type);
     }
     
     return false;
@@ -144,19 +144,19 @@ bool zir_type_is_castable_to(ZirType *source_type, ZirType *target_type)
     switch (source_type->typekind)
     {        
         case ZIR_TYPE_UINT:
-            return zir_type_uint_is_castable_to((ZirUintType*) source_type, target_type);
+            return zir_uint_type_is_castable_to((ZirUintType*) source_type, target_type);
 
         case ZIR_TYPE_BOOL:
-            return zir_type_bool_is_castable_to((ZirBoolType*) source_type, target_type);
+            return zir_bool_type_is_castable_to((ZirBoolType*) source_type, target_type);
 
         case ZIR_TYPE_STRUCT:
-            return zir_type_struct_is_castable_to((ZirStructType*) source_type, target_type);
+            return zir_struct_type_is_castable_to((ZirStructType*) source_type, target_type);
         
         case ZIR_TYPE_REFERENCE:
-            return zir_type_reference_is_castable_to((ZirReferenceType*) source_type, target_type);
+            return zir_reference_type_is_castable_to((ZirReferenceType*) source_type, target_type);
         
         case ZIR_TYPE_ARRAY:
-            return zir_type_array_is_castable_to((ZirArrayType*) source_type, target_type);
+            return zir_array_type_is_castable_to((ZirArrayType*) source_type, target_type);
         
         case ZIR_TYPE_NONE: // Mute warning
             break;
@@ -173,19 +173,19 @@ size_t zir_type_size(ZirType *type)
     switch (type->typekind)
     {
         case ZIR_TYPE_UINT:
-            return zir_type_uint_size((ZirUintType*) type);
+            return zir_uint_type_size((ZirUintType*) type);
 
         case ZIR_TYPE_BOOL:
-            return zir_type_bool_size((ZirBoolType*) type);
+            return zir_bool_type_size((ZirBoolType*) type);
 
         case ZIR_TYPE_STRUCT:
-            return zir_type_struct_size((ZirStructType*) type);
+            return zir_struct_type_size((ZirStructType*) type);
         
         case ZIR_TYPE_REFERENCE:
-            return zir_type_reference_size((ZirReferenceType*) type);
+            return zir_reference_type_size((ZirReferenceType*) type);
         
         case ZIR_TYPE_ARRAY:
-            return zir_type_array_size((ZirArrayType*) type);
+            return zir_array_type_size((ZirArrayType*) type);
         
         case ZIR_TYPE_NONE:
             break;
@@ -203,27 +203,27 @@ void zir_type_free(ZirType *type)
     {
         
         case ZIR_TYPE_UINT:
-            zir_type_uint_free((ZirUintType*) type);
+            zir_uint_type_free((ZirUintType*) type);
             break;
 
         case ZIR_TYPE_BOOL:
-            zir_type_bool_free((ZirBoolType*) type);
+            zir_bool_type_free((ZirBoolType*) type);
             break;
 
         case ZIR_TYPE_STRUCT:
-            zir_type_struct_free((ZirStructType*) type);
+            zir_struct_type_free((ZirStructType*) type);
             break;
 
         case ZIR_TYPE_REFERENCE:
-            zir_type_reference_free((ZirReferenceType*) type);
+            zir_reference_type_free((ZirReferenceType*) type);
             break;
 
         case ZIR_TYPE_ARRAY:
-            zir_type_array_free((ZirArrayType*) type);
+            zir_array_type_free((ZirArrayType*) type);
             break;
 
         case ZIR_TYPE_NONE:
-            zir_type_none_free(type);
+            zir_none_type_free(type);
             break;
     }
 }

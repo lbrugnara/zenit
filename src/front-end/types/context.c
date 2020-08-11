@@ -22,7 +22,7 @@ ZenitTypeContext* zenit_type_ctx_new(void)
 
 ZenitArrayType* zenit_type_ctx_new_array(ZenitTypeContext *type_ctx, ZenitType *member_type)
 {
-    ZenitArrayType *array_type = zenit_type_array_new(member_type);
+    ZenitArrayType *array_type = zenit_array_type_new(member_type);
 
     fl_list_append(type_ctx->uniques, array_type);
 
@@ -40,7 +40,7 @@ ZenitType* zenit_type_ctx_new_none(ZenitTypeContext *type_ctx)
     else
     {
         // First time
-        none_type = zenit_type_none_new();
+        none_type = zenit_none_type_new();
         fl_hashtable_add(type_ctx->pool, "none", none_type);
     }
 
@@ -49,7 +49,7 @@ ZenitType* zenit_type_ctx_new_none(ZenitTypeContext *type_ctx)
 
 ZenitReferenceType* zenit_type_ctx_new_reference(ZenitTypeContext *type_ctx, ZenitType *element)
 {
-    ZenitReferenceType *ref_type = zenit_type_reference_new(element);
+    ZenitReferenceType *ref_type = zenit_reference_type_new(element);
 
     fl_list_append(type_ctx->uniques, ref_type);
 
@@ -62,7 +62,7 @@ ZenitStructType* zenit_type_ctx_new_struct(ZenitTypeContext *type_ctx, char *nam
 
     if (name == NULL) // unnamed
     {
-        struct_type = zenit_type_struct_new(NULL);
+        struct_type = zenit_struct_type_new(NULL);
         fl_list_append(type_ctx->uniques, struct_type);
     }
     else
@@ -73,7 +73,7 @@ ZenitStructType* zenit_type_ctx_new_struct(ZenitTypeContext *type_ctx, char *nam
         }
         else
         {
-            struct_type = zenit_type_struct_new(name);
+            struct_type = zenit_struct_type_new(name);
             fl_hashtable_add(type_ctx->pool, name, struct_type);
         }
     }
@@ -116,7 +116,7 @@ ZenitUintType* zenit_type_ctx_new_uint(ZenitTypeContext *type_ctx, ZenitUintType
     else
     {
         // First time
-        uint_type = zenit_type_uint_new(size);
+        uint_type = zenit_uint_type_new(size);
         fl_hashtable_add(type_ctx->pool, key, uint_type);
     }
 
@@ -134,7 +134,7 @@ ZenitBoolType* zenit_type_ctx_new_bool(ZenitTypeContext *type_ctx)
     else
     {
         // First time
-        bool_type = zenit_type_bool_new();
+        bool_type = zenit_bool_type_new();
         fl_hashtable_add(type_ctx->pool, "bool", bool_type);
     }
 
@@ -143,7 +143,7 @@ ZenitBoolType* zenit_type_ctx_new_bool(ZenitTypeContext *type_ctx)
 
 ZenitArrayType* zenit_type_ctx_copy_array(ZenitTypeContext *type_ctx, ZenitArrayType *src_array_type)
 {
-    ZenitArrayType *array_type = zenit_type_array_new(zenit_type_ctx_copy_type(type_ctx, src_array_type->member_type));
+    ZenitArrayType *array_type = zenit_array_type_new(zenit_type_ctx_copy_type(type_ctx, src_array_type->member_type));
     array_type->length = src_array_type->length;
 
     fl_list_append(type_ctx->uniques, array_type);
@@ -153,7 +153,7 @@ ZenitArrayType* zenit_type_ctx_copy_array(ZenitTypeContext *type_ctx, ZenitArray
 
 ZenitReferenceType* zenit_type_ctx_copy_reference(ZenitTypeContext *type_ctx, ZenitReferenceType *src_ref_type)
 {
-    ZenitReferenceType *ref_type = zenit_type_reference_new(zenit_type_ctx_copy_type(type_ctx, src_ref_type->element));
+    ZenitReferenceType *ref_type = zenit_reference_type_new(zenit_type_ctx_copy_type(type_ctx, src_ref_type->element));
 
     fl_list_append(type_ctx->uniques, ref_type);
 
@@ -168,7 +168,7 @@ ZenitStructType* zenit_type_ctx_copy_struct(ZenitTypeContext *type_ctx, ZenitStr
         return fl_hashtable_get(type_ctx->pool, src_struct_type->name);
 
 
-    ZenitStructType *struct_type = zenit_type_struct_new(NULL);
+    ZenitStructType *struct_type = zenit_struct_type_new(NULL);
 
     struct FlListNode *src_node = fl_list_head(src_struct_type->members);
 
@@ -176,7 +176,7 @@ ZenitStructType* zenit_type_ctx_copy_struct(ZenitTypeContext *type_ctx, ZenitStr
     {
         ZenitStructTypeMember *src_struct_member = (ZenitStructTypeMember*) src_node->value;
 
-        zenit_type_struct_add_member(struct_type, src_struct_member->name, zenit_type_ctx_copy_type(type_ctx, src_struct_member->type));
+        zenit_struct_type_add_member(struct_type, src_struct_member->name, zenit_type_ctx_copy_type(type_ctx, src_struct_member->type));
 
         src_node = src_node->next;
     }
@@ -248,7 +248,7 @@ static bool zenit_type_ctx_unify_array(ZenitTypeContext *type_ctx, ZenitArrayTyp
     if (type_b->typekind != ZENIT_TYPE_ARRAY)
         return false;
 
-    if (zenit_type_array_equals(array_type, type_b))
+    if (zenit_array_type_equals(array_type, type_b))
     {
         *dest = (ZenitType*) zenit_type_ctx_copy_array(type_ctx, array_type);
         return true;
@@ -289,7 +289,7 @@ static bool zenit_type_ctx_unify_reference(ZenitTypeContext *type_ctx, ZenitRefe
     if (type_b->typekind != ZENIT_TYPE_REFERENCE)
         return false;
 
-    if (zenit_type_reference_equals(ref_type, type_b))
+    if (zenit_reference_type_equals(ref_type, type_b))
     {
         *dest = (ZenitType*) zenit_type_ctx_copy_reference(type_ctx, ref_type);
         return true;
@@ -324,7 +324,7 @@ static bool zenit_type_ctx_unify_struct(ZenitTypeContext *type_ctx, ZenitStructT
     if (type_b->typekind != ZENIT_TYPE_STRUCT)
         return false;
 
-    if (zenit_type_struct_equals(struct_type, type_b))
+    if (zenit_struct_type_equals(struct_type, type_b))
     {
         *dest = (ZenitType*) zenit_type_ctx_copy_struct(type_ctx, struct_type);
         return true;
@@ -335,7 +335,7 @@ static bool zenit_type_ctx_unify_struct(ZenitTypeContext *type_ctx, ZenitStructT
     // If they are structurally equals, we just copy one of them and return an unnamed struct
     // (an unnamed struct can be casted or assigned to a named struct as long as they are structurally
     // equals and the other way around)
-    bool struct_equals = zenit_type_struct_structurally_equals(struct_type, struct_type_b);
+    bool struct_equals = zenit_struct_type_structurally_equals(struct_type, struct_type_b);
 
     ZenitStructType *unified_struct = zenit_type_ctx_new_struct(type_ctx, NULL);
 
@@ -344,7 +344,7 @@ static bool zenit_type_ctx_unify_struct(ZenitTypeContext *type_ctx, ZenitStructT
     {
         ZenitStructTypeMember *struct_a_member = (ZenitStructTypeMember*) struct_a_node->value;
 
-        ZenitStructTypeMember *struct_b_member = struct_equals ? NULL : zenit_type_struct_get_member(struct_type_b, struct_a_member->name);
+        ZenitStructTypeMember *struct_b_member = struct_equals ? NULL : zenit_struct_type_get_member(struct_type_b, struct_a_member->name);
 
         // If the structs are structurally equals, we can safely add the member, but if not, we need to make sure
         // the member is present in both types
@@ -363,7 +363,7 @@ static bool zenit_type_ctx_unify_struct(ZenitTypeContext *type_ctx, ZenitStructT
                     return false;
             }
             
-            zenit_type_struct_add_member(unified_struct, struct_a_member->name, member_type);
+            zenit_struct_type_add_member(unified_struct, struct_a_member->name, member_type);
         }
 
         struct_a_node = struct_a_node->next;
@@ -381,7 +381,7 @@ static bool zenit_type_ctx_unify_uint(ZenitTypeContext *type_ctx, ZenitUintType 
     if (type_b->typekind != ZENIT_TYPE_NONE && type_b->typekind != ZENIT_TYPE_UINT)
         return false;
 
-    if (type_b->typekind == ZENIT_TYPE_NONE || zenit_type_uint_equals(uint_type, type_b))
+    if (type_b->typekind == ZENIT_TYPE_NONE || zenit_uint_type_equals(uint_type, type_b))
     {
         *dest = (ZenitType*) zenit_type_ctx_copy_uint(type_ctx, uint_type);
         return true;

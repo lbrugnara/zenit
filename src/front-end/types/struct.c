@@ -16,7 +16,7 @@ static void member_free(void *ptr)
     fl_free(member);
 }
 
-ZenitStructType* zenit_type_struct_new(char *name)
+ZenitStructType* zenit_struct_type_new(char *name)
 {
     ZenitStructType *type = fl_malloc(sizeof(ZenitStructType));
     type->base.typekind = ZENIT_TYPE_STRUCT;
@@ -28,7 +28,7 @@ ZenitStructType* zenit_type_struct_new(char *name)
     return type;
 }
 
-void zenit_type_struct_add_member(ZenitStructType *struct_type, const char *name, ZenitType *member_type)
+void zenit_struct_type_add_member(ZenitStructType *struct_type, const char *name, ZenitType *member_type)
 {
     ZenitStructTypeMember *member = fl_malloc(sizeof(ZenitStructTypeMember));
 
@@ -38,7 +38,7 @@ void zenit_type_struct_add_member(ZenitStructType *struct_type, const char *name
     fl_list_append(struct_type->members, member);
 }
 
-ZenitStructTypeMember* zenit_type_struct_get_member(ZenitStructType *struct_type, const char *name)
+ZenitStructTypeMember* zenit_struct_type_get_member(ZenitStructType *struct_type, const char *name)
 {
     struct FlListNode *tmp = fl_list_head(struct_type->members);
     while (tmp != NULL)
@@ -54,7 +54,7 @@ ZenitStructTypeMember* zenit_type_struct_get_member(ZenitStructType *struct_type
     return NULL;
 }
 
-unsigned long zenit_type_struct_hash(ZenitStructType *type)
+unsigned long zenit_struct_type_hash(ZenitStructType *type)
 {
     static const char *format = "[struct][n:%s]";
 
@@ -77,12 +77,12 @@ unsigned long zenit_type_struct_hash(ZenitStructType *type)
  *  allocated string, but we benefit from the <type_string_mapping_pool> variable
  *  to reuse strings.
  */
-char* zenit_type_struct_to_string(ZenitStructType *type)
+char* zenit_struct_type_to_string(ZenitStructType *type)
 {
     if (type == NULL)
         return NULL;
 
-    unsigned long type_hash = zenit_type_struct_hash(type);
+    unsigned long type_hash = zenit_struct_type_hash(type);
 
     if (type->base.to_string.value == NULL)
     {
@@ -130,7 +130,7 @@ char* zenit_type_struct_to_string(ZenitStructType *type)
     return type->base.to_string.value;
 }
 
-bool zenit_type_struct_structurally_equals(ZenitStructType *type_a, ZenitStructType *type_b)
+bool zenit_struct_type_structurally_equals(ZenitStructType *type_a, ZenitStructType *type_b)
 {
     if (fl_list_length(type_a->members) != fl_list_length(type_b->members))
         return false;
@@ -144,7 +144,7 @@ bool zenit_type_struct_structurally_equals(ZenitStructType *type_a, ZenitStructT
     while (src_node)
     {
         ZenitStructTypeMember *src_member = (ZenitStructTypeMember*) src_node->value;
-        ZenitStructTypeMember *dest_member = zenit_type_struct_get_member(type_b, src_member->name);
+        ZenitStructTypeMember *dest_member = zenit_struct_type_get_member(type_b, src_member->name);
 
         if (dest_member == NULL)
             return false;
@@ -153,7 +153,7 @@ bool zenit_type_struct_structurally_equals(ZenitStructType *type_a, ZenitStructT
         if (src_member->type->typekind != ZENIT_TYPE_STRUCT || dest_member->type->typekind != ZENIT_TYPE_STRUCT)
             equals = zenit_type_equals(src_member->type, dest_member->type);
         else
-            equals = zenit_type_struct_structurally_equals((ZenitStructType*) src_member->type, (ZenitStructType*) dest_member->type);
+            equals = zenit_struct_type_structurally_equals((ZenitStructType*) src_member->type, (ZenitStructType*) dest_member->type);
         
         if (!equals)
             return false;
@@ -164,7 +164,7 @@ bool zenit_type_struct_structurally_equals(ZenitStructType *type_a, ZenitStructT
     return true;
 }
 
-bool zenit_type_struct_equals(ZenitStructType *type_a, ZenitType *type_b)
+bool zenit_struct_type_equals(ZenitStructType *type_a, ZenitType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
         return (ZenitType*) type_a == type_b;
@@ -180,10 +180,10 @@ bool zenit_type_struct_equals(ZenitStructType *type_a, ZenitType *type_b)
         return false;
 
     // Structural equality
-    return zenit_type_struct_structurally_equals(type_a, type_b_struct);
+    return zenit_struct_type_structurally_equals(type_a, type_b_struct);
 }
 
-bool zenit_type_struct_is_assignable_from(ZenitStructType *target_type, ZenitType *from_type)
+bool zenit_struct_type_is_assignable_from(ZenitStructType *target_type, ZenitType *from_type)
 {
     if (!target_type || !from_type)
         return false;
@@ -205,7 +205,7 @@ bool zenit_type_struct_is_assignable_from(ZenitStructType *target_type, ZenitTyp
     while (src_node)
     {
         ZenitStructTypeMember *src_member = (ZenitStructTypeMember*) src_node->value;
-        ZenitStructTypeMember *dest_member = zenit_type_struct_get_member(struct_from_type, src_member->name);
+        ZenitStructTypeMember *dest_member = zenit_struct_type_get_member(struct_from_type, src_member->name);
 
         if (dest_member == NULL)
             return false;
@@ -219,7 +219,7 @@ bool zenit_type_struct_is_assignable_from(ZenitStructType *target_type, ZenitTyp
     return true;
 }
 
-bool zenit_type_struct_is_castable_to(ZenitStructType *struct_type, ZenitType *target_type)
+bool zenit_struct_type_is_castable_to(ZenitStructType *struct_type, ZenitType *target_type)
 {
     if (struct_type == NULL || target_type == NULL)
         return false;
@@ -242,7 +242,7 @@ bool zenit_type_struct_is_castable_to(ZenitStructType *struct_type, ZenitType *t
     while (src_node)
     {
         ZenitStructTypeMember *src_member = (ZenitStructTypeMember*) src_node->value;
-        ZenitStructTypeMember *dest_member = zenit_type_struct_get_member(target_struct_type, src_member->name);
+        ZenitStructTypeMember *dest_member = zenit_struct_type_get_member(target_struct_type, src_member->name);
 
         if (dest_member == NULL)
             return false;
@@ -256,7 +256,7 @@ bool zenit_type_struct_is_castable_to(ZenitStructType *struct_type, ZenitType *t
     return true;
 }
 
-bool zenit_type_struct_can_unify(ZenitStructType *struct_type, ZenitType *type_b)
+bool zenit_struct_type_can_unify(ZenitStructType *struct_type, ZenitType *type_b)
 {
     if (struct_type == NULL || type_b == NULL)
         return false;
@@ -267,7 +267,7 @@ bool zenit_type_struct_can_unify(ZenitStructType *struct_type, ZenitType *type_b
     if (type_b->typekind != ZENIT_TYPE_STRUCT)
         return false;
 
-    if (zenit_type_struct_equals(struct_type, type_b))
+    if (zenit_struct_type_equals(struct_type, type_b))
         return true;
 
     ZenitStructType *struct_type_b = (ZenitStructType*) type_b;
@@ -280,7 +280,7 @@ bool zenit_type_struct_can_unify(ZenitStructType *struct_type, ZenitType *type_b
     while (member_node)
     {
         ZenitStructTypeMember *member_a = (ZenitStructTypeMember*) member_node->value;
-        ZenitStructTypeMember *member_b = zenit_type_struct_get_member(struct_type_b, member_a->name);
+        ZenitStructTypeMember *member_b = zenit_struct_type_get_member(struct_type_b, member_a->name);
 
         if (member_b == NULL || !zenit_type_can_unify(member_a->type, member_b->type))
             return false;
@@ -291,7 +291,7 @@ bool zenit_type_struct_can_unify(ZenitStructType *struct_type, ZenitType *type_b
     return true;
 }
 
-void zenit_type_struct_free(ZenitStructType *type)
+void zenit_struct_type_free(ZenitStructType *type)
 {
     if (!type)
         return;

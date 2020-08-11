@@ -3,7 +3,7 @@
 #include "reference.h"
 #include "../types/reference.h"
 
-ZenitReferenceNode* zenit_node_reference_new(ZenitSourceLocation location, ZenitNode *expression)
+ZenitReferenceNode* zenit_reference_node_new(ZenitSourceLocation location, ZenitNode *expression)
 {
     ZenitReferenceNode *ref_node = fl_malloc(sizeof(ZenitReferenceNode));
     ref_node->base.nodekind = ZENIT_NODE_REFERENCE;
@@ -13,7 +13,7 @@ ZenitReferenceNode* zenit_node_reference_new(ZenitSourceLocation location, Zenit
     return ref_node;
 }
 
-char* zenit_node_reference_uid(ZenitReferenceNode *reference)
+char* zenit_reference_node_uid(ZenitReferenceNode *reference)
 {
     if (!reference)
         return NULL;
@@ -28,7 +28,7 @@ char* zenit_node_reference_uid(ZenitReferenceNode *reference)
     return id;
 }
 
-char* zenit_node_reference_dump(ZenitReferenceNode *reference, char *output)
+char* zenit_reference_node_dump(ZenitReferenceNode *reference, char *output)
 {
     fl_cstring_append(&output, "(ref ");
 
@@ -40,7 +40,7 @@ char* zenit_node_reference_dump(ZenitReferenceNode *reference, char *output)
 }
 
 /*
- * Function: zenit_node_reference_free
+ * Function: zenit_reference_node_free
  *  Releases the memory of the <ZenitReferenceNode> object
  *
  * Parameters:
@@ -49,7 +49,7 @@ char* zenit_node_reference_dump(ZenitReferenceNode *reference, char *output)
  * Returns:
  *  void - This function does not return a value
  */
-void zenit_node_reference_free(ZenitReferenceNode *ref_node)
+void zenit_reference_node_free(ZenitReferenceNode *ref_node)
 {
     if (!ref_node)
         return;

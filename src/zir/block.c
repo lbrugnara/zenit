@@ -5,7 +5,7 @@ ZirBlock* zir_block_new(const char *id, ZirBlockType type, ZirBlock *parent)
 {
     ZirBlock *block = fl_malloc(sizeof(ZirBlock));
     block->parent = parent;
-    block->instructions = fl_array_new(sizeof(ZirInstruction*), 0);
+    block->instructions = fl_array_new(sizeof(ZirInstr*), 0);
     block->children = fl_array_new(sizeof(ZirBlock*), 0);
     block->symtable = zir_symtable_new();
     block->temp_counter = 0;
@@ -25,18 +25,16 @@ void zir_block_free(ZirBlock *block)
 
     if (block->children)
     {
-        //for (size_t i=0; i < fl_array_length(block->children); i++)
-        for (size_t i=fl_array_length(block->children); i > 0; i--)
-            zir_block_free(block->children[i - 1]);
+        for (size_t i=0; i < fl_array_length(block->children); i++)
+            zir_block_free(block->children[i]);
 
         fl_array_free(block->children);
     }
 
     if (block->instructions)
     {
-        //for (size_t i=0; i < fl_array_length(block->instructions); i++)
-        for (size_t i=fl_array_length(block->instructions); i > 0; i--)
-            zir_instruction_free(block->instructions[i - 1]);
+        for (size_t i=0; i < fl_array_length(block->instructions); i++)
+            zir_instruction_free(block->instructions[i]);
 
         fl_array_free(block->instructions);
     }

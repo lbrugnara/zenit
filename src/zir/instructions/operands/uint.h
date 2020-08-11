@@ -34,7 +34,7 @@ typedef struct ZirUintOperand {
 } ZirUintOperand;
 
 /*
- * Function: zir_operand_uint_new
+ * Function: zir_uint_operand_new
  *  Creates a new uint operand with the provided type, size, and value
  *
  * Parameters:
@@ -45,14 +45,14 @@ typedef struct ZirUintOperand {
  *  ZirUintOperand*: The new uint operand object
  *
  * Notes:
- *  The object returned by this function must be freed using the <zir_operand_uint_free> function.
+ *  The object returned by this function must be freed using the <zir_uint_operand_free> function.
  *  The uint operand takes ownership of the <ZirUintType> object, which means it will release
- *  the type object memory too when <zir_operand_uint_free> is called with the uint operand as argument.
+ *  the type object memory too when <zir_uint_operand_free> is called with the uint operand as argument.
  */
-ZirUintOperand* zir_operand_uint_new(ZirUintType *type, ZirUintValue value);
+ZirUintOperand* zir_uint_operand_new(ZirUintType *type, ZirUintValue value);
 
 /*
- * Function: zir_operand_uint_free
+ * Function: zir_uint_operand_free
  *  Frees the memory of the uint operand
  *
  * Parameters:
@@ -61,16 +61,16 @@ ZirUintOperand* zir_operand_uint_new(ZirUintType *type, ZirUintValue value);
  * Returns:
  *  void: This function does not return a value
  */
-void zir_operand_uint_free(ZirUintOperand *uint_operand);
+void zir_uint_operand_free(ZirUintOperand *uint_operand);
 
 /*
- * Function: zir_operand_uint_dump
+ * Function: zir_uint_operand_dump
  *  Dumps the string representation of the uint operand to the *output* pointer. Because
  *  the *output* pointer can be modified this function returns the same pointer, so
  *  it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_operand_uint_dump(uint_operand, output);
+ *  output = zir_uint_operand_dump(uint_operand, output);
  * ===========
  *
  * Parameters:
@@ -83,16 +83,16 @@ void zir_operand_uint_free(ZirUintOperand *uint_operand);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_uint_dump(ZirUintOperand *uint_operand, char *output);
+char* zir_uint_operand_dump(ZirUintOperand *uint_operand, char *output);
 
 /*
- * Function: zir_operand_uint_type_dump
+ * Function: zir_uint_operand_type_dump
  *  Dumps the string representation of the type of the uint operand to the *output* 
  *  pointer. Because the *output* pointer can be modified this function returns 
  *  the same pointer, so it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_operand_uint_type_dump(uint_operand, output);
+ *  output = zir_uint_operand_type_dump(uint_operand, output);
  * ===========
  *
  * Parameters:
@@ -105,6 +105,6 @@ char* zir_operand_uint_dump(ZirUintOperand *uint_operand, char *output);
  * Notes:
  *  If the reallocation of the *output* pointer fails, this function frees its memory.
  */
-char* zir_operand_uint_type_dump(ZirUintOperand *uint_operand, char *output);
+char* zir_uint_operand_type_dump(ZirUintOperand *uint_operand, char *output);
 
 #endif /* ZIR_OPERAND_UINT_H */

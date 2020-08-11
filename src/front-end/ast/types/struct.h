@@ -19,7 +19,7 @@ typedef struct ZenitStructTypeNode {
 } ZenitStructTypeNode;
 
 /*
- * Function: zenit_node_type_struct_new
+ * Function: zenit_struct_type_node_new
  *  Creates a new AST node that represents a struct type declaration
  *
  * Parameters:
@@ -31,12 +31,12 @@ typedef struct ZenitStructTypeNode {
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zenit_node_type_struct_free> function
+ *  <zenit_struct_type_node_free> function
  */
-ZenitStructTypeNode* zenit_node_type_struct_new(ZenitSourceLocation location, char *name);
+ZenitStructTypeNode* zenit_struct_type_node_new(ZenitSourceLocation location, char *name);
 
 /*
- * Function: zenit_node_type_struct_uid
+ * Function: zenit_struct_type_node_uid
  *  Returns a UID for the struct type declaration node
  *
  * Parameters:
@@ -49,10 +49,10 @@ ZenitStructTypeNode* zenit_node_type_struct_new(ZenitSourceLocation location, ch
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_type_struct_uid(ZenitStructTypeNode *type_node);
+char* zenit_struct_type_node_uid(ZenitStructTypeNode *type_node);
 
 /*
- * Function: zenit_node_type_struct_dump
+ * Function: zenit_struct_type_node_dump
  *  Appends a dump of the struct type declaration node to the output pointer, and
  *  returns a pointer to the -possibly reallocated- output
  *
@@ -68,13 +68,13 @@ char* zenit_node_type_struct_uid(ZenitStructTypeNode *type_node);
  *  a pointer to the new location in case the memory is reallocated or
  *  to the old location in case the pointer does not need to be modified. Either
  *  way, it is safe to use the function as:
- *      output = zenit_node_type_struct_dump(struct_type, output);
+ *      output = zenit_struct_type_node_dump(struct_type, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_type_struct_dump(ZenitStructTypeNode *type_node, char *output);
+char* zenit_struct_type_node_dump(ZenitStructTypeNode *type_node, char *output);
 
 /*
- * Function: zenit_node_type_struct_to_string
+ * Function: zenit_struct_type_node_to_string
  *  Returns the string representation of the type declaration
  *
  * Parameters:
@@ -87,10 +87,10 @@ char* zenit_node_type_struct_dump(ZenitStructTypeNode *type_node, char *output);
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_type_struct_to_string(ZenitStructTypeNode *type_node);
+char* zenit_struct_type_node_to_string(ZenitStructTypeNode *type_node);
 
 /*
- * Function: zenit_node_type_struct_free
+ * Function: zenit_struct_type_node_free
  *  Frees the memory used by the struct type declaration node
  *
  * Parameters:
@@ -99,6 +99,6 @@ char* zenit_node_type_struct_to_string(ZenitStructTypeNode *type_node);
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_node_type_struct_free(ZenitStructTypeNode *type_node);
+void zenit_struct_type_node_free(ZenitStructTypeNode *type_node);
 
 #endif /* ZENIT_AST_TYPE_STRUCT_H */

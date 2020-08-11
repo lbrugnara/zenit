@@ -27,7 +27,7 @@ typedef enum ZirBlockType {
  * Members:
  *  <ZirBlock> *parent: Pointer to the parent block
  *  <ZirBlock> **children: Set of children blocks
- *  <ZirInstruction> **instructions: Set of block instructions
+ *  <ZirInstr> **instructions: Set of block instructions
  *  <ZirSymtable> symtable: Symbol table of the current block
  * 
  */
@@ -35,7 +35,7 @@ typedef struct ZirBlock {
     const char *id;
     struct ZirBlock *parent;
     struct ZirBlock **children;
-    ZirInstruction **instructions;
+    ZirInstr **instructions;
     ZirSymtable symtable;
     unsigned long long temp_counter;
     ZirBlockType type;
@@ -90,6 +90,17 @@ void zir_block_free(ZirBlock *block);
  */
 char* zir_block_dump(ZirBlock *block, char *output);
 
+/*
+ * Function: zir_block_get_ip
+ *  Returns the block's instruction pointer, which is the pointer to the last instruction
+ *  within the block
+ *
+ * Parameters:
+ *  block - The block object
+ *
+ * Returns:
+ *  size_t - Instruction pointer value
+ */
 size_t zir_block_get_ip(ZirBlock *block);
 
 #endif /* ZIR_BLOCK_H */

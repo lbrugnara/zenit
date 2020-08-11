@@ -3,7 +3,7 @@
 #include <fllib/Cstring.h>
 #include "struct.h"
 
-ZenitStructNode* zenit_node_struct_new(ZenitSourceLocation location, char *name)
+ZenitStructNode* zenit_struct_node_new(ZenitSourceLocation location, char *name)
 {
     ZenitStructNode *struct_node = fl_malloc(sizeof(ZenitStructNode));
     struct_node->base.nodekind = ZENIT_NODE_STRUCT;
@@ -14,7 +14,7 @@ ZenitStructNode* zenit_node_struct_new(ZenitSourceLocation location, char *name)
     return struct_node;
 }
 
-char* zenit_node_struct_uid(ZenitStructNode *struct_node)
+char* zenit_struct_node_uid(ZenitStructNode *struct_node)
 {
     if (!struct_node)
         return NULL;
@@ -22,7 +22,7 @@ char* zenit_node_struct_uid(ZenitStructNode *struct_node)
     return fl_cstring_vdup("%%L%u:C%u_struct", struct_node->base.location.line, struct_node->base.location.col);
 }
 
-char* zenit_node_struct_dump(ZenitStructNode *struct_node, char *output)
+char* zenit_struct_node_dump(ZenitStructNode *struct_node, char *output)
 {
     if (struct_node->name != NULL)
         fl_cstring_vappend(&output, "(struct %s ", struct_node->name);
@@ -43,7 +43,7 @@ char* zenit_node_struct_dump(ZenitStructNode *struct_node, char *output)
 }
 
 /*
- * Function: zenit_node_struct_free
+ * Function: zenit_struct_node_free
  *  Frees the memory of a <ZenitStructNode> object
  *
  * Parameters:
@@ -52,7 +52,7 @@ char* zenit_node_struct_dump(ZenitStructNode *struct_node, char *output)
  * Returns:
  *  void - This function does not return a value
  */
-void zenit_node_struct_free(ZenitStructNode *struct_node)
+void zenit_struct_node_free(ZenitStructNode *struct_node)
 {
     if (!struct_node)
         return;

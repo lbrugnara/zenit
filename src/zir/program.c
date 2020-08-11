@@ -103,7 +103,7 @@ ZirSymbol* zir_program_add_symbol(ZirProgram *program, ZirSymbol *symbol)
     return zir_symtable_add(&program->current->symtable, symbol);
 }
 
-ZirInstruction* zir_program_emit(ZirProgram *program, ZirInstruction *instruction)
+ZirInstr* zir_program_emit(ZirProgram *program, ZirInstr *instruction)
 {
     program->current->instructions = fl_array_append(program->current->instructions, &instruction);
     return instruction;

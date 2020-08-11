@@ -2,7 +2,7 @@
 #include <fllib/Cstring.h>
 #include "symbol.h"
 
-ZirSymbolOperand* zir_operand_symbol_new(ZirSymbol *symbol)
+ZirSymbolOperand* zir_symbol_operand_new(ZirSymbol *symbol)
 {
     flm_assert(symbol != NULL, "Symbol must not be NULL");
 
@@ -13,7 +13,7 @@ ZirSymbolOperand* zir_operand_symbol_new(ZirSymbol *symbol)
     return operand;
 }
 
-void zir_operand_symbol_free(ZirSymbolOperand *operand)
+void zir_symbol_operand_free(ZirSymbolOperand *operand)
 {
     if (!operand)
         return;
@@ -21,13 +21,13 @@ void zir_operand_symbol_free(ZirSymbolOperand *operand)
     fl_free(operand);
 }
 
-char* zir_operand_symbol_dump(ZirSymbolOperand *operand, char *output)
+char* zir_symbol_operand_dump(ZirSymbolOperand *operand, char *output)
 {
     fl_cstring_vappend(&output, "%s%s", operand->symbol->name && operand->symbol->name[0] == '%' ? "" : "@", operand->symbol->name);
     return output;
 }
 
-char* zir_operand_symbol_type_dump(ZirSymbolOperand *operand, char *output)
+char* zir_symbol_operand_type_dump(ZirSymbolOperand *operand, char *output)
 {
     fl_cstring_vappend(&output, "%s", zir_type_to_string(operand->symbol->type));
     return output;

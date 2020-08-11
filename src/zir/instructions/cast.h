@@ -7,21 +7,21 @@
 #include "../types/type.h"
 
 /*
- * Struct: ZirCastInstruction
+ * Struct: ZirCastInstr
  *  The cast instruction "converts" the object from the *source* operand to a valid object for the
  *  *destination* operand
  * 
  * Members:
- *  <ZirInstruction> base: Basic information of the instruction
+ *  <ZirInstr> base: Basic information of the instruction
  *  <ZirOperand> *source: The source operand of the cast instruction
  */
-typedef struct ZirCastInstruction {
-    ZirInstruction base;
+typedef struct ZirCastInstr {
+    ZirInstr base;
     ZirOperand *source;
-} ZirCastInstruction;
+} ZirCastInstr;
 
 /*
- * Function: zir_instruction_cast_new
+ * Function: zir_cast_instr_new
  *  Creates and returns a new cast instruction
  *
  * Parameters:
@@ -29,34 +29,34 @@ typedef struct ZirCastInstruction {
  *  <ZirOperand> *source: The source operand of the cast instruction
  *
  * Returns:
- *  <ZirCastInstruction>*: Cast instruction object
+ *  <ZirCastInstr>*: Cast instruction object
  *
  * Notes:
  *  The object returned by this function must be freed with the
- *  <zir_instruction_cast_free> function
+ *  <zir_cast_instr_free> function
  */
-ZirCastInstruction* zir_instruction_cast_new(ZirOperand *destination, ZirOperand *source);
+ZirCastInstr* zir_cast_instr_new(ZirOperand *destination, ZirOperand *source);
 
 /*
- * Function: zir_instruction_cast_free
+ * Function: zir_cast_instr_free
  *  Releases the memory used by the cast instruction object
  *
  * Parameters:
- *  <ZirCastInstruction> *instruction: The cast instruction object to be freed
+ *  <ZirCastInstr> *instruction: The cast instruction object to be freed
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zir_instruction_cast_free(ZirCastInstruction *instruction);
+void zir_cast_instr_free(ZirCastInstr *instruction);
 
 /*
- * Function: zir_instruction_cast_dump
+ * Function: zir_cast_instr_dump
  *  Dumps the string representation of the instruction to the *output* pointer. Because
  *  the *output* pointer can be modified this function returns the same pointer, so
  *  it is safe to use it as:
  * 
  * ==== C ====
- *  output = zir_instruction_cast_dump(instruction, output);
+ *  output = zir_cast_instr_dump(instruction, output);
  * ===========
  *
  * Parameters:
@@ -67,6 +67,6 @@ void zir_instruction_cast_free(ZirCastInstruction *instruction);
  *  char*: *output* pointer
  *
  */
-char* zir_instruction_cast_dump(ZirCastInstruction *instruction, char *output);
+char* zir_cast_instr_dump(ZirCastInstr *instruction, char *output);
 
 #endif /* ZIR_INSTRUCTION_CAST_H */

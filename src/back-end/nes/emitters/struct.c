@@ -19,7 +19,7 @@ void znes_emitter_struct_store(ZnesProgram *program, ZirStructOperand *struct_op
     {
         ZnesSymbol *member_symbol = struct_symbol->members[i];
         ZirStructOperandMember *operand_member = struct_operand->members[i];
-        ZirStructTypeMember *type_member = zir_type_struct_get_member(struct_operand->type, operand_member->name);
+        ZirStructTypeMember *type_member = zir_struct_type_get_member(struct_operand->type, operand_member->name);
 
         znes_emitter_store(program, operand_member->operand, member_symbol, 0);
         gap += member_symbol->size;

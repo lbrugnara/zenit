@@ -20,7 +20,7 @@ typedef struct ZirArrayType {
 } ZirArrayType;
 
 /*
- * Function: zir_type_array_new
+ * Function: zir_array_type_new
  *  Returns a new instance of an array type
  *
  * Parameters:
@@ -31,12 +31,12 @@ typedef struct ZirArrayType {
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zir_type_array_free> function
+ *  <zir_array_type_free> function
  */
-ZirArrayType* zir_type_array_new(ZirType *member_type);
+ZirArrayType* zir_array_type_new(ZirType *member_type);
 
 /*
- * Function: zir_type_array_hash
+ * Function: zir_array_type_hash
  *  Returns a hash that identifies the array type object
  *
  * Parameters:
@@ -45,10 +45,10 @@ ZirArrayType* zir_type_array_new(ZirType *member_type);
  * Returns:
  *  unsigned long: Hash code of the type object
  */
-unsigned long zir_type_array_hash(ZirArrayType *type);
+unsigned long zir_array_type_hash(ZirArrayType *type);
 
 /*
- * Function: zir_type_array_to_string
+ * Function: zir_array_type_to_string
  *  Returns a string representation of the array type object
  *
  * Parameters:
@@ -59,13 +59,13 @@ unsigned long zir_type_array_hash(ZirArrayType *type);
  *
  * Notes:
  *  The string returned by this function MUST NOT be freed by the caller, the type object
- *  has ownership of it, and it frees the string memory when the function <zir_type_array_free>
+ *  has ownership of it, and it frees the string memory when the function <zir_array_type_free>
  *  is used to free the memory used by the type object.
  */
-char* zir_type_array_to_string(ZirArrayType *type);
+char* zir_array_type_to_string(ZirArrayType *type);
 
 /*
- * Function: zir_type_array_equals
+ * Function: zir_array_type_equals
  *  Check if the array type *type_a* is equals to the *type_b* object
  *
  * Parameters:
@@ -75,10 +75,10 @@ char* zir_type_array_to_string(ZirArrayType *type);
  * Returns:
  *  bool: *true* if *type_b* is an array type equals to *type_a*, otherwise it returns *false*
  */
-bool zir_type_array_equals(ZirArrayType *type_a, ZirType *type_b);
+bool zir_array_type_equals(ZirArrayType *type_a, ZirType *type_b);
 
 /*
- * Function: zir_type_array_is_assignable_from
+ * Function: zir_array_type_is_assignable_from
  *  Checks if an object with type equals to *value_type* can be assigned to an object with an array type
  *  equals to *target_type*
  *
@@ -90,10 +90,10 @@ bool zir_type_array_equals(ZirArrayType *type_a, ZirType *type_b);
  *  bool: *true* if an object of type *value_type* can be assigned to an object with type *target_type*,
  *        otherwise this function returns *false*.
  */
-bool zir_type_array_is_assignable_from(ZirArrayType *target_type, ZirType *value_type);
+bool zir_array_type_is_assignable_from(ZirArrayType *target_type, ZirType *value_type);
 
 /*
- * Function: zir_type_array_is_castable_to
+ * Function: zir_array_type_is_castable_to
  *  Checks if an object with an array type equals to *array_type* can be casted to an object of type equals
  *  to *target_type*
  *
@@ -104,10 +104,10 @@ bool zir_type_array_is_assignable_from(ZirArrayType *target_type, ZirType *value
  * Returns:
  *  bool: *true* if the array type can be casted to a *target_type*, otherwise *false*
  */
-bool zir_type_array_is_castable_to(ZirArrayType *array_type, ZirType *target_type);
+bool zir_array_type_is_castable_to(ZirArrayType *array_type, ZirType *target_type);
 
 /*
- * Function: zir_type_array_size
+ * Function: zir_array_type_size
  *  Returns the size needed to store an instance of the array type (in bytes)
  *
  * Parameters:
@@ -116,10 +116,10 @@ bool zir_type_array_is_castable_to(ZirArrayType *array_type, ZirType *target_typ
  * Returns:
  *  size_t: Size needed to store an instance of the array type
  */
-size_t zir_type_array_size(ZirArrayType *type);
+size_t zir_array_type_size(ZirArrayType *type);
 
 /*
- * Function: zir_type_array_free
+ * Function: zir_array_type_free
  *  Frees the memory of the array type object
  *
  * Parameters:
@@ -128,6 +128,6 @@ size_t zir_type_array_size(ZirArrayType *type);
  * Returns:
  *  void: This function does not return a value
  */
-void zir_type_array_free(ZirArrayType *type);
+void zir_array_type_free(ZirArrayType *type);
 
 #endif /* ZIR_TYPE_ARRAY_H */

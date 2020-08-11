@@ -22,7 +22,7 @@ typedef struct ZenitFieldNode {
 } ZenitFieldNode;
 
 /*
- * Function: zenit_node_field_new
+ * Function: zenit_field_node_new
  *  Creates a new AST node that represents a field initialization
  *
  * Parameters:
@@ -34,12 +34,12 @@ typedef struct ZenitFieldNode {
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zenit_node_field_free> function
+ *  <zenit_field_node_free> function
  */
-ZenitFieldNode* zenit_node_field_new(ZenitSourceLocation location, char *name);
+ZenitFieldNode* zenit_field_node_new(ZenitSourceLocation location, char *name);
 
 /*
- * Function: zenit_node_field_uid
+ * Function: zenit_field_node_uid
  *  Returns a UID for the field initialization node
  *
  * Parameters:
@@ -52,10 +52,10 @@ ZenitFieldNode* zenit_node_field_new(ZenitSourceLocation location, char *name);
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_node_field_uid(ZenitFieldNode *field);
+char* zenit_field_node_uid(ZenitFieldNode *field);
 
 /*
- * Function: zenit_node_field_dump
+ * Function: zenit_field_node_dump
  *  Appends a dump of the field initialization node to the output pointer, and
  *  returns a pointer to the -possibly reallocated- output
  *
@@ -71,13 +71,13 @@ char* zenit_node_field_uid(ZenitFieldNode *field);
  *  a pointer to the new location in case the memory is reallocated or
  *  to the old location in case the pointer does not need to be modified. Either
  *  way, it is safe to use the function as:
- *      output = zenit_node_field_dump(field, output);
+ *      output = zenit_field_node_dump(field, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_node_field_dump(ZenitFieldNode *field, char *output);
+char* zenit_field_node_dump(ZenitFieldNode *field, char *output);
 
 /*
- * Function: zenit_node_field_free
+ * Function: zenit_field_node_free
  *  Frees the memory used by the field initialization node
  *
  * Parameters:
@@ -86,6 +86,6 @@ char* zenit_node_field_dump(ZenitFieldNode *field, char *output);
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_node_field_free(ZenitFieldNode *field);
+void zenit_field_node_free(ZenitFieldNode *field);
 
 #endif /* ZENIT_AST_FIELD_H */

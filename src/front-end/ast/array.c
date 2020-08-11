@@ -3,7 +3,7 @@
 #include <fllib/Cstring.h>
 #include "array.h"
 
-ZenitArrayNode* zenit_node_array_new(ZenitSourceLocation location)
+ZenitArrayNode* zenit_array_node_new(ZenitSourceLocation location)
 {
     ZenitArrayNode *node = fl_malloc(sizeof(ZenitArrayNode));
     node->base.nodekind = ZENIT_NODE_ARRAY;
@@ -13,13 +13,13 @@ ZenitArrayNode* zenit_node_array_new(ZenitSourceLocation location)
     return node;
 }
 
-void zenit_node_array_add_child(ZenitArrayNode *array, ZenitNode *element)
+void zenit_array_node_add_child(ZenitArrayNode *array, ZenitNode *element)
 {
     // Add the node to the elements list
     array->elements = fl_array_append(array->elements, &element);
 }
 
-char* zenit_node_array_uid(ZenitArrayNode *array)
+char* zenit_array_node_uid(ZenitArrayNode *array)
 {
     if (!array)
         return NULL;
@@ -27,7 +27,7 @@ char* zenit_node_array_uid(ZenitArrayNode *array)
     return fl_cstring_vdup("%%L%u:C%u_array", array->base.location.line, array->base.location.col);
 }
 
-char* zenit_node_array_dump(ZenitArrayNode *array, char *output)
+char* zenit_array_node_dump(ZenitArrayNode *array, char *output)
 {
     fl_cstring_append(&output, "(array");
 
@@ -50,7 +50,7 @@ char* zenit_node_array_dump(ZenitArrayNode *array, char *output)
 }
 
 /*
- f Function: zenit_node_array_free
+ f Function: zenit_array_node_free
  *  Releases the memory of an array node object
  *
  * Parameters:
@@ -59,7 +59,7 @@ char* zenit_node_array_dump(ZenitArrayNode *array, char *output)
  * Returns:
  *  <void>: This function does not return a value
  */
-void zenit_node_array_free(ZenitArrayNode *array)
+void zenit_array_node_free(ZenitArrayNode *array)
 {
     if (!array)
         return;

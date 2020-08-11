@@ -406,7 +406,7 @@ static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *va
 static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node)
 {
     // Enter to the if's scope
-    char *if_uid = zenit_node_if_uid(if_node);
+    char *if_uid = zenit_if_node_uid(if_node);
     zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_uid);
 
     // We create a temporary bool type for the condition (no worries about freeing its memory,
@@ -443,7 +443,7 @@ static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node)
 
 static ZenitSymbol* visit_block_node(ZenitContext *ctx, ZenitBlockNode *block_node)
 {
-    char *block_uid = zenit_node_block_uid(block_node);
+    char *block_uid = zenit_block_node_uid(block_node);
 
     zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_uid);
 

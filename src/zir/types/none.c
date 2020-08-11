@@ -5,7 +5,7 @@
 #include <fllib/Cstring.h>
 #include "none.h"
 
-ZirType* zir_type_none_new(void)
+ZirType* zir_none_type_new(void)
 {
     ZirType *type = fl_malloc(sizeof(ZirType));
     type->typekind = ZIR_TYPE_NONE;
@@ -13,7 +13,7 @@ ZirType* zir_type_none_new(void)
     return type;
 }
 
-unsigned long zir_type_none_hash(ZirType *type)
+unsigned long zir_none_type_hash(ZirType *type)
 {
     unsigned long hash = 5381;
     FlByte c;
@@ -25,7 +25,7 @@ unsigned long zir_type_none_hash(ZirType *type)
     return hash;
 }
 
-void zir_type_none_free(ZirType *type)
+void zir_none_type_free(ZirType *type)
 {
     if (!type)
         return;

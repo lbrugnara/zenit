@@ -11,10 +11,10 @@
 typedef void(*ZirBlockVisitor)(ZirBlock *block, ZnesProgram *program);
 static void visit_block(ZirBlock *block, ZnesProgram *program);
 
-typedef void(*ZirInstructionVisitor)(ZirInstruction *instruction, ZirBlock *block, ZnesProgram *program);
-static void visit_instruction(ZirInstruction *instruction, ZirBlock *block, ZnesProgram *program);
-static void visit_variable_instruction(ZirVariableInstruction *instruction, ZirBlock *block, ZnesProgram *program);
-static void visit_cast_instruction(ZirCastInstruction *instruction, ZirBlock *block, ZnesProgram *program);
+typedef void(*ZirInstructionVisitor)(ZirInstr *instruction, ZirBlock *block, ZnesProgram *program);
+static void visit_instruction(ZirInstr *instruction, ZirBlock *block, ZnesProgram *program);
+static void visit_variable_instruction(ZirVariableInstr *instruction, ZirBlock *block, ZnesProgram *program);
+static void visit_cast_instruction(ZirCastInstr *instruction, ZirBlock *block, ZnesProgram *program);
 
 static const ZirInstructionVisitor instruction_visitors[] = {
     [ZIR_INSTR_VARIABLE]   = (ZirInstructionVisitor) &visit_variable_instruction,
@@ -27,7 +27,7 @@ static const ZirInstructionVisitor instruction_visitors[] = {
  *  into the destination operand (the temporal variable)
  *
  * Parameters:
- *  <ZirCastInstruction> *instruction: ZIR instruction
+ *  <ZirCastInstr> *instruction: ZIR instruction
  *  <ZirBlock> *block: The current block where the ZIR instruction comes from
  *  <ZnesProgram> *program: The NES program being built
  *
@@ -35,7 +35,7 @@ static const ZirInstructionVisitor instruction_visitors[] = {
  *  void: This function does not return a value
  * 
  */
-static void visit_cast_instruction(ZirCastInstruction *instruction, ZirBlock *block, ZnesProgram *program)
+static void visit_cast_instruction(ZirCastInstr *instruction, ZirBlock *block, ZnesProgram *program)
 {
     ZirSymbol *zir_symbol = ((ZirSymbolOperand*) instruction->base.destination)->symbol;
     ZnesSymbol *nes_symbol = znes_program_reserve_symbol(program, block, NULL, zir_symbol);
@@ -49,7 +49,7 @@ static void visit_cast_instruction(ZirCastInstruction *instruction, ZirBlock *bl
  *  is the place where the variable is being stored.
  *
  * Parameters:
- *  <ZirVariableInstruction> *instruction: ZIR instruction
+ *  <ZirVariableInstr> *instruction: ZIR instruction
  *  <ZirBlock> *block: The current block where the ZIR instruction comes from
  *  <ZnesProgram> *program: The NES program being built
  *
@@ -57,7 +57,7 @@ static void visit_cast_instruction(ZirCastInstruction *instruction, ZirBlock *bl
  *  void: This function does not return a value
  * 
  */
-static void visit_variable_instruction(ZirVariableInstruction *instruction, ZirBlock *block, ZnesProgram *program)
+static void visit_variable_instruction(ZirVariableInstr *instruction, ZirBlock *block, ZnesProgram *program)
 {
     ZirSymbol *zir_symbol = ((ZirSymbolOperand*) instruction->base.destination)->symbol;
     ZnesSymbol *nes_symbol = znes_program_reserve_symbol(program, block, instruction->attributes, zir_symbol);
@@ -65,7 +65,7 @@ static void visit_variable_instruction(ZirVariableInstruction *instruction, ZirB
     znes_emitter_store(program, instruction->source, nes_symbol, 0);
 }
 
-static void visit_instruction(ZirInstruction *instruction, ZirBlock *block, ZnesProgram *program)
+static void visit_instruction(ZirInstr *instruction, ZirBlock *block, ZnesProgram *program)
 {
     instruction_visitors[instruction->type](instruction, block, program);
 }
@@ -76,7 +76,7 @@ static void visit_block(ZirBlock *block, ZnesProgram *program)
 
     for (size_t i=0; i < instr_count; i++)
     {
-        ZirInstruction *instr = block->instructions[i];
+        ZirInstr *instr = block->instructions[i];
         visit_instruction(instr, block, program);
     }
 }

@@ -4,7 +4,7 @@
 #include "type.h"
 
 /*
- * Function: zir_type_none_new
+ * Function: zir_none_type_new
  *  Returns a new instance of a type that represents the lack of type
  *
  * Parameters:
@@ -15,12 +15,12 @@
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zir_type_none_free> function
+ *  <zir_none_type_free> function
  */
-ZirType* zir_type_none_new(void);
+ZirType* zir_none_type_new(void);
 
 /*
- * Function: zir_type_none_hash
+ * Function: zir_none_type_hash
  *  Returns a hash that identifies the none type object
  *
  * Parameters:
@@ -29,10 +29,10 @@ ZirType* zir_type_none_new(void);
  * Returns:
  *  unsigned long: Hash code of the type object
  */
-unsigned long zir_type_none_hash(ZirType *type);
+unsigned long zir_none_type_hash(ZirType *type);
 
 /*
- * Function: zir_type_none_free
+ * Function: zir_none_type_free
  *  Frees the memory of the none type object
  *
  * Parameters:
@@ -41,6 +41,6 @@ unsigned long zir_type_none_hash(ZirType *type);
  * Returns:
  *  void: This function does not return a value
  */
-void zir_type_none_free(ZirType *type);
+void zir_none_type_free(ZirType *type);
 
 #endif /* ZIR_TYPE_NONE_H */

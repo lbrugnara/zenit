@@ -5,43 +5,43 @@
 #include "jump.h"
 #include "variable.h"
 
-void zir_instruction_free(ZirInstruction *instruction)
+void zir_instruction_free(ZirInstr *instruction)
 {
     switch (instruction->type)
     {
         case ZIR_INSTR_VARIABLE:
-            zir_instruction_variable_free((ZirVariableInstruction*) instruction);
+            zir_variable_instr_free((ZirVariableInstr*) instruction);
             break;
 
         case ZIR_INSTR_CAST:
-            zir_instruction_cast_free((ZirCastInstruction*) instruction);
+            zir_cast_instr_free((ZirCastInstr*) instruction);
             break;
 
         case ZIR_INSTR_IF_FALSE:
-            zir_instruction_if_false_free((ZirIfFalseInstruction*) instruction);
+            zir_if_false_instr_free((ZirIfFalseInstr*) instruction);
             break;
 
         case ZIR_INSTR_JUMP:
-            zir_instruction_jump_free((ZirJumpInstruction*) instruction);
+            zir_jump_instr_free((ZirJumpInstr*) instruction);
             break;
     }
 }
 
-char* zir_instruction_dump(ZirInstruction *instruction, char *output)
+char* zir_instruction_dump(ZirInstr *instruction, char *output)
 {
     switch (instruction->type)
     {
         case ZIR_INSTR_VARIABLE:
-            return zir_instruction_variable_dump((ZirVariableInstruction*) instruction, output);
+            return zir_variable_instr_dump((ZirVariableInstr*) instruction, output);
 
         case ZIR_INSTR_CAST:
-            return zir_instruction_cast_dump((ZirCastInstruction*) instruction, output);
+            return zir_cast_instr_dump((ZirCastInstr*) instruction, output);
 
         case ZIR_INSTR_IF_FALSE:
-            return zir_instruction_if_false_dump((ZirIfFalseInstruction*) instruction, output);
+            return zir_if_false_instr_dump((ZirIfFalseInstr*) instruction, output);
 
         case ZIR_INSTR_JUMP:
-            return zir_instruction_jump_dump((ZirJumpInstruction*) instruction, output);
+            return zir_jump_instr_dump((ZirJumpInstr*) instruction, output);
     }
 
     return output;

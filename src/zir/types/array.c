@@ -5,7 +5,7 @@
 #include <fllib/Cstring.h>
 #include "array.h"
 
-ZirArrayType* zir_type_array_new(ZirType *member_type)
+ZirArrayType* zir_array_type_new(ZirType *member_type)
 {
     ZirArrayType *type = fl_malloc(sizeof(ZirArrayType));
     type->base.typekind = ZIR_TYPE_ARRAY;
@@ -14,7 +14,7 @@ ZirArrayType* zir_type_array_new(ZirType *member_type)
     return type;
 }
 
-unsigned long zir_type_array_hash(ZirArrayType *type)
+unsigned long zir_array_type_hash(ZirArrayType *type)
 {
     static const char *format = "[array][e:%lu]";
 
@@ -30,12 +30,12 @@ unsigned long zir_type_array_hash(ZirArrayType *type)
     return hash;
 }
 
-char* zir_type_array_to_string(ZirArrayType *type)
+char* zir_array_type_to_string(ZirArrayType *type)
 {
     if (type == NULL)
         return NULL;
 
-    unsigned long type_hash = zir_type_array_hash(type);
+    unsigned long type_hash = zir_array_type_hash(type);
 
     if (type->base.to_string.value == NULL)
     {
@@ -67,7 +67,7 @@ char* zir_type_array_to_string(ZirArrayType *type)
     return type->base.to_string.value;
 }
 
-bool zir_type_array_equals(ZirArrayType *type_a, ZirType *type_b)
+bool zir_array_type_equals(ZirArrayType *type_a, ZirType *type_b)
 {
     if (type_a == NULL || type_b == NULL)
         return (ZirType*) type_a == type_b;
@@ -80,7 +80,7 @@ bool zir_type_array_equals(ZirArrayType *type_a, ZirType *type_b)
     return type_a->length == type_b_array->length && zir_type_equals(type_a->member_type, type_b_array->member_type);
 }
 
-bool zir_type_array_is_assignable_from(ZirArrayType *target_type, ZirType *from_type)
+bool zir_array_type_is_assignable_from(ZirArrayType *target_type, ZirType *from_type)
 {
     if (from_type->typekind != ZIR_TYPE_ARRAY)
         return false;
@@ -97,7 +97,7 @@ bool zir_type_array_is_assignable_from(ZirArrayType *target_type, ZirType *from_
     return zir_type_is_assignable_from(target_type->member_type, array_from_type->member_type);
 }
 
-bool zir_type_array_is_castable_to(ZirArrayType *array_type, ZirType *target_type)
+bool zir_array_type_is_castable_to(ZirArrayType *array_type, ZirType *target_type)
 {
     if (array_type == NULL || target_type == NULL)
         return false;
@@ -107,7 +107,7 @@ bool zir_type_array_is_castable_to(ZirArrayType *array_type, ZirType *target_typ
         return false;
 
     // If target_type is the same type of the array type, we are ok to cast    
-    if (zir_type_array_equals(array_type, target_type))
+    if (zir_array_type_equals(array_type, target_type))
         return true;    
 
     // If we reached this point, it means that:
@@ -122,7 +122,7 @@ bool zir_type_array_is_castable_to(ZirArrayType *array_type, ZirType *target_typ
     return zir_type_is_castable_to(array_type->member_type, target_array_type->member_type);
 }
 
-size_t zir_type_array_size(ZirArrayType *type)
+size_t zir_array_type_size(ZirArrayType *type)
 {
     if (!type)
         return 0;
@@ -130,7 +130,7 @@ size_t zir_type_array_size(ZirArrayType *type)
     return type->length * zir_type_size(type->member_type);
 }
 
-void zir_type_array_free(ZirArrayType *type)
+void zir_array_type_free(ZirArrayType *type)
 {
     if (!type)
         return;

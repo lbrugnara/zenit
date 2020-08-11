@@ -4,7 +4,7 @@
 #include "type.h"
 
 /*
- * Function: zenit_type_none_new
+ * Function: zenit_none_type_new
  *  Returns a new instance of a type that represents the lack of type
  *
  * Parameters:
@@ -15,12 +15,12 @@
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zenit_type_none_free> function
+ *  <zenit_none_type_free> function
  */
-ZenitType* zenit_type_none_new(void);
+ZenitType* zenit_none_type_new(void);
 
 /*
- * Function: zenit_type_none_hash
+ * Function: zenit_none_type_hash
  *  Returns a hash that identifies the none type object
  *
  * Parameters:
@@ -29,10 +29,10 @@ ZenitType* zenit_type_none_new(void);
  * Returns:
  *  unsigned long: Hash code of the type object
  */
-unsigned long zenit_type_none_hash(ZenitType *type);
+unsigned long zenit_none_type_hash(ZenitType *type);
 
 /*
- * Function: zenit_type_none_free
+ * Function: zenit_none_type_free
  *  Frees the memory of the none type object
  *
  * Parameters:
@@ -41,6 +41,6 @@ unsigned long zenit_type_none_hash(ZenitType *type);
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_type_none_free(ZenitType *type);
+void zenit_none_type_free(ZenitType *type);
 
 #endif /* ZENIT_TYPE_NONE_H */
