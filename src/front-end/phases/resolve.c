@@ -638,9 +638,7 @@ static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *va
 
 static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node, enum ResolvePass pass)
 {
-    char *if_uid = zenit_if_node_uid(if_node);
-
-    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_uid);
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_node->id);
 
     visit_node(ctx, if_node->condition, pass);
     visit_node(ctx, if_node->then_branch, pass);
@@ -649,8 +647,6 @@ static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node, enum 
         visit_node(ctx, if_node->else_branch, pass);
 
     zenit_program_pop_scope(ctx->program);
-
-    fl_cstring_free(if_uid);
 
     return NULL;
 }

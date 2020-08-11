@@ -528,19 +528,21 @@ static ZirOperand* visit_variable_node(ZenitContext *ctx, ZirProgram *program, Z
 
 static ZirOperand* visit_if_node(ZenitContext *ctx, ZirProgram *program, ZenitIfNode *if_node)
 {
-    char *if_uid = zenit_if_node_uid(if_node);
-    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_uid);
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_node->id);
 
-    // We need to visit the condition expression to get the operand
-    ZirOperand *condition_operand = visit_node(ctx, program, if_node->condition);
+    // We need to visit the condition expression to emit it. We get the operand because it
+    // is the *source* condition of the if-false instruction
+    ZirOperand *source_operand = visit_node(ctx, program, if_node->condition);
 
     // TODO: WE ARE USING UINT FOR THE JUMP, WE SHOULD UPDATE THIS AS THE TYPES IN ZIR CHANGE
-    // Emit the if-false instruction using the current instruction pointer, we will adjust it later
-    ZirUintOperand *uint = zir_operand_pool_new_uint(program->operands, zir_uint_type_new(ZIR_UINT_16), (ZirUintValue){ .uint16 = 0 });
-    ZirIfFalseInstr *if_false_instr = zir_if_false_instr_new((ZirOperand*) uint, condition_operand);
-    zir_program_emit(program, (ZirInstr*) if_false_instr);
 
-    // Get the IP at the if-false instruction
+    // Create a uint operand for the jump offset with a value of 0 symbolizing a jump that needs to be backpatched 
+    ZirOperand *if_jump_destination = (ZirOperand*) zir_operand_pool_new_uint(program->operands, zir_uint_type_new(ZIR_UINT_16), (ZirUintValue){ .uint16 = 0 });
+
+    // Emit the if-false instruction. We keep a reference to it to backpatch the jump destination
+    ZirInstr *if_false_instr = zir_program_emit(program, (ZirInstr*) zir_if_false_instr_new(if_jump_destination, source_operand));
+
+    // Get the IP at the if-false instruction to calculate the jump
     size_t if_instr_ip = zir_block_get_ip(program->current);
     if (if_instr_ip > (size_t) UINT16_MAX)
     {
@@ -548,67 +550,83 @@ static ZirOperand* visit_if_node(ZenitContext *ctx, ZirProgram *program, ZenitIf
         goto unaddressable_jump;
     }
 
-    // We visit the "then" branch
+    // Visit the "then" branch to emit the ZIR instructions when the if-false instruction is not satisfied
     visit_node(ctx, program, if_node->then_branch);
 
-    // The next instruction is the first one "outside" of the "then" branch, so we need it to calculate the offset
-    size_t then_exit_point_offset = zir_block_get_ip(program->current) - if_instr_ip;
-    if (fl_std_uint_add_overflow(then_exit_point_offset, 1, SIZE_MAX) || then_exit_point_offset + 1 > (size_t) UINT16_MAX)
-    {
-        zenit_context_error(ctx, if_node->base.location, ZENIT_ERROR_INTERNAL, "Unaddressable jump of %zu instructions", then_exit_point_offset);
-        goto unaddressable_jump;
-    }
-    then_exit_point_offset++; // Now the offset points 1 past the "then" branch instructions
-
+    // At this point, the value of the IP of the block is 'k' which is placed in the last instruction that belongs to 
+    // the "then" branch. We say we are 'q' instructions ahead of the IP 'n' we saved before (the if_instr_ip variable):
+    //
+    //      if_false <condition> jump <unknown>                 <-- IP: 'n' ---.
+    //          ...                                                             | Difference of 'k' - 'n' instructions => 'q'
+    //      <last instruction within "then" branch>             <-- IP: 'k' ---´
+    //      <first instruction outside of the "then" branch>    <-- IP: 'k' + 1 
+    //
+    // Based on if exists an else branch or not, we need to calculate the offset of the jump from the if-false instruction
     if (if_node->else_branch == NULL)
     {
-        // If there is no "else" branch, we simply backpatch the if-else jump to the next instruction after the "then" branch
-        ((ZirUintOperand*) if_false_instr->base.destination)->value.uint16 = then_exit_point_offset;
+        // If there is no "else" branch, the jump destination is the instruction placed at 'k' + 1
+        // The following line retrieves the current IP ('k')
+        size_t current_ip = zir_block_get_ip(program->current);
+
+        // Because the if-false instruction works with offsets, we need to calculate it:
+        //  target offset = 'k' + 1 - 'n'
+        if (fl_std_uint_add_overflow(current_ip, 1, UINT16_MAX))
+        {
+            zenit_context_error(ctx, if_node->base.location, ZENIT_ERROR_INTERNAL, "Unaddressable jump of %zu + 1 instructions", current_ip);
+            goto unaddressable_jump;
+        } 
+        ((ZirUintOperand*) if_false_instr->destination)->value.uint16 = current_ip - if_instr_ip + 1;
     }
     else
     {
-        // If there is an "else" branch, emit a jump with a label that will need to be backpatched to skip the else when the if-false falls
-        // through the "then" branch
-        ZirUintOperand *uint = zir_operand_pool_new_uint(program->operands, zir_uint_type_new(ZIR_UINT_16), (ZirUintValue){ .uint16 = 0 });
-        ZirJumpInstr *jump_instr = zir_jump_instr_new((ZirOperand*) uint);
-        zir_program_emit(program, (ZirInstr*) jump_instr);
+        // If there is an "else" branch, the jump destination of the if-false instruction is the first instruction within the "else" branch,
+        // but to not fall from the "then" branch to the "else" branch when the if-false instruction is not met, we need to add an instruction 
+        // to "exit" the "then" branch. That instruction is an unconditional jump, and the destination of that jump needs to be backpatched to jump
+        // to the next instruction following the "else" branch:
+        //
+        //      if_false <condition> jump <unknown>                 <-- IP: 'n' ------.
+        //          ...                                                                |
+        //      <last instruction within "then" branch>             <-- IP: 'k'        | Difference of 'j' + 1 - 'n' instructions
+        //      jump ??                                             <-- IP: 'j'        |
+        //      <first instruction of the "else" branch>            <-- IP: 'j' + 1 --´
+        //          ...
+        //      <last instruction within "else" branch>             <-- IP: 'm'
+        //      <first instruction outside of the "else" branch>    <-- IP: 'm' + 1 (the target of the jump instruction)
+        //
+        ZirOperand *jump_destination = (ZirOperand*) zir_operand_pool_new_uint(program->operands, zir_uint_type_new(ZIR_UINT_16), (ZirUintValue){ .uint16 = 0 });
+        ZirInstr *jump_instr = zir_program_emit(program, (ZirInstr*) zir_jump_instr_new(jump_destination));
 
-        // Similar to what we did with the if-false instruction, we save the IP at the jump place to calculate the offset
+        // Similar to what we did with the if-false instruction, we save the IP ('j') at the jump place to calculate the offset
         size_t jump_inst_ip = zir_block_get_ip(program->current);
 
-        // The entry point of the "else" branch is the target of the if-false instruction when the condition is not false
-        // (which skips the "then" branch)
-        // This actually calculates the offset form the if-false instruction to the goto instruction, we still need to add 1
-        // to it, but we check for overflows
-        size_t else_entry_point = jump_inst_ip - if_instr_ip;
-        if (fl_std_uint_add_overflow(else_entry_point, 1, SIZE_MAX) || else_entry_point + 1 > (size_t) UINT16_MAX)
+        // As mentioned above, the entry point of the "else" branch is the instruction 'j' + 1, which means that the if-false instruction
+        // needs to jump 'j' + 1 - 'n' instruction forward:
+        if (fl_std_uint_add_overflow(jump_inst_ip, 1, UINT16_MAX))
         {
-            zenit_context_error(ctx, if_node->base.location, ZENIT_ERROR_INTERNAL, "Unaddressable jump of %zu instructions", else_entry_point);
+            zenit_context_error(ctx, if_node->base.location, ZENIT_ERROR_INTERNAL, "Unaddressable jump of %zu + 1 instructions", jump_inst_ip);
             goto unaddressable_jump;
-        }
-        // Now it is safe to use the "else" entry point
-        ((ZirUintOperand*) if_false_instr->base.destination)->value.uint16 = ++else_entry_point;
+        } 
+        ((ZirUintOperand*) if_false_instr->destination)->value.uint16 = jump_inst_ip + 1 - if_instr_ip;
 
         // We visit the "else" branch
         visit_node(ctx, program, if_node->else_branch);
+
+        // We retrieve the current IP ('m')
+        size_t last_else_ip = zir_block_get_ip(program->current);
         
-        // Now we need to backpatch the jump: the current IP minus the value of the IP at the jump place plus 1 will give us
-        // the exit point of the "else" branch
-        size_t else_exit_point = zir_block_get_ip(program->current) - jump_inst_ip;
-        if (fl_std_uint_add_overflow(else_exit_point, 1, SIZE_MAX) || else_exit_point + 1 > (size_t) UINT16_MAX)
+        // Finally, the destination of the unconditional jump is the instruction 'm' + 1, and the offset from the jump instruction
+        // is: 'm' + 1 - 'j'
+        if (fl_std_uint_add_overflow(last_else_ip, 1, UINT16_MAX))
         {
-            zenit_context_error(ctx, if_node->base.location, ZENIT_ERROR_INTERNAL, "Unaddressable jump of %zu instructions", else_exit_point);
+            zenit_context_error(ctx, if_node->base.location, ZENIT_ERROR_INTERNAL, "Unaddressable jump of %zu + 1 instructions", last_else_ip);
             goto unaddressable_jump;
         }
-        // Now it is safe to use the "else" exit point
-        ((ZirUintOperand*) jump_instr->base.destination)->value.uint16 = ++else_exit_point;
+        ((ZirUintOperand*) jump_instr->destination)->value.uint16 = last_else_ip + 1 - jump_inst_ip;
     }
 
 unaddressable_jump:
     // Jump out of the Zenit block
     zenit_program_pop_scope(ctx->program);
-
-    fl_cstring_free(if_uid);
 
     // No need to return anything
     return NULL;
