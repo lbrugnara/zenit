@@ -107,15 +107,15 @@ static void emit_zp_to_code_store(ZnesProgram *program, ZnesSymbol *source_symbo
 
         for (size_t i=0; i < to_copy; i++)
         {
-            znes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
-            znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+            znes_program_emit_zpg(target_segment, NES_OP_LDA, source_symbol->address + i);
+            znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
 
         if (nes_symbol->size > source_symbol->size)
         {
             znes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
             for (size_t i = to_copy; i < nes_symbol->size; i++)
-                znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+                znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
     }
 }
@@ -163,25 +163,15 @@ static void emit_zp_to_data_store(ZnesProgram *program, ZnesSymbol *source_symbo
 
         for (size_t i=0; i < to_copy; i++)
         {
-            if (program->static_context)
-            {
-                // NOTE: In static context we can directly copy the value from the DATA segment
-                znes_program_emit_imm(target_segment, NES_OP_LDA, program->data.bytes[source_symbol->address - program->data.base_address + i]);
-            }
-            else
-            {
-                // NOTE: If we are not in static context, we need to get the current -possibly modified- value from the DATA segment
-                znes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
-            }
-
-            znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+            znes_program_emit_zpg(target_segment, NES_OP_LDA, source_symbol->address + i);
+            znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
 
         if (nes_symbol->size > source_symbol->size)
         {
             znes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
             for (size_t i = to_copy; i < nes_symbol->size; i++)
-                znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+                znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
     }
 }
@@ -304,15 +294,25 @@ static void emit_data_to_zp_store(ZnesProgram *program, ZnesSymbol *source_symbo
 
         for (size_t i=0; i < to_copy; i++)
         {
-            znes_program_emit_zpg(target_segment, NES_OP_LDA, (uint8_t)(source_symbol->address + i));
-            znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            if (program->static_context)
+            {
+                // NOTE: In static context we can directly copy the value from the DATA segment
+                znes_program_emit_imm(target_segment, NES_OP_LDA, program->data.bytes[source_symbol->address - program->data.base_address + i]);
+            }
+            else
+            {
+                // NOTE: If we are not in static context, we need to get the current -possibly modified- value from the DATA segment
+                znes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+            }
+
+            znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(source_symbol->address + i));
         }
 
         if (nes_symbol->size > source_symbol->size)
         {
             znes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
             for (size_t i = to_copy; i < nes_symbol->size; i++)
-                znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+                znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
         }
     }
 }
@@ -472,15 +472,15 @@ static void emit_code_to_zp_store(ZnesProgram *program, ZnesSymbol *source_symbo
 
         for (size_t i=0; i < to_copy; i++)
         {
-            znes_program_emit_zpg(target_segment, NES_OP_LDA, (uint8_t)(source_symbol->address + i));
-            znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            znes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+            znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t) (target_address + i));
         }
 
         if (nes_symbol->size > source_symbol->size)
         {
             znes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
             for (size_t i = to_copy; i < nes_symbol->size; i++)
-                znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+                znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t) target_address + i);
         }
     }
 }
