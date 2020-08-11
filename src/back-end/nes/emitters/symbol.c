@@ -8,12 +8,12 @@
 #include "../symbols/temp.h"
 #include "../symbols/uint.h"
 
-static void emit_zp_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
+static void emit_zp_to_zp_store(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;    
 
-    if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
+    if (source_symbol->symkind == ZNES_SYMBOL_ARRAY)
     {
         ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
         ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
@@ -23,10 +23,10 @@ static void emit_zp_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesS
             ZnesSymbol *src_elem = src_symbol->elements[i];
             ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
-            emit_zp_to_zp(program, src_elem, dst_elem, 0);
+            emit_zp_to_zp_store(program, src_elem, dst_elem, 0);
         }
     }
-    else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
+    else if (source_symbol->symkind == ZNES_SYMBOL_STRUCT)
     {
         ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
         ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
@@ -36,7 +36,7 @@ static void emit_zp_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesS
             ZnesSymbol *src_elem = src_symbol->members[i];
             ZnesSymbol *dst_elem = dst_symbol->members[i];
 
-            emit_zp_to_zp(program, src_elem, dst_elem, 0);
+            emit_zp_to_zp_store(program, src_elem, dst_elem, 0);
         }
     }
     else
@@ -51,25 +51,25 @@ static void emit_zp_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesS
 
         for (size_t i=0; i < to_copy; i++)
         {
-            zenit_nes_program_emit_zpg(target_segment, NES_OP_LDA, (uint8_t)(source_symbol->address + i));
-            zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+            znes_program_emit_zpg(target_segment, NES_OP_LDA, (uint8_t)(source_symbol->address + i));
+            znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
         }
 
         if (nes_symbol->size > source_symbol->size)
         {
-            zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+            znes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
             for (size_t i = to_copy; i < nes_symbol->size; i++)
-                zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+                znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
         }
     }
 }
 
-static void emit_zp_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
+static void emit_zp_to_code_store(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
-    if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
+    if (source_symbol->symkind == ZNES_SYMBOL_ARRAY)
     {
         ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
         ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
@@ -79,10 +79,10 @@ static void emit_zp_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, Zne
             ZnesSymbol *src_elem = src_symbol->elements[i];
             ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
-            emit_zp_to_code(program, src_elem, dst_elem, 0);
+            emit_zp_to_code_store(program, src_elem, dst_elem, 0);
         }
     }
-    else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
+    else if (source_symbol->symkind == ZNES_SYMBOL_STRUCT)
     {
         ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
         ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
@@ -92,7 +92,7 @@ static void emit_zp_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, Zne
             ZnesSymbol *src_elem = src_symbol->members[i];
             ZnesSymbol *dst_elem = dst_symbol->members[i];
 
-            emit_zp_to_code(program, src_elem, dst_elem, 0);
+            emit_zp_to_code_store(program, src_elem, dst_elem, 0);
         }
     }
     else
@@ -107,25 +107,25 @@ static void emit_zp_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, Zne
 
         for (size_t i=0; i < to_copy; i++)
         {
-            zenit_nes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
-            zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+            znes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+            znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
         }
 
         if (nes_symbol->size > source_symbol->size)
         {
-            zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+            znes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
             for (size_t i = to_copy; i < nes_symbol->size; i++)
-                zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+                znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
         }
     }
 }
 
-static void emit_zp_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
+static void emit_zp_to_data_store(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
-    if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
+    if (source_symbol->symkind == ZNES_SYMBOL_ARRAY)
     {
         ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
         ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
@@ -135,10 +135,10 @@ static void emit_zp_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, Zne
             ZnesSymbol *src_elem = src_symbol->elements[i];
             ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
-            emit_zp_to_data(program, src_elem, dst_elem, 0);
+            emit_zp_to_data_store(program, src_elem, dst_elem, 0);
         }
     }
-    else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
+    else if (source_symbol->symkind == ZNES_SYMBOL_STRUCT)
     {
         ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
         ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
@@ -148,7 +148,7 @@ static void emit_zp_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, Zne
             ZnesSymbol *src_elem = src_symbol->members[i];
             ZnesSymbol *dst_elem = dst_symbol->members[i];
 
-            emit_zp_to_data(program, src_elem, dst_elem, 0);
+            emit_zp_to_data_store(program, src_elem, dst_elem, 0);
         }
     }
     else
@@ -166,32 +166,32 @@ static void emit_zp_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, Zne
             if (program->static_context)
             {
                 // NOTE: In static context we can directly copy the value from the DATA segment
-                zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, program->data.bytes[source_symbol->address - program->data.base_address + i]);
+                znes_program_emit_imm(target_segment, NES_OP_LDA, program->data.bytes[source_symbol->address - program->data.base_address + i]);
             }
             else
             {
                 // NOTE: If we are not in static context, we need to get the current -possibly modified- value from the DATA segment
-                zenit_nes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+                znes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
             }
 
-            zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+            znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
         }
 
         if (nes_symbol->size > source_symbol->size)
         {
-            zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+            znes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
             for (size_t i = to_copy; i < nes_symbol->size; i++)
-                zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
+                znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address + i));
         }
     }
 }
 
-static void emit_data_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
+static void emit_data_to_data_store(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
-    if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
+    if (source_symbol->symkind == ZNES_SYMBOL_ARRAY)
     {
         ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
         ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
@@ -201,10 +201,10 @@ static void emit_data_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, Z
             ZnesSymbol *src_elem = src_symbol->elements[i];
             ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
-            emit_data_to_data(program, src_elem, dst_elem, 0);
+            emit_data_to_data_store(program, src_elem, dst_elem, 0);
         }
     }
-    else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
+    else if (source_symbol->symkind == ZNES_SYMBOL_STRUCT)
     {
         ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
         ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
@@ -214,7 +214,7 @@ static void emit_data_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, Z
             ZnesSymbol *src_elem = src_symbol->members[i];
             ZnesSymbol *dst_elem = dst_symbol->members[i];
 
-            emit_data_to_data(program, src_elem, dst_elem, 0);
+            emit_data_to_data_store(program, src_elem, dst_elem, 0);
         }
     }
     else
@@ -247,26 +247,26 @@ static void emit_data_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, Z
 
             for (size_t i=0; i < to_copy; i++)
             {
-                zenit_nes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
-                zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+                znes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+                znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
             }
 
             if (nes_symbol->size > source_symbol->size)
             {
-                zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+                znes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
                 for (size_t i = to_copy; i < nes_symbol->size; i++)
-                    zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+                    znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
             }
         }
     }
 }
 
-static void emit_data_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
+static void emit_data_to_zp_store(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
-    if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
+    if (source_symbol->symkind == ZNES_SYMBOL_ARRAY)
     {
         ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
         ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
@@ -276,10 +276,10 @@ static void emit_data_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, Zne
             ZnesSymbol *src_elem = src_symbol->elements[i];
             ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
-            emit_data_to_zp(program, src_elem, dst_elem, 0);
+            emit_data_to_zp_store(program, src_elem, dst_elem, 0);
         }
     }
-    else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
+    else if (source_symbol->symkind == ZNES_SYMBOL_STRUCT)
     {
         ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
         ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
@@ -289,7 +289,7 @@ static void emit_data_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, Zne
             ZnesSymbol *src_elem = src_symbol->members[i];
             ZnesSymbol *dst_elem = dst_symbol->members[i];
 
-            emit_data_to_zp(program, src_elem, dst_elem, 0);
+            emit_data_to_zp_store(program, src_elem, dst_elem, 0);
         }
     }
     else
@@ -304,25 +304,25 @@ static void emit_data_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, Zne
 
         for (size_t i=0; i < to_copy; i++)
         {
-            zenit_nes_program_emit_zpg(target_segment, NES_OP_LDA, (uint8_t)(source_symbol->address + i));
-            zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            znes_program_emit_zpg(target_segment, NES_OP_LDA, (uint8_t)(source_symbol->address + i));
+            znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
 
         if (nes_symbol->size > source_symbol->size)
         {
-            zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+            znes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
             for (size_t i = to_copy; i < nes_symbol->size; i++)
-                zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+                znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
     }
 }
 
-static void emit_data_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
+static void emit_data_to_code_store(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
-    if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
+    if (source_symbol->symkind == ZNES_SYMBOL_ARRAY)
     {
         ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
         ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
@@ -332,10 +332,10 @@ static void emit_data_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, Z
             ZnesSymbol *src_elem = src_symbol->elements[i];
             ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
-            emit_data_to_code(program, src_elem, dst_elem, 0);
+            emit_data_to_code_store(program, src_elem, dst_elem, 0);
         }
     }
-    else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
+    else if (source_symbol->symkind == ZNES_SYMBOL_STRUCT)
     {
         ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
         ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
@@ -345,7 +345,7 @@ static void emit_data_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, Z
             ZnesSymbol *src_elem = src_symbol->members[i];
             ZnesSymbol *dst_elem = dst_symbol->members[i];
 
-            emit_data_to_code(program, src_elem, dst_elem, 0);
+            emit_data_to_code_store(program, src_elem, dst_elem, 0);
         }
     }
     else
@@ -360,25 +360,25 @@ static void emit_data_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, Z
 
         for (size_t i=0; i < to_copy; i++)
         {
-            zenit_nes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
-            zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            znes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+            znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
 
         if (nes_symbol->size > source_symbol->size)
         {
-            zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+            znes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
             for (size_t i = to_copy; i < nes_symbol->size; i++)
-                zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+                znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
     }
 }
 
-static void emit_code_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
+static void emit_code_to_code_store(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
-    if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
+    if (source_symbol->symkind == ZNES_SYMBOL_ARRAY)
     {
         ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
         ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
@@ -388,10 +388,10 @@ static void emit_code_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, Z
             ZnesSymbol *src_elem = src_symbol->elements[i];
             ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
-            emit_code_to_code(program, src_elem, dst_elem, 0);
+            emit_code_to_code_store(program, src_elem, dst_elem, 0);
         }
     }
-    else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
+    else if (source_symbol->symkind == ZNES_SYMBOL_STRUCT)
     {
         ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
         ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
@@ -401,7 +401,7 @@ static void emit_code_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, Z
             ZnesSymbol *src_elem = src_symbol->members[i];
             ZnesSymbol *dst_elem = dst_symbol->members[i];
 
-            emit_code_to_code(program, src_elem, dst_elem, 0);
+            emit_code_to_code_store(program, src_elem, dst_elem, 0);
         }
     }
     else
@@ -416,25 +416,25 @@ static void emit_code_to_code(ZnesProgram *program, ZnesSymbol *source_symbol, Z
 
         for (size_t i=0; i < to_copy; i++)
         {
-            zenit_nes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
-            zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            znes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+            znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
 
         if (nes_symbol->size > source_symbol->size)
         {
-            zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+            znes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
             for (size_t i = to_copy; i < nes_symbol->size; i++)
-                zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+                znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
     }
 }
 
-static void emit_code_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
+static void emit_code_to_zp_store(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
-    if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
+    if (source_symbol->symkind == ZNES_SYMBOL_ARRAY)
     {
         ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
         ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
@@ -444,10 +444,10 @@ static void emit_code_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, Zne
             ZnesSymbol *src_elem = src_symbol->elements[i];
             ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
-            emit_code_to_zp(program, src_elem, dst_elem, 0);
+            emit_code_to_zp_store(program, src_elem, dst_elem, 0);
         }
     }
-    else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
+    else if (source_symbol->symkind == ZNES_SYMBOL_STRUCT)
     {
         ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
         ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
@@ -457,7 +457,7 @@ static void emit_code_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, Zne
             ZnesSymbol *src_elem = src_symbol->members[i];
             ZnesSymbol *dst_elem = dst_symbol->members[i];
 
-            emit_code_to_zp(program, src_elem, dst_elem, 0);
+            emit_code_to_zp_store(program, src_elem, dst_elem, 0);
         }
     }
     else
@@ -472,25 +472,25 @@ static void emit_code_to_zp(ZnesProgram *program, ZnesSymbol *source_symbol, Zne
 
         for (size_t i=0; i < to_copy; i++)
         {
-            zenit_nes_program_emit_zpg(target_segment, NES_OP_LDA, (uint8_t)(source_symbol->address + i));
-            zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            znes_program_emit_zpg(target_segment, NES_OP_LDA, (uint8_t)(source_symbol->address + i));
+            znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
 
         if (nes_symbol->size > source_symbol->size)
         {
-            zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+            znes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
             for (size_t i = to_copy; i < nes_symbol->size; i++)
-                zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+                znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
     }
 }
 
-static void emit_code_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
+static void emit_code_to_data_store(ZnesProgram *program, ZnesSymbol *source_symbol, ZnesSymbol *nes_symbol, size_t offset)
 {
     if (source_symbol->symkind != nes_symbol->symkind)
         return;
 
-    if (source_symbol->symkind == ZENIT_NES_SYMBOL_ARRAY)
+    if (source_symbol->symkind == ZNES_SYMBOL_ARRAY)
     {
         ZnesArraySymbol *src_symbol = (ZnesArraySymbol*) source_symbol;
         ZnesArraySymbol *dst_symbol = (ZnesArraySymbol*) nes_symbol;
@@ -500,10 +500,10 @@ static void emit_code_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, Z
             ZnesSymbol *src_elem = src_symbol->elements[i];
             ZnesSymbol *dst_elem = dst_symbol->elements[i];
 
-            emit_code_to_data(program, src_elem, dst_elem, 0);
+            emit_code_to_data_store(program, src_elem, dst_elem, 0);
         }
     }
-    else if (source_symbol->symkind == ZENIT_NES_SYMBOL_STRUCT)
+    else if (source_symbol->symkind == ZNES_SYMBOL_STRUCT)
     {
         ZnesStructSymbol *src_symbol = (ZnesStructSymbol*) source_symbol;
         ZnesStructSymbol *dst_symbol = (ZnesStructSymbol*) nes_symbol;
@@ -513,7 +513,7 @@ static void emit_code_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, Z
             ZnesSymbol *src_elem = src_symbol->members[i];
             ZnesSymbol *dst_elem = dst_symbol->members[i];
 
-            emit_code_to_data(program, src_elem, dst_elem, 0);
+            emit_code_to_data_store(program, src_elem, dst_elem, 0);
         }
     }
     else
@@ -528,79 +528,79 @@ static void emit_code_to_data(ZnesProgram *program, ZnesSymbol *source_symbol, Z
 
         for (size_t i=0; i < to_copy; i++)
         {
-            zenit_nes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
-            zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+            znes_program_emit_abs(target_segment, NES_OP_LDA, source_symbol->address + i);
+            znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
 
         if (nes_symbol->size > source_symbol->size)
         {
-            zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
+            znes_program_emit_imm(target_segment, NES_OP_LDA, 0x0);
             for (size_t i = to_copy; i < nes_symbol->size; i++)
-                zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
+                znes_program_emit_abs(target_segment, NES_OP_STA, target_address + i);
         }
     }
 }
 
-void zenit_nes_emitter_symbol_store(ZnesProgram *program, ZirSymbolOperand *symbol_operand, ZnesSymbol *nes_symbol, size_t offset)
+void znes_emitter_symbol_store(ZnesProgram *program, ZirSymbolOperand *symbol_operand, ZnesSymbol *nes_symbol, size_t offset)
 {
     ZnesSymbol *source_symbol = fl_hashtable_get(program->symbols, symbol_operand->symbol->name);
 
     // If the source is a temp symbol, we need to "emit" the store in a special way
-    if (source_symbol->symkind == ZENIT_NES_SYMBOL_TEMP)
+    if (source_symbol->symkind == ZNES_SYMBOL_TEMP)
     {
-        zenit_nes_emitter_temp_store(program, (ZnesTempSymbol*) source_symbol, nes_symbol, offset);
+        znes_emitter_temp_store(program, (ZnesTempSymbol*) source_symbol, nes_symbol, offset);
         return;
     }
 
     uint16_t target_address = nes_symbol->address + offset;
 
-    if (nes_symbol->segment == ZENIT_NES_SEGMENT_ZP)
+    if (nes_symbol->segment == ZNES_SEGMENT_ZP)
     {
-        if (source_symbol->segment == ZENIT_NES_SEGMENT_ZP)
+        if (source_symbol->segment == ZNES_SEGMENT_ZP)
         {
-            emit_zp_to_zp(program, source_symbol, nes_symbol, offset);
+            emit_zp_to_zp_store(program, source_symbol, nes_symbol, offset);
         }
-        else if (source_symbol->segment == ZENIT_NES_SEGMENT_CODE)
+        else if (source_symbol->segment == ZNES_SEGMENT_CODE)
         {
-            emit_zp_to_code(program, source_symbol, nes_symbol, offset);
+            emit_code_to_zp_store(program, source_symbol, nes_symbol, offset);
         }
-        else if (source_symbol->segment == ZENIT_NES_SEGMENT_DATA)
+        else if (source_symbol->segment == ZNES_SEGMENT_DATA)
         {
-            emit_zp_to_data(program, source_symbol, nes_symbol, offset);
+            emit_data_to_zp_store(program, source_symbol, nes_symbol, offset);
         }
     }
-    else if (nes_symbol->segment == ZENIT_NES_SEGMENT_DATA)
+    else if (nes_symbol->segment == ZNES_SEGMENT_DATA)
     {
         ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
 
-        if (source_symbol->segment == ZENIT_NES_SEGMENT_DATA)
+        if (source_symbol->segment == ZNES_SEGMENT_DATA)
         {
-            emit_data_to_data(program, source_symbol, nes_symbol, offset);
+            emit_data_to_data_store(program, source_symbol, nes_symbol, offset);
         }
-        else if (source_symbol->segment == ZENIT_NES_SEGMENT_ZP)
+        else if (source_symbol->segment == ZNES_SEGMENT_ZP)
         {
-            emit_data_to_zp(program, source_symbol, nes_symbol, offset);
+            emit_zp_to_data_store(program, source_symbol, nes_symbol, offset);
         }
-        else if (source_symbol->segment == ZENIT_NES_SEGMENT_CODE)
+        else if (source_symbol->segment == ZNES_SEGMENT_CODE)
         {
-            emit_data_to_code(program, source_symbol, nes_symbol, offset);
+            emit_code_to_data_store(program, source_symbol, nes_symbol, offset);
         }
     }
-    else if (nes_symbol->segment == ZENIT_NES_SEGMENT_CODE)
+    else if (nes_symbol->segment == ZNES_SEGMENT_CODE)
     {
         ZnesCodeSegment *target_segment = program->static_context ? &program->startup : &program->code;
 
-        if (source_symbol->segment == ZENIT_NES_SEGMENT_CODE)
+        if (source_symbol->segment == ZNES_SEGMENT_CODE)
         {
-            emit_code_to_code(program, source_symbol, nes_symbol, offset);
+            emit_code_to_code_store(program, source_symbol, nes_symbol, offset);
         }
-        else if (source_symbol->segment == ZENIT_NES_SEGMENT_ZP)
+        else if (source_symbol->segment == ZNES_SEGMENT_ZP)
         {
-            emit_code_to_zp(program, source_symbol, nes_symbol, offset);
+            emit_zp_to_code_store(program, source_symbol, nes_symbol, offset);
         }
-        else if (source_symbol->segment == ZENIT_NES_SEGMENT_DATA)
+        else if (source_symbol->segment == ZNES_SEGMENT_DATA)
         {
-            emit_code_to_data(program, source_symbol, nes_symbol, offset);
+            emit_data_to_code_store(program, source_symbol, nes_symbol, offset);
         }
     }
 }

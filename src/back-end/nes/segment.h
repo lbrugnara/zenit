@@ -1,11 +1,11 @@
-#ifndef ZENIT_NES_SEGMENT_H
-#define ZENIT_NES_SEGMENT_H
+#ifndef ZNES_SEGMENT_H
+#define ZNES_SEGMENT_H
 
 typedef enum ZnesSegment {
-    ZENIT_NES_SEGMENT_ZP,
-    ZENIT_NES_SEGMENT_DATA,
-    ZENIT_NES_SEGMENT_CODE,
-    ZENIT_NES_SEGMENT_TEMP,
+    ZNES_SEGMENT_ZP,
+    ZNES_SEGMENT_DATA,
+    ZNES_SEGMENT_CODE,
+    ZNES_SEGMENT_TEMP,
 } ZnesSegment;
 
 typedef struct ZnesDataSegment {
@@ -23,4 +23,4 @@ typedef struct ZnesZeroPageSegment {
     uint8_t slots[255];
 } ZnesZeroPageSegment;
 
-#endif /* ZENIT_NES_SEGMENT_H */
+#endif /* ZNES_SEGMENT_H */

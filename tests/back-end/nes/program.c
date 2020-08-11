@@ -67,7 +67,7 @@ void zenit_test_nes_program(void)
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = znes_generate_program(zir_program);
 
     fl_expect("NES program must be valid", nes_program != NULL);
 
@@ -84,7 +84,7 @@ void zenit_test_nes_program(void)
     fl_expect("STARTUP segment must be equals to the precomputed value", startup_equals);
     fl_expect("Vectors must be equals to the precomputed value", vectors_equals);
 
-    zenit_nes_program_free(nes_program);
+    znes_program_free(nes_program);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }

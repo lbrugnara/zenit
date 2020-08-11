@@ -32,20 +32,20 @@ int main(int argc, char **argv)
         return -3;
     }
 
-    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = znes_generate_program(zir_program);
 
     if (!nes_program)
         return -4;
 
-    ZnesRom *rom = zenit_nes_rom_new(nes_program);
+    ZnesRom *rom = znes_rom_new(nes_program);
 
     if (!rom)
         return -5;
 
-    zenit_nes_rom_dump(rom, argv[2]);
+    znes_rom_dump(rom, argv[2]);
     
-    zenit_nes_rom_free(rom);
-    zenit_nes_program_free(nes_program);
+    znes_rom_free(rom);
+    znes_program_free(nes_program);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
     return 0;

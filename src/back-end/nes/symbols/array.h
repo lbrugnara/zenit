@@ -1,5 +1,5 @@
-#ifndef ZENIT_NES_ARRAY_SYMBOL_H
-#define ZENIT_NES_ARRAY_SYMBOL_H
+#ifndef ZNES_ARRAY_SYMBOL_H
+#define ZNES_ARRAY_SYMBOL_H
 
 #include <stdint.h>
 #include "symbol.h"
@@ -9,7 +9,7 @@ typedef struct ZnesArraySymbol {
     ZnesSymbol **elements;
 } ZnesArraySymbol;
 
-ZnesArraySymbol* zenit_nes_symbol_array_new(const char *name, ZirArrayType *zir_array_type, ZnesSegment segment, uint16_t address);
-void zenit_nes_symbol_array_free(ZnesArraySymbol *array_symbol);
+ZnesArraySymbol* znes_symbol_array_new(const char *name, ZirArrayType *zir_array_type, ZnesSegment segment, uint16_t address);
+void znes_symbol_array_free(ZnesArraySymbol *array_symbol);
 
-#endif /* ZENIT_NES_ARRAY_SYMBOL_H */
+#endif /* ZNES_ARRAY_SYMBOL_H */

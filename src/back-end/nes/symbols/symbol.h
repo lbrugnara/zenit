@@ -1,17 +1,17 @@
-#ifndef ZENIT_NES_SYMBOL
-#define ZENIT_NES_SYMBOL
+#ifndef ZNES_SYMBOL
+#define ZNES_SYMBOL
 
 #include <stdint.h>
 #include "../segment.h"
 #include "../../../zir/types/system.h"
 
 typedef enum ZnesSymbolKind {
-    ZENIT_NES_SYMBOL_UINT,
-    ZENIT_NES_SYMBOL_BOOL,
-    ZENIT_NES_SYMBOL_ARRAY,
-    ZENIT_NES_SYMBOL_STRUCT,
-    ZENIT_NES_SYMBOL_REFERENCE,
-    ZENIT_NES_SYMBOL_TEMP,
+    ZNES_SYMBOL_UINT,
+    ZNES_SYMBOL_BOOL,
+    ZNES_SYMBOL_ARRAY,
+    ZNES_SYMBOL_STRUCT,
+    ZNES_SYMBOL_REFERENCE,
+    ZNES_SYMBOL_TEMP,
 } ZnesSymbolKind;
 
 typedef struct ZnesSymbol {
@@ -22,7 +22,7 @@ typedef struct ZnesSymbol {
     size_t size;
 } ZnesSymbol;
 
-ZnesSymbol* zenit_nes_symbol_new(const char *name, ZirType *zir_type, ZnesSegment segment, uint16_t address);
-void zenit_nes_symbol_free(ZnesSymbol *symbol);
+ZnesSymbol* znes_symbol_new(const char *name, ZirType *zir_type, ZnesSegment segment, uint16_t address);
+void znes_symbol_free(ZnesSymbol *symbol);
 
-#endif /* ZENIT_NES_SYMBOL */
+#endif /* ZNES_SYMBOL */

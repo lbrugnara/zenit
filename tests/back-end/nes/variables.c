@@ -65,7 +65,7 @@ void zenit_test_nes_global_vars(void)
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = znes_generate_program(zir_program);
     
     fl_expect("Data segment at 0x00 should be 0x1 (a)",                 nes_program->data.bytes[0x00] == 0x1);
     fl_expect("Data segment at 0x01 should be 0x2 (b)",                 nes_program->data.bytes[0x01] == 0x2);
@@ -125,7 +125,7 @@ void zenit_test_nes_global_vars(void)
     fl_expect("Data segment at 0x37 should be 0x01 (ba[0])",            nes_program->data.bytes[0x37] == 0x01);
     fl_expect("Data segment at 0x38 should be 0x00 (ba[1])",            nes_program->data.bytes[0x38] == 0x00);
 
-    zenit_nes_program_free(nes_program);
+    znes_program_free(nes_program);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }
@@ -147,7 +147,7 @@ void zenit_test_nes_global_vars_array(void)
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = znes_generate_program(zir_program);
     
     fl_expect("Data segment at 0x00 should be 0xff (a lo)",             nes_program->data.bytes[0x00] == 0xFF);
     fl_expect("Data segment at 0x01 should be 0x01 (a hi)",             nes_program->data.bytes[0x01] == 0x01);
@@ -157,7 +157,7 @@ void zenit_test_nes_global_vars_array(void)
     fl_expect("Data segment at 0x05 should be 0x01 (barr[0])",          nes_program->data.bytes[0x05] == 0x01);
     fl_expect("Data segment at 0x06 should be 0x00 (barr[1])",          nes_program->data.bytes[0x06] == 0x00);
 
-    zenit_nes_program_free(nes_program);
+    znes_program_free(nes_program);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }
@@ -207,7 +207,7 @@ void zenit_test_nes_global_vars_zp(void)
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = znes_generate_program(zir_program);
 
     fl_expect("Data segment at 0x00 should be 0x00 (datavar -bss-)",    nes_program->data.bytes[0x00] == 0x00);
     fl_expect("Data segment at 0x01 should be 0x00 (tempvar -bss-)",    nes_program->data.bytes[0x01] == 0x00);
@@ -312,7 +312,7 @@ void zenit_test_nes_global_vars_zp(void)
     fl_expect("Startup routine at 0x4A should be 0x85 (STA)",           nes_program->startup.bytes[0x4A] == 0x85);
     fl_expect("Startup routine at 0x4B should be 0x0D ($0D)",           nes_program->startup.bytes[0x4B] == 0x0D);
 
-    zenit_nes_program_free(nes_program);
+    znes_program_free(nes_program);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }
@@ -348,7 +348,7 @@ void zenit_test_nes_global_vars_data(void)
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = znes_generate_program(zir_program);
 
     // datavar = 1
     fl_expect("Data segment at 0x00 should be 0x01 (datavar)",    nes_program->data.bytes[0x00] == 0x01);
@@ -374,7 +374,7 @@ void zenit_test_nes_global_vars_data(void)
     // datavar2 = datavar
     fl_expect("Data segment at 0x03 should be 0x01 (datavar2)",         nes_program->data.bytes[0x03] == 0x01);
 
-    zenit_nes_program_free(nes_program);
+    znes_program_free(nes_program);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }
@@ -425,7 +425,7 @@ void zenit_test_nes_global_vars_code(void)
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = znes_generate_program(zir_program);
 
     fl_expect("Data segment at 0x00 should be 0x00 (datavar -bss-)",    nes_program->data.bytes[0x00] == 0x00);
     fl_expect("Data segment at 0x01 should be 0x00 (tempvar -bss-)",    nes_program->data.bytes[0x01] == 0x00);
@@ -547,7 +547,7 @@ void zenit_test_nes_global_vars_code(void)
     fl_expect("Startup routine at 0x5B should be 0x0D ($200D lo)",      nes_program->startup.bytes[0x5B] == 0x0D);
     fl_expect("Startup routine at 0x5C should be 0x20 ($200D hi)",      nes_program->startup.bytes[0x5C] == 0x20);
 
-    zenit_nes_program_free(nes_program);
+    znes_program_free(nes_program);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }

@@ -13,7 +13,7 @@
 #include "../../zir/instructions/operands/uint.h"
 
 
-ZnesProgram* zenit_nes_program_new()
+ZnesProgram* znes_program_new()
 {
     ZnesProgram *program = fl_malloc(sizeof(ZnesProgram));
 
@@ -30,7 +30,7 @@ ZnesProgram* zenit_nes_program_new()
         .key_allocator = fl_container_allocator_string,
         .key_comparer = fl_container_equals_string,
         .key_cleaner = fl_container_cleaner_pointer,
-        .value_cleaner = (FlContainerCleanupFn) zenit_nes_symbol_free,
+        .value_cleaner = (FlContainerCleanupFn) znes_symbol_free,
         .value_allocator = NULL
     });
 
@@ -52,7 +52,7 @@ ZnesProgram* zenit_nes_program_new()
     return program;
 }
 
-void zenit_nes_program_free(ZnesProgram *program)
+void znes_program_free(ZnesProgram *program)
 {
     if (!program)
         return;
@@ -69,9 +69,9 @@ void zenit_nes_program_free(ZnesProgram *program)
     fl_free(program);
 }
 
-ZnesSymbol* zenit_nes_program_get_tmpsym_symbol(ZnesProgram *program, ZnesSymbol *temp_symbol)
+ZnesSymbol* znes_program_get_tmpsym_symbol(ZnesProgram *program, ZnesSymbol *temp_symbol)
 {
-    if (temp_symbol->segment != ZENIT_NES_SEGMENT_TEMP)
+    if (temp_symbol->segment != ZNES_SEGMENT_TEMP)
         return NULL;
 
     ZnesSymbol *target_symbol = NULL;
@@ -88,7 +88,7 @@ ZnesSymbol* zenit_nes_program_get_tmpsym_symbol(ZnesProgram *program, ZnesSymbol
         if (tmp_symbol == NULL)
             break;
 
-        if (tmp_symbol->segment == ZENIT_NES_SEGMENT_TEMP)
+        if (tmp_symbol->segment == ZNES_SEGMENT_TEMP)
         {
             temp_operand = ((ZnesTempSymbol*) tmp_symbol)->source;
             continue;
@@ -103,9 +103,9 @@ ZnesSymbol* zenit_nes_program_get_tmpsym_symbol(ZnesProgram *program, ZnesSymbol
     return target_symbol;
 }
 
-ZirOperand* zenit_nes_program_get_tmpsym_operand(ZnesProgram *program, ZnesSymbol *temp_symbol, ZirOperandType type)
+ZirOperand* znes_program_get_tmpsym_operand(ZnesProgram *program, ZnesSymbol *temp_symbol, ZirOperandType type)
 {
-    if (temp_symbol->segment != ZENIT_NES_SEGMENT_TEMP)
+    if (temp_symbol->segment != ZNES_SEGMENT_TEMP)
         return NULL;
 
     ZirOperand *temp_operand = ((ZnesTempSymbol*) temp_symbol)->source;
@@ -123,7 +123,7 @@ ZirOperand* zenit_nes_program_get_tmpsym_operand(ZnesProgram *program, ZnesSymbo
         if (tmp_symbol == NULL)
             break;
 
-        if (tmp_symbol->segment != ZENIT_NES_SEGMENT_TEMP)
+        if (tmp_symbol->segment != ZNES_SEGMENT_TEMP)
             break;
 
         temp_operand = ((ZnesTempSymbol*) tmp_symbol)->source;
@@ -196,7 +196,7 @@ static inline bool reserve_zp_symbol(ZnesProgram *program, ZnesSymbol **nes_symb
     }
 
 
-    *nes_symbol = zenit_nes_symbol_new(zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_ZP, slot);
+    *nes_symbol = znes_symbol_new(zir_symbol->name, zir_symbol->type, ZNES_SEGMENT_ZP, slot);
     fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
 
     return true;
@@ -265,7 +265,7 @@ static inline bool reserve_data_symbol(ZnesProgram *program, ZnesSymbol **nes_sy
         }
     }
 
-    *nes_symbol = zenit_nes_symbol_new(zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_DATA, program->data.base_address + (uint16_t) slot);
+    *nes_symbol = znes_symbol_new(zir_symbol->name, zir_symbol->type, ZNES_SEGMENT_DATA, program->data.base_address + (uint16_t) slot);
     fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
 
     return true;
@@ -276,7 +276,7 @@ static inline bool reserve_temp_symbol(ZnesProgram *program, ZnesSymbol **nes_sy
     if (!program || !nes_symbol || !zir_symbol)
         return false;
 
-    *nes_symbol = (ZnesSymbol*) zenit_nes_symbol_temp_new(zir_symbol->name, zir_symbol->type);
+    *nes_symbol = (ZnesSymbol*) znes_symbol_temp_new(zir_symbol->name, zir_symbol->type);
     fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
 
     return true;
@@ -284,7 +284,7 @@ static inline bool reserve_temp_symbol(ZnesProgram *program, ZnesSymbol **nes_sy
 
 static inline bool map_symbol(ZnesProgram *program, ZnesSymbol **nes_symbol, ZirSymbol *zir_symbol, uint16_t address)
 {
-    *nes_symbol = zenit_nes_symbol_new(zir_symbol->name, zir_symbol->type, ZENIT_NES_SEGMENT_CODE, address);
+    *nes_symbol = znes_symbol_new(zir_symbol->name, zir_symbol->type, ZNES_SEGMENT_CODE, address);
 
     fl_hashtable_add(program->symbols, (*nes_symbol)->name, *nes_symbol);
 
@@ -292,7 +292,7 @@ static inline bool map_symbol(ZnesProgram *program, ZnesSymbol **nes_symbol, Zir
 }
 
 
-ZnesSymbol* zenit_nes_program_reserve_symbol(ZnesProgram *program, ZirBlock *block, ZirAttributeMap *attributes, ZirSymbol *zir_symbol)
+ZnesSymbol* znes_program_reserve_symbol(ZnesProgram *program, ZirBlock *block, ZirAttributeMap *attributes, ZirSymbol *zir_symbol)
 {
     ZnesSymbol *nes_symbol = NULL;
 
@@ -337,7 +337,7 @@ ZnesSymbol* zenit_nes_program_reserve_symbol(ZnesProgram *program, ZirBlock *blo
 
                 ZnesSymbol *symbol = fl_hashtable_get(program->symbols, symbol_operand->symbol->name);
 
-                ZirOperand *tmp = zenit_nes_program_get_tmpsym_operand(program, symbol, ZIR_OPERAND_UINT);
+                ZirOperand *tmp = znes_program_get_tmpsym_operand(program, symbol, ZIR_OPERAND_UINT);
 
                 if (tmp->type == ZIR_OPERAND_UINT)
                     uint_value = (ZirUintOperand*) tmp;
@@ -381,12 +381,12 @@ ZnesSymbol* zenit_nes_program_reserve_symbol(ZnesProgram *program, ZirBlock *blo
 }
 
 /*
-uint16_t zenit_nes_program_emit_label(ZnesCodeSegment *code)
+uint16_t znes_program_emit_label(ZnesCodeSegment *code)
 {
     return code->pc + program->base_address;
 }
 
-uint8_t zenit_nes_program_calc_rel_addr(ZnesCodeSegment *code, uint16_t address)
+uint8_t znes_program_calc_rel_addr(ZnesCodeSegment *code, uint16_t address)
 {
     if (address <= code->pc + program->base_address)
         return 256 - (code->pc + program->base_address + 2 - address); // 2 is for the 2-byte instruction
@@ -394,7 +394,7 @@ uint8_t zenit_nes_program_calc_rel_addr(ZnesCodeSegment *code, uint16_t address)
     return address - code->pc + program->base_address;
 }
 */
-void zenit_nes_program_emit_abs(ZnesCodeSegment *code, ZnesOpcode opcode, uint16_t bytes)
+void znes_program_emit_abs(ZnesCodeSegment *code, ZnesOpcode opcode, uint16_t bytes)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -403,13 +403,13 @@ void zenit_nes_program_emit_abs(ZnesCodeSegment *code, ZnesOpcode opcode, uint16
     }
 
     // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_ABS);
+    uint8_t opcode_hex = znes_opcode_lookup(opcode, NES_ADDR_ABS);
     code->bytes[code->pc++] = opcode_hex;
     code->bytes[code->pc++] = (uint8_t)(bytes);
     code->bytes[code->pc++] = (uint8_t)(bytes >> 8);
 }
 
-void zenit_nes_program_emit_abx(ZnesCodeSegment *code, ZnesOpcode opcode, uint16_t bytes)
+void znes_program_emit_abx(ZnesCodeSegment *code, ZnesOpcode opcode, uint16_t bytes)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -418,13 +418,13 @@ void zenit_nes_program_emit_abx(ZnesCodeSegment *code, ZnesOpcode opcode, uint16
     }
 
     // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_ABX);
+    uint8_t opcode_hex = znes_opcode_lookup(opcode, NES_ADDR_ABX);
     code->bytes[code->pc++] = opcode_hex;
     code->bytes[code->pc++] = (uint8_t)(bytes);
     code->bytes[code->pc++] = (uint8_t)(bytes >> 8);
 }
 
-void zenit_nes_program_emit_aby(ZnesCodeSegment *code, ZnesOpcode opcode, uint16_t bytes)
+void znes_program_emit_aby(ZnesCodeSegment *code, ZnesOpcode opcode, uint16_t bytes)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -433,13 +433,13 @@ void zenit_nes_program_emit_aby(ZnesCodeSegment *code, ZnesOpcode opcode, uint16
     }
 
     // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_ABY);
+    uint8_t opcode_hex = znes_opcode_lookup(opcode, NES_ADDR_ABY);
     code->bytes[code->pc++] = opcode_hex;
     code->bytes[code->pc++] = (uint8_t)(bytes);
     code->bytes[code->pc++] = (uint8_t)(bytes >> 8);
 }
 
-void zenit_nes_program_emit_imm(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
+void znes_program_emit_imm(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -448,12 +448,12 @@ void zenit_nes_program_emit_imm(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_
     }
 
     // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_IMM);
+    uint8_t opcode_hex = znes_opcode_lookup(opcode, NES_ADDR_IMM);
     code->bytes[code->pc++] = opcode_hex;
     code->bytes[code->pc++] = byte;
 }
 
-void zenit_nes_program_emit_imp(ZnesCodeSegment *code, ZnesOpcode opcode)
+void znes_program_emit_imp(ZnesCodeSegment *code, ZnesOpcode opcode)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -462,11 +462,11 @@ void zenit_nes_program_emit_imp(ZnesCodeSegment *code, ZnesOpcode opcode)
     }
 
     // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_IMP);
+    uint8_t opcode_hex = znes_opcode_lookup(opcode, NES_ADDR_IMP);
     code->bytes[code->pc++] = opcode_hex;
 }
 
-void zenit_nes_program_emit_ind(ZnesCodeSegment *code, ZnesOpcode opcode, uint16_t bytes)
+void znes_program_emit_ind(ZnesCodeSegment *code, ZnesOpcode opcode, uint16_t bytes)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -475,13 +475,13 @@ void zenit_nes_program_emit_ind(ZnesCodeSegment *code, ZnesOpcode opcode, uint16
     }
 
     // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_IND);
+    uint8_t opcode_hex = znes_opcode_lookup(opcode, NES_ADDR_IND);
     code->bytes[code->pc++] = opcode_hex;
     code->bytes[code->pc++] = (uint8_t)(bytes);
     code->bytes[code->pc++] = (uint8_t)(bytes >> 8);
 }
 
-void zenit_nes_program_emit_inx(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
+void znes_program_emit_inx(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -490,12 +490,12 @@ void zenit_nes_program_emit_inx(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_
     }
 
     // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_INX);
+    uint8_t opcode_hex = znes_opcode_lookup(opcode, NES_ADDR_INX);
     code->bytes[code->pc++] = opcode_hex;
     code->bytes[code->pc++] = byte;
 }
 
-void zenit_nes_program_emit_iny(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
+void znes_program_emit_iny(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -504,12 +504,12 @@ void zenit_nes_program_emit_iny(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_
     }
 
     // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_INY);
+    uint8_t opcode_hex = znes_opcode_lookup(opcode, NES_ADDR_INY);
     code->bytes[code->pc++] = opcode_hex;
     code->bytes[code->pc++] = byte;
 }
 
-void zenit_nes_program_emit_rel(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
+void znes_program_emit_rel(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -518,12 +518,12 @@ void zenit_nes_program_emit_rel(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_
     }
 
     // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_REL);
+    uint8_t opcode_hex = znes_opcode_lookup(opcode, NES_ADDR_REL);
     code->bytes[code->pc++] = opcode_hex;
     code->bytes[code->pc++] = byte;
 }
 
-void zenit_nes_program_emit_zpg(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
+void znes_program_emit_zpg(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -532,12 +532,12 @@ void zenit_nes_program_emit_zpg(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_
     }
 
     // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_ZPG);
+    uint8_t opcode_hex = znes_opcode_lookup(opcode, NES_ADDR_ZPG);
     code->bytes[code->pc++] = opcode_hex;
     code->bytes[code->pc++] = byte;
 }
 
-void zenit_nes_program_emit_zpx(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
+void znes_program_emit_zpx(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -546,12 +546,12 @@ void zenit_nes_program_emit_zpx(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_
     }
 
     // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_ZPX);
+    uint8_t opcode_hex = znes_opcode_lookup(opcode, NES_ADDR_ZPX);
     code->bytes[code->pc++] = opcode_hex;
     code->bytes[code->pc++] = byte;
 }
 
-void zenit_nes_program_emit_zpy(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
+void znes_program_emit_zpy(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_t byte)
 {
     if (code->pc == UINT16_MAX)
     {
@@ -560,7 +560,7 @@ void zenit_nes_program_emit_zpy(ZnesCodeSegment *code, ZnesOpcode opcode, uint8_
     }
 
     // We lookup the actual hex code
-    uint8_t opcode_hex = zenit_nes_opcode_lookup(opcode, NES_ADDR_ZPY);
+    uint8_t opcode_hex = znes_opcode_lookup(opcode, NES_ADDR_ZPY);
     code->bytes[code->pc++] = opcode_hex;
     code->bytes[code->pc++] = byte;
 }

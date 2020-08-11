@@ -4,9 +4,9 @@
 
 #include "../symbols/struct.h"
 
-void zenit_nes_emitter_struct_store(ZnesProgram *program, ZirStructOperand *struct_operand, ZnesSymbol *nes_symbol, size_t offset)
+void znes_emitter_struct_store(ZnesProgram *program, ZirStructOperand *struct_operand, ZnesSymbol *nes_symbol, size_t offset)
 {
-    if (nes_symbol->symkind != ZENIT_NES_SYMBOL_STRUCT)
+    if (nes_symbol->symkind != ZNES_SYMBOL_STRUCT)
     {
         // FIXME: Add error handling for this situation
         return;
@@ -21,7 +21,7 @@ void zenit_nes_emitter_struct_store(ZnesProgram *program, ZirStructOperand *stru
         ZirStructOperandMember *operand_member = struct_operand->members[i];
         ZirStructTypeMember *type_member = zir_type_struct_get_member(struct_operand->type, operand_member->name);
 
-        zenit_nes_emitter_store(program, operand_member->operand, member_symbol, 0);
+        znes_emitter_store(program, operand_member->operand, member_symbol, 0);
         gap += member_symbol->size;
     }
 }

@@ -35,7 +35,7 @@ void zenit_test_nes_cast(void)
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    ZnesProgram *nes_program = zenit_nes_generate_program(zir_program);
+    ZnesProgram *nes_program = znes_generate_program(zir_program);
     
     
     fl_expect("Data segment at 0x00 should be 0xFF (a[0] lo)",  nes_program->data.bytes[0x00] == 0xFF);
@@ -62,7 +62,7 @@ void zenit_test_nes_cast(void)
     fl_expect("Data segment at 0x10 should be 0x02 (f[1] lo)",  nes_program->data.bytes[0x10] == 0x02);
     fl_expect("Data segment at 0x11 should be 0x00 (f[1] hi)",  nes_program->data.bytes[0x11] == 0x00);
 
-    zenit_nes_program_free(nes_program);
+    znes_program_free(nes_program);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }

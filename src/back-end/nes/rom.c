@@ -2,7 +2,7 @@
 #include <fllib/IO.h>
 #include "rom.h"
 
-ZnesRom* zenit_nes_rom_new(ZnesProgram *program)
+ZnesRom* znes_rom_new(ZnesProgram *program)
 {
     //size_t data_size = fl_array_length(program->data.bytes);
     //size_t startup_size = fl_array_length(program->startup.bytes);
@@ -43,7 +43,7 @@ ZnesRom* zenit_nes_rom_new(ZnesProgram *program)
     if (program->startup.pc > 0)
     {
         // The startup routine will replace the original RESET vector, so we need to add a JMP at the end
-        zenit_nes_program_emit_abs(&program->startup, NES_OP_JMP, default_rom.prg_rom.res_addr);
+        znes_program_emit_abs(&program->startup, NES_OP_JMP, default_rom.prg_rom.res_addr);
 
         size_t i=0;
         size_t bank_length = sizeof(default_rom.prg_rom.bank) / sizeof(default_rom.prg_rom.bank[0]);
@@ -79,7 +79,7 @@ ZnesRom* zenit_nes_rom_new(ZnesProgram *program)
     return rom;
 }
 
-void zenit_nes_rom_free(ZnesRom *rom)
+void znes_rom_free(ZnesRom *rom)
 {
     if (!rom)
         return;
@@ -87,7 +87,7 @@ void zenit_nes_rom_free(ZnesRom *rom)
     fl_free(rom);
 }
 
-void zenit_nes_rom_dump(ZnesRom *rom, const char *filename)
+void znes_rom_dump(ZnesRom *rom, const char *filename)
 {
     FILE *file = fl_io_file_open(filename, "w+b");
     fl_io_file_write_bytes(file, sizeof(ZnesFileHeader), (const FlByte*)&rom->header);

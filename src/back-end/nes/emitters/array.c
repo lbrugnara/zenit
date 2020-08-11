@@ -5,9 +5,9 @@
 #include "../symbols/array.h"
 #include "../symbols/temp.h"
 
-void zenit_nes_emitter_array_store(ZnesProgram *program, ZirArrayOperand *array, ZnesSymbol *nes_symbol, size_t offset)
+void znes_emitter_array_store(ZnesProgram *program, ZirArrayOperand *array, ZnesSymbol *nes_symbol, size_t offset)
 {
-    if (nes_symbol->symkind != ZENIT_NES_SYMBOL_ARRAY)
+    if (nes_symbol->symkind != ZNES_SYMBOL_ARRAY)
     {
         // FIXME: Add error handling for this situation
         return;
@@ -22,6 +22,6 @@ void zenit_nes_emitter_array_store(ZnesProgram *program, ZirArrayOperand *array,
         ZnesSymbol *element_symbol = array_symbol->elements[i];
         ZirOperand *operand = array->elements[i];
 
-        zenit_nes_emitter_store(program, operand, element_symbol, 0);
+        znes_emitter_store(program, operand, element_symbol, 0);
     }
 }

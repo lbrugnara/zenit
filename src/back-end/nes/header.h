@@ -1,5 +1,5 @@
-#ifndef ZENIT_NES_HEADER_H
-#define ZENIT_NES_HEADER_H
+#ifndef ZNES_HEADER_H
+#define ZNES_HEADER_H
 
 #include <stdint.h>
 
@@ -54,4 +54,4 @@ typedef struct ZnesFileHeader {
     uint8_t unused[5];
 } ZnesFileHeader;
 
-#endif /* ZENIT_NES_HEADER_H */
+#endif /* ZNES_HEADER_H */

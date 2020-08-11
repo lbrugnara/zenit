@@ -1,5 +1,5 @@
-#ifndef ZENIT_NES_TEMP_SYMBOL_H
-#define ZENIT_NES_TEMP_SYMBOL_H
+#ifndef ZNES_TEMP_SYMBOL_H
+#define ZNES_TEMP_SYMBOL_H
 
 #include <stdint.h>
 #include "symbol.h"
@@ -10,7 +10,7 @@ typedef struct ZnesTempSymbol {
     ZirOperand *source;
 } ZnesTempSymbol;
 
-ZnesTempSymbol* zenit_nes_symbol_temp_new(const char *name, ZirType *zir_type);
-void zenit_nes_symbol_temp_free(ZnesTempSymbol *symbol);
+ZnesTempSymbol* znes_symbol_temp_new(const char *name, ZirType *zir_type);
+void znes_symbol_temp_free(ZnesTempSymbol *symbol);
 
-#endif /* ZENIT_NES_TEMP_SYMBOL_H */
+#endif /* ZNES_TEMP_SYMBOL_H */

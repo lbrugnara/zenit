@@ -38,9 +38,9 @@ static const ZirInstructionVisitor instruction_visitors[] = {
 static void visit_cast_instruction(ZirCastInstruction *instruction, ZirBlock *block, ZnesProgram *program)
 {
     ZirSymbol *zir_symbol = ((ZirSymbolOperand*) instruction->base.destination)->symbol;
-    ZnesSymbol *nes_symbol = zenit_nes_program_reserve_symbol(program, block, NULL, zir_symbol);
+    ZnesSymbol *nes_symbol = znes_program_reserve_symbol(program, block, NULL, zir_symbol);
     
-    zenit_nes_emitter_store(program, instruction->source, nes_symbol, 0);
+    znes_emitter_store(program, instruction->source, nes_symbol, 0);
 }
 
 /*
@@ -60,9 +60,9 @@ static void visit_cast_instruction(ZirCastInstruction *instruction, ZirBlock *bl
 static void visit_variable_instruction(ZirVariableInstruction *instruction, ZirBlock *block, ZnesProgram *program)
 {
     ZirSymbol *zir_symbol = ((ZirSymbolOperand*) instruction->base.destination)->symbol;
-    ZnesSymbol *nes_symbol = zenit_nes_program_reserve_symbol(program, block, instruction->attributes, zir_symbol);
+    ZnesSymbol *nes_symbol = znes_program_reserve_symbol(program, block, instruction->attributes, zir_symbol);
 
-    zenit_nes_emitter_store(program, instruction->source, nes_symbol, 0);
+    znes_emitter_store(program, instruction->source, nes_symbol, 0);
 }
 
 static void visit_instruction(ZirInstruction *instruction, ZirBlock *block, ZnesProgram *program)
@@ -81,13 +81,13 @@ static void visit_block(ZirBlock *block, ZnesProgram *program)
     }
 }
 
-ZnesProgram* zenit_nes_generate_program(ZirProgram *zir_program)
+ZnesProgram* znes_generate_program(ZirProgram *zir_program)
 {
     if (!zir_program)
         return NULL;
 
     // Create the program object
-    ZnesProgram *nes_program = zenit_nes_program_new();
+    ZnesProgram *nes_program = znes_program_new();
 
     // Start visiting the ZIR program
     ZirBlock *zir_block = zir_program->current;

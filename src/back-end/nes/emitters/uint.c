@@ -1,7 +1,7 @@
 #include "uint.h"
 #include "../symbols/temp.h"
 
-void zenit_nes_emitter_uint_store(ZnesProgram *program, ZirUintOperand *uint_operand, ZnesSymbol *nes_symbol, size_t offset)
+void znes_emitter_uint_store(ZnesProgram *program, ZirUintOperand *uint_operand, ZnesSymbol *nes_symbol, size_t offset)
 {
     uint16_t target_address = nes_symbol->address + offset;
 
@@ -24,51 +24,51 @@ void zenit_nes_emitter_uint_store(ZnesProgram *program, ZirUintOperand *uint_ope
         return;
     }
 
-    if (nes_symbol->segment == ZENIT_NES_SEGMENT_ZP)
+    if (nes_symbol->segment == ZNES_SEGMENT_ZP)
     {
-        zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, (uint8_t)(uint_value & 0xFF));
-        zenit_nes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address));
+        znes_program_emit_imm(target_segment, NES_OP_LDA, (uint8_t)(uint_value & 0xFF));
+        znes_program_emit_zpg(target_segment, NES_OP_STA, (uint8_t)(target_address));
 
         // If the element size is greater than or equals to 2, we need to store the highest 8 bits of the
         // uint_value (if it is uint8_t they will be all 0)
         if (nes_symbol->size >= 2 /*bytes*/)
         {
-            zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, (uint8_t)((uint_value >> 8) & 0xFF));
-            zenit_nes_program_emit_zpg(target_segment, NES_OP_STX, (uint8_t)(target_address + 1));
+            znes_program_emit_imm(target_segment, NES_OP_LDX, (uint8_t)((uint_value >> 8) & 0xFF));
+            znes_program_emit_zpg(target_segment, NES_OP_STX, (uint8_t)(target_address + 1));
         }
 
         // If destination is greater than uint16, fill the destination with 0s
         if (nes_symbol->size > 2 /*bytes*/)
         {
-            zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, 0x0);
+            znes_program_emit_imm(target_segment, NES_OP_LDX, 0x0);
             size_t to_fill = nes_symbol->size - 2;
             for (size_t i=0; i < to_fill; i++)
-                zenit_nes_program_emit_zpg(target_segment, NES_OP_STX, (uint8_t)(target_address + i + 2));
+                znes_program_emit_zpg(target_segment, NES_OP_STX, (uint8_t)(target_address + i + 2));
         }
     }
-    else if (nes_symbol->segment == ZENIT_NES_SEGMENT_CODE)
+    else if (nes_symbol->segment == ZNES_SEGMENT_CODE)
     {
-        zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, (uint8_t)(uint_value & 0xFF));
-        zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address);
+        znes_program_emit_imm(target_segment, NES_OP_LDA, (uint8_t)(uint_value & 0xFF));
+        znes_program_emit_abs(target_segment, NES_OP_STA, target_address);
 
         // If the element size is greater than or equals to 2, we need to store the highest 8 bits of the
         // uint_value (if it is uint8_t they will be all 0)
         if (nes_symbol->size >= 2 /*bytes*/)
         {
-            zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, (uint8_t)((uint_value >> 8) & 0xFF));
-            zenit_nes_program_emit_abs(target_segment, NES_OP_STX, target_address + 1);
+            znes_program_emit_imm(target_segment, NES_OP_LDX, (uint8_t)((uint_value >> 8) & 0xFF));
+            znes_program_emit_abs(target_segment, NES_OP_STX, target_address + 1);
         }
 
         // If destination is greater than uint16, fill the destination with 0s
         if (nes_symbol->size > 2 /*bytes*/)
         {
-            zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, 0x0);
+            znes_program_emit_imm(target_segment, NES_OP_LDX, 0x0);
             size_t to_fill = nes_symbol->size - 2;
             for (size_t i=0; i < to_fill; i++)
-                zenit_nes_program_emit_abs(target_segment, NES_OP_STX, target_address + i + 2);
+                znes_program_emit_abs(target_segment, NES_OP_STX, target_address + i + 2);
         }
     }
-    else if (nes_symbol->segment == ZENIT_NES_SEGMENT_DATA)
+    else if (nes_symbol->segment == ZNES_SEGMENT_DATA)
     {
         if (program->static_context)
         {
@@ -91,24 +91,24 @@ void zenit_nes_emitter_uint_store(ZnesProgram *program, ZirUintOperand *uint_ope
         }
         else
         {
-            zenit_nes_program_emit_imm(target_segment, NES_OP_LDA, (uint8_t)(uint_value & 0xFF));
-            zenit_nes_program_emit_abs(target_segment, NES_OP_STA, target_address);
+            znes_program_emit_imm(target_segment, NES_OP_LDA, (uint8_t)(uint_value & 0xFF));
+            znes_program_emit_abs(target_segment, NES_OP_STA, target_address);
 
             // If the element size is greater than or equals to 2, we need to store the highest 8 bits of the
             // uint_value (if it is uint8_t they will be all 0)
             if (nes_symbol->size >= 2 /*bytes*/)
             {
-                zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, (uint8_t)((uint_value >> 8) & 0xFF));
-                zenit_nes_program_emit_abs(target_segment, NES_OP_STX, target_address + 1);
+                znes_program_emit_imm(target_segment, NES_OP_LDX, (uint8_t)((uint_value >> 8) & 0xFF));
+                znes_program_emit_abs(target_segment, NES_OP_STX, target_address + 1);
             }
 
             // If destination is greater than uint16, fill the destination with 0s
             if (nes_symbol->size > 2 /*bytes*/)
             {
-                zenit_nes_program_emit_imm(target_segment, NES_OP_LDX, 0x0);
+                znes_program_emit_imm(target_segment, NES_OP_LDX, 0x0);
                 size_t to_fill = nes_symbol->size - 2;
                 for (size_t i=0; i < to_fill; i++)
-                    zenit_nes_program_emit_abs(target_segment, NES_OP_STX, target_address + i + 2);
+                    znes_program_emit_abs(target_segment, NES_OP_STX, target_address + i + 2);
             }
         }
     }

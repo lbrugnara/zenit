@@ -261,7 +261,7 @@ static const ZnesInstruction opcodes[] = {
     [0xff] = { NES_OP_XXX, NES_ADDR_IMP, "???" },
 };
 
-uint8_t zenit_nes_opcode_lookup(ZnesOpcode opcode, ZnesAddressMode mode)
+uint8_t znes_opcode_lookup(ZnesOpcode opcode, ZnesAddressMode mode)
 {
     // FIXME: sort the opcodes or use a better algorithm to find the opcodes
     for (uint8_t i=0; i < 0xff; i++)

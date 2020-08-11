@@ -25,8 +25,8 @@ typedef struct ZnesRom {
     ZnesNrom256 prg_rom;
 } ZnesRom;
 
-ZnesRom* zenit_nes_rom_new(ZnesProgram *program);
-void zenit_nes_rom_free(ZnesRom *rom);
-void zenit_nes_rom_dump(ZnesRom *rom, const char *filename);
+ZnesRom* znes_rom_new(ZnesProgram *program);
+void znes_rom_free(ZnesRom *rom);
+void znes_rom_dump(ZnesRom *rom, const char *filename);
 
 #endif /* NES_ROM_H */

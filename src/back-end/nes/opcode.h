@@ -1,5 +1,5 @@
-#ifndef ZENIT_NES_OPCODE_H
-#define ZENIT_NES_OPCODE_H
+#ifndef ZNES_OPCODE_H
+#define ZNES_OPCODE_H
 
 #include <stdint.h>
 
@@ -33,6 +33,6 @@ typedef struct ZnesInstruction {
     const char *mnemonic;
 } ZnesInstruction;
 
-uint8_t zenit_nes_opcode_lookup(ZnesOpcode opcode, ZnesAddressMode mode);
+uint8_t znes_opcode_lookup(ZnesOpcode opcode, ZnesAddressMode mode);
 
-#endif /* ZENIT_NES_OPCODE_H */
+#endif /* ZNES_OPCODE_H */
