@@ -14,6 +14,7 @@
 typedef struct ZenitBlockNode {
     ZenitNode base;
     ZenitNode **statements;
+    char *id;
 } ZenitBlockNode;
 
 /*

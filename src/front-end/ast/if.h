@@ -15,6 +15,7 @@
  */
 typedef struct ZenitIfNode {
     ZenitNode base;
+    char *id;
     ZenitNode *condition;
     ZenitNode *then_branch;
     ZenitNode *else_branch;

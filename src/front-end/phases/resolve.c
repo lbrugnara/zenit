@@ -657,16 +657,12 @@ static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node, enum 
 
 static ZenitSymbol* visit_block_node(ZenitContext *ctx, ZenitBlockNode *block_node, enum ResolvePass pass)
 {
-    char *block_uid = zenit_block_node_uid(block_node);
-
-    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_uid);
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_node->id);
 
     for (size_t i = 0; i < fl_array_length(block_node->statements); i++)
         visit_node(ctx, block_node->statements[i], pass);
 
     zenit_program_pop_scope(ctx->program);
-
-    fl_cstring_free(block_uid);
 
     return NULL;
 }

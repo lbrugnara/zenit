@@ -406,8 +406,7 @@ static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *va
 static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node)
 {
     // Enter to the if's scope
-    char *if_uid = zenit_if_node_uid(if_node);
-    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_uid);
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_node->id);
 
     // We create a temporary bool type for the condition (no worries about freeing its memory,
     // the types pool will do it later)
@@ -436,23 +435,17 @@ static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node)
     // Move out of the if scope
     zenit_program_pop_scope(ctx->program);
 
-    fl_cstring_free(if_uid);
-
     return NULL;
 }
 
 static ZenitSymbol* visit_block_node(ZenitContext *ctx, ZenitBlockNode *block_node)
 {
-    char *block_uid = zenit_block_node_uid(block_node);
-
-    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_uid);
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_node->id);
 
     for (size_t i = 0; i < fl_array_length(block_node->statements); i++)
         visit_node(ctx, block_node->statements[i]);
 
     zenit_program_pop_scope(ctx->program);
-
-    fl_cstring_free(block_uid);
 
     return NULL;
 }

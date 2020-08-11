@@ -9,6 +9,7 @@ ZenitBlockNode* zenit_block_node_new(ZenitSourceLocation location)
     node->base.nodekind = ZENIT_NODE_BLOCK;
     node->base.location = location;
     node->statements = fl_array_new(sizeof(ZenitNode*), 0);
+    node->id = zenit_block_node_uid(node);
 
     return node;
 }
@@ -50,20 +51,23 @@ char* zenit_block_node_dump(ZenitBlockNode *block_node, char *output)
 
 /*
  f Function: zenit_block_node_free
- *  Releases the memory of an array node object
+ *  Releases the memory of a block node object
  *
  * Parameters:
- *  <ZenitBlockNode> *array: Array node object
+ *  <ZenitBlockNode> *block: Block node object
  *
  * Returns:
  *  <void>: This function does not return a value
  */
-void zenit_block_node_free(ZenitBlockNode *array)
+void zenit_block_node_free(ZenitBlockNode *block)
 {
-    if (!array)
+    if (!block)
         return;
 
-    fl_array_free_each_pointer(array->statements, (FlArrayFreeElementFunc) zenit_node_free);
+    if (block->id)
+        fl_cstring_free(block->id);
 
-    fl_free(array);
+    fl_array_free_each_pointer(block->statements, (FlArrayFreeElementFunc) zenit_node_free);
+
+    fl_free(block);
 }

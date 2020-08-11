@@ -617,8 +617,7 @@ unaddressable_jump:
 static ZirOperand* visit_block_node(ZenitContext *ctx, ZirProgram *program, ZenitBlockNode *block_node)
 {
     // Enter to the Zenit scope
-    char *block_uid = zenit_block_node_uid(block_node);
-    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_uid);
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_node->id);
 
     // Generate ZIR instructions for each Zenit statement
     for (size_t i=0; i < fl_array_length(block_node->statements); i++)
@@ -626,8 +625,6 @@ static ZirOperand* visit_block_node(ZenitContext *ctx, ZirProgram *program, Zeni
 
     // Jump out of the Zenit block
     zenit_program_pop_scope(ctx->program);
-
-    fl_cstring_free(block_uid);
 
     // No need to return anything
     return NULL;
@@ -654,8 +651,8 @@ static ZirOperand* visit_node(ZenitContext *ctx, ZirProgram *program, ZenitNode 
 
 /*
  * Function: convert_zenit_scope_to_zir_block
- *  For every child of the Zenit scope object this function creates a ZIR block and adds it to
- *  the <ZirBlock> object.
+ *  For every type or function defined in Zenit (which is represented as a scope object) this function 
+ *  creates a ZIR block to contain the type or function definition.
  *
  * Parameters:
  *  <ZenitScope> *scope: The Zenit scope object used as the root for the conversion
@@ -683,7 +680,7 @@ static void convert_zenit_scope_to_zir_block(ZenitScope *scope, ZirBlock *block)
             case ZENIT_SCOPE_GLOBAL:
                 block_type = ZIR_BLOCK_GLOBAL;
                 break;
-            case ZENIT_SCOPE_BLOCK:
+            case ZENIT_SCOPE_BLOCK: // We don't create ZIR blocks for Zenit nested scopes
                 continue;
         }
 

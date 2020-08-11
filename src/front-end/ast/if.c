@@ -10,6 +10,7 @@ ZenitIfNode* zenit_if_node_new(ZenitSourceLocation location, ZenitNode *conditio
     if_node->condition = condition;
     if_node->then_branch = then_branch;
     if_node->else_branch = else_branch;
+    if_node->id = zenit_if_node_uid(if_node);
 
     return if_node;
 }
@@ -54,6 +55,9 @@ void zenit_if_node_free(ZenitIfNode *if_node)
 {
     if (!if_node)
         return;
+
+    if (if_node->id)
+        fl_cstring_free(if_node->id);
 
     if (if_node->condition)
         zenit_node_free(if_node->condition);
