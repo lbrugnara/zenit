@@ -10,7 +10,9 @@
  */
 typedef enum ZirInstructionType {
     ZIR_INSTR_VARIABLE,
+    ZIR_INSTR_IF_FALSE,
     ZIR_INSTR_CAST,
+    ZIR_INSTR_JUMP,
 } ZirInstructionType;
 
 /*

@@ -19,5 +19,8 @@ void zenit_test_resolve_variable_errors(void);
 void zenit_test_resolve_struct_errors(void);
 void zenit_test_resolve_struct_decl(void);
 void zenit_test_resolve_variables_structs(void);
+void zenit_test_resolve_if_statement(void);
+void zenit_test_resolve_block(void);
+void zenit_test_resolve_block_errors(void);
 
 #endif /* ZENIT_TESTS_RESOLVE_H */

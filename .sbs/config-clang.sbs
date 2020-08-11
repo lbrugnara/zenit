@@ -107,7 +107,7 @@ config clang-config for toolchain(clang, gcc) {
 
 # The debug configuration adds flags to generate debug information
 config clang-debug extends clang-config {
-    compile: { flags: [ "-ggdb", "-O0" ] }
+    compile: { flags: [ "-ggdb", "-O0", "-DDEBUG" ] }
 
     if $sbs.os == win {
         shared: { flags: [ "/DEBUG:FULL" ] },

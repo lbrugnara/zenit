@@ -31,6 +31,8 @@ static ZirOperand* visit_cast_node(ZenitContext *ctx, ZirProgram *program, Zenit
 static ZirOperand* visit_field_decl_node(ZenitContext *ctx, ZirProgram *program, ZenitFieldDeclNode *field_node);
 static ZirOperand* visit_struct_decl_node(ZenitContext *ctx, ZirProgram *program, ZenitStructDeclNode *struct_node);
 static ZirOperand* visit_struct_node(ZenitContext *ctx, ZirProgram *program, ZenitStructNode *struct_node);
+static ZirOperand* visit_if_node(ZenitContext *ctx, ZirProgram *program, ZenitIfNode *if_node);
+static ZirOperand* visit_block_node(ZenitContext *ctx, ZirProgram *program, ZenitBlockNode *block_node);
 
 /*
  * Variable: generators
@@ -47,6 +49,8 @@ static const ZirGenerator generators[] = {
     [ZENIT_NODE_FIELD_DECL]     = (ZirGenerator) &visit_field_decl_node,
     [ZENIT_NODE_STRUCT_DECL]    = (ZirGenerator) &visit_struct_decl_node,
     [ZENIT_NODE_STRUCT]         = (ZirGenerator) &visit_struct_node,
+    [ZENIT_NODE_IF]             = (ZirGenerator) &visit_if_node,
+    [ZENIT_NODE_BLOCK]          = (ZirGenerator) &visit_block_node,
 };
 
 /*
@@ -522,6 +526,113 @@ static ZirOperand* visit_variable_node(ZenitContext *ctx, ZirProgram *program, Z
     return zir_program_emit(program, (ZirInstruction*) zir_varinst)->destination;
 }
 
+static ZirOperand* visit_if_node(ZenitContext *ctx, ZirProgram *program, ZenitIfNode *if_node)
+{
+    char *if_uid = zenit_node_if_uid(if_node);
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_uid);
+
+    // We need to visit the condition expression to get the operand
+    ZirOperand *condition_operand = visit_node(ctx, program, if_node->condition);
+
+    // TODO: WE ARE USING UINT FOR THE JUMP, WE SHOULD UPDATE THIS AS THE TYPES IN ZIR CHANGE
+    // Emit the if-false instruction using the current instruction pointer, we will adjust it later
+    ZirUintOperand *uint = zir_operand_pool_new_uint(program->operands, zir_type_uint_new(ZIR_UINT_16), (ZirUintValue){ .uint16 = 0 });
+    ZirIfFalseInstruction *if_false_instr = zir_instruction_if_false_new((ZirOperand*) uint, condition_operand);
+    zir_program_emit(program, (ZirInstruction*) if_false_instr);
+
+    // Get the IP at the if-false instruction
+    size_t if_instr_ip = zir_block_get_ip(program->current);
+    if (if_instr_ip > (size_t) UINT16_MAX)
+    {
+        zenit_context_error(ctx, if_node->base.location, ZENIT_ERROR_INTERNAL, "Unaddressable jump of %zu instructions", if_instr_ip);
+        goto unaddressable_jump;
+    }
+
+    // We visit the "then" branch
+    visit_node(ctx, program, if_node->then_branch);
+
+    // The next instruction is the first one "outside" of the "then" branch, so we need it to calculate the offset
+    size_t then_exit_point_offset = zir_block_get_ip(program->current) - if_instr_ip;
+    if (fl_std_uint_add_overflow(then_exit_point_offset, 1, SIZE_MAX) || then_exit_point_offset + 1 > (size_t) UINT16_MAX)
+    {
+        zenit_context_error(ctx, if_node->base.location, ZENIT_ERROR_INTERNAL, "Unaddressable jump of %zu instructions", then_exit_point_offset);
+        goto unaddressable_jump;
+    }
+    then_exit_point_offset++; // Now the offset points 1 past the "then" branch instructions
+
+    if (if_node->else_branch == NULL)
+    {
+        // If there is no "else" branch, we simply backpatch the if-else jump to the next instruction after the "then" branch
+        ((ZirUintOperand*) if_false_instr->base.destination)->value.uint16 = then_exit_point_offset;
+    }
+    else
+    {
+        // If there is an "else" branch, emit a jump with a label that will need to be backpatched to skip the else when the if-false falls
+        // through the "then" branch
+        ZirUintOperand *uint = zir_operand_pool_new_uint(program->operands, zir_type_uint_new(ZIR_UINT_16), (ZirUintValue){ .uint16 = 0 });
+        ZirJumpInstruction *jump_instr = zir_instruction_jump_new((ZirOperand*) uint);
+        zir_program_emit(program, (ZirInstruction*) jump_instr);
+
+        // Similar to what we did with the if-false instruction, we save the IP at the jump place to calculate the offset
+        size_t jump_inst_ip = zir_block_get_ip(program->current);
+
+        // The entry point of the "else" branch is the target of the if-false instruction when the condition is not false
+        // (which skips the "then" branch)
+        // This actually calculates the offset form the if-false instruction to the goto instruction, we still need to add 1
+        // to it, but we check for overflows
+        size_t else_entry_point = jump_inst_ip - if_instr_ip;
+        if (fl_std_uint_add_overflow(else_entry_point, 1, SIZE_MAX) || else_entry_point + 1 > (size_t) UINT16_MAX)
+        {
+            zenit_context_error(ctx, if_node->base.location, ZENIT_ERROR_INTERNAL, "Unaddressable jump of %zu instructions", else_entry_point);
+            goto unaddressable_jump;
+        }
+        // Now it is safe to use the "else" entry point
+        ((ZirUintOperand*) if_false_instr->base.destination)->value.uint16 = ++else_entry_point;
+
+        // We visit the "else" branch
+        visit_node(ctx, program, if_node->else_branch);
+        
+        // Now we need to backpatch the jump: the current IP minus the value of the IP at the jump place plus 1 will give us
+        // the exit point of the "else" branch
+        size_t else_exit_point = zir_block_get_ip(program->current) - jump_inst_ip;
+        if (fl_std_uint_add_overflow(else_exit_point, 1, SIZE_MAX) || else_exit_point + 1 > (size_t) UINT16_MAX)
+        {
+            zenit_context_error(ctx, if_node->base.location, ZENIT_ERROR_INTERNAL, "Unaddressable jump of %zu instructions", else_exit_point);
+            goto unaddressable_jump;
+        }
+        // Now it is safe to use the "else" exit point
+        ((ZirUintOperand*) jump_instr->base.destination)->value.uint16 = ++else_exit_point;
+    }
+
+unaddressable_jump:
+    // Jump out of the Zenit block
+    zenit_program_pop_scope(ctx->program);
+
+    fl_cstring_free(if_uid);
+
+    // No need to return anything
+    return NULL;
+}
+
+static ZirOperand* visit_block_node(ZenitContext *ctx, ZirProgram *program, ZenitBlockNode *block_node)
+{
+    // Enter to the Zenit scope
+    char *block_uid = zenit_node_block_uid(block_node);
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_uid);
+
+    // Generate ZIR instructions for each Zenit statement
+    for (size_t i=0; i < fl_array_length(block_node->statements); i++)
+        visit_node(ctx, program, block_node->statements[i]);
+
+    // Jump out of the Zenit block
+    zenit_program_pop_scope(ctx->program);
+
+    fl_cstring_free(block_uid);
+
+    // No need to return anything
+    return NULL;
+}
+
 /*
  * Function: visit_node
  *  This function selects the visitor function based on the node's type
@@ -572,6 +683,8 @@ static void convert_zenit_scope_to_zir_block(ZenitScope *scope, ZirBlock *block)
             case ZENIT_SCOPE_GLOBAL:
                 block_type = ZIR_BLOCK_GLOBAL;
                 break;
+            case ZENIT_SCOPE_BLOCK:
+                continue;
         }
 
         ZirBlock *zir_child = zir_block_new(zenit_child->id, block_type, block);

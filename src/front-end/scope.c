@@ -70,13 +70,15 @@ char* zenit_scope_dump(ZenitScope *scope, char *output, bool verbose)
     fl_cstring_append(&output, "(scope ");
 
     if (scope->type == ZENIT_SCOPE_GLOBAL)
-        fl_cstring_append(&output, "global ");
+        fl_cstring_append(&output, "global");
     else if (scope->type == ZENIT_SCOPE_FUNCTION)
-        fl_cstring_vappend(&output, "function %s ", scope->id);
+        fl_cstring_vappend(&output, "function %s", scope->id);
     else if (scope->type == ZENIT_SCOPE_STRUCT)
-        fl_cstring_vappend(&output, "struct %s ", scope->id);
+        fl_cstring_vappend(&output, "struct %s", scope->id);
+    else if (scope->type == ZENIT_SCOPE_BLOCK)
+        fl_cstring_vappend(&output, "block %s", scope->id);
     else
-        fl_cstring_vappend(&output, "unknown %s ", scope->id);
+        fl_cstring_vappend(&output, "unknown %s", scope->id);
 
     output = zenit_symtable_dump(&scope->symtable, output, verbose);
 

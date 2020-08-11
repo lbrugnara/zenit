@@ -109,14 +109,86 @@ ZenitSymbol* zenit_program_add_symbol(ZenitProgram *program, ZenitSymbol *symbol
 
 bool zenit_program_has_symbol(ZenitProgram *program, const char *symbol_name)
 {
-    // FIXME: Fix this to lookup symbols in different scopes
-    return zenit_scope_has_symbol(program->current_scope, symbol_name);
+    if (program->current_scope->type == ZENIT_SCOPE_GLOBAL)
+        return zenit_scope_has_symbol(program->current_scope, symbol_name);
+
+    if (program->current_scope->type == ZENIT_SCOPE_FUNCTION)
+    {
+        return zenit_scope_has_symbol(program->current_scope, symbol_name)
+                || zenit_scope_has_symbol(program->global_scope, symbol_name);
+    }
+
+    if (program->current_scope->type == ZENIT_SCOPE_STRUCT)
+        return zenit_scope_has_symbol(program->current_scope, symbol_name);
+
+    ZenitScope *scope = program->current_scope;
+    do {
+        if (zenit_scope_has_symbol(scope, symbol_name))
+            return true;
+
+        // If we couldn't find the symbol in the scope, try going to the parent scope
+        scope = scope->parent;
+
+        if (scope == NULL)
+            break;
+
+        // If the parent scope is a function, the only possible place the symbol could be
+        // is within the function's scope or the global scope
+        if (scope->type == ZENIT_SCOPE_FUNCTION)
+        {
+            return zenit_scope_has_symbol(scope, symbol_name)
+                    || zenit_scope_has_symbol(program->global_scope, symbol_name);
+        }
+
+        // In case the scope is not a function, keep searching
+    } while (scope != NULL);
+    
+    return false;
 }
 
 ZenitSymbol* zenit_program_get_symbol(ZenitProgram *program, const char *symbol_name)
 {
-    // FIXME: Fix this to lookup symbols in different scopes
-    return zenit_scope_get_symbol(program->current_scope, symbol_name);
+    if (program->current_scope->type == ZENIT_SCOPE_GLOBAL)
+        return zenit_scope_get_symbol(program->current_scope, symbol_name);
+
+    if (program->current_scope->type == ZENIT_SCOPE_FUNCTION)
+    {
+        return zenit_scope_has_symbol(program->current_scope, symbol_name) 
+                    ? zenit_scope_get_symbol(program->current_scope, symbol_name)
+                    : zenit_scope_has_symbol(program->global_scope, symbol_name)
+                        ? zenit_scope_get_symbol(program->global_scope, symbol_name)
+                        : NULL;
+    }
+
+    if (program->current_scope->type == ZENIT_SCOPE_STRUCT)
+        return zenit_scope_get_symbol(program->current_scope, symbol_name);
+
+    ZenitScope *scope = program->current_scope;
+    do {
+        if (zenit_scope_has_symbol(scope, symbol_name))
+            return zenit_scope_get_symbol(scope, symbol_name);
+
+        // If we couldn't find the symbol in the scope, try going to the parent scope
+        scope = scope->parent;
+
+        if (scope == NULL)
+            break;
+
+        // If the parent scope is a function, the only possible place the symbol could be
+        // is within the function's scope or the global scope
+        if (scope->type == ZENIT_SCOPE_FUNCTION)
+        {
+            return zenit_scope_has_symbol(scope, symbol_name) 
+                    ? zenit_scope_get_symbol(scope, symbol_name)
+                    : zenit_scope_has_symbol(program->global_scope, symbol_name)
+                        ? zenit_scope_get_symbol(program->global_scope, symbol_name)
+                        : NULL;
+        }
+
+        // In case the scope is not a function, keep searching
+    } while (scope != NULL);
+    
+    return NULL;
 }
 
 ZenitSymbol* zenit_program_remove_symbol(ZenitProgram *program, const char *symbol_name)

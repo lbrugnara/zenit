@@ -118,10 +118,7 @@ char* zenit_symtable_dump(struct ZenitSymtable *symtable, char *output, bool ver
         {
             ZenitSymbol *symbol = zenit_symtable_get(symtable, name);
 
-            if (started)
-                fl_cstring_append(&output, " ");
-
-            started = true;
+            fl_cstring_append(&output, " ");
 
             output = zenit_symbol_dump(symbol, output);
         }

@@ -59,3 +59,19 @@ void zenit_test_resolve_struct_errors(void)
     zenit_test_resolve_errors(source, tests, error_count);
 }
 
+void zenit_test_resolve_block_errors(void)
+{
+    const char *source = 
+        "var a = 1;"                    "\n"
+        "{ var a = 2; }"                "\n"
+    ;
+
+    struct ResolveTestCase tests[] = {
+        { ZENIT_ERROR_DUPLICATED_SYMBOL,    "Symbol 'a' already exists in an outer scope"         },
+    };
+
+    size_t error_count = sizeof(tests) / sizeof(tests[0]);
+
+    zenit_test_resolve_errors(source, tests, error_count);
+}
+

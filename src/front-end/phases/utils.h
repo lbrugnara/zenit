@@ -7,6 +7,50 @@
 #include "../ast/ast.h"
 #include "../types/context.h"
 
+#ifdef DEBUG
+     /*
+     * Macro: zenit_assert
+     * ===== C =====
+     *  #define zenit_assert(condition, error) ((condition) ? (flm_exit(ERR_FATAL, "Condition '" #condition "' failed. " error), 0) : 1)
+     * =============
+     *  Checks the *condition*, and if it is false, it calls the <fl_exit> function with the
+     *  message error defined in *error*
+     *
+     * Parameters:
+     *  bool condition - Expression that returns a boolean value
+     *  const char *error - Error message
+     * 
+     * Notes:
+     *  - If the condition evaluates to false, the macro calls <fl_exit> therefore in that situation it does not return
+     *  - This macro evaluates only when the <FL_DEBUG> flag evaluates to 1
+     *
+     */
+    #define zenit_assert(condition, error) (!(condition) ? (flm_exit(ERR_FATAL, "Condition '" #condition "' failed. " error), 0) : 1)
+
+     /*
+      * Macro: zenit_vassert
+      * ===== C =====
+      *  #define zenit_vassert(condition, error, ...) (!(condition) ? (flm_vexit(ERR_FATAL, "Condition '" #condition "' failed. " error, __VA_ARGS__), 0) : 1)
+      * =============
+      *  Checks the *condition*, and if it is false, it calls the <fl_exit> function with the
+      *  message error defined in *error* formatted with the additional arguments.
+      *
+      * Parameters:
+      *     bool condition - Expression that returns a boolean value
+      *     const char *error - Error message that supports format specifiers
+      *     ... arguments - Additional arguments used to replace format specifiers in *error*
+      *
+      * Notes:
+      *  - If the condition evaluates to false, the macro calls <fl_exit> therefore in that situation it does not return
+      *  - This macro evaluates only when the <FL_DEBUG> flag evaluates to 1
+      */
+    #define zenit_vassert(condition, error, ...) (!(condition) ? (flm_vexit(ERR_FATAL, "Condition '" #condition "' failed. " error, __VA_ARGS__), 0) : 1)
+#else
+    /* Mute the assertions */
+    #define zenit_assert(condition, error) 1
+    #define zenit_vassert(condition, error, ...) 1
+#endif
+
 static ZenitType* get_type_from_type_declaration(ZenitContext *ctx, ZenitTypeNode *type_decl, ZenitType *rhs_type)
 {
     ZenitType *type = NULL;

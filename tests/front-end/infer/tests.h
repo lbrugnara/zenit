@@ -8,5 +8,6 @@ void zenit_test_infer_variable_reference(void);
 void zenit_test_infer_variable_array(void);
 void zenit_test_infer_variables_structs(void);
 void zenit_test_infer_errors(void);
+void zenit_test_infer_if_statement(void);
 
 #endif /* ZENIT_TESTS_INFER_H */

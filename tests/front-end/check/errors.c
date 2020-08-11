@@ -60,6 +60,12 @@ void zenit_test_check_types_variable_errors(void)
         "var m : [2]uint8 = [ 0x1, 0x2 ];"                      "\n"
         "var n : [2]uint16 = [ 0x1FF, 0x2FF ];"                 "\n"
         "var o = [ &m, &n ];"                                   "\n"
+
+        // Cannot convert from &uint8 to bool
+        "var x = 1;"                                            "\n"
+        "if (x) {}"                                             "\n"
+        "if (&x) {}"                                            "\n"
+        "if ({ x: 0, y: 1, z: 2}) {}"                           "\n"
     ;
 
     struct ExpectedError expected_errors[] = {
@@ -99,6 +105,12 @@ void zenit_test_check_types_variable_errors(void)
         { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot assign from &[3]uint16 to &[3]uint8 (<source>:%u:%u: %s)" },
 
         { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot cast from &uint8 to &uint16 (<source>:%u:%u: %s)" },
+
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from uint8 to bool (<source>:%u:%u: %s)" },
+
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from &uint8 to bool (<source>:%u:%u: %s)" },
+
+        { ZENIT_ERROR_TYPE_MISSMATCH, "Cannot convert from { x: uint8, y: uint8, z: uint8 } to bool (<source>:%u:%u: %s)" },
     };
 
     zenit_test_check_type_errors(source, expected_errors, sizeof(expected_errors) / sizeof(expected_errors[0]));

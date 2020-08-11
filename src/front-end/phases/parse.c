@@ -654,44 +654,6 @@ static ZenitNode* parse_identifier_expression(ZenitParser *parser, ZenitContext 
 }
 
 /*
- * Function: parse_unary_expression
- *  Parses a unary expression
- *
- * Parameters:
- *  <ZenitParser> *parser: Parser object
- *  <ZenitContext> *ctx: Context object
- *
- * Returns:
- *  ZenitNode* - Parsed unary expression
- * 
- * Grammar:
- *  unary_expression = cast_expression | array_literal | reference_expression | identifier_expression | literal_expression ;
- *
- */
-static ZenitNode* parse_unary_expression(ZenitParser *parser, ZenitContext *ctx)
-{
-    if (zenit_parser_next_is(parser, ZENIT_TOKEN_CAST))
-        return parse_cast_expression(parser, ctx);
-
-    if (zenit_parser_next_is(parser, ZENIT_TOKEN_LBRACKET))
-        return parse_array_literal(parser, ctx);
-
-    if (zenit_parser_next_is(parser, ZENIT_TOKEN_LBRACE))
-        return parse_struct_literal(parser, ctx);
-
-    // Check for a reference expression
-    if (zenit_parser_next_is(parser, ZENIT_TOKEN_AMPERSAND))
-        return parse_reference_expression(parser, ctx);
-    
-    // Check for an identifier
-    if (zenit_parser_next_is(parser, ZENIT_TOKEN_ID))
-        return parse_identifier_expression(parser, ctx);
-
-    // Try parsing a literal expression
-    return parse_literal_expression(parser, ctx);
-}
-
-/*
  * Function: parse_cast_expression
  *  Parses a cast expression
  *
@@ -732,6 +694,44 @@ static ZenitNode* parse_cast_expression(ZenitParser *parser, ZenitContext *ctx)
     on_error: zenit_node_cast_free(cast_node);
 
     return NULL;
+}
+
+/*
+ * Function: parse_unary_expression
+ *  Parses a unary expression
+ *
+ * Parameters:
+ *  <ZenitParser> *parser: Parser object
+ *  <ZenitContext> *ctx: Context object
+ *
+ * Returns:
+ *  ZenitNode* - Parsed unary expression
+ * 
+ * Grammar:
+ *  unary_expression = cast_expression | array_literal | reference_expression | identifier_expression | literal_expression ;
+ *
+ */
+static ZenitNode* parse_unary_expression(ZenitParser *parser, ZenitContext *ctx)
+{
+    if (zenit_parser_next_is(parser, ZENIT_TOKEN_CAST))
+        return parse_cast_expression(parser, ctx);
+
+    if (zenit_parser_next_is(parser, ZENIT_TOKEN_LBRACKET))
+        return parse_array_literal(parser, ctx);
+
+    if (zenit_parser_next_is(parser, ZENIT_TOKEN_LBRACE))
+        return parse_struct_literal(parser, ctx);
+
+    // Check for a reference expression
+    if (zenit_parser_next_is(parser, ZENIT_TOKEN_AMPERSAND))
+        return parse_reference_expression(parser, ctx);
+    
+    // Check for an identifier
+    if (zenit_parser_next_is(parser, ZENIT_TOKEN_ID))
+        return parse_identifier_expression(parser, ctx);
+
+    // Try parsing a literal expression
+    return parse_literal_expression(parser, ctx);
 }
 
 /*
@@ -843,8 +843,10 @@ static ZenitNode* parse_if_statement(ZenitParser *parser, ZenitContext *ctx)
     consume_or_return(ctx, parser, ZENIT_TOKEN_IF, &if_token);
 
     consume_or_return(ctx, parser, ZENIT_TOKEN_LPAREN, NULL);
+
     ZenitNode *condition = parse_expression(parser, ctx);
     assert_or_return(ctx, condition != NULL, ZENIT_ERROR_INTERNAL, NULL);
+
     consume_or_return(ctx, parser, ZENIT_TOKEN_RPAREN, NULL);
 
     ZenitNode *then_branch = parse_block(parser, ctx);
@@ -1213,7 +1215,7 @@ static ZenitAttributeNodeMap* parse_attribute_declaration_list(ZenitParser *pars
 
     while (zenit_parser_next_is(parser, ZENIT_TOKEN_HASH))
     {
-        ZenitAttributeNode *attribute = (ZenitAttributeNode*)parse_attribute_declaration(parser, ctx);
+        ZenitAttributeNode *attribute = (ZenitAttributeNode*) parse_attribute_declaration(parser, ctx);
 
         if (attribute == NULL)
             continue;
@@ -1315,6 +1317,9 @@ bool zenit_parse_source(ZenitContext *ctx)
             // Let's try again
             continue;
         }
+
+        // Consume empty statements
+        zenit_parser_consume_if(&parser, ZENIT_TOKEN_SEMICOLON);
 
         fl_list_append(templist, declaration);
         decls_count++;

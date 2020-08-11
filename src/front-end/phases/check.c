@@ -17,6 +17,8 @@ static ZenitSymbol* visit_cast_node(ZenitContext *ctx, ZenitCastNode *cast_node)
 static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitFieldDeclNode *field_node);
 static ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, ZenitStructDeclNode *struct_node);
 static ZenitSymbol* visit_struct_node(ZenitContext *ctx, ZenitStructNode *struct_node);
+static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node);
+static ZenitSymbol* visit_block_node(ZenitContext *ctx, ZenitBlockNode *block_node);
 
 /*
  * Variable: checkers
@@ -33,6 +35,8 @@ static const ZenitTypeChecker checkers[] = {
     [ZENIT_NODE_FIELD_DECL]     = (ZenitTypeChecker) &visit_field_decl_node,
     [ZENIT_NODE_STRUCT_DECL]    = (ZenitTypeChecker) &visit_struct_decl_node,
     [ZENIT_NODE_STRUCT]         = (ZenitTypeChecker) &visit_struct_node,
+    [ZENIT_NODE_IF]             = (ZenitTypeChecker) &visit_if_node,
+    [ZENIT_NODE_BLOCK]          = (ZenitTypeChecker) &visit_block_node,
 };
 
 /*
@@ -396,6 +400,61 @@ static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *va
 
     // The type information returned is always the one from the variable's symbol
     return symbol;
+}
+
+
+static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node)
+{
+    // Enter to the if's scope
+    char *if_uid = zenit_node_if_uid(if_node);
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_uid);
+
+    // We create a temporary bool type for the condition (no worries about freeing its memory,
+    // the types pool will do it later)
+    ZenitType *bool_type = (ZenitType*) zenit_type_ctx_new_bool(ctx->types);
+
+    // Evaluate the condition expression
+    ZenitSymbol* condition_symbol = visit_node(ctx, if_node->condition);
+    
+    // Check if the condition expression evaluates to a boolean
+    if (!zenit_type_is_assignable_from(bool_type, condition_symbol->type))
+    {
+        zenit_context_error(ctx, if_node->base.location, ZENIT_ERROR_TYPE_MISSMATCH, 
+            "Cannot convert from type '%s' to '%s'", 
+            zenit_type_to_string(condition_symbol->type), 
+            zenit_type_to_string(bool_type)
+        );
+    }
+
+    // Evaluate the then branch
+    visit_node(ctx, if_node->then_branch);
+
+    // If present, evaluate the then branch
+    if (if_node->else_branch)
+        visit_node(ctx, if_node->else_branch);
+
+    // Move out of the if scope
+    zenit_program_pop_scope(ctx->program);
+
+    fl_cstring_free(if_uid);
+
+    return NULL;
+}
+
+static ZenitSymbol* visit_block_node(ZenitContext *ctx, ZenitBlockNode *block_node)
+{
+    char *block_uid = zenit_node_block_uid(block_node);
+
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_uid);
+
+    for (size_t i = 0; i < fl_array_length(block_node->statements); i++)
+        visit_node(ctx, block_node->statements[i]);
+
+    zenit_program_pop_scope(ctx->program);
+
+    fl_cstring_free(block_uid);
+
+    return NULL;
 }
 
 /*

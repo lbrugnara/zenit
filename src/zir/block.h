@@ -4,6 +4,8 @@
 #include "symtable.h"
 #include "instructions/instruction.h"
 #include "instructions/cast.h"
+#include "instructions/if-false.h"
+#include "instructions/jump.h"
 #include "instructions/variable.h"
 
 /*
@@ -87,5 +89,7 @@ void zir_block_free(ZirBlock *block);
  *
  */
 char* zir_block_dump(ZirBlock *block, char *output);
+
+size_t zir_block_get_ip(ZirBlock *block);
 
 #endif /* ZIR_BLOCK_H */

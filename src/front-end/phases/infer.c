@@ -24,6 +24,8 @@ static ZenitSymbol* visit_cast_node(ZenitContext *ctx, ZenitCastNode *cast_node,
 static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitFieldDeclNode *field_node, ZenitType **ctx_type, enum InferenceKind infer_kind);
 static ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, ZenitStructDeclNode *struct_node, ZenitType **ctx_type, enum InferenceKind infer_kind);
 static ZenitSymbol* visit_struct_node(ZenitContext *ctx, ZenitStructNode *struct_node, ZenitType **ctx_type, enum InferenceKind infer_kind);
+static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node, ZenitType **ctx_type, enum InferenceKind infer_kind);
+static ZenitSymbol* visit_block_node(ZenitContext *ctx, ZenitBlockNode *block_node, ZenitType **ctx_type, enum InferenceKind infer_kind);
 
 /*
  * Variable: inferrers
@@ -40,6 +42,8 @@ static const ZenitTypeInferrer inferrers[] = {
     [ZENIT_NODE_FIELD_DECL]     = (ZenitTypeInferrer) &visit_field_decl_node,
     [ZENIT_NODE_STRUCT_DECL]    = (ZenitTypeInferrer) &visit_struct_decl_node,
     [ZENIT_NODE_STRUCT]         = (ZenitTypeInferrer) &visit_struct_node,
+    [ZENIT_NODE_IF]             = (ZenitTypeInferrer) &visit_if_node,
+    [ZENIT_NODE_BLOCK]          = (ZenitTypeInferrer) &visit_block_node,
 };
 
 enum UnificationKind {
@@ -598,7 +602,7 @@ static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *va
     //  e.g.: var a = [ 1, 2, 3 ]
     //  The INFER_BIDIRECTIONAL is passed to the array's visitor, which means that the type from the array literal ([3]uint8)
     //  will be assigned to the variable's type
-    flm_assert(ctx_type == NULL && infer_kind == INFER_NONE, "A variable declaration does not need contextual type information");
+    zenit_assert(ctx_type == NULL && infer_kind == INFER_NONE, "A variable declaration does not need contextual type information");
 
     // Visit the attributes and its properties
     visit_attribute_node_map(ctx, variable_node->attributes);
@@ -608,19 +612,19 @@ static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *va
 
     // We need to get the symbol of the right-hand side expression. (if the variable definition has a type hint, we pass that hint to the visitor)
     ZenitSymbol *rhs_symbol = visit_node(ctx, 
-                                                variable_node->rvalue, 
-                                                &symbol->type, 
-                                                // If the variable has a declared type, we don't allow inference on the variable type
-                                                variable_node->type_decl != NULL
-                                                    ? INFER_UNIDIRECTIONAL 
-                                                    : INFER_BIDIRECTIONAL);
+                                            variable_node->rvalue, 
+                                            &symbol->type, 
+                                            // If the variable has a declared type, we don't allow inference on the variable type
+                                            variable_node->type_decl != NULL
+                                                ? INFER_UNIDIRECTIONAL 
+                                                : INFER_BIDIRECTIONAL);
 
     // If the types are not equals, we try to cast the RHS to the LHS type, and if that is not possible, we don't do anything here, we just let
     // the type check to fail later.
     if (!zenit_type_equals(symbol->type, rhs_symbol->type) && zenit_type_is_castable_to(rhs_symbol->type, symbol->type))
     {   
-        // NOTE: the ZenitVariableNode structure changes, but we don't need to worry about its UID changing because of that
-        // as the variables are always accessed by its name, and not by the UID
+        // NOTE: the ZenitVariableNode structure changes, but we don't need to worry about its UID changing because
+        // the variables are always accessed by its name, and not by the UID
         ZenitCastNode *cast_node = zenit_node_cast_new(variable_node->rvalue->location, variable_node->rvalue, true);
         variable_node->rvalue = (ZenitNode*) cast_node;
 
@@ -629,6 +633,62 @@ static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *va
 
     // We always return the variable symbol
     return symbol;
+}
+
+static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node, ZenitType **ctx_type, enum InferenceKind infer_kind)
+{
+    // Enter to the if's scope
+    char *if_uid = zenit_node_if_uid(if_node);
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_uid);
+
+    // We create a temporary bool type for the condition (no worries about freeing its memory,
+    // the types pool will do it later)
+    ZenitType *bool_type = (ZenitType*) zenit_type_ctx_new_bool(ctx->types);
+
+    // Evaluate the condition expression
+    ZenitSymbol *condition_symbol = visit_node(ctx, if_node->condition, &bool_type, INFER_UNIDIRECTIONAL);
+
+    // If the types are not equals, we try to cast the condition to a boolean, and if that is not possible, we don't do anything 
+    // here, we just let the type check to fail later.
+    if (!zenit_type_equals(bool_type, condition_symbol->type) && zenit_type_is_castable_to(condition_symbol->type, bool_type))
+    {   
+        // NOTE: the ZenitVariableNode structure changes, but we don't need to worry about its UID changing because
+        // the variables are always accessed by its name, and not by the UID
+        ZenitCastNode *cast_node = zenit_node_cast_new(if_node->condition->location, if_node->condition, true);
+        if_node->condition = (ZenitNode*) cast_node;
+
+        zenit_utils_new_tmp_symbol(ctx->program, (ZenitNode*) cast_node, bool_type);
+    }
+
+    // Evaluate the then branch (no need to infer anything)
+    visit_node(ctx, if_node->then_branch, NULL, INFER_NONE);
+
+    // If present, evaluate the then branch (no need to infer anything)
+    if (if_node->else_branch)
+        visit_node(ctx, if_node->else_branch, NULL, INFER_NONE);
+
+    // Move out of the if scope
+    zenit_program_pop_scope(ctx->program);
+
+    fl_cstring_free(if_uid);
+
+    return NULL;
+}
+
+static ZenitSymbol* visit_block_node(ZenitContext *ctx, ZenitBlockNode *block_node, ZenitType **ctx_type, enum InferenceKind infer_kind)
+{
+    char *block_uid = zenit_node_block_uid(block_node);
+
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_uid);
+
+    for (size_t i = 0; i < fl_array_length(block_node->statements); i++)
+        visit_node(ctx, block_node->statements[i], NULL, INFER_NONE);
+
+    zenit_program_pop_scope(ctx->program);
+
+    fl_cstring_free(block_uid);
+
+    return NULL;
 }
 
 /*

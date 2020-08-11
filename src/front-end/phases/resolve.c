@@ -5,7 +5,7 @@
 #include "../types/context.h"
 
 enum ResolvePass {
-    RESOLVE_STRUCT,
+    RESOLVE_TYPES,
     RESOLVE_ALL
 };
 
@@ -29,6 +29,8 @@ static ZenitSymbol* visit_cast_node(ZenitContext *ctx, ZenitCastNode *cast_node,
 static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitFieldDeclNode *field_node, enum ResolvePass pass);
 static ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, ZenitStructDeclNode *struct_node, enum ResolvePass pass);
 static ZenitSymbol* visit_struct_node(ZenitContext *ctx, ZenitStructNode *struct_node, enum ResolvePass pass);
+static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node, enum ResolvePass pass);
+static ZenitSymbol* visit_block_node(ZenitContext *ctx, ZenitBlockNode *block_node, enum ResolvePass pass);
 
 /*
  * Variable: symbol_resolvers
@@ -45,6 +47,8 @@ static const ZenitSymbolResolver symbol_resolvers[] = {
     [ZENIT_NODE_FIELD_DECL]     = (ZenitSymbolResolver) &visit_field_decl_node,
     [ZENIT_NODE_STRUCT_DECL]    = (ZenitSymbolResolver) &visit_struct_decl_node,
     [ZENIT_NODE_STRUCT]         = (ZenitSymbolResolver) &visit_struct_node,
+    [ZENIT_NODE_IF]             = (ZenitSymbolResolver) &visit_if_node,
+    [ZENIT_NODE_BLOCK]          = (ZenitSymbolResolver) &visit_block_node,
 };
 
 /*
@@ -91,7 +95,7 @@ static ZenitSymbol* visit_bool_node(ZenitContext *ctx, ZenitBoolNode *bool_node,
 
 /*
  * Function: visit_cast_node
- *  If the cast has a type hint, we need to get that information know to build a temporal symbol that will be
+ *  If the cast has a type hint, we need to get that information to build a temporal symbol that will be
  *  helpful in the type inference and type checking phases
  *
  * Parameters:
@@ -150,7 +154,7 @@ static ZenitSymbol* visit_identifier_node(ZenitContext *ctx, ZenitIdentifierNode
 
 /*
  * Function: visit_reference_node
- *  This function adds a new temporal symbol with an "inferred" type information about the reference
+ *  This function adds a new temporal symbol that represents the reference being taken from the expression.
  *
  * Parameters:
  *  <ZenitContext> *ctx - Context object
@@ -191,8 +195,8 @@ static ZenitSymbol* visit_array_node(ZenitContext *ctx, ZenitArrayNode *array_no
     if (pass != RESOLVE_ALL)
         return NULL;
 
-    // We start creating an array type, we flag it as INFERRED because the truth is, at this point we can't make
-    // sure of its type, so we will need help/confirmation from the inference and type check phases.
+    // We start creating an array type. At this point we are not sure of its type, so we will let that
+    // task to the the inference and type check phases.
     ZenitArrayType *array_type = zenit_type_ctx_new_array(ctx->types, zenit_type_ctx_new_none(ctx->types));
     
     // The length is the number of elements within the array initializer, that's something we know
@@ -227,8 +231,7 @@ static ZenitSymbol* visit_array_node(ZenitContext *ctx, ZenitArrayNode *array_no
         last = element_symbol->type;
     }
 
-    // If the member type is known, we can free the memory of the NONE type assigned to member_type
-    // and copy the new member_type from one of the array elements
+    // If the member type is known, we can copy the new member_type from one of the array elements
     if (member_type_is_known)
         array_type->member_type = zenit_type_ctx_copy_type(ctx->types, last);
 
@@ -280,7 +283,7 @@ static void visit_attribute_node_map(ZenitContext *ctx, ZenitAttributeNodeMap *a
 
 /*
  * Function: visit_named_struct_node
- *  For named structs we do need a previously registered scope, and we need to retrieve the type created in the RESOLVE_STRUCT pass.
+ *  For named structs we do need a previously registered scope, and we need to retrieve the type created in the RESOLVE_TYPES pass.
  *  A literal named struct must have values for all its members, so that check can be done here using the struct type.
  * 
  * Parameters:
@@ -451,7 +454,7 @@ static ZenitSymbol* visit_struct_node(ZenitContext *ctx, ZenitStructNode *struct
 /*
  * Function: visit_field_decl_node
  *  The field declaration visitor run only in the RESOLVE_ALL pass and it registers the field symbol in the current scope (a struct scope by now).
- *  This function checks if the type of the field is valid, because there shouldn't be missing symbols at this point, as the RESOLVE_STRUCT pass should
+ *  This function checks if the type of the field is valid, because there shouldn't be missing symbols at this point, as the RESOLVE_TYPES pass should
  *  have registered all the user-defined types.
  *
  * Parameters:
@@ -481,6 +484,7 @@ static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitFieldDeclNode 
 
     if (!zenit_program_is_valid_type(ctx->program, type))
     {
+        // Types are registered first, if a type is not registered, zenit_program_is_valid_type will return false on RESOLVE_ALL pass
         ZenitType *missing_type = zenit_program_get_invalid_type_component(ctx->program, type);
         zenit_context_error(ctx, field_node->base.location, ZENIT_ERROR_MISSING_SYMBOL, "Type '%s' is not defined", zenit_type_to_string(missing_type));
     }
@@ -506,7 +510,7 @@ static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitFieldDeclNode 
  */
 static ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, ZenitStructDeclNode *struct_node, enum ResolvePass pass)
 {
-    if (pass == RESOLVE_STRUCT)
+    if (pass == RESOLVE_TYPES)
     {
         // If the symbol already exists add an error
         if (zenit_program_has_scope(ctx->program, ZENIT_SCOPE_STRUCT, struct_node->name))
@@ -531,7 +535,7 @@ static ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, ZenitStructDeclNod
         //      struct B { b: uint8; }  <-- This RESOLVE_ALL pass populates the scope with the symbol 'b'
         //      struct B { a: uint16; } <-- This RESOLVE_ALL pass checks if the scope contains symbols, and it actually does
         //
-        // In this scenario, the RESOLVE_STRUCT pass added an error in the context at the moment it visited the second statement, because
+        // In this scenario, the RESOLVE_TYPES pass added an error in the context at the moment it visited the second statement, because
         // struct B was already defined at that point, because of that, the second RESOLVE_ALL pass is not needed at all, we already know
         // it is an error, and it is safe to leave this function
         //
@@ -591,7 +595,15 @@ static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *va
     // If the symbol already exists add an error
     if (zenit_program_has_symbol(ctx->program, variable_node->name))
     {
-        zenit_context_error(ctx, variable_node->base.location, ZENIT_ERROR_DUPLICATED_SYMBOL, "Cannot redefine symbol '%s'", variable_node->name);
+        if (zenit_scope_has_symbol(ctx->program->current_scope, variable_node->name))
+        {
+            zenit_context_error(ctx, variable_node->base.location, ZENIT_ERROR_DUPLICATED_SYMBOL, "Cannot redefine symbol '%s'", variable_node->name);
+        }
+        else
+        {
+            zenit_context_error(ctx, variable_node->base.location, ZENIT_ERROR_DUPLICATED_SYMBOL, 
+                "Cannot redefine symbol '%s' declared in an outer scope", variable_node->name);
+        }
         return NULL;
     }
 
@@ -622,6 +634,41 @@ static ZenitSymbol* visit_variable_node(ZenitContext *ctx, ZenitVariableNode *va
 
     // Create and insert the symbol in the table
     return zenit_program_add_symbol(ctx->program, symbol);
+}
+
+static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node, enum ResolvePass pass)
+{
+    char *if_uid = zenit_node_if_uid(if_node);
+
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, if_uid);
+
+    visit_node(ctx, if_node->condition, pass);
+    visit_node(ctx, if_node->then_branch, pass);
+
+    if (if_node->else_branch)
+        visit_node(ctx, if_node->else_branch, pass);
+
+    zenit_program_pop_scope(ctx->program);
+
+    fl_cstring_free(if_uid);
+
+    return NULL;
+}
+
+static ZenitSymbol* visit_block_node(ZenitContext *ctx, ZenitBlockNode *block_node, enum ResolvePass pass)
+{
+    char *block_uid = zenit_node_block_uid(block_node);
+
+    zenit_program_push_scope(ctx->program, ZENIT_SCOPE_BLOCK, block_uid);
+
+    for (size_t i = 0; i < fl_array_length(block_node->statements); i++)
+        visit_node(ctx, block_node->statements[i], pass);
+
+    zenit_program_pop_scope(ctx->program);
+
+    fl_cstring_free(block_uid);
+
+    return NULL;
 }
 
 /*
@@ -659,7 +706,7 @@ bool zenit_resolve_symbols(ZenitContext *ctx)
     // and the second pass register all the symbols, including variables,
     // struct members, etc
     for (size_t i=0; i < fl_array_length(ctx->ast->decls); i++)
-        visit_node(ctx, ctx->ast->decls[i], RESOLVE_STRUCT);
+        visit_node(ctx, ctx->ast->decls[i], RESOLVE_TYPES);
 
     for (size_t i=0; i < fl_array_length(ctx->ast->decls); i++)
         visit_node(ctx, ctx->ast->decls[i], RESOLVE_ALL);

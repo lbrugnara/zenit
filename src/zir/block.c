@@ -67,3 +67,8 @@ char* zir_block_dump(ZirBlock *block, char *output)
 
     return output;
 }
+
+size_t zir_block_get_ip(ZirBlock *block)
+{
+    return fl_array_length(block->instructions);
+}

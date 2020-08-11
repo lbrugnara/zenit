@@ -12,6 +12,7 @@ typedef enum ZenitScopeType {
     ZENIT_SCOPE_GLOBAL,
     ZENIT_SCOPE_STRUCT,
     ZENIT_SCOPE_FUNCTION,
+    ZENIT_SCOPE_BLOCK,
 } ZenitScopeType;
 
 
