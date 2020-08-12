@@ -224,7 +224,7 @@ bool zir_struct_type_is_castable_to(ZirStructType *struct_type, ZirType *target_
     return zir_type_is_assignable_from(target_type, (ZirType*) struct_type);
 }
 
-size_t zir_struct_type_size(ZirStructType *type)
+size_t zir_struct_type_size(ZirStructType *type, size_t ref_size)
 {
     if (!type)
         return 0;
@@ -235,7 +235,7 @@ size_t zir_struct_type_size(ZirStructType *type)
     while (tmp != NULL)
     {
         ZirStructTypeMember *member = (ZirStructTypeMember*) tmp->value;
-        struct_size += zir_type_size(member->type);
+        struct_size += zir_type_size(member->type, ref_size);
         tmp = tmp->next;
     }
     

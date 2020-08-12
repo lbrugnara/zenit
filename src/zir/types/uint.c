@@ -83,7 +83,7 @@ bool zir_uint_type_is_castable_to(ZirUintType *uint_type, ZirType *target_type)
     return target_type->typekind == ZIR_TYPE_UINT;
 }
 
-size_t zir_uint_type_size(ZirUintType *type)
+size_t zir_uint_type_size(ZirUintType *type, size_t ref_size)
 {
     if (!type)
         return 0;

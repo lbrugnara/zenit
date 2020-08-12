@@ -98,7 +98,7 @@ bool zir_bool_type_is_assignable_from(ZirBoolType *target_type, ZirType *value_t
  * Returns:
  *  size_t: Size needed to store an instance of the boolean type
  */
-size_t zir_bool_type_size(ZirBoolType *type);
+size_t zir_bool_type_size(ZirBoolType *type, size_t ref_size);
 
 /*
  * Function: zir_bool_type_is_castable_to

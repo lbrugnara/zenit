@@ -1,16 +1,16 @@
 #include <stdio.h>
 
 
-#include "../../Test.h"
+#include <flut/flut.h>
 #include "../../../src/front-end/phases/check.h"
-#include "../../../src/front-end/phases/infer.h"
+#include "../../../src/front-end/inference/infer.h"
 #include "../../../src/front-end/phases/parse.h"
 #include "../../../src/front-end/phases/resolve.h"
 #include "../../../src/front-end/symtable.h"
 #include "../../../src/front-end/phases/zirgen.h"
-#include "../../../src/back-end/nes/program.h"
-#include "../../../src/back-end/nes/generate.h"
-#include "../../../src/back-end/nes/rom.h"
+#include "../../../src/back-end/nes/ir/generate.h"
+#include "../../../src/back-end/nes/rp2a03/generate.h"
+#include "../../../src/back-end/nes/rp2a03/rom.h"
 #include "tests.h"
 
 void zenit_test_nes_rom(void)
@@ -61,20 +61,20 @@ void zenit_test_nes_rom(void)
 
     ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
 
-    fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
-    fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
-    fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
-    fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
+    flut_expect_compat("Parsing should not contain errors", zenit_parse_source(&ctx));
+    flut_expect_compat("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
+    flut_expect_compat("Type inference pass should not contain errors", zenit_infer_types(&ctx));
+    flut_expect_compat("Type check pass should not contain errors", zenit_check_types(&ctx));
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
+    ZnesProgram *znes_program = znes_generate_program(zir_program);
+    Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_program);
 
-    ZnesProgram *nes_program = znes_generate_program(zir_program);
+    flut_expect_compat("RP2A03 program must be valid", rp2a03_program != NULL);
 
-    fl_expect("NES program must be valid", nes_program != NULL);
+    Rp2a03Rom *nes_rom = rp2a03_rom_new(rp2a03_program);
 
-    ZnesRom *nes_rom = znes_rom_new(nes_program);
-
-    fl_expect("NES ROM must be valid", nes_rom != NULL);
+    flut_expect_compat("NES ROM must be valid", nes_rom != NULL);
 
     const uint8_t data[] = { 0x78, 0xd8, 0xa2, 0x00, 0x2c, 0x02, 0x20, 0x10, 0xfb, 0x2c, 0x02, 0x20, 0x10, 0xfb, 0xa9, 0x88, 0x8d, 0x00, 0x20, 0x4c, 0x13, 0x80, 0xa6, 0x00, 0xe8, 0x86, 0x00, 0x8e, 0x01, 0x20, 0x40 };
     const uint8_t startup[] = { 0xa9, 0x20, 0x85, 0x00 , 0x4c, 0x00, 0x80 }; // NOTE: The startup routine contains as its last instruction a JMP to the -original- RESET vector
@@ -82,15 +82,16 @@ void zenit_test_nes_rom(void)
 
     bool data_equals = memcmp(data, nes_rom->prg_rom.bank, sizeof(data) / sizeof(data[0])) == 0;
     bool startup_equals = memcmp(startup, nes_rom->prg_rom.bank + sizeof(data) / sizeof(data[0]), sizeof(startup) / sizeof(startup[0])) == 0;
-    // It's a "hack", we compare the 3 x uint16_t that are the nmi_addr, res_addr, and irq_addr that are placed at the end of the ZnesNrom256
+    // It's a "hack", we compare the 3 x uint16_t that are the nmi_addr, res_addr, and irq_addr that are placed at the end of the Rp2a03Nrom256
     bool vectors_equals = memcmp(vectors, nes_rom->prg_rom.bank + sizeof(nes_rom->prg_rom.bank), sizeof(vectors) / sizeof(vectors[0])) == 0;
 
-    fl_expect("DATA segment must be equals to the precomputed value", data_equals);
-    fl_expect("STARTUP segment must be equals to the precomputed value", startup_equals);
-    fl_expect("Vectors must be equals to the precomputed value", vectors_equals);
+    flut_expect_compat("DATA segment must be equals to the precomputed value", data_equals);
+    flut_expect_compat("STARTUP segment must be equals to the precomputed value", startup_equals);
+    flut_expect_compat("Vectors must be equals to the precomputed value", vectors_equals);
 
-    znes_rom_free(nes_rom);
-    znes_program_free(nes_program);
+    rp2a03_rom_free(nes_rom);
+    rp2a03_program_free(rp2a03_program);
+    znes_program_free(znes_program);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }

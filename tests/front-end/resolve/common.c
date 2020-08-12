@@ -1,6 +1,6 @@
 
 
-#include "../../Test.h"
+#include <flut/flut.h>
 #include "../../../src/front-end/phases/parse.h"
 #include "../../../src/front-end/phases/utils.h"
 #include "../../../src/front-end/program.h"
@@ -15,11 +15,11 @@ void zenit_test_resolve_run(const char *source, const char *test_case, bool verb
 
     bool is_valid = zenit_parse_source(&ctx);
 
-    fl_expect("Parsing must not contain errors", is_valid);
+    flut_expect_compat("Parsing must not contain errors", is_valid);
 
     is_valid = zenit_resolve_symbols(&ctx);
 
-    fl_expect("Resolve pass must not contain errors", is_valid);
+    flut_expect_compat("Resolve pass must not contain errors", is_valid);
 
     char *program_dump = zenit_program_dump(ctx.program, verbose);
 
@@ -30,7 +30,7 @@ void zenit_test_resolve_run(const char *source, const char *test_case, bool verb
 
     fl_cstring_free(program_dump);
 
-    fl_vexpect(equals, "Program dump must match with the test case", test_case);
+    flut_vexpect_compat(equals, "Program dump must match with the test case", test_case);
 
     zenit_context_free(&ctx);
 }
@@ -42,7 +42,7 @@ void zenit_test_resolve_errors(const char *source, struct ResolveTestCase *tests
     bool valid_parse = zenit_parse_source(&ctx);
     bool valid_resolve = valid_parse ? zenit_resolve_symbols(&ctx) : false;
 
-    fl_vexpect(!valid_resolve && zenit_context_error_count(&ctx) == tests_count, "Resolve pass must fail with %zu errors", tests_count);
+    flut_vexpect_compat(!valid_resolve && zenit_context_error_count(&ctx) == tests_count, "Resolve pass must fail with %zu errors", tests_count);
 
     size_t i=0;
     struct FlListNode *tmp = fl_list_head(ctx.errors);
@@ -50,7 +50,7 @@ void zenit_test_resolve_errors(const char *source, struct ResolveTestCase *tests
     {
         ZenitError *error = (ZenitError*) tmp->value;
 
-        fl_vexpect(error->type == tests[i].error, 
+        flut_vexpect_compat(error->type == tests[i].error, 
             "L%u:%u: %s (%s)",
             error->location.line, error->location.col, error->message, tests[i].message);
 

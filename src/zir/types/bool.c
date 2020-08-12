@@ -52,7 +52,7 @@ bool zir_bool_type_is_castable_to(ZirBoolType *bool_type, ZirType *target_type)
     return target_type->typekind == ZIR_TYPE_BOOL;
 }
 
-size_t zir_bool_type_size(ZirBoolType *type)
+size_t zir_bool_type_size(ZirBoolType *type, size_t ref_size)
 {
     if (!type)
         return 0;

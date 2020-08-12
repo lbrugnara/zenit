@@ -1,6 +1,6 @@
 
 
-#include "../../Test.h"
+#include <flut/flut.h>
 #include "../../../src/front-end/symtable.h"
 #include "tests.h"
 
@@ -28,22 +28,22 @@ void zenit_test_symtable_api(void)
     //     zenit_symtable_add(&table, symbol);
     // }
     
-    // fl_vexpect(fl_hashtable_length(table.symbols) == count, "Symbol table must contain %zu symbols", count);
+    // flut_vexpect_compat(fl_hashtable_length(table.symbols) == count, "Symbol table must contain %zu symbols", count);
 
     // for (size_t i=0; i < count; i++)
     // {
-    //     fl_vexpect(zenit_symtable_has(&table, names[i]), "Symbol table must contain symbol \"%s\"", names[i]);
+    //     flut_vexpect_compat(zenit_symtable_has(&table, names[i]), "Symbol table must contain symbol \"%s\"", names[i]);
 
     //     ZenitSymbol *symbol = zenit_symtable_get(&table, names[i]);
 
-    //     fl_vexpect(flm_cstring_equals(symbol->name, names[i]), "Symbol name must match (%s)", names[i]);
-    //     fl_vexpect(symbol->type.elements == types[i].elements, "Symbol elements must match (%zu)", types[i].elements);
+    //     flut_vexpect_compat(flm_cstring_equals(symbol->name, names[i]), "Symbol name must match (%s)", names[i]);
+    //     flut_vexpect_compat(symbol->type.elements == types[i].elements, "Symbol elements must match (%zu)", types[i].elements);
     //     if (types[i].is_array)
-    //         fl_expect("Symbol must be an array", symbol->type.is_array);
+    //         flut_expect_compat("Symbol must be an array", symbol->type.is_array);
     //     else
-    //         fl_expect("Symbol must not be an array", !symbol->type.is_array);
-    //     fl_vexpect(symbol->type == types[i].type, "Symbol type must match (%s)", zenit_type_to_string(types + i));
-    //     fl_vexpect(((symbol->type.name == NULL && types[i].name == NULL) 
+    //         flut_expect_compat("Symbol must not be an array", !symbol->type.is_array);
+    //     flut_vexpect_compat(symbol->type == types[i].type, "Symbol type must match (%s)", zenit_type_to_string(types + i));
+    //     flut_vexpect_compat(((symbol->type.name == NULL && types[i].name == NULL) 
     //         || (flm_cstring_equals(symbol->type.name, types[i].name))), "Symbol type name must match (%s)", types[i].name ? types[i].name : "null");
     // }
 

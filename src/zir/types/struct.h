@@ -172,7 +172,7 @@ bool zir_struct_type_is_castable_to(ZirStructType *struct_type, ZirType *target_
  * Returns:
  *  size_t: Size needed to store an instance of the struct type
  */
-size_t zir_struct_type_size(ZirStructType *type);
+size_t zir_struct_type_size(ZirStructType *type, size_t ref_size);
 
 /*
  * Function: zir_struct_type_free

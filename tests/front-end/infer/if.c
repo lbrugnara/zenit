@@ -1,7 +1,7 @@
 
 
-#include "../../Test.h"
-#include "../../../src/front-end/phases/infer.h"
+#include <flut/flut.h>
+#include "../../../src/front-end/inference/infer.h"
 #include "../../../src/front-end/phases/parse.h"
 #include "../../../src/front-end/program.h"
 #include "../../../src/front-end/types/context.h"

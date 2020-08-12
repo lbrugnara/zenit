@@ -121,7 +121,7 @@ static ZenitType* get_type_from_type_declaration(ZenitContext *ctx, ZenitTypeNod
 
 static inline char* zenit_utils_mangle_name(char *name, ZenitSourceLocation *location)
 {
-    return fl_cstring_vdup("%s_$l%uc%u", name, location->line, location->col);
+    return fl_cstring_vdup("%s$l%uc%u", name, location->line, location->col);
 }
 
 static inline ZenitSymbol* zenit_utils_new_tmp_symbol(ZenitProgram *program, ZenitNode *node, ZenitType *type)

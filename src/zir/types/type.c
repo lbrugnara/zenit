@@ -165,7 +165,7 @@ bool zir_type_is_castable_to(ZirType *source_type, ZirType *target_type)
     return false;
 }
 
-size_t zir_type_size(ZirType *type)
+size_t zir_type_size(ZirType *type, size_t ref_size)
 {
     if (!type)
         return 0;
@@ -173,19 +173,19 @@ size_t zir_type_size(ZirType *type)
     switch (type->typekind)
     {
         case ZIR_TYPE_UINT:
-            return zir_uint_type_size((ZirUintType*) type);
+            return zir_uint_type_size((ZirUintType*) type, ref_size);
 
         case ZIR_TYPE_BOOL:
-            return zir_bool_type_size((ZirBoolType*) type);
+            return zir_bool_type_size((ZirBoolType*) type, ref_size);
 
         case ZIR_TYPE_STRUCT:
-            return zir_struct_type_size((ZirStructType*) type);
+            return zir_struct_type_size((ZirStructType*) type, ref_size);
         
         case ZIR_TYPE_REFERENCE:
-            return zir_reference_type_size((ZirReferenceType*) type);
+            return zir_reference_type_size((ZirReferenceType*) type, ref_size);
         
         case ZIR_TYPE_ARRAY:
-            return zir_array_type_size((ZirArrayType*) type);
+            return zir_array_type_size((ZirArrayType*) type, ref_size);
         
         case ZIR_TYPE_NONE:
             break;

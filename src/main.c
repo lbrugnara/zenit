@@ -1,12 +1,12 @@
 #include "front-end/phases/check.h"
-#include "front-end/phases/infer.h"
+#include "front-end/inference/infer.h"
 #include "front-end/phases/parse.h"
 #include "front-end/phases/resolve.h"
 #include "front-end/symtable.h"
 #include "front-end/phases/zirgen.h"
-#include "back-end/nes/program.h"
-#include "back-end/nes/generate.h"
-#include "back-end/nes/rom.h"
+#include "back-end/nes/rp2a03/generate.h"
+#include "back-end/nes/ir/generate.h"
+#include "back-end/nes/rp2a03/rom.h"
 
 int main(int argc, char **argv)
 {
@@ -32,20 +32,27 @@ int main(int argc, char **argv)
         return -3;
     }
 
-    ZnesProgram *nes_program = znes_generate_program(zir_program);
+    ZnesProgram *znes_program = znes_generate_program(zir_program);
 
-    if (!nes_program)
+    if (!znes_program)
         return -4;
 
-    ZnesRom *rom = znes_rom_new(nes_program);
+    
+    Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_program);
+
+    if (!rp2a03_program)
+        return -4;
+
+    Rp2a03Rom *rom = rp2a03_rom_new(rp2a03_program);
 
     if (!rom)
         return -5;
 
-    znes_rom_dump(rom, argv[2]);
+    rp2a03_rom_dump(rom, argv[2]);
     
-    znes_rom_free(rom);
-    znes_program_free(nes_program);
+    rp2a03_rom_free(rom);
+    rp2a03_program_free(rp2a03_program);
+    znes_program_free(znes_program);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
     return 0;

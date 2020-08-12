@@ -99,7 +99,7 @@ bool zir_reference_type_is_assignable_from(ZirReferenceType *target_type, ZirTyp
  * Returns:
  *  size_t: Size needed to store an instance of the reference type
  */
-size_t zir_reference_type_size(ZirReferenceType *type);
+size_t zir_reference_type_size(ZirReferenceType *type, size_t ref_size);
 
 /*
  * Function: zir_reference_type_is_castable_to

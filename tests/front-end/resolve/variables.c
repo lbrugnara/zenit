@@ -1,6 +1,6 @@
 
 
-#include "../../Test.h"
+#include <flut/flut.h>
 #include "../../../src/front-end/phases/parse.h"
 #include "../../../src/front-end/phases/utils.h"
 #include "../../../src/front-end/program.h"
@@ -20,7 +20,7 @@ void zenit_test_resolve_too_many_symbols(void)
 
     size_t number_of_symbols = 500;
     for (size_t i=0; i < number_of_symbols; i++)
-        fl_vexpect(zenit_program_has_symbol(ctx.program, symbols[i]), "Symbol '%s' must exist", symbols[i]);
+        flut_vexpect_compat(zenit_program_has_symbol(ctx.program, symbols[i]), "Symbol '%s' must exist", symbols[i]);
 
     zenit_context_free(&ctx);
 }

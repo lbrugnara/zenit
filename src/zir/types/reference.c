@@ -106,14 +106,12 @@ bool zir_reference_type_is_castable_to(ZirReferenceType *reference, ZirType *tar
     return false;
 }
 
-size_t zir_reference_type_size(ZirReferenceType *type)
+size_t zir_reference_type_size(ZirReferenceType *type, size_t ref_size)
 {
     if (!type)
         return 0;
 
-    // FIXME: A reference size must be equals to the pointer size of the backend implementation
-    // not sure if we can make something here
-    return 0;
+    return ref_size;
 }
 
 void zir_reference_type_free(ZirReferenceType *type)

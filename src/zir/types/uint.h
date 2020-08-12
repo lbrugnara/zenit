@@ -111,7 +111,7 @@ bool zir_uint_type_is_assignable_from(ZirUintType *target_type, ZirType *value_t
  * Returns:
  *  size_t: Size needed to store an instance of the uint type
  */
-size_t zir_uint_type_size(ZirUintType *type);
+size_t zir_uint_type_size(ZirUintType *type, size_t ref_size);
 
 /*
  * Function: zir_uint_type_is_castable_to

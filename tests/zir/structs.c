@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-#include "../Test.h"
+#include <flut/flut.h>
 #include "../../src/front-end/phases/check.h"
-#include "../../src/front-end/phases/infer.h"
+#include "../../src/front-end/inference/infer.h"
 #include "../../src/front-end/phases/parse.h"
 #include "../../src/front-end/phases/resolve.h"
 #include "../../src/front-end/symtable.h"
@@ -49,21 +49,21 @@ void zenit_test_generate_ir_struct_decl(void)
 
     ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
 
-    fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
-    fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
-    fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
-    fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
+    flut_expect_compat("Parsing should not contain errors", zenit_parse_source(&ctx));
+    flut_expect_compat("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
+    flut_expect_compat("Type inference pass should not contain errors", zenit_infer_types(&ctx));
+    flut_expect_compat("Type check pass should not contain errors", zenit_check_types(&ctx));
     
     ZirProgram *program = zenit_generate_zir(&ctx);
 
-    fl_expect("ZIR program must compile", program != NULL);
+    flut_expect_compat("ZIR program must compile", program != NULL);
 
     // At this point we can free the Zenit context, from now on, everything should work only with ZIR objects
     zenit_context_free(&ctx);
     
     char *codegen = zir_program_dump(program);
 
-    fl_expect("Generated IR must be equals to the hand-written version", flm_cstring_equals(codegen, zir_src));
+    flut_expect_compat("Generated IR must be equals to the hand-written version", flm_cstring_equals(codegen, zir_src));
     
     fl_cstring_free(codegen);
     zir_program_free(program);
@@ -96,21 +96,21 @@ void zenit_test_generate_ir_struct(void)
 
     ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
 
-    fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
-    fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
-    fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
-    fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
+    flut_expect_compat("Parsing should not contain errors", zenit_parse_source(&ctx));
+    flut_expect_compat("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
+    flut_expect_compat("Type inference pass should not contain errors", zenit_infer_types(&ctx));
+    flut_expect_compat("Type check pass should not contain errors", zenit_check_types(&ctx));
     
     ZirProgram *program = zenit_generate_zir(&ctx);
 
-    fl_expect("ZIR program must compile", program != NULL);
+    flut_expect_compat("ZIR program must compile", program != NULL);
 
     // At this point we can free the Zenit context, from now on, everything should work only with ZIR objects
     zenit_context_free(&ctx);
     
     char *codegen = zir_program_dump(program);
 
-    fl_expect("Generated IR must be equals to the hand-written version", flm_cstring_equals(codegen, zir_src));
+    flut_expect_compat("Generated IR must be equals to the hand-written version", flm_cstring_equals(codegen, zir_src));
     
     fl_cstring_free(codegen);
     zir_program_free(program);

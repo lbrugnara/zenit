@@ -1,15 +1,15 @@
 #include <stdio.h>
 
 
-#include "../../Test.h"
+#include <flut/flut.h>
 #include "../../../src/front-end/phases/check.h"
-#include "../../../src/front-end/phases/infer.h"
+#include "../../../src/front-end/inference/infer.h"
 #include "../../../src/front-end/phases/parse.h"
 #include "../../../src/front-end/phases/resolve.h"
 #include "../../../src/front-end/symtable.h"
 #include "../../../src/front-end/phases/zirgen.h"
-#include "../../../src/back-end/nes/program.h"
-#include "../../../src/back-end/nes/generate.h"
+#include "../../../src/back-end/nes/rp2a03/generate.h"
+#include "../../../src/back-end/nes/ir/generate.h"
 #include "tests.h"
 
 void zenit_test_nes_program(void)
@@ -34,9 +34,9 @@ void zenit_test_nes_program(void)
         "    0xD8,                       // CLD           Disable decimal mode"                                                                     "\n"
         "    0xA2, 0x00,                 // LDX #$00"                                                                                               "\n"
         "    0x2C, 0x02, 0x20,           // BIT $2002     vwait1"                                                                                   "\n"
-        "    0x10, 0xFB,                 // BPL $0014"                                                                                              "\n"
+        "    0x10, 0xFB,                 // BPL $FB"                                                                                                "\n"
         "    0x2C, 0x02, 0x20,           // BIT $2002     vwait2"                                                                                   "\n"
-        "    0x10, 0xFB,                 // BPL $0014"                                                                                              "\n"
+        "    0x10, 0xFB,                 // BPL $FB"                                                                                                "\n"
         "    0xA9, 0x88,                 // LDA #$88      Enable NMI"                                                                               "\n"
         "    0x8D, 0x00, 0x20,           // STA $2000"                                                                                              "\n"
         "    0x4C, 0x13, 0x80,           // JMP $8013     Jump forever"                                                                             "\n"
@@ -60,31 +60,32 @@ void zenit_test_nes_program(void)
 
     ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_STRING, zenit_source);
 
-    fl_expect("Parsing should not contain errors", zenit_parse_source(&ctx));
-    fl_expect("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
-    fl_expect("Type inference pass should not contain errors", zenit_infer_types(&ctx));
-    fl_expect("Type check pass should not contain errors", zenit_check_types(&ctx));
+    flut_expect_compat("Parsing should not contain errors", zenit_parse_source(&ctx));
+    flut_expect_compat("Symbol resolving pass should not contain errors", zenit_resolve_symbols(&ctx));
+    flut_expect_compat("Type inference pass should not contain errors", zenit_infer_types(&ctx));
+    flut_expect_compat("Type check pass should not contain errors", zenit_check_types(&ctx));
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
+    ZnesProgram *znes_program = znes_generate_program(zir_program);
+    Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_program);
 
-    ZnesProgram *nes_program = znes_generate_program(zir_program);
-
-    fl_expect("NES program must be valid", nes_program != NULL);
+    flut_expect_compat("NES program must be valid", rp2a03_program != NULL);
 
     const uint8_t data[] = { 0x78, 0xd8, 0xa2, 0x00, 0x2c, 0x02, 0x20, 0x10, 0xfb, 0x2c, 0x02, 0x20, 0x10, 0xfb, 0xa9, 0x88, 0x8d, 0x00, 0x20, 0x4c, 0x13, 0x80, 0xa6, 0x00, 0xe8, 0x86, 0x00, 0x8e, 0x01, 0x20, 0x40 };
     // For more context on the following NOTEs refer to the rom.c file
     const uint8_t startup[] = { 0xa9, 0x20, 0x85, 0x00 /*, 0x4c, 0x00, 0x80 */ }; // NOTE: The commented instruction is the JMP to the RESET address
     const uint8_t vectors[] = { 0x16, 0x80, 0x00, 0x80 /*0x1f, 0x80*/ }; // NOTE: The commented address is the RESET address after copying the startup routine
 
-    bool data_equals = memcmp(data, nes_program->data.bytes, sizeof(data) / sizeof(data[0])) == 0;
-    bool startup_equals = memcmp(startup, nes_program->startup.bytes, sizeof(startup) / sizeof(startup[0])) == 0;
-    bool vectors_equals = memcmp(vectors, nes_program->data.bytes + (0xFFFA - nes_program->data.base_address), sizeof(vectors) / sizeof(vectors[0])) == 0;
+    bool data_equals = memcmp(data, rp2a03_program->data->bytes, sizeof(data) / sizeof(data[0])) == 0;
+    bool startup_equals = memcmp(startup, rp2a03_program->startup->bytes, sizeof(startup) / sizeof(startup[0])) == 0;
+    bool vectors_equals = memcmp(vectors, rp2a03_program->data->bytes + (0xFFFA - rp2a03_program->data->base_address), sizeof(vectors) / sizeof(vectors[0])) == 0;
 
-    fl_expect("DATA segment must be equals to the precomputed value", data_equals);
-    fl_expect("STARTUP segment must be equals to the precomputed value", startup_equals);
-    fl_expect("Vectors must be equals to the precomputed value", vectors_equals);
+    flut_expect_compat("DATA segment must be equals to the precomputed value", data_equals);
+    flut_expect_compat("STARTUP segment must be equals to the precomputed value", startup_equals);
+    flut_expect_compat("Vectors must be equals to the precomputed value", vectors_equals);
 
-    znes_program_free(nes_program);
+    rp2a03_program_free(rp2a03_program);
+    znes_program_free(znes_program);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }

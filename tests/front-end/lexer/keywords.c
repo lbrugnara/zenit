@@ -1,6 +1,6 @@
 
 
-#include "../../Test.h"
+#include <flut/flut.h>
 #include "../../../src/front-end/lexer.h"
 #include "tests.h"
 

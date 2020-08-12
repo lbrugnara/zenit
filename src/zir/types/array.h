@@ -116,7 +116,7 @@ bool zir_array_type_is_castable_to(ZirArrayType *array_type, ZirType *target_typ
  * Returns:
  *  size_t: Size needed to store an instance of the array type
  */
-size_t zir_array_type_size(ZirArrayType *type);
+size_t zir_array_type_size(ZirArrayType *type, size_t ref_size);
 
 /*
  * Function: zir_array_type_free

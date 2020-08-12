@@ -1,7 +1,7 @@
 
 
-#include "../../Test.h"
-#include "../../../src/front-end/phases/infer.h"
+#include <flut/flut.h>
+#include "../../../src/front-end/inference/infer.h"
 #include "../../../src/front-end/phases/parse.h"
 #include "../../../src/front-end/program.h"
 #include "../../../src/front-end/types/context.h"
@@ -36,17 +36,17 @@ void zenit_test_infer_variable_uint(void)
     bool is_resolve_valid = is_parsing_valid && zenit_resolve_symbols(&ctx);
     bool is_inference_valid = is_resolve_valid && zenit_infer_types(&ctx);
     
-    fl_expect("Parsing, symbol resolving, and type inference phases should not contain errors", is_inference_valid);
+    flut_expect_compat("Parsing, symbol resolving, and type inference phases should not contain errors", is_inference_valid);
 
     for (size_t i=0; i < count; i++)
     {
         const char **test = tests[i];
 
-        fl_vexpect(zenit_program_has_symbol(ctx.program, test[0]), "Symbol table must contain symbol \"%s\"", test[0]);
+        flut_vexpect_compat(zenit_program_has_symbol(ctx.program, test[0]), "Symbol table must contain symbol \"%s\"", test[0]);
 
         ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test[0]);
 
-        fl_vexpect(flm_cstring_equals(zenit_type_to_string(symbol->type), test[1]), "Symbol %s's type must be %s", test[0], test[1]);
+        flut_vexpect_compat(flm_cstring_equals(zenit_type_to_string(symbol->type), test[1]), "Symbol %s's type must be %s", test[0], test[1]);
     }
 
     zenit_context_free(&ctx);
@@ -97,17 +97,17 @@ void zenit_test_infer_variable_reference(void)
     bool is_resolve_valid = is_parsing_valid && zenit_resolve_symbols(&ctx);
     bool is_inference_valid = is_resolve_valid && zenit_infer_types(&ctx);
     
-    fl_expect("Parsing, symbol resolving, and type inference phases should not contain errors", is_inference_valid);
+    flut_expect_compat("Parsing, symbol resolving, and type inference phases should not contain errors", is_inference_valid);
 
     for (size_t i=0; i < count; i++)
     {
         const char **test = tests[i];
 
-        fl_vexpect(zenit_program_has_symbol(ctx.program, test[0]), "Symbol table must contain symbol \"%s\"", test[0]);
+        flut_vexpect_compat(zenit_program_has_symbol(ctx.program, test[0]), "Symbol table must contain symbol \"%s\"", test[0]);
 
         ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test[0]);
 
-        fl_vexpect(flm_cstring_equals(zenit_type_to_string(symbol->type), test[1]), "Symbol %s's type must be %s", test[0], test[1]);
+        flut_vexpect_compat(flm_cstring_equals(zenit_type_to_string(symbol->type), test[1]), "Symbol %s's type must be %s", test[0], test[1]);
     }
 
     zenit_context_free(&ctx);
@@ -180,22 +180,22 @@ void zenit_test_infer_variable_array(void)
     bool is_resolve_valid = is_parsing_valid && zenit_resolve_symbols(&ctx);
     bool is_inference_valid = is_resolve_valid && zenit_infer_types(&ctx);
     
-    fl_expect("Parsing, symbol resolving, and type inference phases should not contain errors", is_inference_valid);
+    flut_expect_compat("Parsing, symbol resolving, and type inference phases should not contain errors", is_inference_valid);
 
     for (size_t i=0; i < count; i++)
     {
         const char **test = tests[i];
 
-        fl_vexpect(zenit_program_has_symbol(ctx.program, test[0]), "Symbol table must contain symbol \"%s\"", test[0]);
+        flut_vexpect_compat(zenit_program_has_symbol(ctx.program, test[0]), "Symbol table must contain symbol \"%s\"", test[0]);
 
         ZenitSymbol *symbol = zenit_program_get_symbol(ctx.program, test[0]);
 
         bool equals = flm_cstring_equals(zenit_type_to_string(symbol->type), test[1]);
 
         if (equals)
-            fl_vexpect(equals, "Symbol %s's type must be %s", test[0], test[1]);
+            flut_vexpect_compat(equals, "Symbol %s's type must be %s", test[0], test[1]);
         else
-            fl_vexpect(equals, "Symbol %s's type must be %s but actual type is %s", test[0], test[1], zenit_type_to_string(symbol->type));
+            flut_vexpect_compat(equals, "Symbol %s's type must be %s but actual type is %s", test[0], test[1], zenit_type_to_string(symbol->type));
     }
 
     zenit_context_free(&ctx);

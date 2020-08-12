@@ -124,11 +124,12 @@ bool zir_type_is_castable_to(ZirType *source_type, ZirType *target_cast_type);
  *
  * Parameters:
  *  <ZirType> *type: Type object
+ *  <size_t> ref_size: The default size of pointers (back-end specific)
  *
  * Returns:
  *  size_t: Size needed to store an instance of the type
  */
-size_t zir_type_size(ZirType *type);
+size_t zir_type_size(ZirType *type, size_t ref_size);
 
 /*
  * Function: zir_type_fre

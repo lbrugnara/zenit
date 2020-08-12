@@ -122,12 +122,12 @@ bool zir_array_type_is_castable_to(ZirArrayType *array_type, ZirType *target_typ
     return zir_type_is_castable_to(array_type->member_type, target_array_type->member_type);
 }
 
-size_t zir_array_type_size(ZirArrayType *type)
+size_t zir_array_type_size(ZirArrayType *type, size_t ref_size)
 {
     if (!type)
         return 0;
 
-    return type->length * zir_type_size(type->member_type);
+    return type->length * zir_type_size(type->member_type, ref_size);
 }
 
 void zir_array_type_free(ZirArrayType *type)

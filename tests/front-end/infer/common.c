@@ -1,7 +1,7 @@
 
 
-#include "../../Test.h"
-#include "../../../src/front-end/phases/infer.h"
+#include <flut/flut.h>
+#include "../../../src/front-end/inference/infer.h"
 #include "../../../src/front-end/phases/parse.h"
 #include "../../../src/front-end/program.h"
 #include "../../../src/front-end/types/context.h"
@@ -15,15 +15,15 @@ void zenit_test_infer_run(const char *source, const char *test_case, bool verbos
 
     bool is_valid = zenit_parse_source(&ctx);
 
-    fl_expect("Parsing must not contain errors", is_valid);
+    flut_expect_compat("Parsing must not contain errors", is_valid);
 
     is_valid = zenit_resolve_symbols(&ctx);
 
-    fl_expect("Resolve pass must not contain errors", is_valid);
+    flut_expect_compat("Resolve pass must not contain errors", is_valid);
 
     is_valid = zenit_infer_types(&ctx);
 
-    fl_expect("Inference pass must not contain errors", is_valid);
+    flut_expect_compat("Inference pass must not contain errors", is_valid);
 
     char *program_dump = zenit_program_dump(ctx.program, verbose);
 
@@ -34,7 +34,7 @@ void zenit_test_infer_run(const char *source, const char *test_case, bool verbos
 
     fl_cstring_free(program_dump);
 
-    fl_vexpect(equals, "Program dump must match with the test case", test_case);
+    flut_vexpect_compat(equals, "Program dump must match with the test case", test_case);
 
     zenit_context_free(&ctx);
 }

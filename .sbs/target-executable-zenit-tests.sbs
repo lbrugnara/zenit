@@ -8,11 +8,17 @@ executable zenit-tests {
     ]
 
     if $sbs.env == win-cmd {
-        objects: [ "${lib_dir}/fllib/${triplet}/libfl.lib" ]
+        objects: [ 
+            "${lib_dir}/fllib/${triplet}/libfl.lib",
+            "${lib_dir}/flut/${triplet}/libflut.lib" 
+        ]
     }
 
     if $sbs.env == linux-bash {
-        objects: [ "${lib_dir}/fllib/${triplet}/libfl.a" ]
+        objects: [ 
+            "${lib_dir}/fllib/${triplet}/libfl.a",
+            "${lib_dir}/flut/${triplet}/libflut.a"
+        ]
         libraries: [
             { name: "m" },
             { name: "pthread" }

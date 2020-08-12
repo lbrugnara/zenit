@@ -1,13 +1,24 @@
 action copy-fllib
 {
+    # Copy headers
+    if $sbs.os == win and $sbs.shell in [ system, cmd ] {
+        `if not exist .\include (mkdir .\include)`
+        `if not exist .\include\fllib (mkdir .\include\fllib)`
+        `if not exist .\include\flut (mkdir .\include\flut)`
+        `xcopy /y /d /s ..\fllib\src\*.h .\include\fllib`
+        `xcopy /y /d /s ..\fllib\flut\src\*.h .\include\flut`
+    }
+
+    if $sbs.os == linux and $sbs.shell in [ system, bash ] {
+        `mkdir -p ./include/fllib`
+        `mkdir -p ./include/flut`
+        `(cd ../fllib/src && find . -type f -name '*.h' | xargs cp --parents -t ../include/fllib)`
+        `(cd ../fllib/flut/src && find . -type f -name '*.h' | xargs cp --parents -t ../../include/flut)`
+    }
+
+    # Copy libraries
     if $sbs.os == win and $sbs.shell in [ system, cmd ]
     {
-        # Create the include directory
-        `if not exist .\include (md .\include)`,
-
-        # Copy the fllib header
-        `if exist ..\fllib\include\fllib.h (copy /Y ..\fllib\include\fllib.h .\include\ )`,
-
         # Create the fllib library directory
         `if not exist .\lib\fllib\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config} (\
             md .\lib\fllib\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config} )`,
@@ -16,17 +27,35 @@ action copy-fllib
         `if exist ..\fllib\build\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config}\libfl.lib ( \
             copy /Y ..\fllib\build\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config}\libfl.lib \
                  .\lib\fllib\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config}\ )`,
+
+        # Create the flut library directory
+        `if not exist .\lib\flut\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config} (\
+            md .\lib\flut\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config} )`,
+
+        # Copy the flut library
+        `if exist ..\fllib\build\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config}\libflut.lib ( \
+            copy /Y ..\fllib\build\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config}\libflut.lib \
+                 .\lib\flut\${sbs.os}\${sbs.arch}\${sbs.toolchain}\${sbs.config}\ )`,
     }
 
     if $sbs.os == linux and $sbs.shell in [ system, bash ]
     {
-        `mkdir -p ./include`
-        `if [ -f "../fllib/include/fllib.h" ]; then cp ../fllib/include/fllib.h ./include/ ; fi`
-
+        # Create the fllib library directory
         `mkdir -p ./lib/fllib/${sbs.os}/${sbs.arch}/${sbs.toolchain}/${sbs.config}`
+
+        # Copy the fllib library
         `if [ -f "../fllib/build/${sbs.os}/${sbs.arch}/${sbs.toolchain}/${sbs.config}/libfl.a" ]; then \
             cp  ../fllib/build/${sbs.os}/${sbs.arch}/${sbs.toolchain}/${sbs.config}/libfl.a            \
                 ./lib/fllib/${sbs.os}/${sbs.arch}/${sbs.toolchain}/${sbs.config}/ ;                    \
+        fi`
+
+        # Create the flut library directory
+        `mkdir -p ./lib/flut/${sbs.os}/${sbs.arch}/${sbs.toolchain}/${sbs.config}`
+
+        # Copy the flut library
+        `if [ -f "../fllib/build/${sbs.os}/${sbs.arch}/${sbs.toolchain}/${sbs.config}/libflut.a" ]; then \
+            cp  ../fllib/build/${sbs.os}/${sbs.arch}/${sbs.toolchain}/${sbs.config}/libflut.a            \
+                ./lib/flut/${sbs.os}/${sbs.arch}/${sbs.toolchain}/${sbs.config}/ ;                    \
         fi`
     }
 }

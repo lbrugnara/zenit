@@ -3,7 +3,7 @@
 #include <locale.h>
 #include <time.h>
 
-#include "Test.h"
+#include <flut/flut.h>
 
 // Tests
 #include "front-end/check/tests.h"
@@ -17,10 +17,10 @@
 
 int main(int argc, char **argv) 
 {
-    fl_test_run_all_suites(
+    flut_run_tests(
         argc,
         argv,
-        fl_test_suite("Lexer", 
+        flut_suite("Lexer", 
             { "Types",          &zenit_test_lexer_types         },
             { "Operators",      &zenit_test_lexer_operators     },
             { "Identifiers",    &zenit_test_lexer_identifiers   },
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
             { "Combinations",   &zenit_test_lexer_combinations  },
             { "Comments",       &zenit_test_lexer_comments      },
         ),
-        fl_test_suite("Parser", 
+        flut_suite("Parser", 
             { "Simple variable declaration",            &zenit_test_parser_variable_literal             },
             { "Array variable declaration",             &zenit_test_parser_array_variable_literal       },
             { "Variable decl. with type",               &zenit_test_parser_variable_literal_type        },
@@ -48,10 +48,10 @@ int main(int argc, char **argv)
             { "Parse blocks",                           &zenit_test_parser_blocks                       },
             { "Parse if statements",                    &zenit_test_parser_if_statements                },
         ),
-        fl_test_suite("Symtable",
+        flut_suite("Symtable",
             { "Symbol creation",    &zenit_test_symtable_api },
         ),
-        fl_test_suite("Resolve",
+        flut_suite("Resolve",
             { "Resolve too many symbols",                   &zenit_test_resolve_too_many_symbols        },
             { "Resolve variables with primitive types",     &zenit_test_resolve_variables_primitives    },
             { "Resolve variables with reference types",     &zenit_test_resolve_variables_references    },
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
             { "Resolve block",                              &zenit_test_resolve_block                   },
             { "Resolve block errors",                       &zenit_test_resolve_block_errors            },
         ),
-        fl_test_suite("Infer",
+        flut_suite("Infer",
             { "Infer variable type using primitives",       &zenit_test_infer_variable_uint         },
             { "Infer variable type using references",       &zenit_test_infer_variable_reference    },
             { "Infer variable type using arrays",           &zenit_test_infer_variable_array        },
@@ -72,13 +72,13 @@ int main(int argc, char **argv)
             { "Infer in if statement",                      &zenit_test_infer_if_statement          },
             { "Inference errors",                           &zenit_test_infer_errors                },
         ),
-        fl_test_suite("Check",
+        flut_suite("Check",
             { "Type check arrays",          &zenit_test_check_types_array               },
             { "Type check structs",         &zenit_test_check_types_struct              },
             { "Type check variable errors", &zenit_test_check_types_variable_errors     },
             { "Type check struct errors",   &zenit_test_check_types_struct_errors       },
         ),
-        fl_test_suite("zir",
+        flut_suite("zir",
             { "Generate ZIR variables",         &zenit_test_generate_ir_variables       },
             { "Generate ZIR variable clash",    &zenit_test_generate_ir_variables_clash },
             { "Generate ZIR casts",             &zenit_test_generate_ir_casts           },
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
             { "Generate ZIR struct",            &zenit_test_generate_ir_struct          },
             { "Generate ZIR if",                &zenit_test_generate_ir_if              },
         ),
-        fl_test_suite("nes",
+        flut_suite("nes",
             { "NES global variables",               &zenit_test_nes_global_vars             },
             { "NES global array variables",         &zenit_test_nes_global_vars_array       },
             { "NES global variables (ZP)",          &zenit_test_nes_global_vars_zp          },

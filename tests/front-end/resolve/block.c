@@ -1,6 +1,6 @@
 
 
-#include "../../Test.h"
+#include <flut/flut.h>
 #include "../../../src/front-end/phases/parse.h"
 #include "../../../src/front-end/phases/utils.h"
 #include "../../../src/front-end/program.h"
