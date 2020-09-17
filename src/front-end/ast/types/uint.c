@@ -5,7 +5,7 @@
 ZenitUintTypeNode* zenit_uint_type_node_new(ZenitSourceLocation location, ZenitUintTypeSize size)
 {
     ZenitUintTypeNode *uint_type_node = fl_malloc(sizeof(ZenitUintTypeNode));
-    uint_type_node->base.base.nodekind = ZENIT_NODE_TYPE_UINT;
+    uint_type_node->base.base.nodekind = ZENIT_AST_NODE_TYPE_UINT;
     uint_type_node->base.base.location = location;
     uint_type_node->base.typekind = ZENIT_TYPE_UINT;
     uint_type_node->size = size;

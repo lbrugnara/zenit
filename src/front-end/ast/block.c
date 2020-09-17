@@ -6,7 +6,7 @@
 ZenitBlockNode* zenit_block_node_new(ZenitSourceLocation location)
 {
     ZenitBlockNode *node = fl_malloc(sizeof(ZenitBlockNode));
-    node->base.nodekind = ZENIT_NODE_BLOCK;
+    node->base.nodekind = ZENIT_AST_NODE_BLOCK;
     node->base.location = location;
     node->statements = fl_array_new(sizeof(ZenitNode*), 0);
     node->id = zenit_block_node_uid(node);

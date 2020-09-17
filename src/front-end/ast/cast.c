@@ -5,7 +5,7 @@
 ZenitCastNode* zenit_cast_node_new(ZenitSourceLocation location, ZenitNode *expression, bool implicit)
 {
     ZenitCastNode *cast_node = fl_malloc(sizeof(ZenitCastNode));
-    cast_node->base.nodekind = ZENIT_NODE_CAST;
+    cast_node->base.nodekind = ZENIT_AST_NODE_CAST;
     cast_node->base.location = location;
     cast_node->implicit = implicit;
     cast_node->expression = expression;

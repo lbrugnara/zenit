@@ -23,18 +23,18 @@
  *  An array indexed with a <ZenitNodeKind> to get a <ZenitTypeInferrer> function
  */
 static const ZenitTypeInferrer inferrers[] = {
-    [ZENIT_NODE_UINT]           = (ZenitTypeInferrer) &zenit_infer_types_in_uint_node,
-    [ZENIT_NODE_BOOL]           = (ZenitTypeInferrer) &zenit_infer_types_in_bool_node,
-    [ZENIT_NODE_VARIABLE]       = (ZenitTypeInferrer) &zenit_infer_types_in_variable_node,
-    [ZENIT_NODE_ARRAY]          = (ZenitTypeInferrer) &zenit_infer_types_in_array_node,
-    [ZENIT_NODE_IDENTIFIER]     = (ZenitTypeInferrer) &zenit_infer_types_in_identifier_node,
-    [ZENIT_NODE_REFERENCE]      = (ZenitTypeInferrer) &zenit_infer_types_in_reference_node,
-    [ZENIT_NODE_CAST]           = (ZenitTypeInferrer) &zenit_infer_types_in_cast_node,
-    [ZENIT_NODE_FIELD_DECL]     = (ZenitTypeInferrer) &zenit_infer_types_in_field_decl_node,
-    [ZENIT_NODE_STRUCT_DECL]    = (ZenitTypeInferrer) &zenit_infer_types_in_struct_decl_node,
-    [ZENIT_NODE_STRUCT]         = (ZenitTypeInferrer) &zenit_infer_types_in_struct_node,
-    [ZENIT_NODE_IF]             = (ZenitTypeInferrer) &zenit_infer_types_in_if_node,
-    [ZENIT_NODE_BLOCK]          = (ZenitTypeInferrer) &zenit_infer_types_in_block_node,
+    [ZENIT_AST_NODE_UINT]           = (ZenitTypeInferrer) &zenit_infer_types_in_uint_node,
+    [ZENIT_AST_NODE_BOOL]           = (ZenitTypeInferrer) &zenit_infer_types_in_bool_node,
+    [ZENIT_AST_NODE_VARIABLE]       = (ZenitTypeInferrer) &zenit_infer_types_in_variable_node,
+    [ZENIT_AST_NODE_ARRAY]          = (ZenitTypeInferrer) &zenit_infer_types_in_array_node,
+    [ZENIT_AST_NODE_IDENTIFIER]     = (ZenitTypeInferrer) &zenit_infer_types_in_identifier_node,
+    [ZENIT_AST_NODE_REFERENCE]      = (ZenitTypeInferrer) &zenit_infer_types_in_reference_node,
+    [ZENIT_AST_NODE_CAST]           = (ZenitTypeInferrer) &zenit_infer_types_in_cast_node,
+    [ZENIT_AST_NODE_FIELD_DECL]     = (ZenitTypeInferrer) &zenit_infer_types_in_field_decl_node,
+    [ZENIT_AST_NODE_STRUCT_DECL]    = (ZenitTypeInferrer) &zenit_infer_types_in_struct_decl_node,
+    [ZENIT_AST_NODE_STRUCT]         = (ZenitTypeInferrer) &zenit_infer_types_in_struct_node,
+    [ZENIT_AST_NODE_IF]             = (ZenitTypeInferrer) &zenit_infer_types_in_if_node,
+    [ZENIT_AST_NODE_BLOCK]          = (ZenitTypeInferrer) &zenit_infer_types_in_block_node,
 };
 
 ZenitUnificationKind zenit_infer_ik_to_uk(ZenitInferenceKind infer_kind)

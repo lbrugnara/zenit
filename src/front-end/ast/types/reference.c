@@ -5,7 +5,7 @@
 ZenitReferenceTypeNode* zenit_reference_type_node_new(ZenitSourceLocation location, ZenitTypeNode *element_type)
 {
     ZenitReferenceTypeNode *type_node = fl_malloc(sizeof(ZenitReferenceTypeNode));
-    type_node->base.base.nodekind = ZENIT_NODE_TYPE_REFERENCE;
+    type_node->base.base.nodekind = ZENIT_AST_NODE_TYPE_REFERENCE;
     type_node->base.base.location = location;
     type_node->base.typekind = ZENIT_TYPE_REFERENCE;
     type_node->element = element_type;

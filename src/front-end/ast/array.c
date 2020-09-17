@@ -6,7 +6,7 @@
 ZenitArrayNode* zenit_array_node_new(ZenitSourceLocation location)
 {
     ZenitArrayNode *node = fl_malloc(sizeof(ZenitArrayNode));
-    node->base.nodekind = ZENIT_NODE_ARRAY;
+    node->base.nodekind = ZENIT_AST_NODE_ARRAY;
     node->base.location = location;
     node->elements = fl_array_new(sizeof(ZenitNode*), 0);
 

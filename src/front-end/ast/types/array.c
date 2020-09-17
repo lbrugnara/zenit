@@ -5,7 +5,7 @@
 ZenitArrayTypeNode* zenit_array_type_node_new(ZenitSourceLocation location, ZenitTypeNode *member_type)
 {
     ZenitArrayTypeNode *type_node = fl_malloc(sizeof(ZenitArrayTypeNode));
-    type_node->base.base.nodekind = ZENIT_NODE_TYPE_ARRAY;
+    type_node->base.base.nodekind = ZENIT_AST_NODE_TYPE_ARRAY;
     type_node->base.base.location = location;
     type_node->base.typekind = ZENIT_TYPE_ARRAY;
     type_node->member_type = member_type;

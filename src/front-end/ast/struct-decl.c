@@ -6,7 +6,7 @@
 ZenitStructDeclNode* zenit_struct_decl_node_new(ZenitSourceLocation location, char *name)
 {
     ZenitStructDeclNode *struct_node = fl_malloc(sizeof(ZenitStructDeclNode));
-    struct_node->base.nodekind = ZENIT_NODE_STRUCT_DECL;
+    struct_node->base.nodekind = ZENIT_AST_NODE_STRUCT_DECL;
     struct_node->base.location = location;
     struct_node->name = name;
     struct_node->members = fl_array_new(sizeof(ZenitNode*), 0);

@@ -1,18 +1,18 @@
 
 #include <fllib/Cstring.h>
-#include "field-decl.h"
+#include "struct-field-decl.h"
 
-ZenitFieldDeclNode* zenit_field_decl_node_new(ZenitSourceLocation location, char *name)
+ZenitStructFieldDeclNode* zenit_struct_field_decl_node_new(ZenitSourceLocation location, char *name)
 {
-    ZenitFieldDeclNode *field_node = fl_malloc(sizeof(ZenitFieldDeclNode));
-    field_node->base.nodekind = ZENIT_NODE_FIELD_DECL;
+    ZenitStructFieldDeclNode *field_node = fl_malloc(sizeof(ZenitStructFieldDeclNode));
+    field_node->base.nodekind = ZENIT_AST_NODE_FIELD_DECL;
     field_node->base.location = location;
     field_node->name = name;
 
     return field_node;
 }
 
-char* zenit_field_decl_node_uid(ZenitFieldDeclNode *field)
+char* zenit_struct_field_decl_node_uid(ZenitStructFieldDeclNode *field)
 {
     if (!field)
         return NULL;
@@ -20,7 +20,7 @@ char* zenit_field_decl_node_uid(ZenitFieldDeclNode *field)
     return fl_cstring_vdup("%%L%u:C%u_field_decl_%s", field->base.location.line, field->base.location.col, field->name);
 }
 
-char* zenit_field_decl_node_dump(ZenitFieldDeclNode *field, char *output)
+char* zenit_struct_field_decl_node_dump(ZenitStructFieldDeclNode *field, char *output)
 {
     fl_cstring_vappend(&output, "(field %s ", field->name);
     
@@ -32,8 +32,8 @@ char* zenit_field_decl_node_dump(ZenitFieldDeclNode *field, char *output)
 }
 
 /*
- * Function: zenit_field_decl_node_free
- *  Frees the memory of a <ZenitFieldDeclNode> object
+ * Function: zenit_struct_field_decl_node_free
+ *  Frees the memory of a <ZenitStructFieldDeclNode> object
  *
  * Parameters:
  *  field_node - Node object
@@ -41,7 +41,7 @@ char* zenit_field_decl_node_dump(ZenitFieldDeclNode *field, char *output)
  * Returns:
  *  void - This function does not return a value
  */
-void zenit_field_decl_node_free(ZenitFieldDeclNode *field_node)
+void zenit_struct_field_decl_node_free(ZenitStructFieldDeclNode *field_node)
 {
     if (!field_node)
         return;

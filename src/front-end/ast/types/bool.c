@@ -5,7 +5,7 @@
 ZenitBoolTypeNode* zenit_bool_type_node_new(ZenitSourceLocation location)
 {
     ZenitBoolTypeNode *bool_type_node = fl_malloc(sizeof(ZenitBoolTypeNode));
-    bool_type_node->base.base.nodekind = ZENIT_NODE_TYPE_BOOL;
+    bool_type_node->base.base.nodekind = ZENIT_AST_NODE_TYPE_BOOL;
     bool_type_node->base.base.location = location;
     bool_type_node->base.typekind = ZENIT_TYPE_BOOL;
 

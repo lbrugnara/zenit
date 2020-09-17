@@ -6,7 +6,7 @@
 ZenitReferenceNode* zenit_reference_node_new(ZenitSourceLocation location, ZenitNode *expression)
 {
     ZenitReferenceNode *ref_node = fl_malloc(sizeof(ZenitReferenceNode));
-    ref_node->base.nodekind = ZENIT_NODE_REFERENCE;
+    ref_node->base.nodekind = ZENIT_AST_NODE_REFERENCE;
     ref_node->base.location = location;
     ref_node->expression = expression;
 

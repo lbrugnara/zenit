@@ -28,7 +28,7 @@ static ZirOperand* visit_array_node(ZenitContext *ctx, ZirProgram *program, Zeni
 static ZirOperand* visit_identifier_node(ZenitContext *ctx, ZirProgram *program, ZenitIdentifierNode *id_node);
 static ZirOperand* visit_reference_node(ZenitContext *ctx, ZirProgram *program, ZenitReferenceNode *ref_node);
 static ZirOperand* visit_cast_node(ZenitContext *ctx, ZirProgram *program, ZenitCastNode *cast_node);
-static ZirOperand* visit_field_decl_node(ZenitContext *ctx, ZirProgram *program, ZenitFieldDeclNode *field_node);
+static ZirOperand* visit_field_decl_node(ZenitContext *ctx, ZirProgram *program, ZenitStructFieldDeclNode *field_node);
 static ZirOperand* visit_struct_decl_node(ZenitContext *ctx, ZirProgram *program, ZenitStructDeclNode *struct_node);
 static ZirOperand* visit_struct_node(ZenitContext *ctx, ZirProgram *program, ZenitStructNode *struct_node);
 static ZirOperand* visit_if_node(ZenitContext *ctx, ZirProgram *program, ZenitIfNode *if_node);
@@ -39,18 +39,18 @@ static ZirOperand* visit_block_node(ZenitContext *ctx, ZirProgram *program, Zeni
  *  An array indexed with a <ZenitNodeKind> to get a <ZirGenerator> function
  */
 static const ZirGenerator generators[] = {
-    [ZENIT_NODE_UINT]           = (ZirGenerator) &visit_uint_node,
-    [ZENIT_NODE_BOOL]           = (ZirGenerator) &visit_bool_node,
-    [ZENIT_NODE_VARIABLE]       = (ZirGenerator) &visit_variable_node,
-    [ZENIT_NODE_ARRAY]          = (ZirGenerator) &visit_array_node,
-    [ZENIT_NODE_IDENTIFIER]     = (ZirGenerator) &visit_identifier_node,
-    [ZENIT_NODE_REFERENCE]      = (ZirGenerator) &visit_reference_node,
-    [ZENIT_NODE_CAST]           = (ZirGenerator) &visit_cast_node,
-    [ZENIT_NODE_FIELD_DECL]     = (ZirGenerator) &visit_field_decl_node,
-    [ZENIT_NODE_STRUCT_DECL]    = (ZirGenerator) &visit_struct_decl_node,
-    [ZENIT_NODE_STRUCT]         = (ZirGenerator) &visit_struct_node,
-    [ZENIT_NODE_IF]             = (ZirGenerator) &visit_if_node,
-    [ZENIT_NODE_BLOCK]          = (ZirGenerator) &visit_block_node,
+    [ZENIT_AST_NODE_UINT]           = (ZirGenerator) &visit_uint_node,
+    [ZENIT_AST_NODE_BOOL]           = (ZirGenerator) &visit_bool_node,
+    [ZENIT_AST_NODE_VARIABLE]       = (ZirGenerator) &visit_variable_node,
+    [ZENIT_AST_NODE_ARRAY]          = (ZirGenerator) &visit_array_node,
+    [ZENIT_AST_NODE_IDENTIFIER]     = (ZirGenerator) &visit_identifier_node,
+    [ZENIT_AST_NODE_REFERENCE]      = (ZirGenerator) &visit_reference_node,
+    [ZENIT_AST_NODE_CAST]           = (ZirGenerator) &visit_cast_node,
+    [ZENIT_AST_NODE_FIELD_DECL]     = (ZirGenerator) &visit_field_decl_node,
+    [ZENIT_AST_NODE_STRUCT_DECL]    = (ZirGenerator) &visit_struct_decl_node,
+    [ZENIT_AST_NODE_STRUCT]         = (ZirGenerator) &visit_struct_node,
+    [ZENIT_AST_NODE_IF]             = (ZirGenerator) &visit_if_node,
+    [ZENIT_AST_NODE_BLOCK]          = (ZirGenerator) &visit_block_node,
 };
 
 /*
@@ -441,7 +441,7 @@ static ZirOperand* visit_array_node(ZenitContext *ctx, ZirProgram *program, Zeni
  * Parameters:
  *  <ZenitContext> *ctx: Context object
  *  <ZirProgram> *program: ZIR program
- *  <ZenitFieldDeclNode> *zenit_struct: The struct literal node
+ *  <ZenitStructFieldDeclNode> *zenit_struct: The struct literal node
  *
  * Returns:
  *  ZirOperand*: The struct operand
@@ -458,9 +458,9 @@ static ZirOperand* visit_struct_node(ZenitContext *ctx, ZirProgram *program, Zen
     {
         ZenitNode *member_node = zenit_struct->members[i];
 
-        if (member_node->nodekind == ZENIT_NODE_FIELD)
+        if (member_node->nodekind == ZENIT_AST_NODE_FIELD)
         {
-            ZenitFieldNode *field_node = (ZenitFieldNode*) member_node;
+            ZenitStructFieldNode *field_node = (ZenitStructFieldNode*) member_node;
             ZirOperand *field_operand = visit_node(ctx, program, field_node->value);
             zir_struct_operand_add_member(struct_operand, field_node->name, field_operand);
         }
@@ -477,12 +477,12 @@ static ZirOperand* visit_struct_node(ZenitContext *ctx, ZirProgram *program, Zen
  * Parameters:
  *  <ZenitContext> *ctx: Context object
  *  <ZirProgram> *program: ZIR program
- *  <ZenitFieldDeclNode> *zenit_field: The field declaration node
+ *  <ZenitStructFieldDeclNode> *zenit_field: The field declaration node
  *
  * Returns:
  *  ZirOperand*: This function returns <NULL> as the field declaration does not add an instruction to the program
  */
-static ZirOperand* visit_field_decl_node(ZenitContext *ctx, ZirProgram *program, ZenitFieldDeclNode *zenit_field)
+static ZirOperand* visit_field_decl_node(ZenitContext *ctx, ZirProgram *program, ZenitStructFieldDeclNode *zenit_field)
 {
     ZenitSymbol *zenit_symbol = zenit_program_get_symbol(ctx->program, zenit_field->name);
 

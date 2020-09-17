@@ -515,7 +515,7 @@ static ZenitNode* parse_struct_field(ZenitParser *parser, ZenitContext *ctx)
 
     assert_or_return(ctx, value != NULL, ZENIT_ERROR_INTERNAL, NULL);
 
-    ZenitFieldNode *field_node = zenit_field_node_new(field_name.location, token_to_string(&field_name));
+    ZenitStructFieldNode *field_node = zenit_struct_field_node_new(field_name.location, token_to_string(&field_name));
 
     assert_or_return(ctx, field_node != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize struct field node");
 
@@ -554,7 +554,7 @@ static ZenitNode* parse_struct_literal(ZenitParser *parser, ZenitContext *ctx)
 
         assert_or_goto(ctx, field_node != NULL, ZENIT_ERROR_INTERNAL, NULL, on_error);
 
-        ((ZenitFieldNode*) field_node)->owner = (ZenitNode*) struct_node;
+        ((ZenitStructFieldNode*) field_node)->owner = (ZenitNode*) struct_node;
         struct_node->members = fl_array_append(struct_node->members, &field_node);
 
         // If next token is a right parenthesis, break the loop, we finished parsing the properties
@@ -1023,7 +1023,7 @@ static ZenitNode* parse_field_declaration(ZenitParser *parser, ZenitContext *ctx
     }
     
     // Allocate the memory and the base information
-    ZenitFieldDeclNode *field_node = zenit_field_decl_node_new(name_token.location, token_to_string(&name_token));
+    ZenitStructFieldDeclNode *field_node = zenit_struct_field_decl_node_new(name_token.location, token_to_string(&name_token));
 
     assert_or_return(ctx, field_node != NULL, ZENIT_ERROR_INTERNAL, "Could not initialize a field declaration node");
 
@@ -1040,7 +1040,7 @@ static ZenitNode* parse_field_declaration(ZenitParser *parser, ZenitContext *ctx
     return (ZenitNode*) field_node;
 
     // Cleanup code for error conditions
-    on_error: zenit_field_decl_node_free(field_node);
+    on_error: zenit_struct_field_decl_node_free(field_node);
 
     return NULL;
 }
@@ -1100,7 +1100,7 @@ static ZenitNode* parse_struct_declaration(ZenitParser *parser, ZenitContext *ct
         // Something happened while parsing the element, we need to leave
         assert_or_goto(ctx, struct_field != NULL, ZENIT_ERROR_INTERNAL, NULL, on_error);
 
-        ((ZenitFieldDeclNode*) struct_field)->owner = (ZenitNode*) struct_node;
+        ((ZenitStructFieldDeclNode*) struct_field)->owner = (ZenitNode*) struct_node;
         struct_node->members = fl_array_append(struct_node->members, &struct_field);
     }
 

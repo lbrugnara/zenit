@@ -14,7 +14,7 @@ static ZenitSymbol* visit_array_node(ZenitContext *ctx, ZenitArrayNode *array_no
 static ZenitSymbol* visit_identifier_node(ZenitContext *ctx, ZenitIdentifierNode *id_node);
 static ZenitSymbol* visit_reference_node(ZenitContext *ctx, ZenitReferenceNode *ref_node);
 static ZenitSymbol* visit_cast_node(ZenitContext *ctx, ZenitCastNode *cast_node);
-static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitFieldDeclNode *field_node);
+static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitStructFieldDeclNode *field_node);
 static ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, ZenitStructDeclNode *struct_node);
 static ZenitSymbol* visit_struct_node(ZenitContext *ctx, ZenitStructNode *struct_node);
 static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node);
@@ -25,18 +25,18 @@ static ZenitSymbol* visit_block_node(ZenitContext *ctx, ZenitBlockNode *block_no
  *  An array indexed with a <ZenitNodeKind> to get a <ZenitTypeChecker> function
  */
 static const ZenitTypeChecker checkers[] = {
-    [ZENIT_NODE_UINT]           = (ZenitTypeChecker) &visit_uint_node,
-    [ZENIT_NODE_BOOL]           = (ZenitTypeChecker) &visit_bool_node,
-    [ZENIT_NODE_VARIABLE]       = (ZenitTypeChecker) &visit_variable_node,
-    [ZENIT_NODE_ARRAY]          = (ZenitTypeChecker) &visit_array_node,
-    [ZENIT_NODE_IDENTIFIER]     = (ZenitTypeChecker) &visit_identifier_node,
-    [ZENIT_NODE_REFERENCE]      = (ZenitTypeChecker) &visit_reference_node,
-    [ZENIT_NODE_CAST]           = (ZenitTypeChecker) &visit_cast_node,
-    [ZENIT_NODE_FIELD_DECL]     = (ZenitTypeChecker) &visit_field_decl_node,
-    [ZENIT_NODE_STRUCT_DECL]    = (ZenitTypeChecker) &visit_struct_decl_node,
-    [ZENIT_NODE_STRUCT]         = (ZenitTypeChecker) &visit_struct_node,
-    [ZENIT_NODE_IF]             = (ZenitTypeChecker) &visit_if_node,
-    [ZENIT_NODE_BLOCK]          = (ZenitTypeChecker) &visit_block_node,
+    [ZENIT_AST_NODE_UINT]           = (ZenitTypeChecker) &visit_uint_node,
+    [ZENIT_AST_NODE_BOOL]           = (ZenitTypeChecker) &visit_bool_node,
+    [ZENIT_AST_NODE_VARIABLE]       = (ZenitTypeChecker) &visit_variable_node,
+    [ZENIT_AST_NODE_ARRAY]          = (ZenitTypeChecker) &visit_array_node,
+    [ZENIT_AST_NODE_IDENTIFIER]     = (ZenitTypeChecker) &visit_identifier_node,
+    [ZENIT_AST_NODE_REFERENCE]      = (ZenitTypeChecker) &visit_reference_node,
+    [ZENIT_AST_NODE_CAST]           = (ZenitTypeChecker) &visit_cast_node,
+    [ZENIT_AST_NODE_FIELD_DECL]     = (ZenitTypeChecker) &visit_field_decl_node,
+    [ZENIT_AST_NODE_STRUCT_DECL]    = (ZenitTypeChecker) &visit_struct_decl_node,
+    [ZENIT_AST_NODE_STRUCT]         = (ZenitTypeChecker) &visit_struct_node,
+    [ZENIT_AST_NODE_IF]             = (ZenitTypeChecker) &visit_if_node,
+    [ZENIT_AST_NODE_BLOCK]          = (ZenitTypeChecker) &visit_block_node,
 };
 
 /*
@@ -269,9 +269,9 @@ static ZenitSymbol* visit_struct_node(ZenitContext *ctx, ZenitStructNode *struct
 
     for (size_t i=0; i < fl_array_length(struct_node->members); i++)
     {
-        if (struct_node->members[i]->nodekind == ZENIT_NODE_FIELD)
+        if (struct_node->members[i]->nodekind == ZENIT_AST_NODE_FIELD)
         {
-            ZenitFieldNode *field_node = (ZenitFieldNode*) struct_node->members[i];
+            ZenitStructFieldNode *field_node = (ZenitStructFieldNode*) struct_node->members[i];
             ZenitSymbol *value_symbol = visit_node(ctx, field_node->value);
 
             // NOTE: For unnamed structs, we don't have an scope, and the type of the member should be determined
@@ -311,12 +311,12 @@ static ZenitSymbol* visit_struct_node(ZenitContext *ctx, ZenitStructNode *struct
  *
  * Parameters:
  *  <ZenitContext> *ctx - Context object
- *  <ZenitFieldDeclNode> *field_node - Node to visit
+ *  <ZenitStructFieldDeclNode> *field_node - Node to visit
  *
  * Returns:
  *  <ZenitSymbol>* - The field symbol with its type information
  */
-static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitFieldDeclNode *field_node)
+static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitStructFieldDeclNode *field_node)
 {
     return zenit_program_get_symbol(ctx->program, field_node->name);
 }

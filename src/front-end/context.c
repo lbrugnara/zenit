@@ -21,7 +21,7 @@ static void error_free(void *errorptr)
     if (!errorptr)
         return;
 
-    ZenitError *error = (ZenitError*)errorptr;
+    ZenitError *error = (ZenitError*) errorptr;
 
     if (error->message)
         fl_cstring_free(error->message);
@@ -62,19 +62,11 @@ void zenit_context_free(ZenitContext *ctx)
     if (!ctx)
         return;
 
-    zenit_program_free(ctx->program);
-
-    if (ctx->srcinfo)
-        zenit_source_free(ctx->srcinfo);
-
-    if (ctx->ast)
-        zenit_ast_free(ctx->ast);
-
-    if (ctx->errors)
-        fl_list_free(ctx->errors);
-
-    if (ctx->types)
-        zenit_type_ctx_free(ctx->types);
+    if (ctx->program) zenit_program_free(ctx->program);
+    if (ctx->srcinfo) zenit_source_free(ctx->srcinfo);
+    if (ctx->ast) zenit_ast_free(ctx->ast);
+    if (ctx->errors) fl_list_free(ctx->errors);
+    if (ctx->types) zenit_type_ctx_free(ctx->types);
 }
 
 /*

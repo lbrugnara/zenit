@@ -25,9 +25,9 @@ static ZenitSymbol* visit_named_struct_node(ZenitContext *ctx, ZenitStructNode *
 
     for (size_t i=0; i < fl_array_length(struct_node->members); i++)
     {
-        if (struct_node->members[i]->nodekind == ZENIT_NODE_FIELD)
+        if (struct_node->members[i]->nodekind == ZENIT_AST_NODE_FIELD)
         {
-            ZenitFieldNode *field_node = (ZenitFieldNode*) struct_node->members[i];
+            ZenitStructFieldNode *field_node = (ZenitStructFieldNode*) struct_node->members[i];
 
             // We retrieve the field declaration to pass it ot the field value's visitor
             ZenitSymbol *field_decl_symbol = zenit_scope_get_symbol(struct_scope, field_node->name);
@@ -85,9 +85,9 @@ static ZenitSymbol* visit_unnamed_struct_node(ZenitContext *ctx, ZenitStructNode
 
     for (size_t i=0; i < fl_array_length(struct_node->members); i++)
     {
-        if (struct_node->members[i]->nodekind == ZENIT_NODE_FIELD)
+        if (struct_node->members[i]->nodekind == ZENIT_AST_NODE_FIELD)
         {
-            ZenitFieldNode *field_node = (ZenitFieldNode*) struct_node->members[i];
+            ZenitStructFieldNode *field_node = (ZenitStructFieldNode*) struct_node->members[i];
             ZenitStructTypeMember *field_member = zenit_struct_type_get_member((ZenitStructType*) struct_symbol->type, field_node->name);
 
             if (struct_name != NULL)

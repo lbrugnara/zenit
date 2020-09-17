@@ -1,5 +1,5 @@
-#ifndef ZENIT_NODE_H
-#define ZENIT_NODE_H
+#ifndef ZENIT_AST_H
+#define ZENIT_AST_H
 
 #include <stdint.h>
 #include "../token.h"
@@ -10,14 +10,14 @@
 #include "bool.h"
 #include "attribute.h"
 #include "cast.h"
-#include "field.h"
-#include "field-decl.h"
 #include "identifier.h"
 #include "if.h"
 #include "node.h"
 #include "property.h"
 #include "reference.h"
+#include "struct-field.h"
 #include "struct.h"
+#include "struct-field-decl.h"
 #include "struct-decl.h"
 #include "types/type.h"
 #include "uint.h"
@@ -78,4 +78,4 @@ char* zenit_ast_dump(ZenitAst *ast);
  */
 void zenit_ast_free(ZenitAst *ast);
 
-#endif /* ZENIT_NODE_H */
+#endif /* ZENIT_AST_H */

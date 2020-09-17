@@ -26,7 +26,7 @@ static ZenitSymbol* visit_array_node(ZenitContext *ctx, ZenitArrayNode *array_no
 static ZenitSymbol* visit_identifier_node(ZenitContext *ctx, ZenitIdentifierNode *id_node, enum ResolvePass pass);
 static ZenitSymbol* visit_reference_node(ZenitContext *ctx, ZenitReferenceNode *ref_node, enum ResolvePass pass);
 static ZenitSymbol* visit_cast_node(ZenitContext *ctx, ZenitCastNode *cast_node, enum ResolvePass pass);
-static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitFieldDeclNode *field_node, enum ResolvePass pass);
+static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitStructFieldDeclNode *field_node, enum ResolvePass pass);
 static ZenitSymbol* visit_struct_decl_node(ZenitContext *ctx, ZenitStructDeclNode *struct_node, enum ResolvePass pass);
 static ZenitSymbol* visit_struct_node(ZenitContext *ctx, ZenitStructNode *struct_node, enum ResolvePass pass);
 static ZenitSymbol* visit_if_node(ZenitContext *ctx, ZenitIfNode *if_node, enum ResolvePass pass);
@@ -37,18 +37,18 @@ static ZenitSymbol* visit_block_node(ZenitContext *ctx, ZenitBlockNode *block_no
  *  An array indexed with a <ZenitNodeKind> to get a <ZenitSymbolResolver> function
  */
 static const ZenitSymbolResolver symbol_resolvers[] = {
-    [ZENIT_NODE_VARIABLE]       = (ZenitSymbolResolver) &visit_variable_node,
-    [ZENIT_NODE_IDENTIFIER]     = (ZenitSymbolResolver) &visit_identifier_node,
-    [ZENIT_NODE_ARRAY]          = (ZenitSymbolResolver) &visit_array_node,
-    [ZENIT_NODE_REFERENCE]      = (ZenitSymbolResolver) &visit_reference_node,
-    [ZENIT_NODE_CAST]           = (ZenitSymbolResolver) &visit_cast_node,
-    [ZENIT_NODE_UINT]           = (ZenitSymbolResolver) &visit_uint_node,
-    [ZENIT_NODE_BOOL]           = (ZenitSymbolResolver) &visit_bool_node,
-    [ZENIT_NODE_FIELD_DECL]     = (ZenitSymbolResolver) &visit_field_decl_node,
-    [ZENIT_NODE_STRUCT_DECL]    = (ZenitSymbolResolver) &visit_struct_decl_node,
-    [ZENIT_NODE_STRUCT]         = (ZenitSymbolResolver) &visit_struct_node,
-    [ZENIT_NODE_IF]             = (ZenitSymbolResolver) &visit_if_node,
-    [ZENIT_NODE_BLOCK]          = (ZenitSymbolResolver) &visit_block_node,
+    [ZENIT_AST_NODE_VARIABLE]       = (ZenitSymbolResolver) &visit_variable_node,
+    [ZENIT_AST_NODE_IDENTIFIER]     = (ZenitSymbolResolver) &visit_identifier_node,
+    [ZENIT_AST_NODE_ARRAY]          = (ZenitSymbolResolver) &visit_array_node,
+    [ZENIT_AST_NODE_REFERENCE]      = (ZenitSymbolResolver) &visit_reference_node,
+    [ZENIT_AST_NODE_CAST]           = (ZenitSymbolResolver) &visit_cast_node,
+    [ZENIT_AST_NODE_UINT]           = (ZenitSymbolResolver) &visit_uint_node,
+    [ZENIT_AST_NODE_BOOL]           = (ZenitSymbolResolver) &visit_bool_node,
+    [ZENIT_AST_NODE_FIELD_DECL]     = (ZenitSymbolResolver) &visit_field_decl_node,
+    [ZENIT_AST_NODE_STRUCT_DECL]    = (ZenitSymbolResolver) &visit_struct_decl_node,
+    [ZENIT_AST_NODE_STRUCT]         = (ZenitSymbolResolver) &visit_struct_node,
+    [ZENIT_AST_NODE_IF]             = (ZenitSymbolResolver) &visit_if_node,
+    [ZENIT_AST_NODE_BLOCK]          = (ZenitSymbolResolver) &visit_block_node,
 };
 
 /*
@@ -316,9 +316,9 @@ static ZenitSymbol* visit_named_struct_node(ZenitContext *ctx, ZenitStructNode *
 
     for (size_t i=0; i < fl_array_length(struct_node->members); i++)
     {
-        if (struct_node->members[i]->nodekind == ZENIT_NODE_FIELD)
+        if (struct_node->members[i]->nodekind == ZENIT_AST_NODE_FIELD)
         {
-            ZenitFieldNode *field_node = (ZenitFieldNode*) struct_node->members[i];
+            ZenitStructFieldNode *field_node = (ZenitStructFieldNode*) struct_node->members[i];
 
             // If the symbol is not present in the scope, it is not a valid field name for this named struct
             if (!zenit_scope_has_symbol(struct_scope, field_node->name))
@@ -407,11 +407,11 @@ static ZenitSymbol* visit_unnamed_struct_node(ZenitContext *ctx, ZenitStructNode
 
     for (size_t i=0; i < fl_array_length(struct_node->members); i++)
     {
-        if (struct_node->members[i]->nodekind == ZENIT_NODE_FIELD)
+        if (struct_node->members[i]->nodekind == ZENIT_AST_NODE_FIELD)
         {
             // We visit the field's value (the initializer) and then we add the struct type member based
             // on the field's name and its value type
-            ZenitFieldNode *field_node = (ZenitFieldNode*) struct_node->members[i];
+            ZenitStructFieldNode *field_node = (ZenitStructFieldNode*) struct_node->members[i];
             ZenitSymbol *value_symbol = visit_node(ctx, field_node->value, pass);
 
             zenit_struct_type_add_member(struct_type, field_node->name, 
@@ -459,14 +459,14 @@ static ZenitSymbol* visit_struct_node(ZenitContext *ctx, ZenitStructNode *struct
  *
  * Parameters:
  *  <ZenitContext> *ctx: Context object
- *  <ZenitFieldDeclNode> *field_node: Visited node
+ *  <ZenitStructFieldDeclNode> *field_node: Visited node
  *  <enum ResolvePass> pass: The current resolve pass
  *
  * Returns:
  *  ZenitSymbol* - The new symbol introduced by the field declaration or NULL on error
  *
  */
-static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitFieldDeclNode *field_node, enum ResolvePass pass)
+static ZenitSymbol* visit_field_decl_node(ZenitContext *ctx, ZenitStructFieldDeclNode *field_node, enum ResolvePass pass)
 {
     if (pass != RESOLVE_ALL)
         return NULL;

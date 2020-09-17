@@ -2,9 +2,9 @@
 #include "symtable.h"
 #include "symbol.h"
 
-struct ZenitSymtable zenit_symtable_new(void)
+ZenitSymtable zenit_symtable_new(void)
 {
-    return (struct ZenitSymtable) {
+    return (ZenitSymtable) {
         .names = fl_list_new_args((struct FlListArgs) {
             .value_allocator = fl_container_allocator_string,
             .value_cleaner = fl_container_cleaner_pointer
@@ -20,35 +20,32 @@ struct ZenitSymtable zenit_symtable_new(void)
     };
 }
 
-void zenit_symtable_free(struct ZenitSymtable *symtable)
+void zenit_symtable_free(ZenitSymtable *symtable)
 {
     if (!symtable)
         return;
 
-    if (symtable->symbols)
-        fl_hashtable_free(symtable->symbols);
-
-    if (symtable->names)
-        fl_list_free(symtable->names);
+    if (symtable->symbols) fl_hashtable_free(symtable->symbols);
+    if (symtable->names) fl_list_free(symtable->names);
 }
 
-ZenitSymbol* zenit_symtable_add(struct ZenitSymtable *symtable, ZenitSymbol *symbol)
+ZenitSymbol* zenit_symtable_add(ZenitSymtable *symtable, ZenitSymbol *symbol)
 {
     fl_list_append(symtable->names, symbol->name);
     return (ZenitSymbol*) fl_hashtable_add(symtable->symbols, symbol->name, symbol);
 }
 
-bool zenit_symtable_has(struct ZenitSymtable *symtable, const char *symbol_name)
+bool zenit_symtable_has(ZenitSymtable *symtable, const char *symbol_name)
 {
     return fl_hashtable_has_key(symtable->symbols, symbol_name);
 }
 
-ZenitSymbol* zenit_symtable_get(struct ZenitSymtable *symtable, const char *symbol_name)
+ZenitSymbol* zenit_symtable_get(ZenitSymtable *symtable, const char *symbol_name)
 {
     return (ZenitSymbol*) fl_hashtable_get(symtable->symbols, symbol_name);
 }
 
-ZenitSymbol** zenit_symtable_get_all(struct ZenitSymtable *symtable, bool include_temporals)
+ZenitSymbol** zenit_symtable_get_all(ZenitSymtable *symtable, bool include_temporals)
 {
     struct FlListNode *tmp = fl_list_head(symtable->names);
 
@@ -73,7 +70,7 @@ ZenitSymbol** zenit_symtable_get_all(struct ZenitSymtable *symtable, bool includ
     return symbols;
 }
 
-ZenitSymbol* zenit_symtable_remove(struct ZenitSymtable *symtable, const char *symbol_name)
+ZenitSymbol* zenit_symtable_remove(ZenitSymtable *symtable, const char *symbol_name)
 {
     ZenitSymbol *symbol = fl_hashtable_get(symtable->symbols, symbol_name);
 
@@ -97,12 +94,12 @@ ZenitSymbol* zenit_symtable_remove(struct ZenitSymtable *symtable, const char *s
     return symbol;
 }
 
-bool zenit_symtable_is_empty(struct ZenitSymtable *symtable)
+bool zenit_symtable_is_empty(ZenitSymtable *symtable)
 {
     return fl_hashtable_length(symtable->symbols) == 0;
 }
 
-char* zenit_symtable_dump(struct ZenitSymtable *symtable, char *output, bool verbose)
+char* zenit_symtable_dump(ZenitSymtable *symtable, char *output, bool verbose)
 {
     struct FlListNode *tmp = fl_list_head(symtable->names);
 

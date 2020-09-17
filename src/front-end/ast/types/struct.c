@@ -6,7 +6,7 @@
 ZenitStructTypeNode* zenit_struct_type_node_new(ZenitSourceLocation location, char *name)
 {
     ZenitStructTypeNode *type_node = fl_malloc(sizeof(ZenitStructTypeNode));
-    type_node->base.base.nodekind = ZENIT_NODE_TYPE_STRUCT;
+    type_node->base.base.nodekind = ZENIT_AST_NODE_TYPE_STRUCT;
     type_node->base.base.location = location;
     type_node->base.typekind = ZENIT_TYPE_STRUCT;
     type_node->name = name;

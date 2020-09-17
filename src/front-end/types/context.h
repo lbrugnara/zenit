@@ -12,18 +12,21 @@
 #include "reference.h"
 #include "struct.h"
 
+typedef FlHashtable ZenitStringToTypeMap;
+typedef FlList ZenitTypeList;
+
 /*
  * Struct: ZenitTypeContext
  *  Contains information about the different types of the system that are created using
  *  the functions in this module
  * 
  * Members:
- *  <FlHashtable> *pool: Set of reusable types
- *  <FlList> *uniques: Set of types created by the system that can't be reused
+ *  <ZenitStringToTypeMap> *pool: Set of reusable types
+ *  <ZenitTypeList> *uniques: Set of types created by the system that can't be reused
  */
 typedef struct ZenitTypeContext {
-    FlHashtable *pool;
-    FlList *uniques;
+    ZenitStringToTypeMap *pool;
+    ZenitTypeList *uniques;
 } ZenitTypeContext;
 
 /*

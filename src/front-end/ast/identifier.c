@@ -5,7 +5,7 @@
 ZenitIdentifierNode* zenit_identifier_node_new(ZenitSourceLocation location, char *name)
 {
     ZenitIdentifierNode *id_node = fl_malloc(sizeof(ZenitIdentifierNode));
-    id_node->base.nodekind = ZENIT_NODE_IDENTIFIER;
+    id_node->base.nodekind = ZENIT_AST_NODE_IDENTIFIER;
     id_node->base.location = location;
     id_node->name = name;
 

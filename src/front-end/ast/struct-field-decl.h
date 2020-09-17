@@ -5,7 +5,7 @@
 #include "types/type.h"
 
 /*
- * Struct: ZenitFieldDeclNode
+ * Struct: ZenitStructFieldDeclNode
  *  Represents a field declaration node
  * 
  * Members:
@@ -15,15 +15,15 @@
  *  <ZenitNode> *owner: The field's parent node
  * 
  */
-typedef struct ZenitFieldDeclNode {
+typedef struct ZenitStructFieldDeclNode {
     ZenitNode base;
     char *name;
     ZenitTypeNode *type_decl;
     ZenitNode *owner;
-} ZenitFieldDeclNode;
+} ZenitStructFieldDeclNode;
 
 /*
- * Function: zenit_field_decl_node_new
+ * Function: zenit_struct_field_decl_node_new
  *  Creates a new AST node that represents a field declaration
  *
  * Parameters:
@@ -31,20 +31,20 @@ typedef struct ZenitFieldDeclNode {
  *  <char> *name: The name of the field
  *
  * Returns:
- *  ZenitFieldDeclNode*: Field declaration node
+ *  ZenitStructFieldDeclNode*: Field declaration node
  *
  * Notes:
  *  The object returned by this function must be freed using the
- *  <zenit_field_decl_node_free> function
+ *  <zenit_struct_field_decl_node_free> function
  */
-ZenitFieldDeclNode* zenit_field_decl_node_new(ZenitSourceLocation location, char *name);
+ZenitStructFieldDeclNode* zenit_struct_field_decl_node_new(ZenitSourceLocation location, char *name);
 
 /*
- * Function: zenit_field_decl_node_uid
+ * Function: zenit_struct_field_decl_node_uid
  *  Returns a UID for the field declaration node
  *
  * Parameters:
- *  <ZenitFieldDeclNode> *field_decl: Field declaration node
+ *  <ZenitStructFieldDeclNode> *field_decl: Field declaration node
  *
  * Returns:
  *  char*: UID of the field declaration node
@@ -53,15 +53,15 @@ ZenitFieldDeclNode* zenit_field_decl_node_new(ZenitSourceLocation location, char
  *  The object returned by this function must be freed using the
  *  <fl_cstring_free> function
  */
-char* zenit_field_decl_node_uid(ZenitFieldDeclNode *field_decl);
+char* zenit_struct_field_decl_node_uid(ZenitStructFieldDeclNode *field_decl);
 
 /*
- * Function: zenit_field_decl_node_dump
+ * Function: zenit_struct_field_decl_node_dump
  *  Appends a dump of the field declaration node to the output pointer, and
  *  returns a pointer to the -possibly reallocated- output
  *
  * Parameters:
- *  <ZenitFieldDeclNode> *field_decl: Field declaration node to dump to the output
+ *  <ZenitStructFieldDeclNode> *field_decl: Field declaration node to dump to the output
  *  <char> *output: Pointer to a heap allocated string
  *
  * Returns:
@@ -72,21 +72,21 @@ char* zenit_field_decl_node_uid(ZenitFieldDeclNode *field_decl);
  *  a pointer to the new location in case the memory is reallocated or
  *  to the old location in case the pointer does not need to be modified. Either
  *  way, it is safe to use the function as:
- *      output = zenit_field_decl_node_dump(field_decl, output);
+ *      output = zenit_struct_field_decl_node_dump(field_decl, output);
  *  If the memory of *output* cannot be reallocated this function frees the memory.
  */
-char* zenit_field_decl_node_dump(ZenitFieldDeclNode *field_decl, char *output);
+char* zenit_struct_field_decl_node_dump(ZenitStructFieldDeclNode *field_decl, char *output);
 
 /*
- * Function: zenit_field_decl_node_free
+ * Function: zenit_struct_field_decl_node_free
  *  Frees the memory used by the field declaration node
  *
  * Parameters:
- *  <ZenitFieldDeclNode> *field_decl: Field declaration node
+ *  <ZenitStructFieldDeclNode> *field_decl: Field declaration node
  *
  * Returns:
  *  void: This function does not return a value
  */
-void zenit_field_decl_node_free(ZenitFieldDeclNode *field_decl);
+void zenit_struct_field_decl_node_free(ZenitStructFieldDeclNode *field_decl);
 
 #endif /* ZENIT_AST_FIELD_DECL_H */

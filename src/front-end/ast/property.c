@@ -5,7 +5,7 @@
 ZenitPropertyNode* zenit_property_node_new(ZenitSourceLocation location, char *name, ZenitNode *value)
 {
     ZenitPropertyNode *property = fl_malloc(sizeof(ZenitPropertyNode));
-    property->base.nodekind = ZENIT_NODE_PROPERTY;
+    property->base.nodekind = ZENIT_AST_NODE_PROPERTY;
     property->base.location = location;
     property->name = name;
     property->value = value;

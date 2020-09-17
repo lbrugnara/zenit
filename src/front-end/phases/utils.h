@@ -59,22 +59,22 @@ static ZenitType* get_type_from_type_declaration(ZenitContext *ctx, ZenitTypeNod
     {
         type = zenit_type_ctx_new_none(ctx->types);
     }
-    else if (type_decl->base.nodekind == ZENIT_NODE_TYPE_UINT)
+    else if (type_decl->base.nodekind == ZENIT_AST_NODE_TYPE_UINT)
     {
         ZenitUintTypeNode *uint_type_decl = (ZenitUintTypeNode*) type_decl;
         type = (ZenitType*) zenit_type_ctx_new_uint(ctx->types, uint_type_decl->size);
     }
-    else if (type_decl->base.nodekind == ZENIT_NODE_TYPE_BOOL)
+    else if (type_decl->base.nodekind == ZENIT_AST_NODE_TYPE_BOOL)
     {
         ZenitBoolTypeNode *bool_type_decl = (ZenitBoolTypeNode*) type_decl;
         type = (ZenitType*) zenit_type_ctx_new_bool(ctx->types);
     }
-    else if (type_decl->base.nodekind == ZENIT_NODE_TYPE_STRUCT)
+    else if (type_decl->base.nodekind == ZENIT_AST_NODE_TYPE_STRUCT)
     {
         ZenitStructTypeNode *struct_type_decl = (ZenitStructTypeNode*) type_decl;
         type = (ZenitType*) zenit_type_ctx_new_struct(ctx->types, struct_type_decl->name);
     }
-    else if (type_decl->base.nodekind == ZENIT_NODE_TYPE_REFERENCE)
+    else if (type_decl->base.nodekind == ZENIT_AST_NODE_TYPE_REFERENCE)
     {
         ZenitReferenceTypeNode *ref_type_decl = (ZenitReferenceTypeNode*) type_decl;
 
@@ -87,7 +87,7 @@ static ZenitType* get_type_from_type_declaration(ZenitContext *ctx, ZenitTypeNod
         ZenitType *element_type = get_type_from_type_declaration(ctx, ref_type_decl->element, rhs_element_type != NULL ? rhs_element_type : NULL);
         type = (ZenitType*) zenit_type_ctx_new_reference(ctx->types, element_type);
     }
-    else if (type_decl->base.nodekind == ZENIT_NODE_TYPE_ARRAY)
+    else if (type_decl->base.nodekind == ZENIT_AST_NODE_TYPE_ARRAY)
     {
         ZenitArrayTypeNode *array_type_decl = (ZenitArrayTypeNode*) type_decl;
 

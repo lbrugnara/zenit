@@ -21,11 +21,8 @@ void zenit_symbol_free(ZenitSymbol *symbol)
     if (!symbol)
         return;
 
-    if (symbol->name)
-        fl_cstring_free(symbol->name);
-
-    if (symbol->mangled_name)
-        fl_cstring_free(symbol->mangled_name);
+    if (symbol->name) fl_cstring_free(symbol->name);
+    if (symbol->mangled_name) fl_cstring_free(symbol->mangled_name);
 
     fl_free(symbol);
 }

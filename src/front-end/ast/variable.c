@@ -5,7 +5,7 @@
 ZenitVariableNode* zenit_variable_node_new(ZenitSourceLocation location, char *name)
 {
     ZenitVariableNode *var_node = fl_malloc(sizeof(ZenitVariableNode));
-    var_node->base.nodekind = ZENIT_NODE_VARIABLE;
+    var_node->base.nodekind = ZENIT_AST_NODE_VARIABLE;
     var_node->base.location = location;
     var_node->name = name;
 

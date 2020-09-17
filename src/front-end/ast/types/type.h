@@ -42,19 +42,19 @@ static char* zenit_node_type_to_string(ZenitTypeNode *typenode)
     if (!typenode)
         return fl_cstring_dup("<unknown>");
 
-    if (typenode->base.nodekind == ZENIT_NODE_TYPE_STRUCT)
+    if (typenode->base.nodekind == ZENIT_AST_NODE_TYPE_STRUCT)
         return zenit_struct_type_node_to_string((ZenitStructTypeNode*) typenode);
     
-    if (typenode->base.nodekind == ZENIT_NODE_TYPE_REFERENCE)
+    if (typenode->base.nodekind == ZENIT_AST_NODE_TYPE_REFERENCE)
         return zenit_reference_type_node_to_string((ZenitReferenceTypeNode*) typenode);
     
-    if (typenode->base.nodekind == ZENIT_NODE_TYPE_ARRAY)
+    if (typenode->base.nodekind == ZENIT_AST_NODE_TYPE_ARRAY)
         return zenit_array_type_node_to_string((ZenitArrayTypeNode*) typenode);
     
-    if (typenode->base.nodekind == ZENIT_NODE_TYPE_UINT)
+    if (typenode->base.nodekind == ZENIT_AST_NODE_TYPE_UINT)
         return zenit_uint_type_node_to_string((ZenitUintTypeNode*) typenode);
 
-    if (typenode->base.nodekind == ZENIT_NODE_TYPE_BOOL)
+    if (typenode->base.nodekind == ZENIT_AST_NODE_TYPE_BOOL)
         return zenit_bool_type_node_to_string((ZenitBoolTypeNode*) typenode);
         
     return fl_cstring_dup("<unknown>");

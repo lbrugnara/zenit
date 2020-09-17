@@ -5,7 +5,7 @@
 ZenitIfNode* zenit_if_node_new(ZenitSourceLocation location, ZenitNode *condition, ZenitNode *then_branch, ZenitNode *else_branch)
 {
     ZenitIfNode *if_node = fl_malloc(sizeof(ZenitIfNode));
-    if_node->base.nodekind = ZENIT_NODE_IF;
+    if_node->base.nodekind = ZENIT_AST_NODE_IF;
     if_node->base.location = location;
     if_node->condition = condition;
     if_node->then_branch = then_branch;

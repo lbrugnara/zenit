@@ -1,7 +1,6 @@
 #ifndef ZENIT_SYMBOL_H
 #define ZENIT_SYMBOL_H
 
-
 #include "types/type.h"
 
 /*
@@ -30,7 +29,7 @@ typedef struct ZenitSymbol {
  * 
  * Notes:
  *  -   The object returned by this function must be freed using the <zenit_symbol_free> function
- *   -   The ZenitSymbol object takes ownership of the <mangled_name> object, which means it will release
+ *  -   The ZenitSymbol object takes ownership of the <mangled_name> object, which means it will release
  *      the <mangled_name> memory when the <zenit_symbol_free> function is called with the ZenitSymbol object 
  *      as an argument.
  *

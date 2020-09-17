@@ -4,7 +4,7 @@
 ZenitAttributeNode* zenit_attribute_node_new(ZenitSourceLocation location, char *name)
 {
     ZenitAttributeNode *attribute = fl_malloc(sizeof(ZenitAttributeNode));
-    attribute->base.nodekind = ZENIT_NODE_ATTRIBUTE;
+    attribute->base.nodekind = ZENIT_AST_NODE_ATTRIBUTE;
     attribute->base.location = location;
     attribute->name = name;
     attribute->properties = zenit_property_node_map_new();
