@@ -13,7 +13,7 @@
 #include "uint.h"
 #include "variable.h"
 
-#include "../phases/utils.h"
+#include "../utils.h"
 #include "../program.h"
 #include "../symbol.h"
 #include "../types/context.h"

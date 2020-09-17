@@ -2,9 +2,8 @@
 
 #include <flut/flut.h>
 #include "../../../src/front-end/parser/parse.h"
-#include "../../../src/front-end/phases/utils.h"
 #include "../../../src/front-end/program.h"
-#include "../../../src/front-end/phases/resolve.h"
+#include "../../../src/front-end/binding/resolve.h"
 #include "../../../src/front-end/symtable.h"
 #include "../../../src/front-end/types/context.h"
 #include "tests.h"

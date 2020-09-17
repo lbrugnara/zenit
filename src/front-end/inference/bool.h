@@ -2,7 +2,7 @@
 #define ZENIT_INFER_BOOL_H
 
 #include "infer.h"
-#include "../phases/utils.h"
+#include "../utils.h"
 
 /*
  * Function: zenit_infer_types_in_bool_node

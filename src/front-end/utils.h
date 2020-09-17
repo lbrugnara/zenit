@@ -1,11 +1,11 @@
 #ifndef ZENIT_UTILS_H
 #define ZENIT_UTILS_H
 
-#include "../program.h"
-#include "../symbol.h"
-#include "../context.h"
-#include "../ast/ast.h"
-#include "../types/context.h"
+#include "program.h"
+#include "symbol.h"
+#include "context.h"
+#include "ast/ast.h"
+#include "types/context.h"
 
 #ifdef DEBUG
      /*

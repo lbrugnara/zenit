@@ -2,7 +2,7 @@
 #define ZENIT_INFER_STRUCT_H
 
 #include "infer.h"
-#include "../phases/utils.h"
+#include "../utils.h"
 
 /*
  * Function: visit_named_struct_node

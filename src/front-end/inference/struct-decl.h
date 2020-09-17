@@ -3,7 +3,7 @@
 
 #include "infer.h"
 #include "attribute-map.h"
-#include "../phases/utils.h"
+#include "../utils.h"
 
 /*
  * Function: zenit_infer_types_in_struct_decl_node

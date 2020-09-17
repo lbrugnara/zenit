@@ -1,5 +1,5 @@
 #include "check.h"
-#include "utils.h"
+#include "../utils.h"
 #include "../program.h"
 #include "../symbol.h"
 

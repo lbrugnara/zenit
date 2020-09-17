@@ -2,7 +2,7 @@
 #define ZENIT_INFER_IDENTIFIER_H
 
 #include "infer.h"
-#include "../phases/utils.h"
+#include "../utils.h"
 
 /*
  * Function: zenit_infer_types_in_identifier_node

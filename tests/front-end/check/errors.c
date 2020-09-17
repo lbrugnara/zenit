@@ -1,10 +1,10 @@
 
 
 #include <flut/flut.h>
-#include "../../../src/front-end/phases/check.h"
+#include "../../../src/front-end/type-check/check.h"
 #include "../../../src/front-end/inference/infer.h"
 #include "../../../src/front-end/parser/parse.h"
-#include "../../../src/front-end/phases/resolve.h"
+#include "../../../src/front-end/binding/resolve.h"
 #include "../../../src/front-end/symtable.h"
 #include "tests.h"
 

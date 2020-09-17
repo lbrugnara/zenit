@@ -2,12 +2,12 @@
 
 
 #include <flut/flut.h>
-#include "../../../src/front-end/phases/check.h"
+#include "../../../src/front-end/type-check/check.h"
 #include "../../../src/front-end/inference/infer.h"
 #include "../../../src/front-end/parser/parse.h"
-#include "../../../src/front-end/phases/resolve.h"
+#include "../../../src/front-end/binding/resolve.h"
 #include "../../../src/front-end/symtable.h"
-#include "../../../src/front-end/phases/zirgen.h"
+#include "../../../src/front-end/codegen/zir.h"
 #include "../../../src/back-end/nes/rp2a03/generate.h"
 #include "../../../src/back-end/nes/ir/generate.h"
 #include "tests.h"

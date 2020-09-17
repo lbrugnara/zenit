@@ -1,5 +1,5 @@
 #include "resolve.h"
-#include "utils.h"
+#include "../utils.h"
 #include "../program.h"
 #include "../symbol.h"
 #include "../types/context.h"

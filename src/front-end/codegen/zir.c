@@ -1,5 +1,5 @@
-#include "zirgen.h"
-#include "utils.h"
+#include "zir.h"
+#include "../utils.h"
 #include "../program.h"
 #include "../symbol.h"
 #include "../../zir/program.h"

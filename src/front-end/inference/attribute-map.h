@@ -2,7 +2,7 @@
 #define ZENIT_INFER_ATTR_MAP_H
 
 #include "infer.h"
-#include "../phases/utils.h"
+#include "../utils.h"
 
 /*
  * Function: visit_attribute_node_map
