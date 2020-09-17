@@ -10,7 +10,7 @@ static inline bool rp2a03_emit_alloc_instruction(Rp2a03Program *program, Rp2a03T
 
 static inline bool emit_alloc_from_array(Rp2a03Program *program, Rp2a03TextSegment *segment, bool is_startup, ZnesAllocInstruction *instruction)
 {
-    if (instruction->destination->type != ZNES_ALLOC_ARRAY)
+    if (instruction->destination->type != ZNES_ALLOC_TYPE_ARRAY)
     {
         // FIXME: Add error handling for this situation
         return false;

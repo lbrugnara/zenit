@@ -16,28 +16,29 @@
 #include "objects/temp.h"
 #include "objects/uint.h"
 
+#include "../nes.h"
 #include "../../../zir/program.h"
 
-ZnesAllocType znes_utils_variable_type_from_zir_type(ZirType *type)
+ZnesAllocType znes_alloc_type_from_zir_type(ZirType *type)
 {
-    ZnesAllocType var_type = ZNES_ALLOC_UNK;
+    ZnesAllocType var_type = ZNES_ALLOC_TYPE_UNK;
 
     switch (type->typekind)
     {
         case ZIR_TYPE_UINT:
-            var_type = ZNES_ALLOC_UINT;
+            var_type = ZNES_ALLOC_TYPE_UINT;
             break;
         case ZIR_TYPE_BOOL:
-            var_type = ZNES_ALLOC_BOOL;
+            var_type = ZNES_ALLOC_TYPE_BOOL;
             break;
         case ZIR_TYPE_ARRAY:
-            var_type = ZNES_ALLOC_ARRAY;
+            var_type = ZNES_ALLOC_TYPE_ARRAY;
             break;
         case ZIR_TYPE_STRUCT:
-            var_type = ZNES_ALLOC_STRUCT;
+            var_type = ZNES_ALLOC_TYPE_STRUCT;
             break;
         case ZIR_TYPE_REFERENCE:
-            var_type = ZNES_ALLOC_REFERENCE;
+            var_type = ZNES_ALLOC_TYPE_REFERENCE;
             break;
 
         case ZIR_TYPE_NONE: break;
@@ -48,24 +49,24 @@ ZnesAllocType znes_utils_variable_type_from_zir_type(ZirType *type)
 
 ZnesAllocType znes_utils_variable_type_from_operand(ZnesOperand *operand)
 {
-    ZnesAllocType var_type = ZNES_ALLOC_UNK;
+    ZnesAllocType var_type = ZNES_ALLOC_TYPE_UNK;
 
     switch (operand->type)
     {
         case ZNES_OPERAND_UINT:
-            var_type = ZNES_ALLOC_UINT;
+            var_type = ZNES_ALLOC_TYPE_UINT;
             break;
 
         case ZNES_OPERAND_BOOL:
-            var_type = ZNES_ALLOC_BOOL;
+            var_type = ZNES_ALLOC_TYPE_BOOL;
             break;
 
         case ZNES_OPERAND_ARRAY:
-            var_type = ZNES_ALLOC_ARRAY;
+            var_type = ZNES_ALLOC_TYPE_ARRAY;
             break;
 
         case ZNES_OPERAND_STRUCT:
-            var_type = ZNES_ALLOC_STRUCT;
+            var_type = ZNES_ALLOC_TYPE_STRUCT;
             break;
 
         case ZNES_OPERAND_VARIABLE:
@@ -73,7 +74,7 @@ ZnesAllocType znes_utils_variable_type_from_operand(ZnesOperand *operand)
             break;
 
         case ZNES_OPERAND_REFERENCE:
-            var_type = ZNES_ALLOC_REFERENCE;
+            var_type = ZNES_ALLOC_TYPE_REFERENCE;
             break;
     }
 
@@ -83,29 +84,29 @@ ZnesAllocType znes_utils_variable_type_from_operand(ZnesOperand *operand)
 ZnesAllocType znes_utils_zir_type_to_nes_type(ZirSymbol *zir_symbol)
 {
     if (zir_symbol->name[0] == '%')
-        return ZNES_ALLOC_TEMP;
+        return ZNES_ALLOC_TYPE_TEMP;
 
     switch (zir_symbol->type->typekind)
     {
         case ZIR_TYPE_UINT:
-            return ZNES_ALLOC_UINT;
+            return ZNES_ALLOC_TYPE_UINT;
 
         case ZIR_TYPE_BOOL:
-            return ZNES_ALLOC_BOOL;
+            return ZNES_ALLOC_TYPE_BOOL;
 
         case ZIR_TYPE_REFERENCE:
-            return ZNES_ALLOC_REFERENCE;
+            return ZNES_ALLOC_TYPE_REFERENCE;
 
         case ZIR_TYPE_ARRAY:
-            return ZNES_ALLOC_ARRAY;
+            return ZNES_ALLOC_TYPE_ARRAY;
 
         case ZIR_TYPE_STRUCT:
-            return ZNES_ALLOC_STRUCT;
+            return ZNES_ALLOC_TYPE_STRUCT;
 
         default: break;
     }
 
-    return ZNES_ALLOC_UNK;
+    return ZNES_ALLOC_TYPE_UNK;
 }
 
 static inline ZnesOperand* internal_make_nes_operand(ZnesProgram *program, ZirOperand *zir_opn)
@@ -142,7 +143,7 @@ static inline ZnesOperand* internal_make_nes_operand(ZnesProgram *program, ZirOp
         case ZIR_OPERAND_ARRAY:
             ZirArrayOperand *zir_array_opn = (ZirArrayOperand*) zir_opn;
 
-            size_t member_size = zir_type_size(zir_array_opn->type->member_type, 2 /* bytes */);
+            size_t member_size = zir_type_size(zir_array_opn->type->member_type, ZNES_POINTER_SIZE);
             size_t length = zir_array_opn->type->length;
 
             ZnesArrayOperand *array_operand = znes_array_operand_new(member_size, length);
@@ -195,104 +196,131 @@ ZnesOperand* znes_utils_make_nes_operand(ZnesProgram *program, ZirOperand *zir_o
     return operand;
 }
 
-bool znes_utils_var_alloc_prepare(ZnesProgram *program, ZirBlock *block, ZirSymbol *zir_symbol, ZirAttributeMap *attributes, ZnesAllocRequest *var_alloc)
+bool znes_alloc_request_init(ZnesProgram *znes_program, ZirBlock *zir_block, ZirSymbol *zir_symbol, ZirAttributeMap *zir_attributes, ZnesAllocRequest *znes_alloc_request)
 {
-    // Variable kind
     if (zir_symbol->name[0] == '%')
     {
-        var_alloc->kind = ZNES_ALLOC_TEMP;
-        var_alloc->segment = ZNES_SEGMENT_TEMP;
-        var_alloc->is_global = block->type == ZIR_BLOCK_GLOBAL;
-        var_alloc->use_address = false;
-        var_alloc->size = zir_type_size(zir_symbol->type, 2 /* bytes */);
+        // Symbols starting with '%' are temporal symbols
+        znes_alloc_request->type = ZNES_ALLOC_TYPE_TEMP;
+        znes_alloc_request->segment = ZNES_SEGMENT_TEMP;
+        znes_alloc_request->is_global = zir_block->type == ZIR_BLOCK_GLOBAL;
+        znes_alloc_request->use_address = false;
+        znes_alloc_request->size = zir_type_size(zir_symbol->type, ZNES_POINTER_SIZE);
 
         // Return, we don't need anything else
         return true;
     }
 
+    // This defines the allocation structure
     switch (zir_symbol->type->typekind)
     {
         case ZIR_TYPE_UINT:
-            var_alloc->kind = ZNES_ALLOC_UINT;
+            znes_alloc_request->type = ZNES_ALLOC_TYPE_UINT;
             break;
 
         case ZIR_TYPE_BOOL:
-            var_alloc->kind = ZNES_ALLOC_BOOL;
+            znes_alloc_request->type = ZNES_ALLOC_TYPE_BOOL;
             break;
 
         case ZIR_TYPE_REFERENCE:
-            var_alloc->kind = ZNES_ALLOC_REFERENCE;
+            znes_alloc_request->type = ZNES_ALLOC_TYPE_REFERENCE;
             break;
 
         case ZIR_TYPE_ARRAY:
-            var_alloc->kind = ZNES_ALLOC_ARRAY;
+            znes_alloc_request->type = ZNES_ALLOC_TYPE_ARRAY;
             break;
 
         case ZIR_TYPE_STRUCT:
-            var_alloc->kind = ZNES_ALLOC_STRUCT;
+            znes_alloc_request->type = ZNES_ALLOC_TYPE_STRUCT;
             break;
 
         default: return false;
     }
 
-    // Variable size
-    var_alloc->size = zir_type_size(zir_symbol->type, 2 /* bytes */);
+    // Allocation size based on the type
+    znes_alloc_request->size = zir_type_size(zir_symbol->type, ZNES_POINTER_SIZE);
 
     // Segment and address
-    var_alloc->is_global = block->type == ZIR_BLOCK_GLOBAL;
-    var_alloc->segment = var_alloc->is_global ? ZNES_SEGMENT_DATA : ZNES_SEGMENT_TEXT;
+    znes_alloc_request->is_global = zir_block->type == ZIR_BLOCK_GLOBAL;
+    znes_alloc_request->segment = znes_alloc_request->is_global ? ZNES_SEGMENT_DATA : ZNES_SEGMENT_TEXT;
 
-    if (attributes != NULL && zir_attribute_map_has_key(attributes, "NES"))
+    // The segment and the address can be changed using attributes
+    if (zir_attributes != NULL && zir_attribute_map_has_key(zir_attributes, "NES"))
     {
-        ZirAttribute *nes_attribute = zir_attribute_map_get(attributes, "NES");
+        ZirAttribute *nes_attribute = zir_attribute_map_get(zir_attributes, "NES");
 
+        // If the "segment" property is present in the NES attribute, it will define the
+        // target segment of the allocation
         if (zir_property_map_has_key(nes_attribute->properties, "segment"))
         {
             ZirProperty *segment_property = zir_property_map_get(nes_attribute->properties, "segment");
 
-            if (segment_property->value->type == ZIR_OPERAND_SYMBOL)
+            if (segment_property->value->type != ZIR_OPERAND_SYMBOL)
             {
-                ZirSymbolOperand *symbol_operand = (ZirSymbolOperand*) segment_property->value;
+                // TODO: Error handling, we don't support other operands for segment
+                return false;
+            }
 
-                if (flm_cstring_equals(symbol_operand->symbol->name, "zp"))
-                    var_alloc->segment = ZNES_SEGMENT_ZP;
-                else if (flm_cstring_equals(symbol_operand->symbol->name, "data"))
-                    var_alloc->segment = ZNES_SEGMENT_DATA;
+            ZirSymbolOperand *symbol_operand = (ZirSymbolOperand*) segment_property->value;
+
+            if (flm_cstring_equals(symbol_operand->symbol->name, "zp"))
+            {
+                znes_alloc_request->segment = ZNES_SEGMENT_ZP;
+            }
+            else if (flm_cstring_equals(symbol_operand->symbol->name, "data"))
+            {
+                znes_alloc_request->segment = ZNES_SEGMENT_DATA;
+            }
+            else
+            {
+                // TODO: Error handling, we don't support other segments yet
+                return false;
             }
         }
         else if (zir_property_map_has_key(nes_attribute->properties, "address"))
         {
-            ZirProperty *address_property = zir_property_map_get(nes_attribute->properties, "address");
+            // The address property is a uint value
             ZirUintOperand *uint_value = NULL;
+            ZirProperty *address_property = zir_property_map_get(nes_attribute->properties, "address");
 
             if (address_property->value->type == ZIR_OPERAND_UINT)
             {
                 uint_value = (ZirUintOperand*) address_property->value;
             }
-
-            // TODO: ERROR HANDLING
-            if (uint_value == NULL)
+            else
+            {
+                // TODO: Error handling, we don't support other types
                 return false;
+            }
 
-            var_alloc->use_address = true;
+            znes_alloc_request->use_address = true;
 
             if (uint_value->type->size == ZIR_UINT_8)
             {
-                var_alloc->segment = ZNES_SEGMENT_ZP;
-                var_alloc->address = uint_value->value.uint8;
+                // If the address is a uint8 the segment is ZEROPAGE
+                znes_alloc_request->address = uint_value->value.uint8;
+                znes_alloc_request->segment = ZNES_SEGMENT_ZP;
             }
             else if (uint_value->type->size == ZIR_UINT_16)
             {
-                var_alloc->address = uint_value->value.uint16;
+                znes_alloc_request->address = uint_value->value.uint16;
 
-                if (uint_value->value.uint16 >= program->data->base_address)
+                if (uint_value->value.uint16 >= znes_program->data->base_address)
                 {
-                    var_alloc->segment = ZNES_SEGMENT_DATA;
+                    // If the address is within the PRG-ROM it is DATA segment
+                    znes_alloc_request->segment = ZNES_SEGMENT_DATA;
                 }
                 else
                 {
-                    var_alloc->segment = ZNES_SEGMENT_TEXT;
+                    // Values lesser than the PRG-ROM base address are placed
+                    // in the TEXT segment (RAM)
+                    znes_alloc_request->segment = ZNES_SEGMENT_TEXT;
                 }
+            }
+            else
+            {
+                // TODO: Error handling, we don't support other types yet
+                return false;
             }
             
         }

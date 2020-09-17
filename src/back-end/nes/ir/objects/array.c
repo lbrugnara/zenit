@@ -10,7 +10,7 @@ ZnesArrayAlloc* znes_array_alloc_new(const char *name, ZnesSegmentKind segment, 
     array_symbol->base.address = address;
     array_symbol->base.name = name != NULL ? fl_cstring_dup(name) : NULL;
     array_symbol->base.segment = segment;
-    array_symbol->base.type = ZNES_ALLOC_ARRAY;
+    array_symbol->base.type = ZNES_ALLOC_TYPE_ARRAY;
     array_symbol->base.size = size;
     array_symbol->elements = fl_array_new(sizeof(ZnesAlloc*), 0);
 

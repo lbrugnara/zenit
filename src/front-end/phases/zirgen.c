@@ -572,7 +572,8 @@ static ZirOperand* visit_if_node(ZenitContext *ctx, ZirProgram *program, ZenitIf
     // is the *source* condition of the if-false instruction
     ZirOperand *source_operand = visit_node(ctx, program, if_node->condition);
 
-    // TODO: WE ARE USING UINT FOR THE JUMP, WE SHOULD UPDATE THIS AS THE TYPES IN ZIR CHANGE
+    // TODO: WE ARE USING UINT FOR THE JUMP, WE SHOULD UPDATE THIS TO SIGNED INT AS THE TYPES IN ZIR CHANGE
+    //       TO ALLOW JUMPING BACKWARDS
 
     // Create a uint operand for the jump offset with a value of 0 symbolizing a jump that needs to be backpatched 
     ZirOperand *if_jump_destination = (ZirOperand*) zir_operand_pool_new_uint(program->operands, zir_uint_type_new(ZIR_UINT_16), (ZirUintValue){ .uint16 = 0 });
@@ -599,7 +600,7 @@ static ZirOperand* visit_if_node(ZenitContext *ctx, ZirProgram *program, ZenitIf
     //      <last instruction within "then" branch>             <-- IP: 'k' ---´
     //      <first instruction outside of the "then" branch>    <-- IP: 'k' + 1 
     //
-    // Based on if exists an else branch or not, we need to calculate the offset of the jump from the if-false instruction
+    // Depending on the existence of an else branch, we need to calculate the offset of the jump from the if-false instruction
     if (if_node->else_branch == NULL)
     {
         // If there is no "else" branch, the jump destination is the instruction placed at 'k' + 1

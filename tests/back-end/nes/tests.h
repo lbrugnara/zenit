@@ -8,6 +8,7 @@ void zenit_test_nes_global_vars_data(void);
 void zenit_test_nes_global_vars_code(void);
 void zenit_test_nes_global_var_name_clash(void);
 void zenit_test_nes_cast(void);
+void zenit_test_nes_conditionals(void);
 void zenit_test_nes_program(void);
 void zenit_test_nes_rom(void);
 

@@ -32,7 +32,7 @@ int main(int argc, char **argv)
         return -3;
     }
 
-    ZnesProgram *znes_program = znes_generate_program(zir_program);
+    ZnesProgram *znes_program = znes_generate_program(zir_program, false);
 
     if (!znes_program)
         return -4;

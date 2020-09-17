@@ -11,7 +11,7 @@ static inline bool emit_alloc_from_reference(Rp2a03Program *program, Rp2a03TextS
     ZnesAlloc *ref_variable = reference_operand->operand->variable;
 
     // TODO: Should we loop through the temp object?
-    if (ref_variable->type == ZNES_ALLOC_TEMP)
+    if (ref_variable->type == ZNES_ALLOC_TYPE_TEMP)
         ref_variable = ((ZnesVariableOperand*) ((ZnesTempAlloc*) ref_variable)->source)->variable;
 
     if (ref_variable == NULL)

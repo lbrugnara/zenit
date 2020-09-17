@@ -49,15 +49,15 @@ static inline ZnesAlloc* znes_data_segment_alloc_variable(ZnesDataSegment *data,
     if (head == NULL)
     {
         // When there are no symbols, we can directly insert the symbol
-        nes_symbol = znes_alloc_new(alloc->kind, name, ZNES_SEGMENT_DATA, alloc->size, alloc->use_address ? alloc->address : data->base_address);
+        nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_DATA, alloc->size, alloc->use_address ? alloc->address : data->base_address);
         fl_list_append(data->stores, znes_alloc_instruction_new(nes_symbol, source));
         data->used += needed_space;
 
         return nes_symbol;
     }    
 
+    bool already_exist = false;
     struct FlListNode *node = head;
-
     if (!alloc->use_address)
     {
         uint16_t probe_address = data->base_address;
@@ -80,7 +80,7 @@ static inline ZnesAlloc* znes_data_segment_alloc_variable(ZnesDataSegment *data,
             if (fits_before || fits_at_the_end)
             {
                 size_t symbol_address = fits_at_the_end ? symbol->address + symbol->size : probe_address;
-                nes_symbol = znes_alloc_new(alloc->kind, name, ZNES_SEGMENT_DATA, alloc->size, symbol_address);
+                nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_DATA, alloc->size, symbol_address);
 
                 if (fits_at_the_end)
                     fl_list_append(data->stores, znes_alloc_instruction_new(nes_symbol, source));
@@ -106,6 +106,16 @@ static inline ZnesAlloc* znes_data_segment_alloc_variable(ZnesDataSegment *data,
         {
             ZnesAlloc *symbol = ((ZnesAllocInstruction*) node->value)->destination;
 
+            // If the allocation is similar to a previous one, it might be an alias, we allow
+            // this (mmm)
+            if (symbol->address == alloc->address && symbol->type == alloc->type && symbol->size == alloc->size)
+            {
+                already_exist = true;
+                nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_DATA, alloc->size, alloc->address);
+                fl_list_insert_before(data->stores, node, znes_alloc_instruction_new(nes_symbol, source));
+                break;
+            }
+
             // When an address is provided, the new symbol needs to be store at that particular address (if possible). Under
             // this constraint, there are 2 places where the symbol can fit:
             //  a)  The current symbol in the list has an address that is greater than the one we want to use for the new symbol 
@@ -118,7 +128,7 @@ static inline ZnesAlloc* znes_data_segment_alloc_variable(ZnesDataSegment *data,
 
             if (fits_before || fits_at_the_end)
             {
-                nes_symbol = znes_alloc_new(alloc->kind, name, ZNES_SEGMENT_DATA, alloc->size, alloc->address);
+                nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_DATA, alloc->size, alloc->address);
 
                 if (fits_at_the_end)
                     fl_list_append(data->stores, znes_alloc_instruction_new(nes_symbol, source));
@@ -132,7 +142,7 @@ static inline ZnesAlloc* znes_data_segment_alloc_variable(ZnesDataSegment *data,
         }
     }
 
-    if (nes_symbol != NULL)
+    if (nes_symbol != NULL && !already_exist)
         data->used += needed_space;
 
     return nes_symbol;

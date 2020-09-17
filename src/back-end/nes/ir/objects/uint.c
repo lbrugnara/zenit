@@ -8,7 +8,7 @@ ZnesUintAlloc* znes_uint_alloc_new(const char *name, ZnesSegmentKind segment, si
     uint_symbol->base.address = address;
     uint_symbol->base.name = name != NULL ? fl_cstring_dup(name) : NULL;
     uint_symbol->base.segment = segment;
-    uint_symbol->base.type = ZNES_ALLOC_UINT;
+    uint_symbol->base.type = ZNES_ALLOC_TYPE_UINT;
     uint_symbol->base.size = size;
     
     return uint_symbol;

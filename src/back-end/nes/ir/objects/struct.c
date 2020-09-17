@@ -11,7 +11,7 @@ ZnesStructAlloc* znes_struct_alloc_new(const char *name, ZnesSegmentKind segment
     struct_symbol->base.address = address;
     struct_symbol->base.name = name != NULL ? fl_cstring_dup(name) : NULL;
     struct_symbol->base.segment = segment;
-    struct_symbol->base.type = ZNES_ALLOC_STRUCT;
+    struct_symbol->base.type = ZNES_ALLOC_TYPE_STRUCT;
     struct_symbol->base.size = size;
     struct_symbol->members = fl_array_new(sizeof(ZnesAlloc*), 0);
 

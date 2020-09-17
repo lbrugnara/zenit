@@ -14,7 +14,7 @@
 static inline bool rp2a03_emit_alloc_instruction(Rp2a03Program *program, Rp2a03TextSegment *segment, bool is_startup, ZnesAllocInstruction *instruction)
 {
     // TODO: Temp
-    if (instruction->destination->type == ZNES_ALLOC_TEMP)
+    if (instruction->destination->type == ZNES_ALLOC_TYPE_TEMP)
     {
         ((ZnesTempAlloc*) instruction->destination)->source = instruction->source;
         return true;

@@ -11,18 +11,18 @@ typedef FlHashtable ZnesVariableMap;
 typedef FlList ZnesVariableList;
 
 typedef enum ZnesAllocType {
-    ZNES_ALLOC_UNK,
-    ZNES_ALLOC_UINT,
-    ZNES_ALLOC_BOOL,
-    ZNES_ALLOC_ARRAY,
-    ZNES_ALLOC_STRUCT,
-    ZNES_ALLOC_REFERENCE,
-    ZNES_ALLOC_TEMP,
+    ZNES_ALLOC_TYPE_UNK,
+    ZNES_ALLOC_TYPE_UINT,
+    ZNES_ALLOC_TYPE_BOOL,
+    ZNES_ALLOC_TYPE_ARRAY,
+    ZNES_ALLOC_TYPE_STRUCT,
+    ZNES_ALLOC_TYPE_REFERENCE,
+    ZNES_ALLOC_TYPE_TEMP,
 } ZnesAllocType;
 
 typedef struct ZnesAllocRequest {
     ZnesSegmentKind segment;
-    ZnesAllocType kind;
+    ZnesAllocType type;
     size_t size;
     uint16_t address;
     bool use_address;

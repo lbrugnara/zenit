@@ -51,15 +51,15 @@ static inline ZnesAlloc* znes_zp_segment_alloc_variable(ZnesZeroPageSegment *zp_
     if (head == NULL)
     {
         // When there are no symbols, we can directly insert the symbol
-        nes_symbol = znes_alloc_new(alloc->kind, name, ZNES_SEGMENT_ZP, alloc->size, alloc->use_address ? alloc->address : 0);
+        nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_ZP, alloc->size, alloc->use_address ? alloc->address : 0);
         fl_list_append(zp_emitter->stores, znes_alloc_instruction_new(nes_symbol, source));
         zp_emitter->used += needed_space;
 
         return nes_symbol;
     }    
 
+    bool already_exist = false;
     struct FlListNode *node = head;
-
     if (!alloc->use_address)
     {
         uint16_t probe_address = 0;
@@ -82,7 +82,7 @@ static inline ZnesAlloc* znes_zp_segment_alloc_variable(ZnesZeroPageSegment *zp_
             if (fits_before || fits_at_the_end)
             {
                 uint16_t symbol_address = fits_at_the_end ? symbol->address + symbol->size : probe_address;
-                nes_symbol = znes_alloc_new(alloc->kind, name, ZNES_SEGMENT_ZP, alloc->size, symbol_address);
+                nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_ZP, alloc->size, symbol_address);
 
                 if (fits_at_the_end)
                     fl_list_append(zp_emitter->stores, znes_alloc_instruction_new(nes_symbol, source));
@@ -108,6 +108,16 @@ static inline ZnesAlloc* znes_zp_segment_alloc_variable(ZnesZeroPageSegment *zp_
         {
             ZnesAlloc *symbol = ((ZnesAllocInstruction*) node->value)->destination;
 
+            // If the allocation is similar to a previous one, it might be an alias, we allow
+            // this (mmm)
+            if (symbol->address == alloc->address && symbol->type == alloc->type && symbol->size == alloc->size)
+            {
+                already_exist = true;
+                nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_ZP, alloc->size, alloc->address);
+                fl_list_insert_before(zp_emitter->stores, node, znes_alloc_instruction_new(nes_symbol, source));
+                break;
+            }
+
             // When an address is provided, the new symbol needs to be store at that particular address (if possible). Under
             // this constraint, there are 2 places where the symbol can fit:
             //  a)  The current symbol in the list has an address that is greater than the one we want to use for the new symbol 
@@ -116,11 +126,11 @@ static inline ZnesAlloc* znes_zp_segment_alloc_variable(ZnesZeroPageSegment *zp_
             //  b)  The desired address is greater than the current symbol's address and there are no more symbols in the list
             //      so that we place the new symbol at the end of the list
             bool fits_at_the_end = alloc->address >= symbol->address + symbol->size && node->next == NULL;
-            bool fits_before = alloc->address + needed_space <= symbol->address;
+            bool fits_before = alloc->address + needed_space <= symbol->address;            
 
             if (fits_before || fits_at_the_end)
             {
-                nes_symbol = znes_alloc_new(alloc->kind, name, ZNES_SEGMENT_ZP, alloc->size, alloc->address);
+                nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_ZP, alloc->size, alloc->address);
 
                 if (fits_at_the_end)
                     fl_list_append(zp_emitter->stores, znes_alloc_instruction_new(nes_symbol, source));
@@ -134,7 +144,7 @@ static inline ZnesAlloc* znes_zp_segment_alloc_variable(ZnesZeroPageSegment *zp_
         }
     }
 
-    if (nes_symbol != NULL)
+    if (nes_symbol != NULL && !already_exist)
         zp_emitter->used += needed_space;
 
     return nes_symbol;

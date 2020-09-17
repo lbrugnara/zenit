@@ -12,22 +12,22 @@ ZnesAlloc* znes_alloc_new(ZnesAllocType kind, const char *name, ZnesSegmentKind 
 {
     switch (kind)
     {
-        case ZNES_ALLOC_UINT:
+        case ZNES_ALLOC_TYPE_UINT:
             return (ZnesAlloc*) znes_uint_alloc_new(name, segment, size, address);
 
-        case ZNES_ALLOC_BOOL:
+        case ZNES_ALLOC_TYPE_BOOL:
             return (ZnesAlloc*) znes_bool_alloc_new(name, segment, size, address);
 
-        case ZNES_ALLOC_ARRAY:
+        case ZNES_ALLOC_TYPE_ARRAY:
             return (ZnesAlloc*) znes_array_alloc_new(name, segment, size, address);
 
-        case ZNES_ALLOC_REFERENCE:
+        case ZNES_ALLOC_TYPE_REFERENCE:
             return (ZnesAlloc*) znes_reference_alloc_new(name, segment, size, address);
 
-        case ZNES_ALLOC_STRUCT:
+        case ZNES_ALLOC_TYPE_STRUCT:
             return (ZnesAlloc*) znes_struct_alloc_new(name, segment, size, address);
 
-        case ZNES_ALLOC_TEMP:
+        case ZNES_ALLOC_TYPE_TEMP:
             return (ZnesAlloc*) znes_temp_alloc_new(name, size);
 
         default: break;
@@ -41,27 +41,27 @@ void znes_alloc_free(ZnesAlloc *symbol)
 {
     switch (symbol->type)
     {
-        case ZNES_ALLOC_UINT:
+        case ZNES_ALLOC_TYPE_UINT:
             znes_uint_alloc_free((ZnesUintAlloc*) symbol);
             break;
 
-        case ZNES_ALLOC_BOOL:
+        case ZNES_ALLOC_TYPE_BOOL:
             znes_bool_alloc_free((ZnesBoolAlloc*) symbol);
             break;
 
-        case ZNES_ALLOC_ARRAY:
+        case ZNES_ALLOC_TYPE_ARRAY:
             znes_array_alloc_free((ZnesArrayAlloc*) symbol);
             break;
 
-        case ZNES_ALLOC_STRUCT:
+        case ZNES_ALLOC_TYPE_STRUCT:
             znes_struct_alloc_free((ZnesStructAlloc*) symbol);
             break;
 
-        case ZNES_ALLOC_REFERENCE:
+        case ZNES_ALLOC_TYPE_REFERENCE:
             znes_reference_alloc_free((ZnesReferenceAlloc*) symbol);
             break;
 
-        case ZNES_ALLOC_TEMP:
+        case ZNES_ALLOC_TYPE_TEMP:
             znes_temp_alloc_free((ZnesTempAlloc*) symbol);
             break;
 

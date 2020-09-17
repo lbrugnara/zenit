@@ -25,7 +25,13 @@ void rp2a03_data_segment_free(Rp2a03DataSegment *data)
 
 char* rp2a03_data_segment_disassemble(Rp2a03DataSegment *data, bool as_code, char *output)
 {
-    size_t size = fl_array_length(data->bytes);
+    size_t size = 0;
+
+    for (size_t i=0; i < fl_array_length(data->slots); i++)
+    {
+        if (data->slots[i] != 0)
+            size++;
+    }
 
     if (size == 0)
         return output;
@@ -84,13 +90,13 @@ char* rp2a03_data_segment_disassemble(Rp2a03DataSegment *data, bool as_code, cha
 
             if (skipped)
             {
-                fl_cstring_vappend(&output, ".... %s%s", "\t", "\n");
+                fl_cstring_vappend(&output, ".... %s%s", "    ", "\n");
                 skipped = false;
             }
 
             Rp2a03Instruction *instr = rp2a03_instruction_lookup(data->bytes[pc]);
 
-            fl_cstring_vappend(&output, "%04zX: %s", data->base_address + pc, "\t");
+            fl_cstring_vappend(&output, "%04zX: %s", data->base_address + pc, "    ");
 
             if (instr->size == 1)
             {

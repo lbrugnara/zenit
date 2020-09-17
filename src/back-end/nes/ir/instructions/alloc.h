@@ -1,5 +1,5 @@
-#ifndef ZNES_ALLOC_INSTR_H
-#define ZNES_ALLOC_INSTR_H
+#ifndef ZNES_ALLOC_TYPE_INSTR_H
+#define ZNES_ALLOC_TYPE_INSTR_H
 
 #include <fllib/Mem.h>
 #include <fllib/containers/List.h>
@@ -37,4 +37,4 @@ static inline void znes_alloc_instruction_list_add(ZnesAllocInstructionList *lis
 }
 
 
-#endif /* ZNES_ALLOC_INSTR_H */
+#endif /* ZNES_ALLOC_TYPE_INSTR_H */

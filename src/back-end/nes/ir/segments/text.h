@@ -42,7 +42,7 @@ static inline void znes_text_segment_add_instr(ZnesTextSegment *text, ZnesInstru
 static inline ZnesAlloc* znes_text_segment_alloc_variable(ZnesTextSegment *text, const char *name, ZnesAllocRequest *alloc, ZnesOperand *source)
 {
     // TODO: By now we use the address
-    ZnesAlloc *nes_symbol = znes_alloc_new(alloc->kind, name, ZNES_SEGMENT_TEXT, alloc->size, alloc->address);
+    ZnesAlloc *nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_TEXT, alloc->size, alloc->address);
     //fl_list_append(text->instructions, znes_alloc_instruction_new(nes_symbol, source));
     fl_list_append(text->variables, nes_symbol);
     text->used += alloc->size;
@@ -75,7 +75,7 @@ static inline char* znes_text_segment_dump(ZnesTextSegment *text, char *output)
 
         fl_cstring_vappend(&output, "%s", "\t");
         output = znes_instruction_dump(instrbuilder, output);
-        fl_cstring_vappend(&output, "%s", "\n\n");
+        fl_cstring_vappend(&output, "%s", "\n");
 
         node = node->next;
     }

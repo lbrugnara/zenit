@@ -29,8 +29,7 @@ void rp2a03_program_free(Rp2a03Program *program)
 
 char* rp2a03_program_disassemble(Rp2a03Program *program)
 {
-    char *output = fl_cstring_new(0);
-
+    char *output = fl_cstring_dup("; RP2A03 PROGRAM DISASSEMBLY\n");
     output = rp2a03_data_segment_disassemble(program->data, true, output);
     output = rp2a03_text_segment_disassemble(program->startup, "STARTUP segment", output);
     output = rp2a03_text_segment_disassemble(program->code, "CODE segment", output);

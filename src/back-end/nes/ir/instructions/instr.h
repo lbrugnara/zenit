@@ -12,6 +12,8 @@ typedef struct FlListNode ZnesInstructionListNode;
 typedef enum ZnesInstructionKind {
     ZNES_INSTRUCTION_UNK,
     ZNES_INSTRUCTION_ALLOC,
+    ZNES_INSTRUCTION_IF_FALSE,
+    ZNES_INSTRUCTION_JUMP,
 } ZnesInstructionKind;
 
 typedef struct ZnesInstruction {

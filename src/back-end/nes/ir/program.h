@@ -23,11 +23,11 @@ typedef struct ZnesProgram {
     bool startup_context;
 } ZnesProgram;
 
-static inline ZnesProgram* znes_program_new(void)
+static inline ZnesProgram* znes_program_new(bool scripting)
 {
     ZnesProgram *program = fl_malloc(sizeof(ZnesProgram));
 
-    program->startup_context = true;
+    program->startup_context = !scripting;
     program->data = znes_data_segment_new(0x8000);
     program->startup = znes_text_segment_new(0x0);
     program->code = znes_text_segment_new(0x0);
@@ -94,6 +94,11 @@ static ZnesAlloc* znes_program_alloc_variable(ZnesProgram *program, const char *
     }
 
     return variable;
+}
+
+static inline void znes_program_emit_instruction(ZnesProgram *program, ZnesInstruction *instruction)
+{
+    znes_text_segment_add_instr(program->startup_context ? program->startup : program->code, instruction);
 }
 
 static inline char* znes_program_dump(ZnesProgram *program)

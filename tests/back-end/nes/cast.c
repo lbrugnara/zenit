@@ -33,7 +33,7 @@ void zenit_test_nes_cast(void)
     flut_expect_compat("Type check pass should not contain errors", zenit_check_types(&ctx));
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
-    ZnesProgram *znes_program = znes_generate_program(zir_program);
+    ZnesProgram *znes_program = znes_generate_program(zir_program, false);
     Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_program);
     
     

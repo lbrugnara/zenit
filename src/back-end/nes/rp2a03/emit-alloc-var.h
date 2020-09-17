@@ -14,7 +14,7 @@ static bool emit_alloc_from_zp_var_to_zp_var(Rp2a03Program *program, Rp2a03TextS
     if (source->type != destination->type)
         return false;
 
-    if (source->type == ZNES_ALLOC_ARRAY)
+    if (source->type == ZNES_ALLOC_TYPE_ARRAY)
     {
         ZnesArrayAlloc *source_array = (ZnesArrayAlloc*) source;
         ZnesArrayAlloc *dest_array = (ZnesArrayAlloc*) destination;
@@ -23,7 +23,7 @@ static bool emit_alloc_from_zp_var_to_zp_var(Rp2a03Program *program, Rp2a03TextS
             if (!emit_alloc_from_zp_var_to_zp_var(program, segment, is_startup, source_array->elements[i], dest_array->elements[i]))
                 return false;
     }
-    else if (source->type == ZNES_ALLOC_STRUCT)
+    else if (source->type == ZNES_ALLOC_TYPE_STRUCT)
     {
         ZnesStructAlloc *source_struct = (ZnesStructAlloc*) source;
         ZnesStructAlloc *dest_struct = (ZnesStructAlloc*) destination;
@@ -61,7 +61,7 @@ static bool emit_alloc_from_zp_var_to_code_var(Rp2a03Program *program, Rp2a03Tex
     if (source->type != destination->type)
         return false;
 
-    if (source->type == ZNES_ALLOC_ARRAY)
+    if (source->type == ZNES_ALLOC_TYPE_ARRAY)
     {
         ZnesArrayAlloc *source_array = (ZnesArrayAlloc*) source;
         ZnesArrayAlloc *dest_array = (ZnesArrayAlloc*) destination;
@@ -70,7 +70,7 @@ static bool emit_alloc_from_zp_var_to_code_var(Rp2a03Program *program, Rp2a03Tex
             if (!emit_alloc_from_zp_var_to_code_var(program, segment, is_startup, source_array->elements[i], dest_array->elements[i]))
                 return false;
     }
-    else if (source->type == ZNES_ALLOC_STRUCT)
+    else if (source->type == ZNES_ALLOC_TYPE_STRUCT)
     {
         ZnesStructAlloc *source_struct = (ZnesStructAlloc*) source;
         ZnesStructAlloc *dest_struct = (ZnesStructAlloc*) destination;
@@ -108,7 +108,7 @@ static bool emit_alloc_from_zp_var_to_data_var(Rp2a03Program *program, Rp2a03Tex
     if (source->type != destination->type)
         return false;
 
-    if (source->type == ZNES_ALLOC_ARRAY)
+    if (source->type == ZNES_ALLOC_TYPE_ARRAY)
     {
         ZnesArrayAlloc *source_array = (ZnesArrayAlloc*) source;
         ZnesArrayAlloc *dest_array = (ZnesArrayAlloc*) destination;
@@ -117,7 +117,7 @@ static bool emit_alloc_from_zp_var_to_data_var(Rp2a03Program *program, Rp2a03Tex
             if (!emit_alloc_from_zp_var_to_data_var(program, segment, is_startup, source_array->elements[i], dest_array->elements[i]))
                 return false;
     }
-    else if (source->type == ZNES_ALLOC_STRUCT)
+    else if (source->type == ZNES_ALLOC_TYPE_STRUCT)
     {
         ZnesStructAlloc *source_struct = (ZnesStructAlloc*) source;
         ZnesStructAlloc *dest_struct = (ZnesStructAlloc*) destination;
@@ -155,7 +155,7 @@ static bool emit_alloc_from_data_var_to_data_var(Rp2a03Program *program, Rp2a03T
     if (source->type != destination->type)
         return false;
 
-    if (source->type == ZNES_ALLOC_ARRAY)
+    if (source->type == ZNES_ALLOC_TYPE_ARRAY)
     {
         ZnesArrayAlloc *source_array = (ZnesArrayAlloc*) source;
         ZnesArrayAlloc *dest_array = (ZnesArrayAlloc*) destination;
@@ -164,7 +164,7 @@ static bool emit_alloc_from_data_var_to_data_var(Rp2a03Program *program, Rp2a03T
             if (!emit_alloc_from_data_var_to_data_var(program, segment, is_startup, source_array->elements[i], dest_array->elements[i]))
                 return false;
     }
-    else if (source->type == ZNES_ALLOC_STRUCT)
+    else if (source->type == ZNES_ALLOC_TYPE_STRUCT)
     {
         ZnesStructAlloc *source_struct = (ZnesStructAlloc*) source;
         ZnesStructAlloc *dest_struct = (ZnesStructAlloc*) destination;
@@ -219,7 +219,7 @@ static bool emit_alloc_from_data_var_to_zp_var(Rp2a03Program *program, Rp2a03Tex
     if (source->type != destination->type)
         return false;
 
-    if (source->type == ZNES_ALLOC_ARRAY)
+    if (source->type == ZNES_ALLOC_TYPE_ARRAY)
     {
         ZnesArrayAlloc *source_array = (ZnesArrayAlloc*) source;
         ZnesArrayAlloc *dest_array = (ZnesArrayAlloc*) destination;
@@ -228,7 +228,7 @@ static bool emit_alloc_from_data_var_to_zp_var(Rp2a03Program *program, Rp2a03Tex
             if (!emit_alloc_from_data_var_to_zp_var(program, segment, is_startup, source_array->elements[i], dest_array->elements[i]))
                 return false;
     }
-    else if (source->type == ZNES_ALLOC_STRUCT)
+    else if (source->type == ZNES_ALLOC_TYPE_STRUCT)
     {
         ZnesStructAlloc *source_struct = (ZnesStructAlloc*) source;
         ZnesStructAlloc *dest_struct = (ZnesStructAlloc*) destination;
@@ -275,7 +275,7 @@ static bool emit_alloc_from_data_var_to_code_var(Rp2a03Program *program, Rp2a03T
     if (source->type != destination->type)
         return false;
 
-    if (source->type == ZNES_ALLOC_ARRAY)
+    if (source->type == ZNES_ALLOC_TYPE_ARRAY)
     {
         ZnesArrayAlloc *source_array = (ZnesArrayAlloc*) source;
         ZnesArrayAlloc *dest_array = (ZnesArrayAlloc*) destination;
@@ -284,7 +284,7 @@ static bool emit_alloc_from_data_var_to_code_var(Rp2a03Program *program, Rp2a03T
             if (!emit_alloc_from_data_var_to_code_var(program, segment, is_startup, source_array->elements[i], dest_array->elements[i]))
                 return false;
     }
-    else if (source->type == ZNES_ALLOC_STRUCT)
+    else if (source->type == ZNES_ALLOC_TYPE_STRUCT)
     {
         ZnesStructAlloc *source_struct = (ZnesStructAlloc*) source;
         ZnesStructAlloc *dest_struct = (ZnesStructAlloc*) destination;
@@ -322,7 +322,7 @@ static bool emit_alloc_from_code_var_to_code_var(Rp2a03Program *program, Rp2a03T
     if (source->type != destination->type)
         return false;
 
-    if (source->type == ZNES_ALLOC_ARRAY)
+    if (source->type == ZNES_ALLOC_TYPE_ARRAY)
     {
         ZnesArrayAlloc *source_array = (ZnesArrayAlloc*) source;
         ZnesArrayAlloc *dest_array = (ZnesArrayAlloc*) destination;
@@ -331,7 +331,7 @@ static bool emit_alloc_from_code_var_to_code_var(Rp2a03Program *program, Rp2a03T
             if (!emit_alloc_from_code_var_to_code_var(program, segment, is_startup, source_array->elements[i], dest_array->elements[i]))
                 return false;
     }
-    else if (source->type == ZNES_ALLOC_STRUCT)
+    else if (source->type == ZNES_ALLOC_TYPE_STRUCT)
     {
         ZnesStructAlloc *source_struct = (ZnesStructAlloc*) source;
         ZnesStructAlloc *dest_struct = (ZnesStructAlloc*) destination;
@@ -369,7 +369,7 @@ static bool emit_alloc_from_code_var_to_zp_var(Rp2a03Program *program, Rp2a03Tex
     if (source->type != destination->type)
         return false;
 
-    if (source->type == ZNES_ALLOC_ARRAY)
+    if (source->type == ZNES_ALLOC_TYPE_ARRAY)
     {
         ZnesArrayAlloc *source_array = (ZnesArrayAlloc*) source;
         ZnesArrayAlloc *dest_array = (ZnesArrayAlloc*) destination;
@@ -378,7 +378,7 @@ static bool emit_alloc_from_code_var_to_zp_var(Rp2a03Program *program, Rp2a03Tex
             if (!emit_alloc_from_code_var_to_zp_var(program, segment, is_startup, source_array->elements[i], dest_array->elements[i]))
                 return false;
     }
-    else if (source->type == ZNES_ALLOC_STRUCT)
+    else if (source->type == ZNES_ALLOC_TYPE_STRUCT)
     {
         ZnesStructAlloc *source_struct = (ZnesStructAlloc*) source;
         ZnesStructAlloc *dest_struct = (ZnesStructAlloc*) destination;
@@ -416,7 +416,7 @@ static bool emit_alloc_from_code_var_to_data_var(Rp2a03Program *program, Rp2a03T
     if (source->type != destination->type)
         return false;
 
-    if (source->type == ZNES_ALLOC_ARRAY)
+    if (source->type == ZNES_ALLOC_TYPE_ARRAY)
     {
         ZnesArrayAlloc *source_array = (ZnesArrayAlloc*) source;
         ZnesArrayAlloc *dest_array = (ZnesArrayAlloc*) destination;
@@ -425,7 +425,7 @@ static bool emit_alloc_from_code_var_to_data_var(Rp2a03Program *program, Rp2a03T
             if (!emit_alloc_from_code_var_to_data_var(program, segment, is_startup, source_array->elements[i], dest_array->elements[i]))
                 return false;
     }
-    else if (source->type == ZNES_ALLOC_STRUCT)
+    else if (source->type == ZNES_ALLOC_TYPE_STRUCT)
     {
         ZnesStructAlloc *source_struct = (ZnesStructAlloc*) source;
         ZnesStructAlloc *dest_struct = (ZnesStructAlloc*) destination;
@@ -463,7 +463,7 @@ static inline bool emit_alloc_from_variable(Rp2a03Program *program, Rp2a03TextSe
     ZnesAlloc *source_variable = ((ZnesVariableOperand*) instruction->source)->variable;
 
     // If the source is a temp symbol, we need to "emit" the store in a special way
-    if (source_variable->type == ZNES_ALLOC_TEMP)
+    if (source_variable->type == ZNES_ALLOC_TYPE_TEMP)
     {
         ZnesAllocInstruction temp_alloc = znes_alloc_instruction_new_local(instruction->destination, ((ZnesTempAlloc*) source_variable)->source);
         return rp2a03_emit_alloc_instruction(program, segment, is_startup, &temp_alloc);

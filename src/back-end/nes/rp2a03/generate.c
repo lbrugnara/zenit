@@ -1,5 +1,7 @@
 #include "generate.h"
 #include "emit-alloc.h"
+#include "emit-if-false.h"
+#include "emit-jump.h"
 
 static bool emit_instruction(Rp2a03Program *program, Rp2a03TextSegment *segment, bool is_startup, ZnesInstruction *instruction)
 {
@@ -8,25 +10,34 @@ static bool emit_instruction(Rp2a03Program *program, Rp2a03TextSegment *segment,
         case ZNES_INSTRUCTION_ALLOC:
             return rp2a03_emit_alloc_instruction(program, segment, is_startup, (ZnesAllocInstruction*) instruction);
 
+        case ZNES_INSTRUCTION_IF_FALSE:
+            return rp2a03_emit_if_false_instruction(program, segment, is_startup, (ZnesIfFalseInstruction*) instruction);
+
+        case ZNES_INSTRUCTION_JUMP:
+            return rp2a03_emit_jump_instruction(program, segment, is_startup, (ZnesJumpInstruction*) instruction);
+
         default: break;
     }
 
     return false;
 }
 
-static void emit_startup_routine(Rp2a03Program *program, ZnesProgram *ir_prog)
+static void emit_segment_instructions(Rp2a03Program *rp2a03_program, Rp2a03TextSegment *rp2a03_segment, ZnesProgram *ir_prog, ZnesTextSegment *ir_segment)
 {
-    ZnesInstructionListNode *inst_node = znes_instruction_list_head(ir_prog->startup->instructions);
+    ZnesInstructionListNode *inst_node = znes_instruction_list_head(ir_segment->instructions);
 
     while (inst_node)
     {
         ZnesInstruction *instr = (ZnesInstruction*) inst_node->value;
         
-        if (!emit_instruction(program, program->startup, true, instr))
+        if (!emit_instruction(rp2a03_program, rp2a03_segment, ir_prog->startup_context, instr))
         {
             // TODO: Error handling
             break;
         }
+
+        rp2a03_text_segment_backpatch_jumps(rp2a03_segment);
+
         inst_node = inst_node->next;
     }
 }
@@ -38,7 +49,10 @@ Rp2a03Program* rp2a03_generate_program(ZnesProgram *ir_prog)
     // DATA segment is allocated using the startup routine:
     //  a) if a symbol within the DATA segment is initialized with a constant value, the value is copied on compilation
     //  b) if the value is not constant (reading from ZP, or CODE) the startup routine emits an instruction to initialize it
-    emit_startup_routine(program, ir_prog);
+    ir_prog->startup_context = true;
+    emit_segment_instructions(program, program->startup, ir_prog, ir_prog->startup);
+    ir_prog->startup_context = false;
+    emit_segment_instructions(program, program->code, ir_prog, ir_prog->code);
 
     // 0x00 is used as an special sentinel. Address $00 is ZP, it never can be a valid base address, we need to 
     // find the place for the startup routine
@@ -72,8 +86,10 @@ Rp2a03Program* rp2a03_generate_program(ZnesProgram *ir_prog)
         program->startup->base_address = program->data->base_address + j;
 
         // Flag the DATA segment as used on the startup range
-        for (; j < i; j++)
-            program->data->slots[j] = 1;
+        /*for (; j < i; j++)
+            program->data->slots[j] = 1;*/
+
+        rp2a03_text_segment_backpatch_absolute_jumps(program->startup);
     }
 
     // 0x00 is used as an special sentinel. Address $00 is ZP, it never can be a valid base address, we need to 
@@ -106,8 +122,10 @@ Rp2a03Program* rp2a03_generate_program(ZnesProgram *ir_prog)
         program->code->base_address = program->data->base_address + j;
 
         // Flag the DATA segment as used on the startup range
-        for (; j < i; j++)
-            program->data->slots[j] = 1;
+        /*for (; j < i; j++)
+            program->data->slots[j] = 1;*/
+
+        rp2a03_text_segment_backpatch_absolute_jumps(program->code);
     }
 
     return program;

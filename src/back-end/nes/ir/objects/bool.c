@@ -7,7 +7,7 @@ ZnesBoolAlloc* znes_bool_alloc_new(const char *name, ZnesSegmentKind segment, si
     bool_symbol->base.address = address;
     bool_symbol->base.name = name != NULL ? fl_cstring_dup(name) : NULL;
     bool_symbol->base.segment = segment;
-    bool_symbol->base.type = ZNES_ALLOC_BOOL;
+    bool_symbol->base.type = ZNES_ALLOC_TYPE_BOOL;
     bool_symbol->base.size = size;
     
     return bool_symbol;

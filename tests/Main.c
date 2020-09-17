@@ -94,6 +94,7 @@ int main(int argc, char **argv)
             { "NES global variables (CODE)",        &zenit_test_nes_global_vars_code        },
             { "NES global variables name clash",    &zenit_test_nes_global_var_name_clash   },
             { "Cast operations",                    &zenit_test_nes_cast                    },
+            { "Conditionals",                       &zenit_test_nes_conditionals            },
             { "Compile NES program",                &zenit_test_nes_program                 },
             { "Compile NES ROM",                    &zenit_test_nes_rom                     },
         ),
