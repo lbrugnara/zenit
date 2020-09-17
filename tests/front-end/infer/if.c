@@ -2,7 +2,7 @@
 
 #include <flut/flut.h>
 #include "../../../src/front-end/inference/infer.h"
-#include "../../../src/front-end/phases/parse.h"
+#include "../../../src/front-end/parser/parse.h"
 #include "../../../src/front-end/program.h"
 #include "../../../src/front-end/types/context.h"
 #include "../../../src/front-end/phases/resolve.h"

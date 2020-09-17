@@ -2,7 +2,7 @@
 
 #include <flut/flut.h>
 #include "../../../src/front-end/ast/ast.h"
-#include "../../../src/front-end/phases/parse.h"
+#include "../../../src/front-end/parser/parse.h"
 #include "tests.h"
 
 void zenit_test_parser_blocks(void)

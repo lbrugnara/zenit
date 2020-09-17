@@ -1,6 +1,7 @@
 #ifndef ZNES_OPERAND_ARRAY_H
 #define ZNES_OPERAND_ARRAY_H
 
+#include <stdint.h>
 #include "operand.h"
 
 typedef struct ZnesArrayOperand {

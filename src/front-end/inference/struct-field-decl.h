@@ -1,4 +1,7 @@
-#include "field-decl.h"
+#ifndef ZENIT_INFER_FIELD_DECL_H
+#define ZENIT_INFER_FIELD_DECL_H
+
+#include "infer.h"
 #include "../phases/utils.h"
 
 /*
@@ -14,7 +17,9 @@
  * Returns:
  *  <ZenitSymbol>* - The field symbol with its type information
  */
-ZenitSymbol* zenit_infer_types_in_field_decl_node(ZenitContext *ctx, ZenitStructFieldDeclNode *field_node, ZenitType **ctx_type, ZenitInferenceKind infer_kind)
+static inline ZenitSymbol* zenit_infer_types_in_field_decl_node(ZenitContext *ctx, ZenitStructFieldDeclNode *field_node, ZenitType **ctx_type, ZenitInferenceKind infer_kind)
 {
     return zenit_program_get_symbol(ctx->program, field_node->name);
 }
+
+#endif /* ZENIT_INFER_FIELD_DECL_H */

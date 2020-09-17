@@ -65,11 +65,12 @@ static ZnesAlloc* znes_program_alloc_variable(ZnesProgram *program, const char *
     switch (alloc->segment)
     {
         case ZNES_SEGMENT_TEMP:
+        {
             ZnesTempAlloc *temp = znes_temp_alloc_new(name, alloc->size);
             temp->source = source;
             variable = (ZnesAlloc*) temp;
             break;
-            
+        }   
         case ZNES_SEGMENT_ZP:
             variable = znes_zp_segment_alloc_variable(program->zp, name, alloc, source);
             break;

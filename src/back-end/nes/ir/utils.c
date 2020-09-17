@@ -114,6 +114,7 @@ static inline ZnesOperand* internal_make_nes_operand(ZnesProgram *program, ZirOp
     switch (zir_opn->type)
     {
         case ZIR_OPERAND_UINT:
+        {
             ZirUintOperand *zir_uint_opn = (ZirUintOperand*) zir_opn;
             
             ZnesUintValue value = { 0 };
@@ -134,13 +135,15 @@ static inline ZnesOperand* internal_make_nes_operand(ZnesProgram *program, ZirOp
             }
             
             return (ZnesOperand*) znes_uint_operand_new(size, value);
-
+        }
         case ZIR_OPERAND_BOOL:
+        {
             ZirBoolOperand *zir_bool_opn = (ZirBoolOperand*) zir_opn;
 
             return (ZnesOperand*) znes_bool_operand_new(zir_bool_opn->value);
-
+        }
         case ZIR_OPERAND_ARRAY:
+        {
             ZirArrayOperand *zir_array_opn = (ZirArrayOperand*) zir_opn;
 
             size_t member_size = zir_type_size(zir_array_opn->type->member_type, ZNES_POINTER_SIZE);
@@ -152,8 +155,9 @@ static inline ZnesOperand* internal_make_nes_operand(ZnesProgram *program, ZirOp
                 array_operand->elements[i] = znes_utils_make_nes_operand(program, zir_array_opn->elements[i]);
 
             return (ZnesOperand*) array_operand;
-
+        }
         case ZIR_OPERAND_STRUCT:
+        {
             ZirStructOperand *zir_struct_opn = (ZirStructOperand*) zir_opn;
 
             ZnesStructOperand *struct_operand = znes_struct_operand_new();
@@ -165,15 +169,17 @@ static inline ZnesOperand* internal_make_nes_operand(ZnesProgram *program, ZirOp
             }
 
             return (ZnesOperand*) struct_operand;
-
+        }
         case ZIR_OPERAND_SYMBOL:
+        {
             ZirSymbolOperand *zir_symbol_opn = (ZirSymbolOperand*) zir_opn;
 
             ZnesAlloc *variable = fl_hashtable_get(program->variables, zir_symbol_opn->symbol->name);
 
             return (ZnesOperand*) znes_variable_operand_new(variable);
-
+        }
         case ZIR_OPERAND_REFERENCE:
+        {
             ZirReferenceOperand *zir_ref_opn = (ZirReferenceOperand*) zir_opn;
 
             ZnesOperand *var_operand = znes_utils_make_nes_operand(program, (ZirOperand*) zir_ref_opn->operand);
@@ -182,6 +188,7 @@ static inline ZnesOperand* internal_make_nes_operand(ZnesProgram *program, ZirOp
                 return (ZnesOperand*) znes_reference_operand_new((ZnesVariableOperand*) var_operand);
 
             return NULL;
+        }
     }
 
     return NULL;

@@ -1,6 +1,6 @@
 #include "front-end/phases/check.h"
 #include "front-end/inference/infer.h"
-#include "front-end/phases/parse.h"
+#include "front-end/parser/parse.h"
 #include "front-end/phases/resolve.h"
 #include "front-end/symtable.h"
 #include "front-end/phases/zirgen.h"

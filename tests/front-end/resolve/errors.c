@@ -1,7 +1,7 @@
 
 
 #include <flut/flut.h>
-#include "../../../src/front-end/phases/parse.h"
+#include "../../../src/front-end/parser/parse.h"
 #include "../../../src/front-end/phases/resolve.h"
 #include "../../../src/front-end/symtable.h"
 #include "tests.h"

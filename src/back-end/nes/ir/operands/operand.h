@@ -1,6 +1,8 @@
 #ifndef ZNES_OPERAND_H
 #define ZNES_OPERAND_H
 
+#include <stddef.h>
+
 typedef enum ZnesOperandType {
     ZNES_OPERAND_UINT,
     ZNES_OPERAND_BOOL,
