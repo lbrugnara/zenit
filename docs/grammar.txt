@@ -1,10 +1,12 @@
+program = declaration* ( ';' )?
+
 declaration = attribute_declaration* ( variable_declaration | struct_declaration ) | statement ;
 
 attribute_declaration = '#' '[' ID ( '(' ID ':' expression ( ',' ID ':' expression )*  ')' )? ']' ;
 
-struct_declaration = 'struct' ID '{' field_declaration+ '}' ;
+struct_declaration = 'struct' ID '{' struct_field_declaration+ '}' ;
 
-field_declaration = ID ':' type_information ';' ;
+struct_field_declaration = ID ':' type_information ';' ;
 
 variable_declaration = 'var' ID ( ':' type_information )? '=' expression ';' ;
 
@@ -18,9 +20,9 @@ expression_statement = expression ';' ;
 
 expression = unary_expression ;
 
-cast_expression = 'cast' '(' expression ( ':' type_information )? ')' ;
-
 unary_expression = cast_expression | array_literal | reference_expression | identifier_expression | literal_expression ;
+
+cast_expression = 'cast' '(' expression ( ':' type_information )? ')' ;
 
 identifier_expression = named_struct_literal | identifier ;
 
@@ -40,6 +42,8 @@ literal_expression = integer_literal | boolean_literal ;
 
 boolean_literal = BOOL ;
 
-integer_literal = INTEGER ;
+integer_literal = unsigned_integer ;
+
+unsigned_integer = ( [0-9]+ | '0x' [a-fA-F0-9]+ | '0b' [0-1_]+ )
 
 type_information = ( '[' integer_literal ']' )? '&'? ID ;

@@ -10,11 +10,15 @@
 void zenit_test_parser_literal_integer(void)
 {
     const char *source = 
-            "/* uint8 */ 1;"                    "\n"
-            "/* uint8 */ 2;"                    "\n"
-            "/* uint8 */ 3;"                    "\n"
-            "/* uint8 */ 255;"                  "\n"
-            "/* uint16 */ 8192;"                "\n"
+            "/* uint8 */ 1;"                        "\n"
+            "/* uint8 */ 2;"                        "\n"
+            "/* uint8 */ 3;"                        "\n"
+            "/* uint8 */ 255;"                      "\n"
+            "/* uint8 */ 0xFE;"                     "\n"
+            "/* uint8 */ 0b01010100;"               "\n"
+            "/* uint16 */ 8192;"                    "\n"
+            "/* uint16 */ 0x1FF;"                   "\n"
+            "/* uint16 */ 0b0101_0100_0101_0100;"   "\n"
             //"/* uint64 */ 1844674407370955161;  \n"
     ;
 
@@ -24,7 +28,11 @@ void zenit_test_parser_literal_integer(void)
             " (uint8 2)"
             " (uint8 3)"
             " (uint8 255)"
+            " (uint8 254)"
+            " (uint8 84)"
             " (uint16 8192)"
+            " (uint16 511)"
+            " (uint16 21588)"
         ")"
     ;
 

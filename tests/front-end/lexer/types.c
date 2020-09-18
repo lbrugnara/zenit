@@ -15,6 +15,9 @@ static struct ZenitLexerTest tests[] = {
     { "0xA",            (ZenitTokenType[]){ T(INTEGER), T(EOF) }   },
     { "0xa",            (ZenitTokenType[]){ T(INTEGER), T(EOF) }   },
     { "0xFF",           (ZenitTokenType[]){ T(INTEGER), T(EOF) }   },
+    { "0b01",           (ZenitTokenType[]){ T(INTEGER), T(EOF) }   },
+    { "0b11",           (ZenitTokenType[]){ T(INTEGER), T(EOF) }   },
+    { "0b10",           (ZenitTokenType[]){ T(INTEGER), T(EOF) }   },
     { "true",           (ZenitTokenType[]){ T(BOOL), T(EOF) }      },
     { "false",          (ZenitTokenType[]){ T(BOOL), T(EOF) }      },
 };

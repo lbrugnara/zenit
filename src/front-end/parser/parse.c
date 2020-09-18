@@ -94,7 +94,7 @@ static ZenitNode* parse_if_statement(ZenitParser *parser, ZenitContext *ctx);
 static ZenitNode* parse_block(ZenitParser *parser, ZenitContext *ctx);
 static ZenitNode* parse_statement(ZenitParser *parser, ZenitContext *ctx);
 static ZenitNode* parse_variable_declaration(ZenitParser *parser, ZenitContext *ctx);
-static ZenitNode* parse_field_declaration(ZenitParser *parser, ZenitContext *ctx);
+static ZenitNode* parse_struct_field_declaration(ZenitParser *parser, ZenitContext *ctx);
 static ZenitNode* parse_struct_declaration(ZenitParser *parser, ZenitContext *ctx);
 static ZenitNode* parse_attribute_declaration(ZenitParser *parser, ZenitContext *ctx);
 static ZenitNode* parse_declaration(ZenitParser *parser, ZenitContext *ctx);
@@ -250,27 +250,64 @@ static ZenitTypeNode* parse_type_declaration(ZenitParser *parser, ZenitContext *
     return NULL;
 }
 
+/*
+ * Grammar:
+ *  unsigned_integer = ( [0-9]+ | '0x' [a-fA-F0-9]+ | '0b' [0-1_]+ )
+ * 
+ */
 static bool parse_uint_value(ZenitContext *ctx, ZenitToken *primitive_token, ZenitUintTypeSize *size, ZenitUintValue *value)
 {
     // This is the integer parsing logic (unsigned integers by now)
-    char *endptr;
+
+    // Number string
+    char *number_str = NULL;
+    void *number_str_end = NULL;
+    char *strtoull_end = NULL;
     short base = 10;
     unsigned long long temp_int = 0;
-    
-    // If it starts with 0x it is a hex value
+
     if (primitive_token->value.sequence[0] == '0' && primitive_token->value.sequence[1] == 'x')
+    {
+        // If it starts with 0x it is a hex value
         base = 16;
+        number_str = token_to_string(primitive_token);
+        number_str_end = (void*) (number_str + primitive_token->value.length);
+    }
+    else if (primitive_token->value.sequence[0] == '0' && primitive_token->value.sequence[1] == 'b')
+    {
+        // If it starts with 0b it is a binary value
+        base = 2;
+        number_str = fl_cstring_new(0);
+
+        // Skip the '0b'
+        size_t length = 0;
+        for (size_t i=2; i < primitive_token->value.length; i++)
+        {
+            if ((char) primitive_token->value.sequence[i] == '_')
+                continue;
+
+            fl_cstring_append_char(&number_str, (char) primitive_token->value.sequence[i]);
+            length++;
+        }
+        number_str_end = (void*) (number_str + length);
+    }
+    else
+    {
+        // Decimal
+        base = 10;
+        number_str = token_to_string(primitive_token);
+        number_str_end = (void*) (number_str + primitive_token->value.length);
+    }
 
     errno = 0;
-    temp_int = strtoull((const char*)primitive_token->value.sequence, &endptr, base);
+    temp_int = strtoull((const char *) number_str, &strtoull_end, base);
     
     // The token length must be equals to the parsed number
-    assert_or_return_val(ctx, (void*)(primitive_token->value.sequence + primitive_token->value.length) == (void*)endptr, ZENIT_ERROR_INTERNAL, 
-        "Could not parse number", false);
+    assert_or_goto(ctx, number_str_end == (void*) strtoull_end, ZENIT_ERROR_INTERNAL, "Could not parse number", error);
 
     // Check for specific strtoull errors
-    assert_or_return_val(ctx, (temp_int != ULLONG_MAX || errno != ERANGE) && (temp_int != 0ULL || errno != EINVAL), ZENIT_ERROR_LARGE_INTEGER, 
-        "Integral value is too large", false);
+    assert_or_goto(ctx, (temp_int != ULLONG_MAX || errno != ERANGE) && (temp_int != 0ULL || errno != EINVAL), ZENIT_ERROR_LARGE_INTEGER, 
+        "Integral value is too large", error);
 
     if (temp_int <= UINT8_MAX)
     {
@@ -285,10 +322,15 @@ static bool parse_uint_value(ZenitContext *ctx, ZenitToken *primitive_token, Zen
     else
     {
         zenit_context_error(ctx, ctx->srcinfo->location, ZENIT_ERROR_LARGE_INTEGER, "Integral value is too large");
-        return false;
+        goto error;
     }
 
+    fl_cstring_free(number_str);
+
     return true;
+
+    error: fl_cstring_free(number_str);
+    return false;
 }
 
 /*
@@ -303,7 +345,7 @@ static bool parse_uint_value(ZenitContext *ctx, ZenitToken *primitive_token, Zen
  *  ZenitNode* - The parsed integer literal
  *
  * Grammar:
- *  integer_literal = INTEGER
+ *  integer_literal = unsigned_integer
  */
 static ZenitNode* parse_integer_literal(ZenitParser *parser, ZenitContext *ctx)
 {
@@ -873,8 +915,7 @@ static ZenitNode* parse_if_statement(ZenitParser *parser, ZenitContext *ctx)
 
     return (ZenitNode*) if_node;
 
-    on_if_node_error:       if (else_branch) 
-                                zenit_node_free(else_branch);
+    on_if_node_error:       if (else_branch) zenit_node_free(else_branch);
     on_else_branch_error:   zenit_node_free(then_branch);
     on_then_branch_error:   zenit_node_free(condition);
 
@@ -985,7 +1026,7 @@ static ZenitNode* parse_variable_declaration(ZenitParser *parser, ZenitContext *
 }
 
 /*
- * Function: parse_field_declaration
+ * Function: parse_struct_field_declaration
  *  Parses a struct member declaration
  *
  * Parameters:
@@ -996,10 +1037,10 @@ static ZenitNode* parse_variable_declaration(ZenitParser *parser, ZenitContext *
  *  ZenitNode* - Struct member declaration node
  * 
  * Grammar:
- *  field_declaration = ID ':' type_information ';' ;
+ *  struct_field_declaration = ID ':' type_information ';' ;
  *
  */
-static ZenitNode* parse_field_declaration(ZenitParser *parser, ZenitContext *ctx)
+static ZenitNode* parse_struct_field_declaration(ZenitParser *parser, ZenitContext *ctx)
 {
     ZenitToken name_token;
     
@@ -1057,7 +1098,7 @@ static ZenitNode* parse_field_declaration(ZenitParser *parser, ZenitContext *ctx
  *  ZenitNode* - Struct declaration node
  * 
  * Grammar:
- *  struct_declaration = 'struct' ID '{' field_declaration+ '}';
+ *  struct_declaration = 'struct' ID '{' struct_field_declaration+ '}';
  *
  */
 static ZenitNode* parse_struct_declaration(ZenitParser *parser, ZenitContext *ctx)
@@ -1095,7 +1136,7 @@ static ZenitNode* parse_struct_declaration(ZenitParser *parser, ZenitContext *ct
     while (zenit_parser_has_input(parser) && !zenit_parser_next_is(parser, ZENIT_TOKEN_RBRACE))
     {
         // Get the struct member
-        ZenitNode *struct_field = parse_field_declaration(parser, ctx);
+        ZenitNode *struct_field = parse_struct_field_declaration(parser, ctx);
 
         // Something happened while parsing the element, we need to leave
         assert_or_goto(ctx, struct_field != NULL, ZENIT_ERROR_INTERNAL, NULL, on_error);
@@ -1294,6 +1335,9 @@ static ZenitNode* parse_declaration(ZenitParser *parser, ZenitContext *ctx)
  * Function: zenit_parse_source
  *  While the parser has input, we call the <parse_declaration> function
  *  that is the top-level function that knows how to "traverse" the code
+ * 
+ * Grammar:
+ *  program = declaration* ( ';' )?
  */
 bool zenit_parse_source(ZenitContext *ctx)
 {
