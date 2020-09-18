@@ -7,10 +7,28 @@
 
 static inline bool rp2a03_emit_if_false_instruction(Rp2a03Program *program, Rp2a03TextSegment *segment, bool is_startup, ZnesIfFalseInstruction *instruction)
 {
+    ZnesOperand *source_operand = NULL;
+
     if (instruction->source->type == ZNES_OPERAND_BOOL)
     {
+        source_operand = instruction->source;
+    }
+    else if (instruction->source->type == ZNES_OPERAND_VARIABLE)
+    {
+        if (((ZnesVariableOperand*) instruction->source)->variable->type == ZNES_ALLOC_TYPE_TEMP)
+            source_operand = ((ZnesTempAlloc*)((ZnesVariableOperand*) instruction->source)->variable)->source;
+        else
+            source_operand = instruction->source;
+    }
+    else
+    {
+        return false;
+    }
+
+    if (source_operand->type == ZNES_OPERAND_BOOL)
+    {
         // Get the source value from the bool operand
-        uint8_t bool_value = ((ZnesBoolOperand*) instruction->source)->value ? 0x1 : 0x0;
+        uint8_t bool_value = ((ZnesBoolOperand*) source_operand)->value ? 0x1 : 0x0;
 
         // Load the immediate value
         rp2a03_program_emit_imm(program, segment, NES_OP_LDA, bool_value);
@@ -33,9 +51,9 @@ static inline bool rp2a03_emit_if_false_instruction(Rp2a03Program *program, Rp2a
         // Add the pending jump
         rp2a03_text_segment_add_pending_jump(segment, &pending_jump);
     }
-    else if (instruction->source->type == ZNES_OPERAND_VARIABLE)
+    else if (source_operand->type == ZNES_OPERAND_VARIABLE)
     {
-        ZnesVariableOperand *variable_operand = (ZnesVariableOperand*) instruction->source;
+        ZnesVariableOperand *variable_operand = (ZnesVariableOperand*) source_operand;
 
         if (variable_operand->variable->type != ZNES_ALLOC_TYPE_BOOL)
         {
