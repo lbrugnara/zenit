@@ -9,7 +9,7 @@
 
 typedef struct ZnesTextSegment {
     ZnesInstructionList *instructions;
-    ZnesVariableList *variables;
+    ZnesAllocList *allocations;
     uint16_t base_address;
     size_t used;
 } ZnesTextSegment;
@@ -19,7 +19,7 @@ static inline ZnesTextSegment* znes_text_segment_new(size_t base_address)
     ZnesTextSegment *text = fl_malloc(sizeof(ZnesTextSegment));
 
     text->instructions = znes_instruction_list_new();
-    text->variables = fl_list_new();
+    text->allocations = fl_list_new();
     text->base_address = base_address;
     text->used = 0;
 
@@ -29,7 +29,7 @@ static inline ZnesTextSegment* znes_text_segment_new(size_t base_address)
 static inline void znes_text_segment_free(ZnesTextSegment *text)
 {
     znes_instruction_list_free(text->instructions);
-    fl_list_free(text->variables);
+    fl_list_free(text->allocations);
 
     fl_free(text);
 }
@@ -44,7 +44,7 @@ static inline ZnesAlloc* znes_text_segment_alloc_variable(ZnesTextSegment *text,
     // TODO: By now we use the address
     ZnesAlloc *nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_TEXT, alloc->size, alloc->address);
     //fl_list_append(text->instructions, znes_alloc_instruction_new(nes_symbol, source));
-    fl_list_append(text->variables, nes_symbol);
+    fl_list_append(text->allocations, nes_symbol);
     text->used += alloc->size;
 
     return nes_symbol;
@@ -52,9 +52,9 @@ static inline ZnesAlloc* znes_text_segment_alloc_variable(ZnesTextSegment *text,
 
 static inline char* znes_text_segment_dump(ZnesTextSegment *text, char *output)
 {
-    fl_cstring_vappend(&output, "; Mapped variables: %zu\n\n", fl_list_length(text->variables));
+    fl_cstring_vappend(&output, "; Allocations: %zu\n\n", fl_list_length(text->allocations));
 
-    struct FlListNode *node = fl_list_head(text->variables);
+    struct FlListNode *node = fl_list_head(text->allocations);
 
     while (node)
     {

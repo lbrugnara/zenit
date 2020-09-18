@@ -7,8 +7,8 @@
 #include "../segment.h"
 #include "../operands/operand.h"
 
-typedef FlHashtable ZnesVariableMap;
-typedef FlList ZnesVariableList;
+typedef FlHashtable ZnesAllocMap;
+typedef FlList ZnesAllocList;
 
 typedef enum ZnesAllocType {
     ZNES_ALLOC_TYPE_UNK,

@@ -67,8 +67,11 @@ void zenit_test_nes_rom(void)
     flut_expect_compat("Type check pass should not contain errors", zenit_check_types(&ctx));
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
-    ZnesProgram *znes_program = znes_generate_program(zir_program, false);
-    Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_program);
+
+    ZnesContext *znes_context = znes_context_new(false);
+    flut_expect_compat("NES IR should not contain errors", znes_generate_program(znes_context, zir_program));
+
+    Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_context->program);
 
     flut_expect_compat("RP2A03 program must be valid", rp2a03_program != NULL);
 
@@ -91,7 +94,7 @@ void zenit_test_nes_rom(void)
 
     rp2a03_rom_free(nes_rom);
     rp2a03_program_free(rp2a03_program);
-    znes_program_free(znes_program);
+    znes_context_free(znes_context);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }

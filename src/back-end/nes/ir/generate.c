@@ -1,5 +1,5 @@
 #include <stdint.h>
-
+#include <inttypes.h>
 #include "generate.h"
 
 #include "utils.h"
@@ -19,12 +19,12 @@
 #include "../../../zir/symbol.h"
 #include "../../../zir/instructions/operands/operand.h"
 
-typedef void(*ZirInstructionVisitor)(ZirInstr *instruction, ZirBlock *block, ZnesProgram *program);
-static void visit_zir_instruction(ZirInstr *instruction, ZirBlock *block, ZnesProgram *program);
-static void visit_zir_variable_instruction(ZirVariableInstr *instruction, ZirBlock *block, ZnesProgram *program);
-static void visit_cast_instruction(ZirCastInstr *instruction, ZirBlock *block, ZnesProgram *program);
-static void visit_if_false_instruction(ZirIfFalseInstr *instruction, ZirBlock *block, ZnesProgram *program);
-static void visit_jump_instruction(ZirJumpInstr *instruction, ZirBlock *block, ZnesProgram *program);
+typedef void(*ZirInstructionVisitor)(ZnesContext *znes_context, ZirInstr *instruction, ZirBlock *block);
+static void visit_zir_instruction(ZnesContext *znes_context, ZirInstr *instruction, ZirBlock *block);
+static void visit_zir_variable_instruction(ZnesContext *znes_context, ZirVariableInstr *instruction, ZirBlock *block);
+static void visit_cast_instruction(ZnesContext *znes_context, ZirCastInstr *instruction, ZirBlock *block);
+static void visit_if_false_instruction(ZnesContext *znes_context, ZirIfFalseInstr *instruction, ZirBlock *block);
+static void visit_jump_instruction(ZnesContext *znes_context, ZirJumpInstr *instruction, ZirBlock *block);
 
 static const ZirInstructionVisitor zir_instruction_visitors[] = {
     [ZIR_INSTR_VARIABLE]    = (ZirInstructionVisitor) &visit_zir_variable_instruction,
@@ -33,10 +33,11 @@ static const ZirInstructionVisitor zir_instruction_visitors[] = {
     [ZIR_INSTR_JUMP]        = (ZirInstructionVisitor) &visit_jump_instruction,
 };
 
-static bool znes_allocation_setup_aggregates(ZnesProgram *program, ZnesAlloc *allocation, ZirType *zir_type)
+static bool znes_allocation_setup_aggregates(ZnesContext *znes_context, ZnesAlloc *allocation, ZirType *zir_type)
 {
     if (allocation->type == ZNES_ALLOC_TYPE_BOOL
         || allocation->type == ZNES_ALLOC_TYPE_UINT
+        || allocation->type == ZNES_ALLOC_TYPE_REFERENCE
         || allocation->type == ZNES_ALLOC_TYPE_TEMP)
         return true;
 
@@ -68,11 +69,13 @@ static bool znes_allocation_setup_aggregates(ZnesProgram *program, ZnesAlloc *al
                                                 allocation->address + (znes_item_alloc_size * i));  // The address is based on the position of the item and its size
 
             // The item might be an aggregate too, we ensure we setup all the allocations recursively
-            znes_allocation_setup_aggregates(program, znes_item_allocation, zir_array_type->member_type);
+            znes_allocation_setup_aggregates(znes_context, znes_item_allocation, zir_array_type->member_type);
 
             // Finally we setup the allocation within the array
             znes_array_alloc_add_element(znes_array_allocation, znes_item_allocation);
         }
+
+        return true;
     }
     else if (zir_type->typekind == ZIR_TYPE_STRUCT)
     {
@@ -104,7 +107,7 @@ static bool znes_allocation_setup_aggregates(ZnesProgram *program, ZnesAlloc *al
                                                                 allocation->address + gap);             // The address is based on the current gap
 
             // The member might be an aggregate too, we ensure we setup all the allocations recursively
-            znes_allocation_setup_aggregates(program, znes_member_allocation, zir_struct_member->type);
+            znes_allocation_setup_aggregates(znes_context, znes_member_allocation, zir_struct_member->type);
 
             // Finally we setup the allocation within the struct
             znes_struct_alloc_add_member(znes_struct_allocation, znes_member_allocation);
@@ -114,46 +117,60 @@ static bool znes_allocation_setup_aggregates(ZnesProgram *program, ZnesAlloc *al
 
             node = node->next;
         }
+
+        return true;
     }
+
+    znes_context_error(znes_context, ZNES_ERROR_INTERNAL, "Unhandled ZIR type in znes_allocation_setup_aggregates");
 
     return false;
 }
 
-static void visit_jump_instruction(ZirJumpInstr *zir_instruction, ZirBlock *zir_block, ZnesProgram *znes_program)
+static void visit_jump_instruction(ZnesContext *znes_context, ZirJumpInstr *zir_instruction, ZirBlock *zir_block)
 {
     // The destination of an jump instruction is a jump offset
     // TODO: WE ARE USING UINT FOR THE JUMP, WE SHOULD UPDATE THIS TO SIGNED INT AS THE TYPES IN ZIR CHANGE
     //       TO ALLOW JUMPING BACKWARDS
     if (zir_instruction->base.destination->type != ZIR_OPERAND_UINT)
     {
-        // TODO: Handle error here
+        znes_context_error(znes_context, ZNES_ERROR_INTERNAL, "Invalid operand type for jump offset in visit_jump_instruction");
         return;
     }
-    ZnesUintOperand *jump_offset = (ZnesUintOperand*) znes_utils_make_nes_operand(znes_program, zir_instruction->base.destination);
+
+    ZnesUintOperand *jump_offset = (ZnesUintOperand*) znes_utils_make_nes_operand(znes_context, zir_instruction->base.destination);
+
+    if (jump_offset == NULL)
+        return;
 
     ZnesJumpInstruction *jump_instruction = znes_jump_instruction_new(jump_offset);
 
-    znes_program_emit_instruction(znes_program, (ZnesInstruction*) jump_instruction);
+    znes_program_emit_instruction(znes_context->program, (ZnesInstruction*) jump_instruction);
 }
 
-static void visit_if_false_instruction(ZirIfFalseInstr *zir_instruction, ZirBlock *zir_block, ZnesProgram *znes_program)
+static void visit_if_false_instruction(ZnesContext *znes_context, ZirIfFalseInstr *zir_instruction, ZirBlock *zir_block)
 {
     // The destination of an if_false instruction is a jump offset
     // TODO: WE ARE USING UINT FOR THE JUMP, WE SHOULD UPDATE THIS TO SIGNED INT AS THE TYPES IN ZIR CHANGE
     //       TO ALLOW JUMPING BACKWARDS
     if (zir_instruction->base.destination->type != ZIR_OPERAND_UINT)
     {
-        // TODO: Handle error here
+        znes_context_error(znes_context, ZNES_ERROR_INTERNAL, "Invalid operand type for jump offset in visit_if_false_instruction");
         return;
     }
-    ZnesUintOperand *jump_offset = (ZnesUintOperand*) znes_utils_make_nes_operand(znes_program, zir_instruction->base.destination);
+    ZnesUintOperand *jump_offset = (ZnesUintOperand*) znes_utils_make_nes_operand(znes_context, zir_instruction->base.destination);
+
+    if (jump_offset == NULL)
+        return;
 
     // Create the source operand
-    ZnesOperand *znes_source_operand = znes_utils_make_nes_operand(znes_program, zir_instruction->source);
+    ZnesOperand *znes_source_operand = znes_utils_make_nes_operand(znes_context, zir_instruction->source);
+
+    if (znes_source_operand == NULL)
+        return;
 
     ZnesIfFalseInstruction *if_false_instruction = znes_if_false_instruction_new(jump_offset, znes_source_operand);
 
-    znes_program_emit_instruction(znes_program, (ZnesInstruction*) if_false_instruction);
+    znes_program_emit_instruction(znes_context->program, (ZnesInstruction*) if_false_instruction);
 }
 
 /*
@@ -170,111 +187,98 @@ static void visit_if_false_instruction(ZirIfFalseInstr *zir_instruction, ZirBloc
  *  void: This function does not return a value
  * 
  */
-static void visit_cast_instruction(ZirCastInstr *instruction, ZirBlock *block, ZnesProgram *program)
+static void visit_cast_instruction(ZnesContext *znes_context, ZirCastInstr *instruction, ZirBlock *block)
 {
+    // A cast has a source value, we need to create a NES operand
+    ZnesOperand *znes_source_operand = znes_utils_make_nes_operand(znes_context, instruction->source);
+
+    if (znes_source_operand == NULL)
+        return;
+
     // A cast creates has a destination symbol
     ZirSymbol *zir_destination_symbol = ((ZirSymbolOperand*) instruction->base.destination)->symbol;
 
-    // A cast has a source value, we need to create a NES operand
-    ZnesOperand *znes_source_operand = znes_utils_make_nes_operand(program, instruction->source);
-
-    if (znes_source_operand == NULL)
-    {
-        // TODO: Handle errors
-        return;
-    }
-
     // We request allocation for the temporal destination symbol in the NES program
     ZnesAllocRequest znes_alloc_request = { 0 };
-    if (!znes_alloc_request_init(program, block, zir_destination_symbol, NULL, &znes_alloc_request))
-    {
-        // TODO: Handle errors if the allocation request fails
+    if (!znes_alloc_request_init(znes_context, block, zir_destination_symbol, NULL, &znes_alloc_request))
         return;
-    }
 
     // With the allocation request and the initial value we can allocate the space for the temporal variable
-    ZnesAlloc *variable = znes_program_alloc_variable(program, zir_destination_symbol->name, &znes_alloc_request, znes_source_operand);
-
-    if (variable == NULL)
-    {
-        // TODO: Handle errors
-        return;
-    }
-
-    // For arrays, structs, and other compund types, we need to configure its members
-    if (!znes_allocation_setup_aggregates(program, variable, zir_destination_symbol->type))
-    {
-        // TODO: Handle errors
-        return;
-    }
-}
-
-static void visit_zir_variable_instruction(ZirVariableInstr *zir_instruction, ZirBlock *zir_block, ZnesProgram *znes_program)
-{
-    // A variable definition has a destination symbol
-    ZirSymbol *zir_destination_symbol = ((ZirSymbolOperand*) zir_instruction->base.destination)->symbol;
-
-    // A variable is initialized from its source value, we need to create a NES operand
-    ZnesOperand *znes_source_operand = znes_utils_make_nes_operand(znes_program, zir_instruction->source);
-    
-    if (znes_source_operand == NULL)
-    {
-        // TODO: Handle errors
-        return;
-    }
-
-    // We request allocation for the destination symbol in the NES program
-    ZnesAllocRequest znes_alloc_request = { 0 };
-    if (!znes_alloc_request_init(znes_program, zir_block, zir_destination_symbol, zir_instruction->attributes, &znes_alloc_request))
-    {
-        // TODO: Handle errors if the allocation request fails
-        return;
-    }
-
-    // With the allocation request and the initial value we can allocate the space for the variable
-    ZnesAlloc *znes_allocation = znes_program_alloc_variable(znes_program, zir_destination_symbol->name, &znes_alloc_request, znes_source_operand);
+    ZnesAlloc *znes_allocation = znes_program_alloc_variable(znes_context->program, zir_destination_symbol->name, &znes_alloc_request, znes_source_operand);
 
     if (znes_allocation == NULL)
     {
-        // TODO: Handle errors
+        znes_context_error(znes_context, ZNES_ERROR_ALLOC, 
+            "Could not satisfy allocation request in cast instruction for segment: %s | address: %"PRIX16" | size: %zu",
+            znes_segment_kind_str[znes_alloc_request.segment],
+            znes_alloc_request.address,
+            znes_alloc_request.size);
         return;
     }
 
     // For arrays, structs, and other compund types, we need to configure its members
-    if (!znes_allocation_setup_aggregates(znes_program, znes_allocation, zir_destination_symbol->type))
+    if (!znes_allocation_setup_aggregates(znes_context, znes_allocation, zir_destination_symbol->type))
+        return;
+}
+
+static void visit_zir_variable_instruction(ZnesContext *znes_context, ZirVariableInstr *zir_instruction, ZirBlock *zir_block)
+{
+    // A variable is initialized from its source value, we need to create a NES operand
+    ZnesOperand *znes_source_operand = znes_utils_make_nes_operand(znes_context, zir_instruction->source);
+    
+    if (znes_source_operand == NULL) return;
+
+    // A variable definition has a destination symbol
+    ZirSymbol *zir_destination_symbol = ((ZirSymbolOperand*) zir_instruction->base.destination)->symbol;
+
+    // We request allocation for the destination symbol in the NES program
+    ZnesAllocRequest znes_alloc_request = { 0 };
+    if (!znes_alloc_request_init(znes_context, zir_block, zir_destination_symbol, zir_instruction->attributes, &znes_alloc_request))
+        return;
+
+    // With the allocation request and the initial value we can allocate the space for the variable
+    ZnesAlloc *znes_allocation = znes_program_alloc_variable(znes_context->program, zir_destination_symbol->name, &znes_alloc_request, znes_source_operand);
+
+    if (znes_allocation == NULL)
     {
-        // TODO: Handle errors
+        znes_context_error(znes_context, ZNES_ERROR_ALLOC, 
+            "Could not satisfy allocation request in variable instruction for segment: %s | address: %"PRIX16" | size: %zu",
+            znes_segment_kind_str[znes_alloc_request.segment],
+            znes_alloc_request.address,
+            znes_alloc_request.size);
         return;
     }
+
+    // For arrays, structs, and other compund types, we need to configure its members
+    if (!znes_allocation_setup_aggregates(znes_context, znes_allocation, zir_destination_symbol->type))
+        return;
 }
 
-static void visit_zir_instruction(ZirInstr *zir_instruction, ZirBlock *zir_block, ZnesProgram *znes_program)
+static void visit_zir_instruction(ZnesContext *znes_context, ZirInstr *zir_instruction, ZirBlock *zir_block)
 {
-    zir_instruction_visitors[zir_instruction->type](zir_instruction, zir_block, znes_program);
+    zir_instruction_visitors[zir_instruction->type](znes_context, zir_instruction, zir_block);
 }
 
-static void visit_zir_block(ZirBlock *zir_block, ZnesProgram *znes_program)
+static void visit_zir_block(ZnesContext *znes_context, ZirBlock *zir_block)
 {
     size_t instr_count = fl_array_length(zir_block->instructions);
 
     for (size_t i=0; i < instr_count; i++)
-    {
-        ZirInstr *zir_instr = zir_block->instructions[i];
-        visit_zir_instruction(zir_instr, zir_block, znes_program);
-    }
+        visit_zir_instruction(znes_context, zir_block->instructions[i], zir_block);
 }
 
-ZnesProgram* znes_generate_program(ZirProgram *zir_program, bool scripting)
+bool znes_generate_program(ZnesContext *znes_context, ZirProgram *zir_program)
 {
     if (!zir_program)
         return NULL;
 
-    // Create the program object
-    ZnesProgram *znes_program = znes_program_new(scripting);
-
     // Start visiting the ZIR program
-    ZirBlock *zir_block = zir_program->current;
-    visit_zir_block(zir_block, znes_program);
+    visit_zir_block(znes_context, zir_program->global);
 
-    return znes_program;
+    if (znes_context_has_errors(znes_context))
+    {
+        znes_context_print_errors(znes_context);
+    }
+
+    return !znes_context_has_errors(znes_context);
 }

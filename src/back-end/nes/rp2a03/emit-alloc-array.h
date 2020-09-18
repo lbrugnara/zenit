@@ -3,6 +3,7 @@
 
 #include "program.h"
 #include "../ir/program.h"
+#include "../ir/operands/array.h"
 #include "../ir/objects/array.h"
 #include "../ir/instructions/alloc.h"
 

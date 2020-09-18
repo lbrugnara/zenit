@@ -62,8 +62,11 @@ void zenit_test_nes_global_vars(void)
     flut_expect_compat("Type check pass should not contain errors", zenit_check_types(&ctx));
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
-    ZnesProgram *nesprg = znes_generate_program(zir_program, false);
-    Rp2a03Program *rp2a03_program = rp2a03_generate_program(nesprg);
+    
+    ZnesContext *znes_context = znes_context_new(false);
+    flut_expect_compat("NES IR should not contain errors", znes_generate_program(znes_context, zir_program));
+
+    Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_context->program);
     
     flut_expect_compat("Data segment at 0x00 should be 0x1 (a)",                 rp2a03_program->data->bytes[0x00] == 0x1);
     flut_expect_compat("Data segment at 0x01 should be 0x2 (b)",                 rp2a03_program->data->bytes[0x01] == 0x2);
@@ -125,7 +128,7 @@ void zenit_test_nes_global_vars(void)
 
 
     rp2a03_program_free(rp2a03_program);
-    znes_program_free(nesprg);
+    znes_context_free(znes_context);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }
@@ -146,8 +149,11 @@ void zenit_test_nes_global_vars_array(void)
     flut_expect_compat("Type check pass should not contain errors", zenit_check_types(&ctx));
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
-    ZnesProgram *nesprg = znes_generate_program(zir_program, false);
-    Rp2a03Program *rp2a03_program = rp2a03_generate_program(nesprg);
+    
+    ZnesContext *znes_context = znes_context_new(false);
+    flut_expect_compat("NES IR should not contain errors", znes_generate_program(znes_context, zir_program));
+
+    Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_context->program);
     
     flut_expect_compat("Data segment at 0x00 should be 0xff (a lo)",             rp2a03_program->data->bytes[0x00] == 0xFF);
     flut_expect_compat("Data segment at 0x01 should be 0x01 (a hi)",             rp2a03_program->data->bytes[0x01] == 0x01);
@@ -158,7 +164,7 @@ void zenit_test_nes_global_vars_array(void)
     flut_expect_compat("Data segment at 0x06 should be 0x00 (barr[1])",          rp2a03_program->data->bytes[0x06] == 0x00);
 
     rp2a03_program_free(rp2a03_program);
-    znes_program_free(nesprg);
+    znes_context_free(znes_context);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }
@@ -207,8 +213,11 @@ void zenit_test_nes_global_vars_zp(void)
     flut_expect_compat("Type check pass should not contain errors", zenit_check_types(&ctx));
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
-    ZnesProgram *nesprg = znes_generate_program(zir_program, false);
-    Rp2a03Program *rp2a03_program = rp2a03_generate_program(nesprg);
+    
+    ZnesContext *znes_context = znes_context_new(false);
+    flut_expect_compat("NES IR should not contain errors", znes_generate_program(znes_context, zir_program));
+
+    Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_context->program);
 
     flut_expect_compat("Data segment at 0x00 should be 0x00 (datavar -bss-)",    rp2a03_program->data->bytes[0x00] == 0x00);
     flut_expect_compat("Data segment at 0x01 should be 0x00 (tempvar -bss-)",    rp2a03_program->data->bytes[0x01] == 0x00);
@@ -314,7 +323,7 @@ void zenit_test_nes_global_vars_zp(void)
     flut_expect_compat("Startup routine at 0x4B should be 0x0D ($0D)",           rp2a03_program->startup->bytes[0x4B] == 0x0D);
 
     rp2a03_program_free(rp2a03_program);
-    znes_program_free(nesprg);
+    znes_context_free(znes_context);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }
@@ -349,8 +358,11 @@ void zenit_test_nes_global_vars_data(void)
     flut_expect_compat("Type check pass should not contain errors", zenit_check_types(&ctx));
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
-    ZnesProgram *nesprg = znes_generate_program(zir_program, false);
-    Rp2a03Program *rp2a03_program = rp2a03_generate_program(nesprg);
+    
+    ZnesContext *znes_context = znes_context_new(false);
+    flut_expect_compat("NES IR should not contain errors", znes_generate_program(znes_context, zir_program));
+
+    Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_context->program);
 
     // datavar = 1
     flut_expect_compat("Data segment at 0x00 should be 0x01 (datavar)",    rp2a03_program->data->bytes[0x00] == 0x01);
@@ -377,7 +389,7 @@ void zenit_test_nes_global_vars_data(void)
     flut_expect_compat("Data segment at 0x03 should be 0x01 (datavar2)",         rp2a03_program->data->bytes[0x03] == 0x01);
 
     rp2a03_program_free(rp2a03_program);
-    znes_program_free(nesprg);
+    znes_context_free(znes_context);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }
@@ -429,8 +441,11 @@ void zenit_test_nes_global_vars_code(void)
     flut_expect_compat("Type check pass should not contain errors", zenit_check_types(&ctx));
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
-    ZnesProgram *nesprg = znes_generate_program(zir_program, false);
-    Rp2a03Program *rp2a03_program = rp2a03_generate_program(nesprg);
+    
+    ZnesContext *znes_context = znes_context_new(false);
+    flut_expect_compat("NES IR should not contain errors", znes_generate_program(znes_context, zir_program));
+
+    Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_context->program);
 
     flut_expect_compat("Data segment at 0x00 should be 0x00 (datavar -bss-)",    rp2a03_program->data->bytes[0x00] == 0x00);
     flut_expect_compat("Data segment at 0x01 should be 0x00 (tempvar -bss-)",    rp2a03_program->data->bytes[0x01] == 0x00);
@@ -553,7 +568,7 @@ void zenit_test_nes_global_vars_code(void)
     flut_expect_compat("Startup routine at 0x5C should be 0x20 ($200D hi)",      rp2a03_program->startup->bytes[0x5C] == 0x20);
 
     rp2a03_program_free(rp2a03_program);
-    znes_program_free(nesprg);
+    znes_context_free(znes_context);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }
@@ -579,8 +594,11 @@ void zenit_test_nes_global_var_name_clash(void)
     
     ZirProgram *zir_program = zenit_generate_zir(&ctx);
 
-    ZnesProgram *nesprg = znes_generate_program(zir_program, false);
-    Rp2a03Program *rp2a03_program = rp2a03_generate_program(nesprg);
+    
+    ZnesContext *znes_context = znes_context_new(false);
+    flut_expect_compat("NES IR should not contain errors", znes_generate_program(znes_context, zir_program));
+
+    Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_context->program);
 
     flut_expect_compat("Data segment at 0x00 should be 0x02 (a)",                rp2a03_program->data->bytes[0x00] == 0x02);
     flut_expect_compat("Data segment at 0x01 should be 0x02 (x)",                rp2a03_program->data->bytes[0x01] == 0x02);
@@ -600,7 +618,7 @@ void zenit_test_nes_global_var_name_clash(void)
     flut_expect_compat("Startup routine at 0x08 should be 0x80 ($8004 hi)",      rp2a03_program->startup->bytes[0x08] == 0x80);
 
     rp2a03_program_free(rp2a03_program);
-    znes_program_free(nesprg);
+    znes_context_free(znes_context);
     zir_program_free(zir_program);
     zenit_context_free(&ctx);
 }

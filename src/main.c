@@ -13,32 +13,32 @@ int main(int argc, char **argv)
     if (argc < 3)
         return -1;
 
-    ZenitContext ctx = zenit_context_new(ZENIT_SOURCE_FILE, argv[1]);
+    ZenitContext zenit_context = zenit_context_new(ZENIT_SOURCE_FILE, argv[1]);
 
-    if (!zenit_parse_source(&ctx)
-        || !zenit_resolve_symbols(&ctx)
-        || !zenit_infer_types(&ctx)
-        || !zenit_check_types(&ctx))
+    if (!zenit_parse_source(&zenit_context)
+        || !zenit_resolve_symbols(&zenit_context)
+        || !zenit_infer_types(&zenit_context)
+        || !zenit_check_types(&zenit_context))
     {
-        zenit_context_print_errors(&ctx);
+        zenit_context_print_errors(&zenit_context);
         return -2;
     }
     
-    ZirProgram *zir_program = zenit_generate_zir(&ctx);
+    ZirProgram *zir_program = zenit_generate_zir(&zenit_context);
 
     if (!zir_program)
     {
-        zenit_context_print_errors(&ctx);
+        zenit_context_print_errors(&zenit_context);
         return -3;
     }
 
-    ZnesProgram *znes_program = znes_generate_program(zir_program, false);
+    ZnesContext *znes_context = znes_context_new(false);
 
-    if (!znes_program)
+    if (!znes_generate_program(znes_context, zir_program))
         return -4;
 
     
-    Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_program);
+    Rp2a03Program *rp2a03_program = rp2a03_generate_program(znes_context->program);
 
     if (!rp2a03_program)
         return -4;
@@ -52,8 +52,8 @@ int main(int argc, char **argv)
     
     rp2a03_rom_free(rom);
     rp2a03_program_free(rp2a03_program);
-    znes_program_free(znes_program);
+    znes_context_free(znes_context);
     zir_program_free(zir_program);
-    zenit_context_free(&ctx);
+    zenit_context_free(&zenit_context);
     return 0;
 }

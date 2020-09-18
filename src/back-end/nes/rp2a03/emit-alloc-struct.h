@@ -2,6 +2,7 @@
 #define RP2A03_EMIT_ALLOC_STRUCT_H
 
 #include "program.h"
+#include "../ir/operands/struct.h"
 #include "../ir/program.h"
 #include "../ir/objects/struct.h"
 #include "../ir/instructions/alloc.h"

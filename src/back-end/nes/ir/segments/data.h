@@ -8,7 +8,7 @@
 #include "../objects/alloc.h"
 
 typedef struct ZnesDataSegment {
-    ZnesAllocInstructionList *stores;
+    ZnesAllocInstructionList *allocations;
     uint16_t base_address;
     size_t used;
 } ZnesDataSegment;
@@ -17,7 +17,7 @@ static inline ZnesDataSegment* znes_data_segment_new(uint16_t base_address)
 {
     ZnesDataSegment *data = fl_malloc(sizeof(ZnesDataSegment));
 
-    data->stores = znes_alloc_instruction_list_new();
+    data->allocations = znes_alloc_instruction_list_new();
     data->base_address = base_address;
     data->used = base_address;
 
@@ -26,7 +26,7 @@ static inline ZnesDataSegment* znes_data_segment_new(uint16_t base_address)
 
 static inline void znes_data_segment_free(ZnesDataSegment *data)
 {
-    znes_alloc_instruction_list_free(data->stores);
+    znes_alloc_instruction_list_free(data->allocations);
 
     fl_free(data);
 }
@@ -44,13 +44,13 @@ static inline ZnesAlloc* znes_data_segment_alloc_variable(ZnesDataSegment *data,
         return false;    */
 
     ZnesAlloc *nes_symbol = NULL;
-    struct FlListNode *head = fl_list_head(data->stores);
+    struct FlListNode *head = fl_list_head(data->allocations);
 
     if (head == NULL)
     {
         // When there are no symbols, we can directly insert the symbol
         nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_DATA, alloc->size, alloc->use_address ? alloc->address : data->base_address);
-        fl_list_append(data->stores, znes_alloc_instruction_new(nes_symbol, source));
+        fl_list_append(data->allocations, znes_alloc_instruction_new(nes_symbol, source));
         data->used += needed_space;
 
         return nes_symbol;
@@ -83,9 +83,9 @@ static inline ZnesAlloc* znes_data_segment_alloc_variable(ZnesDataSegment *data,
                 nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_DATA, alloc->size, symbol_address);
 
                 if (fits_at_the_end)
-                    fl_list_append(data->stores, znes_alloc_instruction_new(nes_symbol, source));
+                    fl_list_append(data->allocations, znes_alloc_instruction_new(nes_symbol, source));
                 else
-                    fl_list_insert_before(data->stores, node, znes_alloc_instruction_new(nes_symbol, source));
+                    fl_list_insert_before(data->allocations, node, znes_alloc_instruction_new(nes_symbol, source));
 
                 break;
             }
@@ -102,6 +102,10 @@ static inline ZnesAlloc* znes_data_segment_alloc_variable(ZnesDataSegment *data,
     }
     else
     {
+        // TODO: Currently we allow aliasing if the allocation size and type is equals to a previously allocated one.
+        // This is really useful for special memory addresses like PPUSTATUS, or reading from joypads. That being said, it could be
+        // useful to alias different allocations size for temporal values, so we could use a flag or an attribute property to 
+        // allow/disable aliasing.
         while (node)
         {
             ZnesAlloc *symbol = ((ZnesAllocInstruction*) node->value)->destination;
@@ -112,7 +116,7 @@ static inline ZnesAlloc* znes_data_segment_alloc_variable(ZnesDataSegment *data,
             {
                 already_exist = true;
                 nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_DATA, alloc->size, alloc->address);
-                fl_list_insert_before(data->stores, node, znes_alloc_instruction_new(nes_symbol, source));
+                fl_list_insert_before(data->allocations, node, znes_alloc_instruction_new(nes_symbol, source));
                 break;
             }
 
@@ -131,9 +135,9 @@ static inline ZnesAlloc* znes_data_segment_alloc_variable(ZnesDataSegment *data,
                 nes_symbol = znes_alloc_new(alloc->type, name, ZNES_SEGMENT_DATA, alloc->size, alloc->address);
 
                 if (fits_at_the_end)
-                    fl_list_append(data->stores, znes_alloc_instruction_new(nes_symbol, source));
+                    fl_list_append(data->allocations, znes_alloc_instruction_new(nes_symbol, source));
                 else
-                    fl_list_insert_before(data->stores, node, znes_alloc_instruction_new(nes_symbol, source));
+                    fl_list_insert_before(data->allocations, node, znes_alloc_instruction_new(nes_symbol, source));
 
                 break;
             }
@@ -151,7 +155,7 @@ static inline ZnesAlloc* znes_data_segment_alloc_variable(ZnesDataSegment *data,
 static inline char* znes_data_segment_dump(ZnesDataSegment *data, char *output)
 {
     fl_cstring_vappend(&output, "; DATA segment size: %zu byte%s (base address: 0x%02X)\n\n", data->used, (data->used > 1 ? "s":""), data->base_address);
-    struct FlListNode *node = fl_list_head(data->stores);
+    struct FlListNode *node = fl_list_head(data->allocations);
 
     while (node)
     {
@@ -159,9 +163,7 @@ static inline char* znes_data_segment_dump(ZnesDataSegment *data, char *output)
         ZnesAlloc *symbol = instr->destination;
 
         fl_cstring_vappend(&output, "\t; addr: 0x%02X size: %zu byte%s\n", symbol->address, symbol->size, (symbol->size > 1 ? "s" : ""));
-        fl_cstring_append(&output, "\t");
-        output = znes_alloc_instruction_dump(instr, output);
-        fl_cstring_vappend(&output, "%s", "\n\n");
+        fl_cstring_vappend(&output, "\t%s\n\n", instr->destination->name);
 
         node = node->next;
     }

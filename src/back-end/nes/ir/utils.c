@@ -1,7 +1,7 @@
 #include <stdint.h>
 
 #include "utils.h"
-#include "program.h"
+#include "context.h"
 #include "operands/array.h"
 #include "operands/bool.h"
 #include "operands/reference.h"
@@ -109,7 +109,7 @@ ZnesAllocType znes_utils_zir_type_to_nes_type(ZirSymbol *zir_symbol)
     return ZNES_ALLOC_TYPE_UNK;
 }
 
-static inline ZnesOperand* internal_make_nes_operand(ZnesProgram *program, ZirOperand *zir_opn)
+static inline ZnesOperand* internal_make_nes_operand(ZnesContext *znes_context, ZirOperand *zir_opn)
 {
     switch (zir_opn->type)
     {
@@ -152,7 +152,7 @@ static inline ZnesOperand* internal_make_nes_operand(ZnesProgram *program, ZirOp
             ZnesArrayOperand *array_operand = znes_array_operand_new(member_size, length);
 
             for (size_t i=0; i < fl_array_length(zir_array_opn->elements); i++)
-                array_operand->elements[i] = znes_utils_make_nes_operand(program, zir_array_opn->elements[i]);
+                array_operand->elements[i] = znes_utils_make_nes_operand(znes_context, zir_array_opn->elements[i]);
 
             return (ZnesOperand*) array_operand;
         }
@@ -165,7 +165,7 @@ static inline ZnesOperand* internal_make_nes_operand(ZnesProgram *program, ZirOp
             for (size_t i = 0; i < fl_array_length(zir_struct_opn->members); i++)
             {
                 ZirStructOperandMember *member = zir_struct_opn->members[i];
-                znes_struct_operand_add_member(struct_operand, member->name, znes_utils_make_nes_operand(program, member->operand));
+                znes_struct_operand_add_member(struct_operand, member->name, znes_utils_make_nes_operand(znes_context, member->operand));
             }
 
             return (ZnesOperand*) struct_operand;
@@ -174,7 +174,7 @@ static inline ZnesOperand* internal_make_nes_operand(ZnesProgram *program, ZirOp
         {
             ZirSymbolOperand *zir_symbol_opn = (ZirSymbolOperand*) zir_opn;
 
-            ZnesAlloc *variable = fl_hashtable_get(program->variables, zir_symbol_opn->symbol->name);
+            ZnesAlloc *variable = fl_hashtable_get(znes_context->program->allocations, zir_symbol_opn->symbol->name);
 
             return (ZnesOperand*) znes_variable_operand_new(variable);
         }
@@ -182,28 +182,33 @@ static inline ZnesOperand* internal_make_nes_operand(ZnesProgram *program, ZirOp
         {
             ZirReferenceOperand *zir_ref_opn = (ZirReferenceOperand*) zir_opn;
 
-            ZnesOperand *var_operand = znes_utils_make_nes_operand(program, (ZirOperand*) zir_ref_opn->operand);
+            ZnesOperand *operand = znes_utils_make_nes_operand(znes_context, (ZirOperand*) zir_ref_opn->operand);
             
-            if (var_operand->type == ZNES_OPERAND_VARIABLE)
-                return (ZnesOperand*) znes_reference_operand_new((ZnesVariableOperand*) var_operand);
+            if (operand->type == ZNES_OPERAND_VARIABLE)
+                return (ZnesOperand*) znes_reference_operand_new((ZnesVariableOperand*) operand);
+
+            znes_context_error(znes_context, ZNES_ERROR_INTERNAL, "Operand of a ZIR reference operand is not a NES variable operand");
 
             return NULL;
         }
     }
 
+    znes_context_error(znes_context, ZNES_ERROR_INTERNAL, "Unhandled ZIR operand type in internal_make_nes_operand");
+
     return NULL;
 }
 
-ZnesOperand* znes_utils_make_nes_operand(ZnesProgram *program, ZirOperand *zir_opn)
+ZnesOperand* znes_utils_make_nes_operand(ZnesContext *znes_context, ZirOperand *zir_opn)
 {
-    ZnesOperand *operand = internal_make_nes_operand(program, zir_opn);
+    ZnesOperand *operand = internal_make_nes_operand(znes_context, zir_opn);
 
-    znes_operand_pool_register(program->operands, operand);
+    if (operand != NULL)
+        znes_operand_pool_register(znes_context->operands, operand);
 
     return operand;
 }
 
-bool znes_alloc_request_init(ZnesProgram *znes_program, ZirBlock *zir_block, ZirSymbol *zir_symbol, ZirAttributeMap *zir_attributes, ZnesAllocRequest *znes_alloc_request)
+bool znes_alloc_request_init(ZnesContext *znes_context, ZirBlock *zir_block, ZirSymbol *zir_symbol, ZirAttributeMap *zir_attributes, ZnesAllocRequest *znes_alloc_request)
 {
     if (zir_symbol->name[0] == '%')
     {
@@ -241,7 +246,9 @@ bool znes_alloc_request_init(ZnesProgram *znes_program, ZirBlock *zir_block, Zir
             znes_alloc_request->type = ZNES_ALLOC_TYPE_STRUCT;
             break;
 
-        default: return false;
+        default: 
+            znes_context_error(znes_context, ZNES_ERROR_INTERNAL, "Unhandled ZIR symbol type in znes_alloc_request_init");
+            return false;
     }
 
     // Allocation size based on the type
@@ -264,7 +271,7 @@ bool znes_alloc_request_init(ZnesProgram *znes_program, ZirBlock *zir_block, Zir
 
             if (segment_property->value->type != ZIR_OPERAND_SYMBOL)
             {
-                // TODO: Error handling, we don't support other operands for segment
+                znes_context_error(znes_context, ZNES_ERROR_INTERNAL, "Property 'segment' in attribute 'NES' is not a valid symbol");
                 return false;
             }
 
@@ -280,7 +287,7 @@ bool znes_alloc_request_init(ZnesProgram *znes_program, ZirBlock *zir_block, Zir
             }
             else
             {
-                // TODO: Error handling, we don't support other segments yet
+                znes_context_error(znes_context, ZNES_ERROR_INTERNAL, "Unknown property '%s' in attribute 'NES'", symbol_operand->symbol->name);
                 return false;
             }
         }
@@ -296,7 +303,7 @@ bool znes_alloc_request_init(ZnesProgram *znes_program, ZirBlock *zir_block, Zir
             }
             else
             {
-                // TODO: Error handling, we don't support other types
+                znes_context_error(znes_context, ZNES_ERROR_INTERNAL, "Property 'address' in attribute 'NES' is not a valid number");
                 return false;
             }
 
@@ -312,7 +319,7 @@ bool znes_alloc_request_init(ZnesProgram *znes_program, ZirBlock *zir_block, Zir
             {
                 znes_alloc_request->address = uint_value->value.uint16;
 
-                if (uint_value->value.uint16 >= znes_program->data->base_address)
+                if (uint_value->value.uint16 >= znes_context->program->data->base_address)
                 {
                     // If the address is within the PRG-ROM it is DATA segment
                     znes_alloc_request->segment = ZNES_SEGMENT_DATA;
@@ -326,7 +333,7 @@ bool znes_alloc_request_init(ZnesProgram *znes_program, ZirBlock *zir_block, Zir
             }
             else
             {
-                // TODO: Error handling, we don't support other types yet
+                znes_context_error(znes_context, ZNES_ERROR_INTERNAL, "Unhandled integer size for property 'address' in attribute 'NES'");
                 return false;
             }
             

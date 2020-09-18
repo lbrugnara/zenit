@@ -2,6 +2,7 @@
 #define RP2A03_EMIT_ALLOC_BOOL_H
 
 #include "program.h"
+#include "../ir/operands/bool.h"
 #include "../ir/program.h"
 #include "../ir/instructions/alloc.h"
 

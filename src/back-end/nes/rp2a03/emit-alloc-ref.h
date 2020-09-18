@@ -2,6 +2,7 @@
 #define RP2A03_EMIT_ALLOC_REF_H
 
 #include "program.h"
+#include "../ir/operands/reference.h"
 #include "../ir/program.h"
 #include "../ir/instructions/alloc.h"
 

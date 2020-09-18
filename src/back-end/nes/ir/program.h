@@ -11,15 +11,13 @@
 #include "objects/alloc.h"
 #include "objects/temp.h"
 #include "operands/operand.h"
-#include "operands/pool.h"
 
 typedef struct ZnesProgram {
     ZnesDataSegment *data;
     ZnesTextSegment *startup;
     ZnesTextSegment *code;
     ZnesZeroPageSegment *zp;
-    ZnesVariableMap *variables;
-    ZnesOperandPool *operands;
+    ZnesAllocMap *allocations;
     bool startup_context;
 } ZnesProgram;
 
@@ -32,9 +30,8 @@ static inline ZnesProgram* znes_program_new(bool scripting)
     program->startup = znes_text_segment_new(0x0);
     program->code = znes_text_segment_new(0x0);
     program->zp = znes_zp_segment_new();
-    program->operands = znes_operand_pool_new();
 
-    program->variables = fl_hashtable_new_args((struct FlHashtableArgs) {
+    program->allocations = fl_hashtable_new_args((struct FlHashtableArgs) {
         .hash_function = fl_hashtable_hash_string,
         .key_allocator = fl_container_allocator_string,
         .key_comparer = fl_container_equals_string,
@@ -52,8 +49,7 @@ static inline void znes_program_free(ZnesProgram *program)
     znes_text_segment_free(program->code);
     znes_text_segment_free(program->startup);
     znes_zp_segment_free(program->zp);
-    fl_hashtable_free(program->variables);
-    znes_operand_pool_free(program->operands);
+    fl_hashtable_free(program->allocations);
 
     fl_free(program);
 }
@@ -72,23 +68,26 @@ static ZnesAlloc* znes_program_alloc_variable(ZnesProgram *program, const char *
             break;
         }   
         case ZNES_SEGMENT_ZP:
+        {
             variable = znes_zp_segment_alloc_variable(program->zp, name, alloc, source);
             break;
-
+        }
         case ZNES_SEGMENT_DATA:
+        {
             variable = znes_data_segment_alloc_variable(program->data, name, alloc, source);
             break;
-
+        }
         case ZNES_SEGMENT_TEXT:
+        {
             variable = znes_text_segment_alloc_variable(program->startup_context ? program->startup : program->code, name, alloc, source);
             break;
-        
+        }
         default: break;
     }
 
     if (variable != NULL)
     {
-        fl_hashtable_add(program->variables, variable->name, variable);
+        fl_hashtable_add(program->allocations, variable->name, variable);
 
         ZnesAllocInstruction *instr = znes_alloc_instruction_new(variable, source);
         znes_text_segment_add_instr(program->startup_context ? program->startup : program->code, (ZnesInstruction*) instr);
